@@ -1,0 +1,55 @@
+{
+  "auditCommand": "pnpm audit --json",
+  "baselineHost": {
+    "architecture": "x64",
+    "platform": "win32"
+  },
+  "blockingThreshold": "high",
+  "carryForward": {
+    "advisory": "GHSA-xffm-g5w8-qvg7",
+    "package": "@eslint/plugin-kit@0.2.8",
+    "severity": "low",
+    "state": "OPEN_NON_BLOCKING"
+  },
+  "findings": [
+    {
+      "advisory": "GHSA-xffm-g5w8-qvg7",
+      "blocking": false,
+      "dependencyPaths": [
+        ".>eslint>@eslint/plugin-kit",
+        ".>typescript-eslint>@typescript-eslint/eslint-plugin>@typescript-eslint/parser>eslint>@eslint/plugin-kit",
+        ".>typescript-eslint>@typescript-eslint/eslint-plugin>@typescript-eslint/type-utils>@typescript-eslint/utils>@eslint-community/eslint-utils>eslint>@eslint/plugin-kit",
+        ".>typescript-eslint>@typescript-eslint/eslint-plugin>@typescript-eslint/type-utils>@typescript-eslint/utils>eslint>@eslint/plugin-kit",
+        ".>typescript-eslint>@typescript-eslint/eslint-plugin>@typescript-eslint/type-utils>eslint>@eslint/plugin-kit",
+        ".>typescript-eslint>@typescript-eslint/eslint-plugin>@typescript-eslint/utils>@eslint-community/eslint-utils>eslint>@eslint/plugin-kit",
+        ".>typescript-eslint>@typescript-eslint/eslint-plugin>@typescript-eslint/utils>eslint>@eslint/plugin-kit",
+        ".>typescript-eslint>@typescript-eslint/eslint-plugin>eslint>@eslint/plugin-kit",
+        ".>typescript-eslint>@typescript-eslint/parser>eslint>@eslint/plugin-kit",
+        ".>typescript-eslint>@typescript-eslint/utils>@eslint-community/eslint-utils>eslint>@eslint/plugin-kit",
+        ".>typescript-eslint>@typescript-eslint/utils>eslint>@eslint/plugin-kit",
+        ".>typescript-eslint>eslint>@eslint/plugin-kit"
+      ],
+      "notes": "PRE1 carry-forward: open, visible, non-blocking low-severity development-tool finding.",
+      "package": "@eslint/plugin-kit",
+      "patchedBoundary": ">=0.3.4",
+      "severity": "low",
+      "state": "OPEN_NON_BLOCKING",
+      "version": "0.2.8",
+      "vulnerableVersions": "<0.3.4"
+    }
+  ],
+  "schemaVersion": 1,
+  "snapshotHost": {
+    "architecture": "x64",
+    "platform": "win32"
+  },
+  "summary": {
+    "blocking": 0,
+    "critical": 0,
+    "high": 0,
+    "info": 0,
+    "low": 1,
+    "moderate": 0,
+    "total": 1
+  }
+}

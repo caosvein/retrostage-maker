@@ -9,14 +9,18 @@
     "pnpm": "11.17.0"
   },
   "scripts": {
-    "format:check": "prettier --check \"package.json\" \"pnpm-workspace.yaml\" \"eslint.config.mjs\" \"prettier.config.mjs\" \"dependency-cruiser.config.cjs\" \"knip.json\" \"tsconfig.json\" \"tooling/**/*.{ts,mjs}\" \"packages/*/package.json\"",
+    "format:check": "prettier --check \"package.json\" \"pnpm-workspace.yaml\" \"eslint.config.mjs\" \"prettier.config.mjs\" \"dependency-cruiser.config.cjs\" \"knip.json\" \"tsconfig.json\" \".github/**/*.yml\" \"tooling/**/*.{ts,mjs}\" \"packages/*/package.json\"",
     "lint": "eslint \"tooling/**/*.{ts,mjs}\" \"eslint.config.mjs\" \"prettier.config.mjs\"",
     "typecheck": "tsc --project tsconfig.json --noEmit",
     "test": "vitest run",
     "arch:check": "node --experimental-loader ./tooling/node-fs-r-ok-compat-loader.mjs ./node_modules/dependency-cruiser/bin/dependency-cruise.mjs --config dependency-cruiser.config.cjs tooling",
     "deadcode:check": "knip",
     "build": "tsc --project tsconfig.json --noEmit false --outDir dist/tooling",
-    "validate": "pnpm run format:check && pnpm run lint && pnpm run typecheck && pnpm run test && pnpm run arch:check && pnpm run deadcode:check && pnpm run build"
+    "validate": "pnpm run format:check && pnpm run lint && pnpm run typecheck && pnpm run test && pnpm run arch:check && pnpm run deadcode:check && pnpm run build",
+    "dependency:audit": "pnpm audit --audit-level high",
+    "compliance:generate": "node tooling/compliance/generate.mjs compliance",
+    "compliance:check": "node tooling/compliance/check.mjs",
+    "ci:validate": "pnpm install --frozen-lockfile && pnpm run validate && pnpm run compliance:check && pnpm run dependency:audit"
   },
   "devDependencies": {
     "dependency-cruiser": "16.10.0",

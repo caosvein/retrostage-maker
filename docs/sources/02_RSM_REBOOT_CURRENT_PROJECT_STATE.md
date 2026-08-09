@@ -6,28 +6,28 @@
 **Source generation:** Reboot / clean-start  
 **Snapshot date:** 2026-08-09  
 **Snapshot timezone:** Europe/Istanbul  
-**Document state:** `LIVE SNAPSHOT / POST-RSM-3-I1 / RSM-2 CLOSED / RSM-3 CURRENT`  
+**Document state:** `LIVE SNAPSHOT / POST-RSM-3-I3-PRE1 / RSM-2 CLOSED / RSM-3 CURRENT`  
 **Current product gate:** `Gate A — Governed Reboot`  
 **Current milestone:** `RSM-3 — Repository / Remote Backup / Reproducible Bootstrap`  
-**Current task:** `RSM-3-I2 — pnpm Workspace / Toolchain / Quality Scripts`  
-**Active work mode:** `RSM-3-I2 AUTHORIZED / READY FOR EXECUTION / NOT YET EXECUTED`  
+**Current task:** `RSM-3-I3 — CI / Dependency Review / SBOM / Third-Party Notices`  
+**Active work mode:** `RSM-3-I3 AUTHORIZED / READY TO RESUME IMPLEMENTATION / NOT EXECUTED BY ALIGN1`  
 **Repository:** `PRESENT — C:\RetroStage\retrostage-maker`  
 **Remote origin:** `https://github.com/caosvein/retrostage-maker.git`  
 **Primary branch:** `main`  
-**Current Git HEAD:** `6d67b19f136cdd0a36ae11a861f4ba8b0addd196`  
-**Installed dependency graph:** `NONE / NOT YET MATERIALIZED`  
+**Current Git HEAD:** `5c7ff6322ba2583176065a919db385d51b650fba`  
+**Installed dependency graph:** `I2 DEVELOPMENT TOOLING PRESENT / PRE1 SECURITY REMEDIATION COMMITTED / 7 EXACT DIRECT DEV DEPENDENCIES / VITEST 3.2.6 / NO PRODUCT DEPENDENCIES`  
 **Implemented reboot product capabilities:** `NONE`  
 **RSM-2 decision:** `CLOSED / SOURCE PASS`  
-**RSM-3 decision:** `CURRENT / RSM-3-I1 CLOSED / RSM-3-I2 AUTHORIZED`  
+**RSM-3 decision:** `CURRENT / RSM-3-I1 CLOSED / RSM-3-I2 CLOSED / RSM-3-I3-PRE1 CLOSED / RSM-3-I3 AUTHORIZED TO RESUME`  
 **Historical implementation status:** `HISTORICAL_IDENTITY_PRESERVED_BYTES_UNAVAILABLE`  
 **Active milestone authority:** `08_RSM_REBOOT_CURRENT_MILESTONE.md`  
-**Immediate next control step:** `Execute the separately controlled RSM-3-I2 implementation task`  
+**Immediate next control step:** `Resume the separately controlled full RSM-3-I3 implementation from the accepted PRE1 security baseline`  
 
 ---
 
 ## 1. Purpose
 
-This document records the latest truthful state of the RetroStage Maker reboot after RSM-2 source reconstruction closed, RSM-3-I1 closed, and RSM-3-I2 became the one authorized next task.
+This document records the latest truthful state of the RetroStage Maker reboot after RSM-2 source reconstruction closed, RSM-3-I1 and RSM-3-I2 closed, and the RSM-3-I3-PRE1 security remediation closed. RSM-3-I3 remains the one current task and is authorized to resume only after this alignment succeeds.
 
 It distinguishes:
 
@@ -38,7 +38,7 @@ It distinguishes:
 - historical pre-loss evidence,
 - and future implementation intent.
 
-It records the accepted physical repository and I1 root-commit baseline. It is not proof that a project dependency graph, lockfile, CI, test, build, product application, export, remote backup, clean clone, or restore proof currently exists.
+It records the accepted physical repository, I2 toolchain-foundation commit, and PRE1 security-remediation commit baseline. It is not proof that full I3 implementation has resumed or that CI, dependency-review automation, an SBOM, third-party notices, product application, export, remote backup, clean clone, or restore proof currently exists.
 
 ---
 
@@ -61,15 +61,16 @@ The reboot now has approved sources for:
 
 RSM-3 is current. RSM-3-A, RSM-3-B, RSM-3-C, and RSM-3-D are completed and accepted. RSM-3-D reached terminal acceptance through RECOVERY1, TERM1, and the independent terminal review. Recursive Original/FIX1–FIX15 history remains evidence history and is not current authority.
 
-The project now has a verified canonical local Git repository, `main` branch, configured origin, and one accepted root commit from RSM-3-I1. The working tree is clean at the accepted I1 closure baseline. The origin contains zero remote refs; no push or upstream tracking exists.
+The project now has a verified canonical local Git repository, `main` branch, configured origin, the accepted RSM-3-I1 root commit, the accepted RSM-3-I2 toolchain commit, and the accepted PRE1 security-remediation commit. The working tree is clean at security commit `5c7ff6322ba2583176065a919db385d51b650fba`. The origin contains zero remote refs; no push or upstream tracking exists. The committed pnpm workspace/toolchain foundation contains one authoritative lockfile and exactly seven direct development dependencies, with `vitest@3.2.6`, no product dependencies, and no product implementation.
+
+The first full-I3 attempt stopped before repository mutation on the critical Vitest advisory and two exact license-review requirements. PRE1 then consumed the owner decision lock, committed the exact Vitest remediation, applied only the exact transitive license decisions for `argparse@2.0.1 / Python-2.0` and `minimatch@10.2.6 / BlueOak-1.0.0`, and closed through independent post-commit review. The low finding `GHSA-xffm-g5w8-qvg7 / @eslint/plugin-kit@0.2.8 / low` remains open and non-blocking and must be carried into resumed I3 evidence.
 
 The project still has no verified:
 
-- package-manager lockfile,
-- installed package graph,
 - CI,
-- tests,
-- build,
+- dependency-review automation,
+- SBOM,
+- third-party notices,
 - editor,
 - player,
 - export,
@@ -79,7 +80,7 @@ The project still has no verified:
 
 Current position:
 
-> Gate A remains current. RSM-2 is closed; RSM-3-A/B/C are accepted; RSM-3-D is terminally accepted; RSM-3-I1 is closed; and RSM-3-I2 is the one current authorized next task. I2 implementation has not begun.
+> Gate A remains current. RSM-2 is closed; RSM-3-A/B/C are accepted; RSM-3-D is terminally accepted; RSM-3-I1 and RSM-3-I2 are closed; RSM-3-I3-PRE1 is closed; and RSM-3-I3 is the one current task, authorized and ready to resume full implementation after this alignment. ALIGN1 has not executed full I3 implementation.
 
 ---
 
@@ -102,7 +103,13 @@ Current source-of-truth order:
 13. the accepted `RSM-3-D-TERM1-CURRENT-AUTHORITY-CUTOFF.tsv`
 14. `RSM-3-D-TERM1-CHATGPT-INDEPENDENT-TERMINAL-REVIEW.md`
 15. the bounded ALIGN1 authority delta for the post-TERM1 identities of sources 02, 08, and 09
-16. pre-loss identities and provenance only as explicitly historical metadata under the TERM1 governed exception
+16. the accepted RSM-3-I1 import, commit, post-commit-review, and closure evidence
+17. the bounded RSM-3-I1 ALIGN1 authority delta for sources 02 and 08
+18. the accepted RSM-3-I2 implementation, FIX1, commit, post-commit-review, and closure evidence
+19. the bounded RSM-3-I2 ALIGN1 authority delta for sources 02 and 08
+20. the accepted RSM-3-I3-PRE1 owner lock, remediation evidence, independent reviews, commit evidence, and closure
+21. the bounded RSM-3-I3-PRE1 ALIGN1 authority delta for sources 02 and 08
+22. pre-loss identities and provenance only as explicitly historical metadata under the TERM1 governed exception
 
 After RSM-3 creates the repository, physical evidence becomes authoritative for implementation questions:
 
@@ -132,7 +139,12 @@ After RSM-3 creates the repository, physical evidence becomes authoritative for 
 | RSM-3-C — Supply-Chain / Backup / Restore Boundary | `COMPLETED / ACCEPTED` | Owner, device, supply-chain, backup, and restore boundaries accepted |
 | RSM-3-D — Detailed Bootstrap Readiness | `TERMINALLY ACCEPTED` | RECOVERY1 + TERM1 + independent terminal review accepted |
 | RSM-3-I1 — Local Git Repository / Source Import / Initial Commit Candidate | `CLOSED` | Accepted 76-file local root-commit baseline exists |
-| RSM-3-I2 — pnpm Workspace / Toolchain / Quality Scripts | `AUTHORIZED / READY FOR EXECUTION` | One current authorized next task; implementation has not yet run |
+| RSM-3-I2 — pnpm Workspace / Toolchain / Quality Scripts | `CLOSED` | Accepted local toolchain commit `302538e3692ed82daa969bceed0a63945736fc5f` exists |
+| RSM-3-I3-PRE1 — Security and Exact-License Baseline Remediation | `CLOSED` | Accepted local security commit `5c7ff6322ba2583176065a919db385d51b650fba`; independent post-commit closure accepted |
+| RSM-3-I3 — CI / Dependency Review / SBOM / Third-Party Notices | `AUTHORIZED / READY TO RESUME IMPLEMENTATION` | One current task; full implementation may resume after this alignment but was not executed by ALIGN1 |
+| RSM-3-I4 — Remote Push / Clean Clone / Restore Proof | `BLOCKED ON RSM-3-I3` | Requires accepted I3 evidence and its own entry controls |
+| RSM-3-V1 — Milestone-Wide Bootstrap Validation | `BLOCKED` | Requires accepted I1–I4 evidence |
+| RSM-3-CLOSE1 — Closure / RSM-4 Handoff | `BLOCKED` | Requires accepted V1 |
 | RSM-4 — Engineering / Review / Milestone Gate Baseline | `BLOCKED` | Workflow source exists but repository activation awaits RSM-3 closure |
 | Gate B — Secure Vertical Slice | `INACTIVE` | Product implementation remains blocked |
 | RSM-5 and later | `NOT STARTED` | No product capability may be claimed |
@@ -163,7 +175,7 @@ The independent terminal review decision is exactly:
 
 `RSM-3-D TERMINAL REVIEW — ACCEPTED`
 
-Sources 02, 08, and 09 supersede their pre-ALIGN1 identities for current operational use. Their exact pre/post ALIGN1 SHA-256 values are recorded in `RSM-3-D-ALIGN1-AUTHORITY-DELTA-LOCK.tsv`. The TERM1 cutoff remains immutable historical terminal evidence and is not rewritten for this alignment.
+Sources 02, 08, and 09 supersede their pre-ALIGN1 identities for current operational use. Their exact pre/post D-ALIGN1 SHA-256 values are recorded in `RSM-3-D-ALIGN1-AUTHORITY-DELTA-LOCK.tsv`. The accepted I1, I2, and I3-PRE1 closure evidence and their bounded ALIGN1 deltas extend current operational authority without rewriting the immutable TERM1 cutoff or historical evidence.
 
 ---
 
@@ -174,11 +186,12 @@ Repository: PRESENT
 Repository path: C:\RetroStage\retrostage-maker
 Git repository: TRUE
 Primary branch: main
-Current HEAD: 6d67b19f136cdd0a36ae11a861f4ba8b0addd196
-HEAD role: ACCEPTED RSM-3-I1 ROOT COMMIT
-Commit count: 1
-HEAD parent count: 0
-HEAD tree files: 76
+Current HEAD: 5c7ff6322ba2583176065a919db385d51b650fba
+Current HEAD parent: 302538e3692ed82daa969bceed0a63945736fc5f
+HEAD role: ACCEPTED RSM-3-I3-PRE1 SECURITY REMEDIATION COMMIT
+Commit count: 3
+HEAD parent count: 1
+HEAD tree files: 105
 Working tree: CLEAN
 Staged changes: 0
 Unstaged changes: 0
@@ -187,16 +200,24 @@ Remote origin: https://github.com/caosvein/retrostage-maker.git
 Remote refs: 0
 Upstream tracking: NONE
 Push: NOT PERFORMED
-Committed lockfile: NONE
-Installed project dependency graph: NONE
+pnpm workspace: PRESENT
+Committed lockfile: PRESENT / pnpm-lock.yaml
+Corrected pnpm 11 project policy: COMMITTED
+Direct I2 dev dependencies: 7 EXACT
+Vitest direct identity: 3.2.6
+Critical Vitest advisory remediation: COMMITTED / PRE1 CLOSED
+Open non-blocking security finding: GHSA-xffm-g5w8-qvg7 / @eslint/plugin-kit@0.2.8 / low
+Product dependencies: NONE
 CI baseline: NONE
-Build: NONE
+SBOM: NONE
+Third-party notices: NONE
+I2 foundation validation/build: PASS
 Clean clone: NONE
 Restore proof: NONE
 Product implementation: NONE
 ```
 
-The I1 root commit is the immutable accepted repository baseline. The aligned live bootstrap copies of sources 02 and 08 are intentionally not synchronized into the repository during this task; that traceable delta belongs to RSM-3-I2. The Git working tree therefore remains clean.
+The accepted PRE1 security commit is the immutable physical baseline for this alignment. The post-PRE1 live bootstrap copies of sources 02 and 08 are intentionally not synchronized into the repository during this task; that traceable delta belongs to resumed RSM-3-I3. The Git working tree therefore remains clean.
 
 ---
 
@@ -272,9 +293,12 @@ Product dependencies must enter at their canonical roadmap milestones.
 
 ## 11. Dependency State
 
-### Approved direction, not installed
+### Approved direction and admitted foundation
 
-- Node.js, pnpm, TypeScript;
+- Node.js `24.19.0`, pnpm `11.17.0`, and project-local TypeScript `6.0.3` are pinned in the accepted I2 foundation;
+- exact direct `vitest@3.2.6` is committed by PRE1, replacing the critical-advisory-affected `3.0.7` identity;
+- exactly seven direct development dependencies are committed for repository/toolchain/quality work;
+- product dependencies remain absent;
 - Electron, Babylon.js 9, React and approved supporting stack;
 - development/test/compliance tools named by the technology contract;
 - milestone-gated and conditional dependencies.
@@ -311,13 +335,14 @@ A configured backup without a successful restore test is not accepted evidence.
 Current status:
 
 ```text
-Repository commands: NONE
-Typecheck: NOT RUN
-Lint: NOT RUN
-Tests: NOT RUN
-Architecture checks: NOT RUN
+Repository quality scripts: PRESENT
+Typecheck: PASS
+Lint: PASS
+Tests: 3/3 PASS
+Architecture checks: PASS / 0 VIOLATIONS
+Dead-code check: PASS / 0 FINDINGS
 SBOM: NOT GENERATED
-Build: NOT RUN
+I2 foundation build: PASS
 Clean-clone validation: NOT RUN
 Restore validation: NOT RUN
 ```
@@ -328,16 +353,21 @@ RSM-3 must establish the empty-foundation command baseline before source 07 beco
 
 ## 14. Commercial and License Position
 
-The technology and license contract is approved, but no final package graph or commercial artifact exists.
+The technology and license contract is approved. The admitted I2 development-tooling graph and authoritative lockfile exist, but no product package graph or final commercial artifact exists.
 
 Current status:
 
 ```text
-Dependency graph: NONE
-Lockfile: NONE
+I2 direct development dependencies: 7 EXACT
+Vitest direct identity: 3.2.6
+Critical Vitest remediation: COMMITTED / PRE1 CLOSED
+Exact owner-approved transitive license identities: argparse@2.0.1 / Python-2.0; minimatch@10.2.6 / BlueOak-1.0.0
+Open non-blocking security finding: GHSA-xffm-g5w8-qvg7 / @eslint/plugin-kit@0.2.8 / low
+Product dependencies: NONE
+Lockfile: PRESENT / pnpm-lock.yaml
 SBOM: NONE
 Third-party notices artifact: NONE
-Native/WASM inventory: NONE
+Native/WASM compliance inventory: NOT YET PRODUCED
 Steamworks integration: NONE
 Installer: NONE
 Signing: NONE
@@ -355,7 +385,7 @@ Current physical status for every identity:
 
 `HISTORICAL_IDENTITY_PRESERVED_BYTES_UNAVAILABLE`
 
-RECOVERY1 found 0/9 original byte streams in the bounded reboot workspace. TERM1 approved the governed byte-loss exception. RSM-3-I1 must preserve the identity/provenance and governed-loss record, must not create synthetic historical files, and must not treat historical metadata as live implementation truth.
+RECOVERY1 found 0/9 original byte streams in the bounded reboot workspace. TERM1 approved the governed byte-loss exception. RSM-3-I1 preserved the identity/provenance and governed-loss record without creating synthetic historical files; later tasks must continue to preserve that boundary and must not treat historical metadata as live implementation truth.
 
 If genuine originals are recovered later, they may enter only through historical-source change control.
 
@@ -400,7 +430,7 @@ Before the dedicated addendum:
 
 | Risk | Current control |
 |---|---|
-| Starting with an unsafe path | Accepted RSM-3-A/B/C/D controls and exact I1 task boundary |
+| Starting with an unsafe path | Accepted RSM-3-A/B/C/D controls and accepted PRE1 security repository baseline |
 | No off-device recovery | RSM-3 requires remote push and restore proof |
 | Dependency overreach | Milestone-based admission |
 | Toolchain drift | Exact version pinning and lockfile |
@@ -419,19 +449,20 @@ RSM-3-A — COMPLETED / ACCEPTED
 → RSM-3-C — COMPLETED / ACCEPTED
 → RSM-3-D — TERMINALLY ACCEPTED
 → RSM-3-I1 — CLOSED
-→ RSM-3-I2 — AUTHORIZED / READY FOR EXECUTION
-→ RSM-3-I3
-→ RSM-3-I4
+→ RSM-3-I2 — CLOSED
+→ RSM-3-I3-PRE1 — CLOSED
+→ RSM-3-I3 — AUTHORIZED / READY TO RESUME IMPLEMENTATION
+→ RSM-3-I4 — BLOCKED ON I3
 → RSM-3-V1
 → RSM-3-CLOSE1
 → RSM-4
 ```
 
-Only RSM-3-I2 is currently authorized. I2 implementation has not yet run.
+Only RSM-3-I3 is currently authorized. Full I3 implementation is ready to resume after this alignment and was not executed by ALIGN1. The remaining controlled sequence is `I3 → I4 → V1 → CLOSE1`.
 
 ---
 
-## 20. RSM-3-I1 Closure and RSM-3-I2 Entry Readiness
+## 20. RSM-3-I3-PRE1 Closure and Full-I3 Resume Readiness
 
 RSM-3-D remains terminally accepted because:
 
@@ -441,7 +472,9 @@ RSM-3-D remains terminally accepted because:
 - the independent terminal review returned `RSM-3-D TERMINAL REVIEW — ACCEPTED`;
 - the earlier D-ALIGN1 delta made sources 02, 08, and 09 current without rewriting TERM1 evidence.
 
-RSM-3-I1 is closed by the independent decision `RSM-3-I1 CLOSED / RSM-3-I2 ALIGNMENT ELIGIBLE`. Its accepted physical baseline is the one local root commit at `6d67b19f136cdd0a36ae11a861f4ba8b0addd196`. RSM-3-I2 is authorized and ready for execution, but this authorization is not evidence that I2 files, dependencies, scripts, a lockfile, CI, build output, or another commit already exist.
+RSM-3-I1 remains closed by the independent decision `RSM-3-I1 CLOSED / RSM-3-I2 ALIGNMENT ELIGIBLE`. RSM-3-I2 remains closed by the independent decision `RSM-3-I2 CLOSED / RSM-3-I3 ALIGNMENT ELIGIBLE`; its accepted commit is `302538e3692ed82daa969bceed0a63945736fc5f`, whose parent is the I1 root commit `6d67b19f136cdd0a36ae11a861f4ba8b0addd196`.
+
+The first I3 attempt stopped before repository mutation. PRE1 then committed exact `vitest@3.2.6` as local commit `5c7ff6322ba2583176065a919db385d51b650fba`, whose parent is the accepted I2 commit. PRE1 is closed by the independent decision `RSM-3-I3-PRE1 CLOSED / RSM-3-I3 CURRENT-STATE ALIGNMENT REQUIRED BEFORE RESUME`. RSM-3-I3 is now authorized and ready to resume full implementation after this alignment, but this prospective authorization is not evidence that CI, dependency-review automation, SBOM, third-party notices, or a full-I3 candidate already exists.
 
 ---
 
@@ -459,8 +492,9 @@ Do not claim:
 
 - the root commit has been pushed;
 - the project is remotely backed up;
-- dependencies are installed;
-- commands pass;
+- CI exists;
+- an SBOM or third-party notices artifact exists;
+- full I3 implementation has resumed or completed;
 - the editor or player works;
 - a build or export exists;
 - Gate A is closed;
@@ -470,7 +504,7 @@ Do not claim:
 
 The accurate statement is:
 
-> RSM-2 is closed; RSM-3-A/B/C are accepted; RSM-3-D is terminally accepted; RSM-3-I1 is closed with one accepted local root commit; RSM-3-I2 is authorized and ready for execution but has not begun; no push or product implementation has occurred.
+> RSM-2 is closed; RSM-3-A/B/C are accepted; RSM-3-D is terminally accepted; RSM-3-I1, RSM-3-I2, and RSM-3-I3-PRE1 are closed with three accepted local commits; RSM-3-I3 is authorized and ready to resume full implementation after alignment, but ALIGN1 did not execute it; no push or product implementation has occurred.
 
 ---
 
@@ -478,7 +512,7 @@ The accurate statement is:
 
 Update this file when:
 
-- RSM-3-I2 starts or completes;
+- RSM-3-I3 starts or completes;
 - repository path or remote is selected;
 - Git repository is created;
 - branch or HEAD exists;
@@ -501,13 +535,13 @@ CURRENT MILESTONE:
 RSM-3 — Repository / Remote Backup / Reproducible Bootstrap
 
 CURRENT TASK:
-RSM-3-I2 — pnpm Workspace / Toolchain / Quality Scripts
+RSM-3-I3 — CI / Dependency Review / SBOM / Third-Party Notices
 
 REPOSITORY:
-C:\RetroStage\retrostage-maker / main / 6d67b19f136cdd0a36ae11a861f4ba8b0addd196 / CLEAN
+C:\RetroStage\retrostage-maker / main / 5c7ff6322ba2583176065a919db385d51b650fba / CLEAN
 
 NEXT ACTION:
-Execute RSM-3-I2 under one declared primary executor and its separately controlled implementation contract; do not infer commit or push authority.
+Resume full RSM-3-I3 under one declared primary executor and a revised separately controlled implementation contract that consumes the post-PRE1 source hashes and closure lineage; do not infer commit or push authority.
 ```
 
 ---
@@ -519,11 +553,11 @@ Acceptance of this snapshot means:
 - RSM-2 is closed with source pass;
 - RSM-3 is current;
 - RSM-3-A/B/C/D are accepted and recursive FIX history is not current authority;
-- RSM-3-I1 is closed and its accepted local root-commit baseline remains current;
-- only RSM-3-I2 is currently authorized, and it has not yet executed;
+- RSM-3-I1, RSM-3-I2, and RSM-3-I3-PRE1 are closed, and the accepted local PRE1 security commit baseline remains current;
+- only RSM-3-I3 is currently authorized to resume, and ALIGN1 did not execute full I3 implementation;
 - the repository exists while product implementation remains absent;
 - source 07 remains deferred;
 - historical identity/provenance is preserved under `HISTORICAL_IDENTITY_PRESERVED_BYTES_UNAVAILABLE`;
-- current authority derives from the accepted TERM1 cutoff plus the ALIGN1 delta;
+- current authority derives from the accepted TERM1 cutoff, accepted I1/I2/PRE1 closure evidence, and the bounded D/I1/I2/PRE1 ALIGN1 deltas;
 - Gate A remains open;
 - and the multi-AI requirement is recorded for a later controlled workflow addendum.

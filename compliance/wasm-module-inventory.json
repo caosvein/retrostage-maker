@@ -1,0 +1,15 @@
+{
+  "artifacts": [],
+  "baselineHost": {
+    "architecture": "x64",
+    "platform": "win32"
+  },
+  "count": 0,
+  "distributionScope": "DEVELOPMENT / BOOTSTRAP TOOLING ONLY",
+  "scanExtension": ".wasm",
+  "schemaVersion": 1,
+  "snapshotHost": {
+    "architecture": "x64",
+    "platform": "win32"
+  }
+}

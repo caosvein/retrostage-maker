@@ -1,0 +1,61 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  validation:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Provision exact official Node.js
+        shell: bash
+        run: |
+          set -euo pipefail
+          archive="$RUNNER_TEMP/node-v24.19.0-linux-x64.tar.xz"
+          node_root="$RUNNER_TEMP/node-v24.19.0-linux-x64"
+          curl --fail --location --silent --show-error \
+            "https://nodejs.org/download/release/v24.19.0/node-v24.19.0-linux-x64.tar.xz" \
+            --output "$archive"
+          echo "14b342e71204f811bde6153be8e04b62aef63c236fef92b55f9c83154b409647  $archive" | sha256sum --check --strict
+          mkdir -p "$node_root"
+          tar -xJf "$archive" --strip-components=1 -C "$node_root"
+          echo "$node_root/bin" >> "$GITHUB_PATH"
+
+      - name: Verify exact Node.js
+        shell: bash
+        run: |
+          node --version
+          test "$(node --version)" = "v24.19.0"
+
+      - name: Install exact pnpm
+        uses: pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271 # v6.0.9
+        with:
+          version: 11.17.0
+          run_install: false
+
+      - name: Verify exact pnpm
+        shell: bash
+        run: |
+          pnpm --version
+          test "$(pnpm --version)" = "11.17.0"
+
+      - name: Install from the immutable lockfile
+        run: pnpm install --frozen-lockfile
+
+      - name: Validate the empty foundation
+        run: pnpm run validate
+
+      - name: Verify deterministic compliance artifacts
+        run: pnpm run compliance:check
+
+      - name: Enforce the high-severity vulnerability gate
+        run: pnpm run dependency:audit
