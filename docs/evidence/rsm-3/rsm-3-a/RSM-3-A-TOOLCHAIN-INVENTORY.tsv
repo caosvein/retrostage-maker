@@ -1,0 +1,24 @@
+tool	presence	exact_version	path_or_safe_identity	classification	status	notes
+Git	NOT INSTALLED	N/A	N/A	REQUIRED BEFORE RSM-3-B	BLOCKER	Must be installed before repository creation
+Node.js	NOT INSTALLED	N/A	N/A	REQUIRED BEFORE RSM-3-B	BLOCKER	Node 24 LTS required by technology contract
+npm	NOT INSTALLED	N/A	N/A	REQUIRED BEFORE RSM-3-B	MISSING WITH NODE	Bundled with Node.js installation
+Corepack	NOT INSTALLED	N/A	N/A	FUTURE ACTIVATION METHOD UNDECIDED	MISSING WITH NODE	Current state: unavailable because Node.js is absent. Future pnpm activation method: undecided and must be verified after the exact Node distribution is selected.
+pnpm	NOT INSTALLED	N/A	N/A	REQUIRED BEFORE RSM-3-B	BLOCKER	Required by technology contract; install via Corepack or direct
+TypeScript (global)	NOT INSTALLED	N/A	N/A	NOT REQUIRED	OK	Project-local TypeScript remains authoritative per contract
+TypeScript (project-local)	NOT INSTALLED	N/A	N/A	REQUIRED DURING A LATER RSM-3 SLICE	PENDING RSM-3-I2	devDependency at RSM-3-I2
+GitHub CLI (gh)	NOT INSTALLED	N/A	N/A	UNKNOWN / REQUIRES OWNER DECISION	NOT INSTALLED / NON-BLOCKING UNTIL AUTH METHOD SELECTED	Recommended for authentication; alternative: manual HTTPS/SSH
+PowerShell 5.1	INSTALLED	5.1.19041.3803	C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe	REQUIRED BEFORE RSM-3-B	OK	Adequate for bootstrap
+PowerShell 7 (pwsh)	NOT INSTALLED	N/A	N/A	OPTIONAL PRODUCTIVITY TOOL	OK	Not required; PS 5.1 is sufficient
+Visual Studio	NOT FOUND	N/A	N/A (vswhere absent)	MILESTONE-GATED PRODUCT TOOL	OK FOR RSM-3	Required only for native addon compilation (better-sqlite3 etc.)
+Visual Studio Build Tools	NOT FOUND	N/A	N/A	MILESTONE-GATED PRODUCT TOOL	OK FOR RSM-3	Same as Visual Studio
+Windows SDK	NOT FOUND	N/A	N/A	MILESTONE-GATED PRODUCT TOOL	OK FOR RSM-3	Same as Visual Studio
+Python	NOT FOUND	N/A	N/A	UNKNOWN / REQUIRES LATER DEPENDENCY DECISION	PENDING	Needed by node-gyp if native addons require compilation
+CMake	NOT FOUND	N/A	N/A	NOT REQUIRED	OK	No current roadmap need
+Ninja	NOT FOUND	N/A	N/A	NOT REQUIRED	OK	No current roadmap need
+Git LFS	NOT FOUND	N/A	N/A	OPTIONAL PRODUCTIVITY TOOL	OK	Not required for initial bootstrap
+7-Zip	NOT FOUND	N/A	N/A	OPTIONAL PRODUCTIVITY TOOL	OK	tar (bsdtar 3.5.2) is available via Windows
+tar (bsdtar)	INSTALLED	3.5.2	Windows built-in (libarchive 3.5.2)	NOT REQUIRED	OK	Archive utility available
+Code-signing tools	NOT FOUND	N/A	N/A	MILESTONE-GATED PRODUCT TOOL	OK	Needed at distribution milestone
+Antigravity IDE (Initial Audit)	HISTORICAL	Claude Opus 4.6 (Thinking)	Local IDE application	TASK EXECUTION APPLICATION / OUTSIDE PRODUCT TOOLCHAIN	OK	Historical execution provenance
+Antigravity IDE (Correction)	ACTIVE	Gemini 3.1 Pro (High)	Local IDE application	TASK EXECUTION APPLICATION / OUTSIDE PRODUCT TOOLCHAIN	OK	Correction executor for RSM-3-A
+Codex	COMPLETED	NOT EXPOSED TO REVIEWER RUNTIME	Local review application	TASK EXECUTION APPLICATION / OUTSIDE PRODUCT TOOLCHAIN	PASS WITH MATERIAL CORRECTIONS	Independent read-only review completed; M-01 remediated by FIX4; narrow M-01 re-review pending
