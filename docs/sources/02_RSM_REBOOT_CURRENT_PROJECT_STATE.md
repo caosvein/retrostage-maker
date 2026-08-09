@@ -6,28 +6,28 @@
 **Source generation:** Reboot / clean-start  
 **Snapshot date:** 2026-08-09  
 **Snapshot timezone:** Europe/Istanbul  
-**Document state:** `LIVE SNAPSHOT / PRE-REPOSITORY / RSM-2 CLOSED / RSM-3 CURRENT`  
+**Document state:** `LIVE SNAPSHOT / POST-RSM-3-I1 / RSM-2 CLOSED / RSM-3 CURRENT`  
 **Current product gate:** `Gate A — Governed Reboot`  
 **Current milestone:** `RSM-3 — Repository / Remote Backup / Reproducible Bootstrap`  
-**Current task:** `RSM-3-I1 — Local Git Repository / Source Import / Initial Commit Candidate`  
-**Active work mode:** `RSM-3-I1 AUTHORIZED / PRE-IMPLEMENTATION`  
-**Repository:** `NOT YET CREATED`  
-**Remote origin:** `NOT YET CREATED`  
-**Primary branch:** `NOT YET SELECTED`  
-**Current Git HEAD:** `NONE`  
+**Current task:** `RSM-3-I2 — pnpm Workspace / Toolchain / Quality Scripts`  
+**Active work mode:** `RSM-3-I2 AUTHORIZED / READY FOR EXECUTION / NOT YET EXECUTED`  
+**Repository:** `PRESENT — C:\RetroStage\retrostage-maker`  
+**Remote origin:** `https://github.com/caosvein/retrostage-maker.git`  
+**Primary branch:** `main`  
+**Current Git HEAD:** `6d67b19f136cdd0a36ae11a861f4ba8b0addd196`  
 **Installed dependency graph:** `NONE / NOT YET MATERIALIZED`  
 **Implemented reboot product capabilities:** `NONE`  
 **RSM-2 decision:** `CLOSED / SOURCE PASS`  
-**RSM-3 decision:** `CURRENT / RSM-3-I1 AUTHORIZED / NOT YET EXECUTED`  
+**RSM-3 decision:** `CURRENT / RSM-3-I1 CLOSED / RSM-3-I2 AUTHORIZED`  
 **Historical implementation status:** `HISTORICAL_IDENTITY_PRESERVED_BYTES_UNAVAILABLE`  
 **Active milestone authority:** `08_RSM_REBOOT_CURRENT_MILESTONE.md`  
-**Immediate next control step:** `Execute RSM-3-I1 under a separately controlled implementation task`  
+**Immediate next control step:** `Execute the separately controlled RSM-3-I2 implementation task`  
 
 ---
 
 ## 1. Purpose
 
-This document records the latest truthful state of the RetroStage Maker reboot after RSM-2 source reconstruction closed and RSM-3 repository bootstrap was activated.
+This document records the latest truthful state of the RetroStage Maker reboot after RSM-2 source reconstruction closed, RSM-3-I1 closed, and RSM-3-I2 became the one authorized next task.
 
 It distinguishes:
 
@@ -38,7 +38,7 @@ It distinguishes:
 - historical pre-loss evidence,
 - and future implementation intent.
 
-It is not proof that a repository, dependency, test, build, application, export, or backup currently exists.
+It records the accepted physical repository and I1 root-commit baseline. It is not proof that a project dependency graph, lockfile, CI, test, build, product application, export, remote backup, clean clone, or restore proof currently exists.
 
 ---
 
@@ -61,13 +61,11 @@ The reboot now has approved sources for:
 
 RSM-3 is current. RSM-3-A, RSM-3-B, RSM-3-C, and RSM-3-D are completed and accepted. RSM-3-D reached terminal acceptance through RECOVERY1, TERM1, and the independent terminal review. Recursive Original/FIX1–FIX15 history remains evidence history and is not current authority.
 
+The project now has a verified canonical local Git repository, `main` branch, configured origin, and one accepted root commit from RSM-3-I1. The working tree is clean at the accepted I1 closure baseline. The origin contains zero remote refs; no push or upstream tracking exists.
+
 The project still has no verified:
 
-- Git repository,
-- remote origin,
-- branch,
-- HEAD,
-- lockfile,
+- package-manager lockfile,
 - installed package graph,
 - CI,
 - tests,
@@ -81,13 +79,13 @@ The project still has no verified:
 
 Current position:
 
-> Governance, source reconstruction, and detailed bootstrap readiness are accepted. RSM-3-I1 is authorized as the one active next task, but physical repository creation and I1 implementation have not yet occurred.
+> Gate A remains current. RSM-2 is closed; RSM-3-A/B/C are accepted; RSM-3-D is terminally accepted; RSM-3-I1 is closed; and RSM-3-I2 is the one current authorized next task. I2 implementation has not begun.
 
 ---
 
 ## 3. Source-of-Truth Order
 
-Before repository creation:
+Current source-of-truth order:
 
 1. `00_RSM_REBOOT_PROJECT_CHARTER.md`
 2. `06_RSM_REBOOT_TECHNOLOGY_DEPENDENCY_AND_LICENSE_CONTRACT.md`
@@ -124,7 +122,7 @@ After RSM-3 creates the repository, physical evidence becomes authoritative for 
 
 | Item | State | Meaning |
 |---|---|---|
-| Gate A — Governed Reboot | `CURRENT` | Repository and workflow baselines remain to be established |
+| Gate A — Governed Reboot | `CURRENT` | Repository bootstrap continues; Gate A remains open |
 | RSM-0 — Reboot Product Charter / Source Authority Reset | `SOURCE COMPLETE` | Approved governance source |
 | RSM-1 — Technology / Dependency / Commercial License Contract | `SOURCE COMPLETE` | Approved technology/license source |
 | RSM-2 — Canonical Roadmap / Reboot Source-Set Reconstruction | `CLOSED / SOURCE PASS` | Source set reconstructed, reviewed, aligned, and handed off |
@@ -133,7 +131,8 @@ After RSM-3 creates the repository, physical evidence becomes authoritative for 
 | RSM-3-B — Repository / Toolchain / Source-Import Contract | `COMPLETED / ACCEPTED` | Source-import contract, frozen map, and topology accepted |
 | RSM-3-C — Supply-Chain / Backup / Restore Boundary | `COMPLETED / ACCEPTED` | Owner, device, supply-chain, backup, and restore boundaries accepted |
 | RSM-3-D — Detailed Bootstrap Readiness | `TERMINALLY ACCEPTED` | RECOVERY1 + TERM1 + independent terminal review accepted |
-| RSM-3-I1 — Local Git Repository / Source Import / Initial Commit Candidate | `AUTHORIZED / READY FOR EXECUTION` | Current active task; implementation has not yet run |
+| RSM-3-I1 — Local Git Repository / Source Import / Initial Commit Candidate | `CLOSED` | Accepted 76-file local root-commit baseline exists |
+| RSM-3-I2 — pnpm Workspace / Toolchain / Quality Scripts | `AUTHORIZED / READY FOR EXECUTION` | One current authorized next task; implementation has not yet run |
 | RSM-4 — Engineering / Review / Milestone Gate Baseline | `BLOCKED` | Workflow source exists but repository activation awaits RSM-3 closure |
 | Gate B — Secure Vertical Slice | `INACTIVE` | Product implementation remains blocked |
 | RSM-5 and later | `NOT STARTED` | No product capability may be claimed |
@@ -152,7 +151,7 @@ Accepted closure artifacts:
 | `RSM-2-CLOSE1-SOURCE-RECONSTRUCTION-CLOSURE.md` | `MILESTONE CLOSED / SOURCE PASS` | `FE61409732028356EEE534464A252E0F5AAC29587540980A2A1B09D8F6683E75` |
 | `RSM-3-A-REPOSITORY-BOOTSTRAP-AUDIT-AND-READINESS-CONTRACT.md` | `READY` | `FCBDA15B020C2A726A20204382AEDD6B1CF6FAA153DD9C4BDB08920E3206EB11` |
 
-RSM-2 closure did not create a repository or product implementation.
+RSM-2 closure did not create a repository or product implementation. The repository was subsequently created and accepted under RSM-3-I1; product implementation remains absent.
 
 ---
 
@@ -171,23 +170,33 @@ Sources 02, 08, and 09 supersede their pre-ALIGN1 identities for current operati
 ## 7. Current Repository Reality
 
 ```text
-Repository path: NONE
-Remote origin: NONE
-Primary branch: NONE
-Current HEAD: NONE
-Working tree: NOT APPLICABLE
-Index: NOT APPLICABLE
-Untracked inventory: NOT APPLICABLE
-Stash list: NOT APPLICABLE
-Committed manifests: NONE
+Repository: PRESENT
+Repository path: C:\RetroStage\retrostage-maker
+Git repository: TRUE
+Primary branch: main
+Current HEAD: 6d67b19f136cdd0a36ae11a861f4ba8b0addd196
+HEAD role: ACCEPTED RSM-3-I1 ROOT COMMIT
+Commit count: 1
+HEAD parent count: 0
+HEAD tree files: 76
+Working tree: CLEAN
+Staged changes: 0
+Unstaged changes: 0
+Untracked files: 0
+Remote origin: https://github.com/caosvein/retrostage-maker.git
+Remote refs: 0
+Upstream tracking: NONE
+Push: NOT PERFORMED
 Committed lockfile: NONE
+Installed project dependency graph: NONE
 CI baseline: NONE
-Off-device push: NONE
+Build: NONE
 Clean clone: NONE
 Restore proof: NONE
+Product implementation: NONE
 ```
 
-RSM-3-I1 owns the first physical creation of the selected local repository baseline. Until I1 executes and produces evidence, every value above remains absent.
+The I1 root commit is the immutable accepted repository baseline. The aligned live bootstrap copies of sources 02 and 08 are intentionally not synchronized into the repository during this task; that traceable delta belongs to RSM-3-I2. The Git working tree therefore remains clean.
 
 ---
 
@@ -285,6 +294,8 @@ The previous loss makes backup and restore a Gate A requirement.
 Current status:
 
 ```text
+Remote origin configured: YES
+Remote refs: 0
 Remote backup: NONE
 Snapshot backup: NONE
 Clean clone: NONE
@@ -407,8 +418,8 @@ RSM-3-A — COMPLETED / ACCEPTED
 → RSM-3-B — COMPLETED / ACCEPTED
 → RSM-3-C — COMPLETED / ACCEPTED
 → RSM-3-D — TERMINALLY ACCEPTED
-→ RSM-3-I1 — AUTHORIZED / READY FOR EXECUTION
-→ RSM-3-I2
+→ RSM-3-I1 — CLOSED
+→ RSM-3-I2 — AUTHORIZED / READY FOR EXECUTION
 → RSM-3-I3
 → RSM-3-I4
 → RSM-3-V1
@@ -416,21 +427,21 @@ RSM-3-A — COMPLETED / ACCEPTED
 → RSM-4
 ```
 
-Only RSM-3-I1 is currently authorized. I1 implementation has not yet run.
+Only RSM-3-I2 is currently authorized. I2 implementation has not yet run.
 
 ---
 
-## 20. RSM-3-D Acceptance and RSM-3-I1 Entry Readiness
+## 20. RSM-3-I1 Closure and RSM-3-I2 Entry Readiness
 
-RSM-3-D is terminally accepted because:
+RSM-3-D remains terminally accepted because:
 
 - RECOVERY1 established physical source truth and collapsed the recursive correction chain;
 - TERM1 recorded the governed historical-byte exception and exact non-self authority cutoff;
 - all 127 old D correction rows remain excluded from I1 authority;
 - the independent terminal review returned `RSM-3-D TERMINAL REVIEW — ACCEPTED`;
-- this ALIGN1 delta makes sources 02, 08, and 09 current without rewriting TERM1 evidence.
+- the earlier D-ALIGN1 delta made sources 02, 08, and 09 current without rewriting TERM1 evidence.
 
-RSM-3-I1 is authorized and ready for execution after ALIGN1. Authorization is not evidence that repository creation, source import, staging, commit-candidate preparation, commit, or push has occurred.
+RSM-3-I1 is closed by the independent decision `RSM-3-I1 CLOSED / RSM-3-I2 ALIGNMENT ELIGIBLE`. Its accepted physical baseline is the one local root commit at `6d67b19f136cdd0a36ae11a861f4ba8b0addd196`. RSM-3-I2 is authorized and ready for execution, but this authorization is not evidence that I2 files, dependencies, scripts, a lockfile, CI, build output, or another commit already exist.
 
 ---
 
@@ -446,9 +457,8 @@ It may receive a non-authoritative planning shell only if explicitly labeled. Th
 
 Do not claim:
 
-- the repository exists;
-- the remote exists;
-- the project is backed up;
+- the root commit has been pushed;
+- the project is remotely backed up;
 - dependencies are installed;
 - commands pass;
 - the editor or player works;
@@ -460,7 +470,7 @@ Do not claim:
 
 The accurate statement is:
 
-> RSM-2 is closed; RSM-3-A/B/C/D are accepted; RSM-3-I1 is authorized and ready for execution; physical repository creation and I1 implementation have not begun.
+> RSM-2 is closed; RSM-3-A/B/C are accepted; RSM-3-D is terminally accepted; RSM-3-I1 is closed with one accepted local root commit; RSM-3-I2 is authorized and ready for execution but has not begun; no push or product implementation has occurred.
 
 ---
 
@@ -468,7 +478,7 @@ The accurate statement is:
 
 Update this file when:
 
-- RSM-3-I1 starts or completes;
+- RSM-3-I2 starts or completes;
 - repository path or remote is selected;
 - Git repository is created;
 - branch or HEAD exists;
@@ -491,13 +501,13 @@ CURRENT MILESTONE:
 RSM-3 — Repository / Remote Backup / Reproducible Bootstrap
 
 CURRENT TASK:
-RSM-3-I1 — Local Git Repository / Source Import / Initial Commit Candidate
+RSM-3-I2 — pnpm Workspace / Toolchain / Quality Scripts
 
 REPOSITORY:
-NOT YET CREATED
+C:\RetroStage\retrostage-maker / main / 6d67b19f136cdd0a36ae11a861f4ba8b0addd196 / CLEAN
 
 NEXT ACTION:
-Execute RSM-3-I1 under one declared primary executor and its accepted implementation contract; do not commit or push automatically.
+Execute RSM-3-I2 under one declared primary executor and its separately controlled implementation contract; do not infer commit or push authority.
 ```
 
 ---
@@ -509,8 +519,9 @@ Acceptance of this snapshot means:
 - RSM-2 is closed with source pass;
 - RSM-3 is current;
 - RSM-3-A/B/C/D are accepted and recursive FIX history is not current authority;
-- only RSM-3-I1 is currently authorized, and it has not yet executed;
-- repository and product implementation remain absent;
+- RSM-3-I1 is closed and its accepted local root-commit baseline remains current;
+- only RSM-3-I2 is currently authorized, and it has not yet executed;
+- the repository exists while product implementation remains absent;
 - source 07 remains deferred;
 - historical identity/provenance is preserved under `HISTORICAL_IDENTITY_PRESERVED_BYTES_UNAVAILABLE`;
 - current authority derives from the accepted TERM1 cutoff plus the ALIGN1 delta;

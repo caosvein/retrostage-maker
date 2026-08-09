@@ -5,13 +5,13 @@
 **Project:** RetroStage Maker  
 **Current gate:** `Gate A — Governed Reboot`  
 **Current milestone:** `RSM-3 — Repository / Remote Backup / Reproducible Bootstrap`  
-**Current task:** `RSM-3-I1 — Local Git Repository / Source Import / Initial Commit Candidate`  
-**Milestone state:** `CURRENT / RSM-3-I1 AUTHORIZED`  
+**Current task:** `RSM-3-I2 — pnpm Workspace / Toolchain / Quality Scripts`  
+**Milestone state:** `CURRENT / RSM-3-I1 CLOSED / RSM-3-I2 AUTHORIZED`  
 **Task state:** `AUTHORIZED / READY FOR EXECUTION`  
-**Work mode:** `PRE-REPOSITORY I1 IMPLEMENTATION AUTHORIZED`  
+**Work mode:** `RSM-3-I2 IMPLEMENTATION AUTHORIZED / NOT YET EXECUTED`  
 **Snapshot date:** 2026-08-09  
 **Timezone:** Europe/Istanbul  
-**Repository:** `NOT YET CREATED`  
+**Repository:** `PRESENT — C:\RetroStage\retrostage-maker`  
 **RSM-2:** `CLOSED / SOURCE PASS`  
 **RSM-4:** `BLOCKED UNTIL RSM-3 CLOSURE`  
 
@@ -19,17 +19,17 @@
 
 ## 1. Purpose
 
-This document controls the active RSM-3 milestone after the explicit closure of RSM-2.
+This document controls the active RSM-3 milestone after the explicit closure of RSM-2 and RSM-3-I1.
 
 It defines:
 
 - what RSM-3 must prove,
-- what the authorized RSM-3-I1 slice may establish,
+- what the authorized RSM-3-I2 slice may establish,
 - what may and may not be created,
 - how repository, remote, toolchain, backup, and restore evidence must be handled,
 - and when RSM-4 may begin.
 
-It does not claim that repository bootstrap has already occurred.
+It records the accepted I1 repository baseline. It does not claim that I2 implementation, dependency installation, lockfile creation, CI, build, push, clean clone, restore proof, or product implementation has occurred.
 
 ---
 
@@ -51,7 +51,7 @@ Canonical roadmap exit:
 
 ## 3. Entry Evidence
 
-RSM-3-I1 entry is authorized by the accepted phase chain and the terminal owner-resolution package:
+RSM-3-I2 entry is authorized by the accepted phase chain, the completed I1 controls, and the independent I1 closure:
 
 | Phase / gate | Current result | Authority anchor |
 |---|---|---|
@@ -60,9 +60,15 @@ RSM-3-I1 entry is authorized by the accepted phase chain and the terminal owner-
 | `RSM-3-B` | `ACCEPTED` | accepted repository/toolchain/source-import contract package |
 | `RSM-3-C` | `ACCEPTED` | accepted supply-chain/backup/restore boundary package |
 | `RSM-3-D` | `TERMINALLY ACCEPTED` | `RSM-3-D-TERM1-OWNER-SOURCE-GOVERNANCE-EXCEPTION-AND-DECISION-LOCK.md`; `RSM-3-D-TERM1-CHATGPT-INDEPENDENT-TERMINAL-REVIEW.md` |
-| `RSM-3-I1` | `AUTHORIZED / READY FOR EXECUTION` | terminal-review decision `RSM-3-D TERMINAL REVIEW — ACCEPTED`; this ALIGN1 authority delta |
+| `RSM-3-I1` | `CLOSED` | accepted root commit `6d67b19f136cdd0a36ae11a861f4ba8b0addd196`; independent decision `RSM-3-I1 CLOSED / RSM-3-I2 ALIGNMENT ELIGIBLE` |
+| `RSM-3-I2` | `AUTHORIZED / READY FOR EXECUTION` | this post-I1 current-state alignment and the accepted I1 closure package |
+| `RSM-3-I3` | `BLOCKED ON RSM-3-I2` | requires accepted I2 evidence and transition control |
+| `RSM-3-I4` | `BLOCKED ON RSM-3-I3 AND ITS OWN ENTRY CONTROLS` | requires accepted I3 evidence plus I4-specific entry authority |
+| `RSM-3-V1` | `BLOCKED` | requires accepted I1–I4 evidence |
+| `RSM-3-CLOSE1` | `BLOCKED` | requires accepted V1 |
+| `RSM-4` | `BLOCKED UNTIL RSM-3 CLOSURE` | cannot begin during the current milestone |
 
-Recursive FIX/review history remains evidence history and does not replace the terminal current-authority chain. RSM-3-I1 authorization does not claim repository creation or implementation execution.
+Recursive FIX/review history remains evidence history and does not replace the terminal current-authority chain. RSM-3-I2 authorization is prospective and does not claim I2 execution.
 
 ---
 
@@ -86,7 +92,9 @@ RSM-3 must read:
 14. `RSM-3-D-TERM1-CURRENT-AUTHORITY-CUTOFF.tsv`;
 15. `RSM-3-D-TERM1-I1-ENTRY-CANDIDATE-REPORT.md`;
 16. `RSM-3-D-TERM1-CHATGPT-INDEPENDENT-TERMINAL-REVIEW.md`;
-17. `RSM-3-D-ALIGN1-AUTHORITY-DELTA-LOCK.tsv` and the aligned sources 02, 08, and 09.
+17. `RSM-3-D-ALIGN1-AUTHORITY-DELTA-LOCK.tsv` and its aligned sources 02, 08, and 09;
+18. the accepted RSM-3-I1 import, candidate-review, commit, post-commit-review, and closure evidence;
+19. `RSM-3-I1-ALIGN1-AUTHORITY-DELTA-LOCK.tsv` and the aligned current sources 02 and 08.
 
 `RSM-3-D-TERM1-CURRENT-AUTHORITY-CUTOFF.tsv` remains immutable. ALIGN1 records only the bounded post-cutoff identity delta for sources 02, 08, and 09. Physical repository evidence becomes authoritative as soon as repository facts exist.
 
@@ -95,16 +103,26 @@ RSM-3 must read:
 ## 5. Current Truth
 
 ```text
-Repository: NOT YET CREATED
-Remote: NOT YET CREATED
-Branch: NONE
-HEAD: NONE
+Repository: PRESENT
+Repository path: C:\RetroStage\retrostage-maker
+Branch: main
+HEAD: 6d67b19f136cdd0a36ae11a861f4ba8b0addd196
+HEAD role: ACCEPTED RSM-3-I1 ROOT COMMIT
+Commit count: 1
+HEAD parent count: 0
+HEAD tree files: 76
+Working tree: CLEAN
+Staged changes: 0
+Unstaged changes: 0
+Untracked files: 0
+Origin: https://github.com/caosvein/retrostage-maker.git
+Remote refs: 0
+Push: NONE
+Upstream: NONE
 Lockfile: NONE
 Dependencies: NONE
 CI: NONE
-Tests: NONE
 Build: NONE
-Push: NONE
 Clean clone: NONE
 Restore proof: NONE
 Product implementation: NONE
@@ -208,68 +226,73 @@ RSM-3-V1 — Milestone-Wide Bootstrap Validation
 RSM-3-CLOSE1 — Closure / RSM-4 Handoff
 ```
 
-The accepted phase chain is `RSM-3-A → RSM-3-B → RSM-3-C → RSM-3-D`. Only `RSM-3-I1` is now authorized for execution. RSM-3-I2 and all later slices remain blocked until their predecessor evidence and review gates are satisfied.
+The accepted phase chain is `RSM-3-A → RSM-3-B → RSM-3-C → RSM-3-D → RSM-3-I1`. I1 is closed. Only `RSM-3-I2` is now authorized for execution. I3 is blocked on I2; I4 is blocked on I3 and its own entry controls; V1 and CLOSE1 remain blocked.
 
 ---
 
-## 10. Current Task — RSM-3-I1
+## 10. Current Task — RSM-3-I2
 
-`RSM-3-I1 — Local Git Repository / Source Import / Initial Commit Candidate` is the only currently authorized implementation slice.
+`RSM-3-I2 — pnpm Workspace / Toolchain / Quality Scripts` is the only currently authorized implementation slice.
 
-Its bounded purpose is to establish the approved local repository foundation, import the authorized source/evidence set under the accepted mappings and governance exception, and prepare an initial commit candidate for review. No repository, import, commit candidate, commit, push, backup, clone, restore, dependency installation, or product implementation has yet occurred merely because I1 is authorized.
+Its bounded purpose is to add the approved pnpm workspace, exact RSM-3 toolchain pins, and development-only quality-script foundation to the accepted I1 repository baseline. Authorization does not mean any I2 file, package declaration, lockfile, dependency graph, script, test, build, or commit already exists.
 
 ---
 
-## 11. RSM-3-I1 Authorized Scope
+## 11. RSM-3-I2 Authorized Scope
 
-- create the approved local Git repository at the owner-locked canonical path;
-- apply the accepted branch, identity, shell, topology, source-import, and import-lock contracts;
-- import the authorized current source/evidence set;
-- preserve the nine unavailable historical sources as identity/provenance records under the terminal exception, without synthesizing replacement bytes;
-- produce the required physical inventory, import-lock, validation, and initial commit-candidate evidence;
-- stop before commit or push pending their explicit downstream approvals.
+- operate only on the accepted canonical repository baseline through a separately controlled I2 implementation task;
+- create the minimal approved pnpm workspace and exact Node/pnpm/TypeScript toolchain declarations;
+- admit only repository/toolchain/quality dependencies assigned to RSM-3 by the roadmap and technology contract;
+- create the bounded quality-script and architecture-validation foundation assigned to I2;
+- synchronize the aligned live source 02/08 identities into the repository as an explicit traceable I2 delta;
+- produce reviewable I2 evidence and stop before any commit or push unless separately authorized.
 
 Authorization is prospective. Every physical fact must be observed and recorded during I1.
 
 ---
 
-## 12. RSM-3-I1 Forbidden Scope
+## 12. RSM-3-I2 Forbidden Scope
 
 - product code or product functionality;
 - product dependencies owned by later milestones;
+- Electron / Forge / Vite before RSM-5;
+- Babylon.js before RSM-6;
+- React editor UI before RSM-9;
+- TypeBox/Ajv before RSM-11;
 - final source 07 authority before commands are physically observed;
 - synthetic reconstruction of the nine unavailable historical files;
 - automatic commit or push;
-- remote, backup, clone, restore, or dependency work owned by later RSM-3 slices;
+- CI/dependency-review/SBOM/notices work owned by I3;
+- remote push, backup, clean-clone, or restore work owned by I4;
 - secret exposure or unrelated directory mutation;
 - declaring RSM-3 complete or starting RSM-4.
 
 ---
 
-## 13. RSM-3-I1 Evidence Requirement
+## 13. RSM-3-I2 Evidence Requirement
 
-I1 must return a reviewable physical package that identifies at minimum:
+I2 must return a reviewable physical package that identifies at minimum:
 
-- repository root, `.git` identity, branch, and working-tree state;
-- every imported file and its physical hash;
-- applied source-import and import-lock mappings;
-- treatment of the historical byte-loss exception;
+- repository root, branch, HEAD, and working-tree baseline;
+- every I2-created or I2-modified path and its physical hash;
+- exact workspace, toolchain, dependency, and script declarations;
+- exact 02/08 repository synchronization delta;
 - validation commands actually run and their results;
-- exact initial commit-candidate inventory;
+- exact I2 commit-candidate inventory;
 - all blockers or divergences.
 
 The evidence may support `READY FOR REVIEW` or `BLOCKED`; it may not silently advance to commit or push.
 
 ---
 
-## 14. RSM-3-I1 Stop Conditions
+## 14. RSM-3-I2 Stop Conditions
 
 Stop if:
 
-- the owner-locked repository path or source mapping cannot be applied exactly;
+- the accepted I1 repository baseline or current 02/08 authority cannot be applied exactly;
 - a current-authority source is missing, ambiguous, or hash-divergent without authorized mapping;
 - an operation would synthesize the unavailable historical bytes;
-- required Git identity/authentication facts conflict with the accepted owner lock;
+- required toolchain/dependency identities cannot be resolved within RSM-3 authority;
 - secrets or unrelated data could be exposed or overwritten;
 - an unapproved dependency, commit, push, backup, clone, restore, or product action would be required;
 - or a material owner choice remains unresolved.
@@ -286,7 +309,7 @@ The controlled sequence is:
 RSM-3-I1 → RSM-3-I2 → RSM-3-I3 → RSM-3-I4 → RSM-3-V1 → RSM-3-CLOSE1
 ```
 
-I2 may begin only after I1 physical evidence is independently accepted and the next slice is explicitly authorized. I3 depends on accepted I2; I4 depends on accepted I3; V1 depends on accepted I1–I4; CLOSE1 depends on an accepted V1. No transition authorizes an automatic commit or push.
+I2 is now explicitly authorized after accepted I1 closure and this alignment. I3 depends on accepted I2; I4 depends on accepted I3 and its own entry controls; V1 depends on accepted I1–I4; CLOSE1 depends on an accepted V1. No transition authorizes an automatic commit or push.
 
 ---
 
@@ -454,17 +477,17 @@ Temporary RSM-3 rule:
 
 ## 26. Current Blockers
 
-No source-governance blocker prevents authorized RSM-3-I1 execution. The nine historical bytes remain unavailable, but TERM1 has dispositioned that condition as a bounded owner-accepted exception; it is not permission to reconstruct them.
+No source-governance blocker prevents authorized RSM-3-I2 execution. The nine historical bytes remain unavailable under `HISTORICAL_IDENTITY_PRESERVED_BYTES_UNAVAILABLE`, but TERM1 has dispositioned that condition as a bounded owner-accepted exception; it is not permission to reconstruct them.
 
-Repository facts remain absent until I1 observes and creates them. RSM-3-I2 and later slices, source 07 finalization, RSM-4, and Gate B remain blocked.
+RSM-3-I1 repository facts are accepted and present. RSM-3-I3 is blocked on I2; I4 is blocked on I3 and its own entry controls; V1, CLOSE1, source 07 finalization, RSM-4, and Gate B remain blocked.
 
 ---
 
 ## 27. Immediate Next Action
 
 ```text
-Execute the bounded RSM-3-I1 contract using one declared primary local engineering tool.
-Create and validate only the approved local repository/source-import/initial commit-candidate slice.
+Execute the bounded RSM-3-I2 contract using one declared primary local engineering tool.
+Create and validate only the approved pnpm workspace/toolchain/quality-script slice.
 Return READY FOR REVIEW or BLOCKED; do not commit or push automatically.
 ```
 
@@ -472,7 +495,7 @@ Return READY FOR REVIEW or BLOCKED; do not commit or push automatically.
 
 ## 28. Status Transition Rules
 
-RSM-3-I1 may transition:
+RSM-3-I2 may transition:
 
 ```text
 READY FOR EXECUTION
@@ -496,9 +519,8 @@ RSM-3 remains `CURRENT` throughout these task transitions.
 
 Update this document when:
 
-- RSM-3-I1 starts or completes;
-- I1 physical repository and source-import facts are accepted;
-- RSM-3-I2 is activated;
+- RSM-3-I2 starts or completes;
+- I2 workspace, toolchain, quality-script, and source-alignment facts are accepted;
 - repository/remote/branch/HEAD appears;
 - toolchain versions are pinned;
 - lockfile or CI exists;
@@ -516,8 +538,10 @@ Update this document when:
 RSM-3 is current.
 RSM-3-A, RSM-3-B, and RSM-3-C are accepted.
 RSM-3-D is terminally accepted.
-RSM-3-I1 is authorized / ready for execution.
-No repository exists yet.
+RSM-3-I1 is closed.
+RSM-3-I2 is authorized / ready for execution.
+The accepted local repository exists at C:\RetroStage\retrostage-maker.
+No I2 implementation has occurred yet.
 No product implementation is authorized.
 Gate A remains open.
 ```
@@ -531,8 +555,9 @@ Acceptance of this milestone source means:
 - RSM-2 closure is accepted;
 - RSM-3-A, RSM-3-B, and RSM-3-C acceptance is current;
 - RSM-3-D terminal acceptance is current;
-- only RSM-3-I1 may begin;
-- RSM-3-I2 and all later RSM-3 slices remain blocked by their dependency gates;
+- RSM-3-I1 closure is accepted;
+- only RSM-3-I2 may begin;
+- RSM-3-I3 and all later RSM-3 slices remain blocked by their dependency gates;
 - source 07 remains deferred;
 - backup/restore evidence is mandatory;
 - product dependencies remain milestone-gated;
