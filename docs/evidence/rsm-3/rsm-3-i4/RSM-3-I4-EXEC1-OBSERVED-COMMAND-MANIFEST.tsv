@@ -1,0 +1,17 @@
+sequence	phase	working_directory	command_or_operation	exit_code	result	mutating	target	notes
+1	AUTHORITY	C:\RetroStage\bootstrap\RSM-3-A	Strict UTF-8 full-read and SHA-256 verification of mandatory EXEC1 authority set	0	PASS	FALSE	mandatory authority artifacts	required activation and owner non-blocking encryption decisions exact
+2	BOOTSTRAP_GUARD	C:\RetroStage\bootstrap\RSM-3-A	Recursive physical SHA-256 inventory of every pre-existing bootstrap file	0	PASS	FALSE	C:\RetroStage\bootstrap\RSM-3-A	309 files; aggregate SHA-256 6F83F9A8A00227743D36EC229D7DCB5EC4FA9AEA9812B0C1E75AEB1BC5846775
+3	PREFLIGHT	C:\RetroStage\retrostage-maker	git rev-parse HEAD and HEAD^; branch/rev-list/ls-tree/status/diff checks	0	PASS	FALSE	C:\RetroStage\retrostage-maker	exact e50cadca baseline; main; 4 commits; 140 tree files; clean
+4	PREFLIGHT	C:\RetroStage\retrostage-maker	git ls-remote origin	0	PASS	FALSE	https://github.com/caosvein/retrostage-maker.git	remote ref count 0
+5	PREFLIGHT	C:\RetroStage\retrostage-maker	git config --get branch.main.remote and branch.main.merge	1	PASS_EXPECTED_ABSENCE	FALSE	C:\RetroStage\retrostage-maker	upstream absent
+6	PREFLIGHT	C:\RetroStage\bootstrap\RSM-3-A	gh auth status --active --hostname github.com	0	PASS	FALSE	github.com	active account caosvein; token value not captured
+7	PREFLIGHT	C:\RetroStage\bootstrap\RSM-3-A	gh repo view caosvein/retrostage-maker --json nameWithOwner,isPrivate,isEmpty,defaultBranchRef,viewerPermission,url	0	PASS	FALSE	caosvein/retrostage-maker	private; empty; ADMIN
+8	PREFLIGHT	C:\RetroStage\retrostage-maker	Enumerate tracked files and physical .git metadata; filename-only secret-scope scan; exact capacity calculation	0	PASS	FALSE	canonical repository and selected Seagate	N=173; G=4023827; secret blockers=0; both capacity gates pass
+9	PREFLIGHT	C:\RetroStage\bootstrap\RSM-3-A	Resolve Volume GUID through Win32_Volume/Get-Partition/Get-Disk/Win32_DiskDrive	0	PASS	FALSE	\\?\Volume{15607945-45f1-49e8-bacd-481208610792}\	exact Seagate stable identity; F observational
+10	PHASE_A	C:\RetroStage\bootstrap\RSM-3-A	git -C "C:\RetroStage\retrostage-maker" push -u origin main	1	FAIL	TRUE	origin/main	remote rejected OAuth App update of .github/workflows/ci.yml without workflow scope
+11	POST_FAILURE	C:\RetroStage\retrostage-maker	git ls-remote --heads origin main and git ls-remote origin	0	PASS	FALSE	origin	main refs 0; all refs 0
+12	POST_FAILURE	C:\RetroStage\bootstrap\RSM-3-A	gh run list -R caosvein/retrostage-maker --commit e50cadca387b992f6a5648237fe0c006ef72a6fa --limit 20	0	PASS	FALSE	caosvein/retrostage-maker	matching workflow run count 0
+13	POST_FAILURE	C:\RetroStage\retrostage-maker	Revalidate 173 governed files against PRE1 size and SHA-256 inventory	0	PASS	FALSE	C:\RetroStage\retrostage-maker	physical mismatch count 0
+14	POST_FAILURE	C:\RetroStage\bootstrap\RSM-3-A	Recheck clean clone local backup restore and external-root target absence	0	PASS	FALSE	D: and selected Seagate targets	all four remain absent
+15	POST_FAILURE	C:\RetroStage\bootstrap\RSM-3-A	Recompute pre-existing bootstrap aggregate before evidence creation	0	PASS	FALSE	C:\RetroStage\bootstrap\RSM-3-A	309 files; baseline aggregate unchanged
+

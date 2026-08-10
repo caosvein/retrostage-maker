@@ -1,0 +1,22 @@
+sequence	phase	working_directory	command_or_operation	exit_code	result	mutating	target	notes
+1	AUTHORITY	C:\RetroStage\bootstrap\RSM-3-A	Strict UTF-8 full-read and SHA-256 verification of RETRY1 authority and failed EXEC1 lineage	0	PASS	FALSE	mandatory artifacts	all required historical hashes exact
+2	BOOTSTRAP_GUARD	C:\RetroStage\bootstrap\RSM-3-A	Recursive physical SHA-256 inventory of every pre-existing bootstrap file	0	PASS	FALSE	C:\RetroStage\bootstrap\RSM-3-A	317 files; aggregate 0314049F39724B51B17DCA34A23D1E364B138EE708B2D696774C3E29E7F1ED5C
+3	AUTH_GATE	C:\RetroStage\bootstrap\RSM-3-A	gh auth status --active --hostname github.com	0	PASS	FALSE	github.com	active caosvein; scopes include gist read:org repo workflow; no token value
+4	AUTH_GATE	C:\RetroStage\bootstrap\RSM-3-A	gh repo view caosvein/retrostage-maker --json nameWithOwner,isPrivate,isEmpty,defaultBranchRef,viewerPermission,url	0	PASS	FALSE	caosvein/retrostage-maker	private empty ADMIN
+5	BASELINE	C:\RetroStage\retrostage-maker	git rev-parse/status/diff/ls-tree/rev-list/remote/upstream checks	0	PASS	FALSE	C:\RetroStage\retrostage-maker	exact e50cadca baseline; remote empty; upstream absent
+6	BASELINE	C:\RetroStage\retrostage-maker	Revalidate governed PRE1 inventory by physical path size and SHA-256	0	PASS	FALSE	C:\RetroStage\retrostage-maker	173 files; 4023827 bytes; mismatches 0; secret blockers 0
+7	DEVICE_GATE	C:\RetroStage\bootstrap\RSM-3-A	Resolve selected Volume GUID through Windows disk and volume providers; apply exact capacity formula	0	PASS	FALSE	\\?\Volume{15607945-45f1-49e8-bacd-481208610792}\	exact Seagate identity; E=20801043; both capacity gates pass
+8	PHASE_A	C:\RetroStage\bootstrap\RSM-3-A	git -C "C:\RetroStage\retrostage-maker" push -u origin main	0	PASS	TRUE	origin/main	single RETRY1 push; new remote branch
+9	PHASE_A	C:\RetroStage\retrostage-maker	git rev-parse HEAD; git ls-remote --heads origin main; git rev-parse --abbrev-ref --symbolic-full-name @{u}	0	PASS	FALSE	origin/main	remote and local exact e50cadca; upstream origin/main
+10	PHASE_B	C:\RetroStage\bootstrap\RSM-3-A	gh run list -R caosvein/retrostage-maker --commit e50cadca387b992f6a5648237fe0c006ef72a6fa --limit 20	0	PASS	FALSE	GitHub Actions	natural push run 31340336172 located
+11	PHASE_B	C:\RetroStage\bootstrap\RSM-3-A	gh run watch 31340336172 -R caosvein/retrostage-maker --exit-status --interval 5	0	PASS	FALSE	GitHub Actions	run reached success
+12	PHASE_B	C:\RetroStage\bootstrap\RSM-3-A	gh run view 31340336172 -R caosvein/retrostage-maker --json run-and-job-fields	0	PASS	FALSE	GitHub Actions	exact SHA branch push event; CI and validation job success
+13	PHASE_C	C:\RetroStage\bootstrap\RSM-3-A	Test clean-clone target absence and create D:\RSM-Validation parent	0	PASS	TRUE	D:\RSM-Validation	parent required for authorized clone; exact target absent
+14	PHASE_C	C:\RetroStage\bootstrap\RSM-3-A	git clone "https://github.com/caosvein/retrostage-maker.git" "D:\RSM-Validation\clean-clone"	0	PASS	TRUE	D:\RSM-Validation\clean-clone	exact remote clone
+15	PHASE_C	D:\RSM-Validation\clean-clone	git HEAD branch origin history tree and status verification	0	PASS	FALSE	D:\RSM-Validation\clean-clone	e50cadca; main; 4 commits; 140 files; clean
+16	PHASE_D	D:\RSM-Validation\clean-clone	pnpm.cmd install --frozen-lockfile	0	PASS	TRUE	D:\RSM-Validation\clean-clone	node_modules installed; tracked state unchanged
+17	PHASE_D	D:\RSM-Validation\clean-clone	pnpm.cmd run format:check	1	FAIL	FALSE	D:\RSM-Validation\clean-clone	18 CRLF checkout paths conflict with Prettier endOfLine lf
+18	POST_FAILURE	D:\RSM-Validation\clean-clone	git status; lockfile Git diff; Node and pnpm versions; core.autocrlf and EOL diagnostics	0	PASS	FALSE	D:\RSM-Validation\clean-clone	clean; tracked lockfile drift 0; core.autocrlf true; all reported files CRLF
+19	POST_FAILURE	C:\RetroStage\bootstrap\RSM-3-A	Recheck canonical remote CI clone and later target/source guards	0	PASS	FALSE	all controlled locations	canonical/remote/CI success preserved; backup restore external and source 07 absent
+20	POST_FAILURE	C:\RetroStage\bootstrap\RSM-3-A	Recompute pre-existing bootstrap aggregate before RETRY1 evidence creation	0	PASS	FALSE	C:\RetroStage\bootstrap\RSM-3-A	317-file aggregate unchanged
+

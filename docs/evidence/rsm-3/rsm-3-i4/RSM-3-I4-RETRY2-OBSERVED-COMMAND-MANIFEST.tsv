@@ -1,0 +1,47 @@
+sequence	phase	working_directory	command_or_operation	exit_code	result	mutating	target	notes
+1	AUTHORITY	C:/RetroStage/bootstrap/RSM-3-A	Strict UTF-8 full-read and SHA-256 verification of FIX2 review/outputs and current owner locks	0	PASS	FALSE	mandatory authority	accepted patch FB505B4902C5E863261485670DC0A33D031338074A1C86B5BF5109AE42CECC8D
+2	BOOTSTRAP_GUARD	C:/RetroStage/bootstrap/RSM-3-A	Recursive physical pre-mutation inventory and strict UTF-8 check	0	PASS	FALSE	bootstrap	337 files; aggregate F1A710FD990C74D13A6B5D429B8C8276D99209C25534C18173A5830A56A52AB9
+3	TARGET_GATES	C:/RetroStage/bootstrap/RSM-3-A	Test exact RETRY2 clone/local-backup/restore target absence and Source07/eight-output absence	0	PASS	FALSE	authorized new targets	all required targets absent
+4	PRE_COMMIT	C:/RetroStage/retrostage-maker	git rev-parse/status/rev-list/remote/upstream/diff cached/ls-files blob checks	0	PASS	FALSE	canonical repository	exact e50cadca baseline and one staged path
+5	REMOTE_AUTH	C:/RetroStage/retrostage-maker	gh auth status and gh repo view	0	PASS	FALSE	github.com	active caosvein; private repository; ADMIN; token value not recorded
+6	PRE_COMMIT	C:/RetroStage/retrostage-maker	git diff --cached --no-ext-diff --full-index --binary and SHA-256	0	PASS	FALSE	staged candidate	FB505B4902C5E863261485670DC0A33D031338074A1C86B5BF5109AE42CECC8D
+7	COMMIT	C:/RetroStage/retrostage-maker	git commit -m "bootstrap: enforce portable lf checkout policy"	0	PASS	TRUE	canonical repository	FIX2_HEAD f9404ec83436cb739e9363ccc3791517a3ddefb9
+8	POST_COMMIT	C:/RetroStage/retrostage-maker	git parent/subject/diff-tree/count/tree/status verification	0	PASS	FALSE	FIX2_HEAD	one added .gitattributes; clean; five commits; 141 tree files
+9	PUSH	C:/RetroStage/retrostage-maker	git push origin main	0	PASS	TRUE	origin/main	normal fast-forward; no force
+10	REMOTE_VERIFY	C:/RetroStage/retrostage-maker	git ls-remote --heads origin main and local ref/upstream/status checks	0	PASS	FALSE	origin/main	remote/local exact FIX2_HEAD
+11	CI	C:/RetroStage/retrostage-maker	gh run list --commit FIX2_HEAD --event push	0	PASS	FALSE	GitHub Actions	natural run 31342080945 located
+12	CI	C:/RetroStage/retrostage-maker	gh run watch 31342080945 --exit-status --interval 5	0	PASS	FALSE	GitHub Actions	terminal success
+13	CI	C:/RetroStage/retrostage-maker	gh run view 31342080945 --json run/job fields	0	PASS	FALSE	GitHub Actions	SHA/main/push/success exact; job 93317410502
+14	CLONE	C:/RetroStage/bootstrap/RSM-3-A	git clone https://github.com/caosvein/retrostage-maker.git D:/RSM-Validation/clean-clone-retry2	0	PASS	TRUE	clean-clone-retry2	brand-new target
+15	CLONE_BASELINE	D:/RSM-Validation/clean-clone-retry2	git config --get/--show-origin core.autocrlf and HEAD/branch/origin/status checks	0	PASS	FALSE	clean-clone-retry2	natural core.autocrlf=true; no local override
+16	EOL_PROOF	D:/RSM-Validation/clean-clone-retry2	git ls-files --eol and git check-attr text eol	0	PASS	FALSE	18 exact paths	18/18 index/worktree LF and eol=lf
+17	BYTE_PROOF	D:/RSM-Validation/clean-clone-retry2	git hash-object --no-filters for protected evidence/notices	0	PASS	FALSE	103 protected paths	physical/index blob mismatch 0
+18	CLONE_INSTALL	D:/RSM-Validation/clean-clone-retry2	pnpm.cmd install --frozen-lockfile	0	PASS	TRUE	ignored dependency store	lockfile unchanged
+19	CLONE_VALIDATE	D:/RSM-Validation/clean-clone-retry2	pnpm.cmd run format:check	0	PASS	FALSE	clean clone	LF checkout defect eliminated
+20	CLONE_VALIDATE	D:/RSM-Validation/clean-clone-retry2	pnpm.cmd run lint	0	PASS	FALSE	clean clone	no lint failure
+21	CLONE_VALIDATE	D:/RSM-Validation/clean-clone-retry2	pnpm.cmd run typecheck	0	PASS	FALSE	clean clone	no type failure
+22	CLONE_VALIDATE	D:/RSM-Validation/clean-clone-retry2	pnpm.cmd run test	0	PASS	FALSE	clean clone	34 tests passed
+23	CLONE_VALIDATE	D:/RSM-Validation/clean-clone-retry2	pnpm.cmd run arch:check	0	PASS	FALSE	clean clone	zero dependency violations
+24	CLONE_VALIDATE	D:/RSM-Validation/clean-clone-retry2	pnpm.cmd run deadcode:check	0	PASS	FALSE	clean clone	PASS
+25	CLONE_VALIDATE	D:/RSM-Validation/clean-clone-retry2	pnpm.cmd run build	0	PASS	TRUE	ignored build output	PASS
+26	CLONE_VALIDATE	D:/RSM-Validation/clean-clone-retry2	pnpm.cmd run validate	0	PASS	TRUE	ignored build output	PASS
+27	CLONE_VALIDATE	D:/RSM-Validation/clean-clone-retry2	pnpm.cmd run compliance:check	0	PASS	FALSE	clean clone	byte-stable compliance PASS
+28	CLONE_VALIDATE	D:/RSM-Validation/clean-clone-retry2	pnpm.cmd run dependency:audit	0	PASS	FALSE	clean clone	one visible non-blocking low advisory
+29	CLONE_VALIDATE	D:/RSM-Validation/clean-clone-retry2	pnpm.cmd run ci:validate	0	PASS	TRUE	ignored dependency/build state	PASS; tracked drift 0
+30	BACKUP_SCOPE	C:/RetroStage/retrostage-maker	Enumerate git ls-files plus .git files; physical size/SHA and secret-scope checks	0	PASS	FALSE	canonical governed scope	179 files; 4025576 bytes; secret blockers 0
+31	LOCAL_BACKUP	C:/RetroStage/retrostage-maker	Copy governed files to D:/RSM-Backup/retrostage-maker and verify complete map	0	PASS	TRUE	local backup	missing/extra/size/hash mismatch 0
+32	DEVICE_GATE	C:/RetroStage/bootstrap/RSM-3-A	Resolve Volume GUID through Win32_Volume/Get-Partition/Get-Disk/Win32_DiskDrive	0	PASS	FALSE	selected Seagate	exact model/serial/UniqueId/NTFS
+33	CAPACITY	C:/RetroStage/bootstrap/RSM-3-A	Apply E=max(ceil(G*1.25),G+16777216) and 20-percent gate	0	PASS	FALSE	selected Seagate	E=20802792; both gates PASS
+34	EXTERNAL_COPY	C:/RetroStage/retrostage-maker	Create first external generation payload and copy 179 governed files	0	PASS	TRUE	20260809T233850Z_f9404ec83436	payload exact
+35	EXTERNAL_VERIFY	C:/RetroStage/retrostage-maker	Enumerate payload and compare path/size/SHA to source scope	0	PASS	FALSE	external payload	mismatch counts 0
+36	EXTERNAL_MANIFEST	C:/RetroStage/retrostage-maker	Create deterministic manifest.tsv and generation.json	0	PASS	TRUE	external generation	manifest D96F8F52DB5535C6E14FB08978FB1176AF077756FDCF051F606BFCDB5EF90494
+37	EXTERNAL_COMPLETE	C:/RetroStage/retrostage-maker	Write COMPLETE.sha256 last and verify marker/metadata identities	0	PASS	TRUE	external generation	completion marker valid
+38	RESTORE_SOURCE	C:/RetroStage/bootstrap/RSM-3-A	Reverify completion marker, metadata, 179-row manifest and full payload	0	PASS	FALSE	external generation	missing/extra/size/hash mismatch 0
+39	RESTORE_COPY	C:/RetroStage/bootstrap/RSM-3-A	Copy verified manifest paths only to D:/RSM-Restore-Test	0	PASS	TRUE	isolated restore	179 files exact
+40	RESTORE_GIT	D:/RSM-Restore-Test	git rev-parse/branch/count/tree/status and git fsck --full	0	PASS	FALSE	isolated restore	FIX2_HEAD history clean
+41	RESTORE_VALIDATE	D:/RSM-Restore-Test	pnpm.cmd install --frozen-lockfile	0	PASS	TRUE	ignored dependency store	lockfile unchanged
+42	RESTORE_VALIDATE	D:/RSM-Restore-Test	pnpm.cmd run validate	0	PASS	TRUE	ignored build output	PASS
+43	RESTORE_VALIDATE	D:/RSM-Restore-Test	pnpm.cmd run build	0	PASS	TRUE	ignored build output	PASS
+44	RESTORE_VALIDATE	D:/RSM-Restore-Test	pnpm.cmd run compliance:check	0	PASS	FALSE	isolated restore	PASS; tracked drift 0
+45	SOURCE07	C:/RetroStage/bootstrap/RSM-3-A	Create Source 07 from physically observed I4 commands	0	PASS	TRUE	Sources/07	pending independent review
+46	SOURCE_ALIGNMENT	C:/RetroStage/bootstrap/RSM-3-A	Update live Source 02 and Source 08 with RETRY2 truth	0	PASS	TRUE	Sources/02 and Sources/08	I4 not closed; V1 not authorized; RSM-4 blocked
