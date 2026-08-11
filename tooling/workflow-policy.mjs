@@ -19,47 +19,17 @@ export const EXPECTED_DIRECT_DEV_DEPENDENCIES = Object.freeze({
   vitest: "3.2.6",
 });
 
-export const EXPECTED_SOURCE_IDENTITIES = Object.freeze({
-  "00": Object.freeze({
-    filename: "00_RSM_REBOOT_PROJECT_CHARTER.md",
-    sha256: "91E8492ECA2AB14A1B8090968E75A214B2892B0A9DBFC015FFE15D61280D510D",
-  }),
-  "01": Object.freeze({
-    filename: "01_RSM_REBOOT_CANONICAL_ROADMAP.md",
-    sha256: "F04CAF1A8384E49A349B159DD8FF2EE0C53A988FEFE563D44BCD9C046EEF4B59",
-  }),
-  "02": Object.freeze({
-    filename: "02_RSM_REBOOT_CURRENT_PROJECT_STATE.md",
-    sha256: "6D529460E9B7292910D41EDD282B08B02595A86CB7177E5BB297E8FA719BDA8B",
-  }),
-  "03": Object.freeze({
-    filename: "03_RSM_REBOOT_ARCHITECTURE_AND_PACKAGE_MAP.md",
-    sha256: "B2D3AF3EEEE6166BDF69533894A6E6CD7961BF1DA6A966807D03E3C92E7AB790",
-  }),
-  "04": Object.freeze({
-    filename: "04_RSM_REBOOT_ENGINEERING_AND_REVIEW_WORKFLOW.md",
-    sha256: "E6D8D039ACB5739F48F5135303279C26069CB86F0D033AB49A460F4ED741D95F",
-  }),
-  "05": Object.freeze({
-    filename: "05_RSM_REBOOT_PRODUCT_DECISIONS_AND_DEFERRED_SCOPE.md",
-    sha256: "B84964F5213D462BBEB3058D78B90BBA64C7465247C9602DE7836A5893774085",
-  }),
-  "06": Object.freeze({
-    filename: "06_RSM_REBOOT_TECHNOLOGY_DEPENDENCY_AND_LICENSE_CONTRACT.md",
-    sha256: "37E82204F974036EE81CB8B917935C9D0574E75668746F29B99FC439FA463FE4",
-  }),
-  "07": Object.freeze({
-    filename: "07_RSM_REBOOT_REPOSITORY_COMMANDS_AND_VALIDATION.md",
-    sha256: "46F8AADE2C55468197C646FAB653BBC0205DCD3B57B46FA30144CD3D28FB9745",
-  }),
-  "08": Object.freeze({
-    filename: "08_RSM_REBOOT_CURRENT_MILESTONE.md",
-    sha256: "038E16C0C9032630D4A22D2B49EEAAA21712F59DF7EB2DEABFC47B6A7067BAAE",
-  }),
-  "09": Object.freeze({
-    filename: "09_RSM_REBOOT_HISTORICAL_SOURCE_INDEX.md",
-    sha256: "C8CFEB1D4BEA6A4A46E9AB4035DAE1F5CF308F32ADBC756E7437EE3E18CCD016",
-  }),
+export const EXPECTED_SOURCE_LAYOUT = Object.freeze({
+  "00": "00_RSM_REBOOT_PROJECT_CHARTER.md",
+  "01": "01_RSM_REBOOT_CANONICAL_ROADMAP.md",
+  "02": "02_RSM_REBOOT_CURRENT_PROJECT_STATE.md",
+  "03": "03_RSM_REBOOT_ARCHITECTURE_AND_PACKAGE_MAP.md",
+  "04": "04_RSM_REBOOT_ENGINEERING_AND_REVIEW_WORKFLOW.md",
+  "05": "05_RSM_REBOOT_PRODUCT_DECISIONS_AND_DEFERRED_SCOPE.md",
+  "06": "06_RSM_REBOOT_TECHNOLOGY_DEPENDENCY_AND_LICENSE_CONTRACT.md",
+  "07": "07_RSM_REBOOT_REPOSITORY_COMMANDS_AND_VALIDATION.md",
+  "08": "08_RSM_REBOOT_CURRENT_MILESTONE.md",
+  "09": "09_RSM_REBOOT_HISTORICAL_SOURCE_INDEX.md",
 });
 
 export const REQUIRED_PATHS = Object.freeze([
@@ -232,7 +202,7 @@ function validateRequiredText(rootPath, issues) {
   }
 }
 
-function validateSourceManifest(rootPath, expectedSources, issues) {
+function validateSourceManifest(rootPath, expectedSourceLayout, issues) {
   const manifestPath = path.join(rootPath, "docs", "sources", "SOURCE-MANIFEST.tsv");
   if (!existsSync(manifestPath)) return;
   const { headers, rows } = parseTsv(readUtf8(manifestPath));
@@ -248,43 +218,39 @@ function validateSourceManifest(rootPath, expectedSources, issues) {
       continue;
     }
     seen.add(row.source_id);
-    const expected = expectedSources[row.source_id];
-    if (!expected) {
+    const expectedFilename = expectedSourceLayout[row.source_id];
+    if (!expectedFilename) {
       issues.push(issue("SOURCE_MANIFEST_EXTRA_ROW", row.source_id));
       continue;
     }
-    if (row.filename !== expected.filename) {
+    if (row.filename !== expectedFilename) {
       issues.push(
         issue(
           "SOURCE_MANIFEST_FILENAME_MISMATCH",
-          `${row.source_id}: ${row.filename} != ${expected.filename}`,
+          `${row.source_id}: ${row.filename} != ${expectedFilename}`,
         ),
       );
     }
-    if (row.sha256 !== expected.sha256) {
-      issues.push(
-        issue(
-          "SOURCE_MANIFEST_HASH_MISMATCH",
-          `${row.source_id}: ${row.sha256} != ${expected.sha256}`,
-        ),
-      );
+    const manifestHashIsValid = /^[0-9A-F]{64}$/u.test(row.sha256);
+    if (!manifestHashIsValid) {
+      issues.push(issue("SOURCE_MANIFEST_HASH_INVALID", `${row.source_id}: ${row.sha256}`));
     }
     if (row.status !== "CURRENT") {
       issues.push(issue("SOURCE_MANIFEST_STATUS_INVALID", `${row.source_id}: ${row.status}`));
     }
-    const sourcePath = path.join(rootPath, "docs", "sources", expected.filename);
+    const sourcePath = path.join(rootPath, "docs", "sources", expectedFilename);
     if (!existsSync(sourcePath)) {
-      issues.push(issue("SOURCE_FILE_MISSING", expected.filename));
+      issues.push(issue("SOURCE_FILE_MISSING", expectedFilename));
     } else {
       const observed = sha256File(sourcePath);
-      if (observed !== expected.sha256) {
+      if (manifestHashIsValid && observed !== row.sha256) {
         issues.push(
-          issue("SOURCE_FILE_HASH_MISMATCH", `${row.source_id}: ${observed} != ${expected.sha256}`),
+          issue("SOURCE_FILE_HASH_MISMATCH", `${row.source_id}: ${observed} != ${row.sha256}`),
         );
       }
     }
   }
-  for (const sourceId of Object.keys(expectedSources)) {
+  for (const sourceId of Object.keys(expectedSourceLayout)) {
     if (!seen.has(sourceId)) issues.push(issue("SOURCE_MANIFEST_MISSING_ROW", sourceId));
   }
 }
@@ -369,11 +335,11 @@ function validateRepositoryAndDependencies(rootPath, repositoryPaths, issues) {
 export function validateWorkflowRepository(rootPath, options = {}) {
   const resolvedRoot = path.resolve(rootPath);
   const issues = [];
-  const expectedSources = options.expectedSources ?? EXPECTED_SOURCE_IDENTITIES;
+  const expectedSourceLayout = options.expectedSourceLayout ?? EXPECTED_SOURCE_LAYOUT;
   const repositoryPaths = options.repositoryPaths ?? walkFiles(resolvedRoot);
   validateRequiredPaths(resolvedRoot, issues);
   validateRequiredText(resolvedRoot, issues);
-  validateSourceManifest(resolvedRoot, expectedSources, issues);
+  validateSourceManifest(resolvedRoot, expectedSourceLayout, issues);
   validateMilestoneManifest(resolvedRoot, issues);
   validateRepositoryAndDependencies(resolvedRoot, repositoryPaths, issues);
   return issues.sort((left, right) =>
@@ -386,7 +352,7 @@ function main() {
   const result = {
     result: issues.length === 0 ? "PASS" : "BLOCKED",
     repository: normalizePath(REPOSITORY_ROOT),
-    sourceRowsExpected: Object.keys(EXPECTED_SOURCE_IDENTITIES).length,
+    sourceRowsExpected: Object.keys(EXPECTED_SOURCE_LAYOUT).length,
     requiredPaths: REQUIRED_PATHS.length,
     issueCount: issues.length,
     issues,

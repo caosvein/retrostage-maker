@@ -8,6 +8,7 @@ import { afterEach, describe, expect, it } from "vitest";
 
 import {
   EXPECTED_DIRECT_DEV_DEPENDENCIES,
+  EXPECTED_SOURCE_LAYOUT,
   REQUIRED_PATHS,
   REQUIRED_TEXT_FRAGMENTS,
   validateWorkflowRepository,
@@ -35,14 +36,10 @@ function createFixture(activeTaskCount = 0) {
     write(root, requiredPath, `${fragments.join("\n")}\n`);
   }
 
-  const expectedSources = {};
   const sourceRows = [];
-  for (let index = 0; index < 10; index += 1) {
-    const sourceId = String(index).padStart(2, "0");
-    const filename = `${sourceId}_fixture.md`;
+  for (const [sourceId, filename] of Object.entries(EXPECTED_SOURCE_LAYOUT)) {
     const content = `fixture source ${sourceId}\n`;
     const identity = sha256(content);
-    expectedSources[sourceId] = { filename, sha256: identity };
     sourceRows.push(`${sourceId}\t${filename}\t${identity}\tCURRENT`);
     write(root, `docs/sources/${filename}`, content);
   }
@@ -94,13 +91,22 @@ function createFixture(activeTaskCount = 0) {
     write(root, `${packagePath}/package.json`, `${JSON.stringify({ name }, null, 2)}\n`);
   }
   write(root, ".github/workflows/ci.yml", "name: Fixture CI\n");
-  return { root, expectedSources };
+  return { root };
 }
 
 function validateFixture(fixture) {
-  return validateWorkflowRepository(fixture.root, {
-    expectedSources: fixture.expectedSources,
+  return validateWorkflowRepository(fixture.root);
+}
+
+function updateSourceManifestRow(root, sourceId, update) {
+  const manifest = path.join(root, "docs/sources/SOURCE-MANIFEST.tsv");
+  const lines = readFileSync(manifest, "utf8").trimEnd().split("\n");
+  const updated = lines.map((line, index) => {
+    if (index === 0) return line;
+    const fields = line.split("\t");
+    return fields[0] === sourceId ? update(fields).join("\t") : line;
   });
+  write(root, "docs/sources/SOURCE-MANIFEST.tsv", `${updated.join("\n")}\n`);
 }
 
 function issueCodes(issues) {
@@ -116,7 +122,7 @@ describe("RSM-4 workflow policy", () => {
     expect(validateWorkflowRepository(REPOSITORY_ROOT)).toEqual([]);
   });
 
-  it("passes all ten exact synchronized source hashes", () => {
+  it("passes all ten manifest-governed synchronized source hashes", () => {
     const sourceIssues = validateWorkflowRepository(REPOSITORY_ROOT).filter(({ code }) =>
       code.startsWith("SOURCE_"),
     );
@@ -154,6 +160,15 @@ describe("RSM-4 workflow policy", () => {
     const lines = readFileSync(manifest, "utf8").trimEnd().split("\n");
     write(fixture.root, "docs/sources/SOURCE-MANIFEST.tsv", `${lines.slice(0, -1).join("\n")}\n`);
     expect(issueCodes(validateFixture(fixture))).toContain("SOURCE_MANIFEST_MISSING_ROW");
+
+    const schemaFixture = createFixture();
+    const schemaManifest = path.join(schemaFixture.root, "docs/sources/SOURCE-MANIFEST.tsv");
+    const schemaText = readFileSync(schemaManifest, "utf8").replace(
+      "source_id\tfilename\tsha256\tstatus",
+      "source_id\tfilename\tstatus\tsha256",
+    );
+    write(schemaFixture.root, "docs/sources/SOURCE-MANIFEST.tsv", schemaText);
+    expect(issueCodes(validateFixture(schemaFixture))).toContain("SOURCE_MANIFEST_SCHEMA_INVALID");
   });
 
   it("fails when a Source row is duplicated", () => {
@@ -169,13 +184,52 @@ describe("RSM-4 workflow policy", () => {
     const fixture = createFixture();
     const manifest = path.join(fixture.root, "docs/sources/SOURCE-MANIFEST.tsv");
     const text = readFileSync(manifest, "utf8");
-    write(fixture.root, "docs/sources/SOURCE-MANIFEST.tsv", `${text}10\t10_extra.md\tX\tCURRENT\n`);
-    expect(issueCodes(validateFixture(fixture))).toContain("SOURCE_MANIFEST_EXTRA_ROW");
+    const lines = text.trimEnd().split("\n");
+    const source00 = lines[1].split("\t");
+    source00[1] = "00_wrong.md";
+    source00[3] = "HISTORICAL";
+    lines[1] = source00.join("\t");
+    write(
+      fixture.root,
+      "docs/sources/SOURCE-MANIFEST.tsv",
+      `${lines.join("\n")}\n10\t10_extra.md\t${"A".repeat(64)}\tCURRENT\n`,
+    );
+    const codes = issueCodes(validateFixture(fixture));
+    expect(codes).toContain("SOURCE_MANIFEST_EXTRA_ROW");
+    expect(codes).toContain("SOURCE_MANIFEST_FILENAME_MISMATCH");
+    expect(codes).toContain("SOURCE_MANIFEST_STATUS_INVALID");
+  });
+
+  it("passes when Source bytes and the corresponding manifest hash advance together", () => {
+    const fixture = createFixture();
+    const content = "authorized lifecycle source 00\n";
+    write(fixture.root, `docs/sources/${EXPECTED_SOURCE_LAYOUT["00"]}`, content);
+    updateSourceManifestRow(fixture.root, "00", (fields) => {
+      fields[2] = sha256(content);
+      return fields;
+    });
+    expect(validateFixture(fixture)).toEqual([]);
+  });
+
+  it("fails when a manifest hash is invalid or drifts without matching Source bytes", () => {
+    const invalidFixture = createFixture();
+    updateSourceManifestRow(invalidFixture.root, "00", (fields) => {
+      fields[2] = "invalid";
+      return fields;
+    });
+    expect(issueCodes(validateFixture(invalidFixture))).toContain("SOURCE_MANIFEST_HASH_INVALID");
+
+    const driftFixture = createFixture();
+    updateSourceManifestRow(driftFixture.root, "00", (fields) => {
+      fields[2] = "A".repeat(64);
+      return fields;
+    });
+    expect(issueCodes(validateFixture(driftFixture))).toContain("SOURCE_FILE_HASH_MISMATCH");
   });
 
   it("fails when synchronized source bytes drift", () => {
     const fixture = createFixture();
-    write(fixture.root, "docs/sources/00_fixture.md", "drifted source\n");
+    write(fixture.root, `docs/sources/${EXPECTED_SOURCE_LAYOUT["00"]}`, "drifted source\n");
     expect(issueCodes(validateFixture(fixture))).toContain("SOURCE_FILE_HASH_MISMATCH");
   });
 
