@@ -6,9 +6,9 @@
 **Distribution intent:** Commercial desktop creator distributed through Steam and other approved Windows channels  
 **Source generation:** Reboot / clean-start  
 **Document date:** 2026-08-05  
-**Document state:** `PRE-REPOSITORY / REBOOT PLANNING`  
-**Repository:** `NOT YET CREATED`  
-**Primary branch:** `NOT YET ESTABLISHED`  
+**Document state:** `ACTIVE FOUNDATIONAL CHARTER / REPOSITORY FOUNDATION ESTABLISHED / RSM-3 CLOSED`  
+**Repository:** `ESTABLISHED — see Source 02 and Source 07 for current physical truth`  
+**Primary branch:** `main`  
 **Supersedes:** Active-status and live-implementation claims in the 2026-07 pre-loss source set  
 **Preserves:** Approved product identity, architectural invariants, roadmap intent, engineering lessons, and evidence-driven review discipline from the pre-loss source set
 
@@ -71,9 +71,9 @@ The historical source set must be indexed and preserved as `HISTORICAL / PRE-LOS
 
 Historical material may inform a new decision, but it becomes active only when explicitly re-adopted by a current reboot source or implemented and validated in the new repository.
 
-### Current truthful state
+### Historical reboot-origin snapshot
 
-At the date of this charter:
+At the original date of this charter, before repository bootstrap:
 
 ```text
 Project state: PRE-REPOSITORY / REBOOT PLANNING
@@ -83,6 +83,16 @@ Historical design sources: AVAILABLE
 Approved product direction: AVAILABLE
 Approved technology direction: Babylon.js 9 + Electron
 Next source task: technology/dependency contract, then canonical reboot roadmap
+```
+
+Current lifecycle note:
+
+```text
+RSM-3: CLOSED
+POST-RSM-3 PRODUCT STRATEGY ALIGNMENT: PASS
+RSM-4: NOT YET STARTED
+Gate B: INACTIVE
+Live current-state authority: Source 02 / Source 08
 ```
 
 ---
@@ -1118,9 +1128,9 @@ A lower-level implementation convenience is not sufficient reason to weaken an i
 
 ---
 
-## 35. Immediate Handoff
+## 35. Historical Source-Authoring Handoff
 
-After this charter is approved, the pre-repository source reconstruction order is:
+After this charter was originally approved, the pre-repository source reconstruction order was:
 
 1. `06_RSM_REBOOT_TECHNOLOGY_DEPENDENCY_AND_LICENSE_CONTRACT.md`
 2. `01_RSM_REBOOT_CANONICAL_ROADMAP.md`
@@ -1132,7 +1142,7 @@ After this charter is approved, the pre-repository source reconstruction order i
 8. `09_RSM_REBOOT_HISTORICAL_SOURCE_INDEX.md`
 9. `RSM-2-V1-SOURCE-SET-CONSISTENCY-REVIEW.md`
 
-`07_RSM_REBOOT_REPOSITORY_COMMANDS_AND_VALIDATION.md` is intentionally excluded from the pre-repository source-authoring sequence. It must be created or finalized during RSM-3 only after the physical repository path, branch, manifests, scripts, validation commands, and restore procedure exist.
+`07_RSM_REBOOT_REPOSITORY_COMMANDS_AND_VALIDATION.md` was intentionally excluded from the pre-repository source-authoring sequence. It was materialized during RSM-3 after the physical repository path, branch, manifests, scripts, validation commands, and restore procedure existed, and is now authoritative under its current disposition.
 
 No repository bootstrap should be treated as approved implementation work until the technology/dependency contract and the first reboot roadmap gate define:
 
@@ -1157,4 +1167,3 @@ Approval of this document means:
 - native sequencing remains a core capability,
 - external cinematic interchange remains optional and generic,
 - the reboot may proceed to the technology/dependency contract and canonical roadmap.
-

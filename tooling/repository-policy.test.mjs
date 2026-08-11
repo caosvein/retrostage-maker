@@ -9,7 +9,7 @@ const admittedDependencies = {
   prettier: "3.5.2",
   typescript: "6.0.3",
   "typescript-eslint": "8.66.0",
-  vitest: "3.0.7",
+  vitest: "3.2.6",
 };
 
 const admittedPackages = {
@@ -22,6 +22,7 @@ describe("RSM-3-I2 repository bootstrap policy", () => {
   it("accepts the exact empty-foundation topology and dependency set", () => {
     const issues = validateRepositoryBootstrap({
       repositoryPaths: [
+        ".github/workflows/ci.yml",
         "tooling/repository-policy.ts",
         "packages/core/package.json",
         "packages/diagnostics/package.json",

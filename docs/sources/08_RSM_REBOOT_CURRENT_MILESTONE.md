@@ -4,23 +4,23 @@
 **Role:** Authoritative active-milestone and next-control source  
 **Project:** RetroStage Maker  
 **Current gate:** `Gate A — Governed Reboot`  
-**Current milestone:** `RSM-3 — Repository / Remote Backup / Reproducible Bootstrap`  
-**Current task:** `RSM-3-I4-SYNC1 — Reviewed Source / Evidence Repository Synchronization`  
-**Milestone state:** `CURRENT / I1-I3 CLOSED / I4 NOT YET CLOSED`  
-**Task state:** `RETRY2 INDEPENDENT REVIEW PASS / SYNC1 CURRENT`  
+**Current milestone/control:** `POST-RSM-3 PSA2-ALIGN1 — FINAL SOURCE-SET ACCEPTANCE / RSM-4 ACTIVATION HANDOFF`  
+**Current task:** `FINAL PROJECT SOURCE REPLACEMENT / RSM-4 ACTIVATION ALIGNMENT`  
+**Milestone/control state:** `RSM-3 CLOSED / PRODUCT STRATEGY ALIGNMENT PASS / FINAL SOURCE SET INDEPENDENT PASS / RSM-4 ACTIVATION ALIGNMENT ELIGIBLE`  
+**Task state:** `FINAL SOURCE SET ACCEPTED / PROJECT SOURCE REPLACEMENT AUTHORIZED / RSM-4 ACTIVATION ALIGNMENT ELIGIBLE`  
 **Snapshot date:** 2026-08-10  
 **Timezone:** Europe/Istanbul  
 **Repository:** `PRESENT — C:\RetroStage\retrostage-maker`  
 **RSM-2:** `CLOSED / SOURCE PASS`  
-**RSM-4:** `BLOCKED UNTIL RSM-3 CLOSURE`
+**RSM-4:** `ACTIVATION ALIGNMENT ELIGIBLE / NOT YET AUTHORIZED`
 
 ---
 
 ## 1. Purpose
 
-This document controls the current RSM-3 milestone after physical RSM-3-I4 FIX2 RETRY2 execution and independent review acceptance. It records successful commit, push, hosted CI, fresh clone, LF portability, validation, backup, restore, and accepted Source 07 observations while preserving the repository-sync and I4-closure boundaries.
+This document records independent acceptance of the POST-RSM-3 PSA2/FIX1 final reboot Source 00–09 package and controls the project-source replacement / RSM-4 activation handoff while retaining the accepted repository, clean-clone, LF portability, validation, backup, restore, and Source 07 truth as the technical baseline without mutating the canonical repository.
 
-Physical success is not the same as phase closure. This source does not close I4 or authorize V1.
+The final Source 00–09 package, including authoritative reboot Source 07, is independently accepted. Project source replacement is authorized. RSM-4 is activation-alignment eligible but remains not yet authorized or started; Gate B remains inactive.
 
 ---
 
@@ -29,16 +29,19 @@ Physical success is not the same as phase closure. This source does not close I4
 | Phase / gate | Current result |
 |---|---|
 | RSM-2 | `CLOSED / SOURCE PASS` |
+| RSM-3 | `CLOSED` |
 | RSM-3-A / B / C | `ACCEPTED` |
 | RSM-3-D | `TERMINALLY ACCEPTED` |
 | RSM-3-I1 | `CLOSED` |
 | RSM-3-I2 | `CLOSED` |
 | RSM-3-I3-PRE1 | `CLOSED` |
 | RSM-3-I3 | `CLOSED` |
-| RSM-3-I4 | `PHYSICAL GATES ACCEPTED / SYNC1 CURRENT / NOT CLOSED` |
-| RSM-3-V1 | `NOT AUTHORIZED` |
-| RSM-3-CLOSE1 | `BLOCKED` |
-| RSM-4 | `BLOCKED UNTIL RSM-3 CLOSURE` |
+| RSM-3-I4 | `CLOSED` |
+| RSM-3-V1 | `PASS` |
+| RSM-3-CLOSE1 | `INDEPENDENT PASS / RSM-3 CLOSED` |
+| POST-RSM-3 PRODUCT STRATEGY ALIGNMENT | `PASS` |
+| POST-RSM-3 PSA2 | `INDEPENDENT PASS / FINAL SOURCE SET ACCEPTED` |
+| RSM-4 | `ACTIVATION ALIGNMENT ELIGIBLE / NOT YET AUTHORIZED` |
 | Gate B | `INACTIVE` |
 
 Historical FIX/failure artifacts remain evidence history. The original failed clone remains preserved and is not promoted as current success evidence.
@@ -50,16 +53,16 @@ Historical FIX/failure artifacts remain evidence history. The original failed cl
 ```text
 Repository: C:\RetroStage\retrostage-maker
 Branch: main
-HEAD / FIX2_HEAD: f9404ec83436cb739e9363ccc3791517a3ddefb9
-Parent: e50cadca387b992f6a5648237fe0c006ef72a6fa
-Commit subject: bootstrap: enforce portable lf checkout policy
-Commit delta: A .gitattributes
-Commit count: 5
-HEAD tree files: 141
+HEAD / SYNC1_HEAD: 5cec4ae7ef05dfe392b0e768dd9ca7d91a5dbc4e
+Parent: f9404ec83436cb739e9363ccc3791517a3ddefb9
+Commit subject: bootstrap: synchronize rsm-3 i4 authority
+Commit delta: 54 paths / 52 added / 2 modified / 0 deleted
+Commit count: 6
+HEAD tree files: 193
 Working tree/index: CLEAN
 Unexpected untracked non-ignored files: 0
 Origin: https://github.com/caosvein/retrostage-maker.git
-origin/main: f9404ec83436cb739e9363ccc3791517a3ddefb9
+origin/main: 5cec4ae7ef05dfe392b0e768dd9ca7d91a5dbc4e
 Upstream: origin/main
 Push: PASS / NORMAL FAST-FORWARD
 ```
@@ -72,9 +75,9 @@ The accepted LF policy preserves `docs/evidence/**` and `compliance/THIRD_PARTY_
 
 ```text
 Workflow: CI
-Run ID: 31342080945
-Job ID: 93317410502
-Head SHA: f9404ec83436cb739e9363ccc3791517a3ddefb9
+Run ID: 31344290662
+Job ID: 93323235859
+Head SHA: 5cec4ae7ef05dfe392b0e768dd9ca7d91a5dbc4e
 Head branch: main
 Event: push
 Status: completed
@@ -82,7 +85,7 @@ Conclusion: success
 Duplicate manual dispatch: FALSE
 ```
 
-CI configuration and deterministic compliance checks are both committed and physically proven on GitHub-hosted infrastructure for FIX2_HEAD.
+CI configuration and deterministic compliance checks are both committed and physically proven on GitHub-hosted infrastructure for SYNC1_HEAD.
 
 Dependency Review Action remains deferred because of platform capability. The visible low advisory remains non-blocking; no high/critical blocker is hidden.
 
@@ -190,29 +193,27 @@ Live bootstrap source:
 
 State:
 
-`SOURCE 07 = INDEPENDENTLY ACCEPTED / PENDING REPOSITORY SYNC AND I4 CLOSURE`
+`SOURCE 07 = AUTHORITATIVE REPOSITORY COMMAND SOURCE / RSM-3 CLOSED / PRODUCT STRATEGY PASS / RSM-4 BASELINE INPUT`
 
 It records only physically observed RETRY2 commands and failure rules. It contains no secrets and does not make BitLocker an RSM-3 requirement.
 
-The Source 07 operational content is independently accepted. Its byte-identical canonical repository synchronization is the current SYNC1 control and does not itself close I4.
+The Source 07 operational content is independently accepted as RSM-3 repository-command truth, included in the final reboot Source 00–09 package, and carried forward as an RSM-4 baseline input. Its canonical repository copy remains unchanged by this live-source consolidation.
 
 ---
 
-## 8. Current Synchronization Boundary
+## 8. Current PSA2 Consolidation Boundary
 
-The current SYNC1 control is byte-identical repository synchronization of:
+RSM-3 is independently closed after accepted V1 and CLOSE1 review.
 
-- accepted I4 lineage evidence;
-- accepted observed-command Source 07; and
-- live Source 02/07/08 authority.
+The POST-RSM-3 product strategy alignment is independently accepted. PSA2 aligns final live-source lifecycle authority only; it does not alter implementation, dependencies, repository history, or the accepted RSM-3 physical baseline.
 
-This synchronization boundary produces a staged candidate for independent review. It does not automatically authorize a commit, I4 closure, V1, or RSM-4.
+This source candidate does not authorize RSM-4, start Gate B, or claim that the aligned live sources are present in the canonical repository.
 
 ---
 
 ## 9. Product and Historical Boundaries
 
-RSM-3 continues to own repository, toolchain, quality, compliance, off-device backup, reproducibility, restore, and command documentation only.
+The closed RSM-3 baseline owns repository, toolchain, quality, compliance, off-device backup, reproducibility, restore, and command documentation truth.
 
 Product implementation remains absent. Electron, Babylon, React editor/product work, product schemas, runtime systems, export/player, assets, Flow Graph, sequencer, Steam integration, and later dependencies remain unauthorized.
 
@@ -227,34 +228,46 @@ No synthetic historical bytes are promoted.
 ## 10. Remaining Controlled Sequence
 
 ```text
-RSM-3-I4-SYNC1 reviewed source/evidence repository synchronization
-→ independent staged-content review
-→ separately authorized I4 closure disposition
-→ RSM-3-V1 only under new explicit authority
-→ RSM-3-CLOSE1 only after accepted V1
+POST-RSM-3 PRODUCT STRATEGY ALIGNMENT (PASS)
+→ POST-RSM-3 PSA2 FINAL SOURCE-SET CONSOLIDATION (INDEPENDENT PASS / FINAL SOURCE SET ACCEPTED)
+→ PROJECT SOURCE 00–09 REPLACEMENT (AUTHORIZED)
+→ RSM-4 ACTIVATION ALIGNMENT (ELIGIBLE / NOT YET EXECUTED)
 ```
 
-RSM-4 remains blocked until RSM-3 closure. Gate B remains inactive.
+RSM-4 is activation-alignment eligible but not yet authorized or started. Gate B remains inactive.
 
 ---
 
 ## 11. Current Milestone Statement
 
 ```text
-FIX2_HEAD = f9404ec83436cb739e9363ccc3791517a3ddefb9
-origin/main = f9404ec83436cb739e9363ccc3791517a3ddefb9
-commit count = 5
-tree files = 141
-GitHub-hosted CI on FIX2_HEAD = PASS
+SYNC1_HEAD = 5cec4ae7ef05dfe392b0e768dd9ca7d91a5dbc4e
+parent = f9404ec83436cb739e9363ccc3791517a3ddefb9
+subject = bootstrap: synchronize rsm-3 i4 authority
+origin/main = 5cec4ae7ef05dfe392b0e768dd9ca7d91a5dbc4e
+upstream = origin/main
+commit count = 6
+tree files = 193
+working tree/index = CLEAN
+first remote push = PASS
+GitHub-hosted CI on SYNC1_HEAD / run 31344290662 = PASS
 fresh Windows clean clone = PASS
 18/18 LF checkout proof = PASS
-full clean-clone validation = PASS
+11/11 full clean-clone validation = PASS
 local backup = PASS
 external verified generation = PASS
 isolated restore = PASS
-source 07 = independently accepted / pending repository sync and I4 closure
+I4 final source/evidence sync commit/push/CI = PASS
+source 07 content = INDEPENDENTLY ACCEPTED
+source 07 disposition = AUTHORITATIVE REPOSITORY COMMAND SOURCE / RSM-3 CLOSED / PRODUCT STRATEGY PASS / RSM-4 BASELINE INPUT
 canonical repository = clean
-I4 = NOT YET CLOSED
-V1 = NOT AUTHORIZED
-RSM-4 = BLOCKED
+I4 = CLOSED
+V1 = PASS
+RSM-3-CLOSE1 = INDEPENDENT PASS
+RSM-3 = CLOSED
+POST-RSM-3 PRODUCT STRATEGY ALIGNMENT = PASS
+POST-RSM-3 PSA2 = INDEPENDENT PASS / FINAL SOURCE SET ACCEPTED
+FINAL REBOOT SOURCE PACKAGE = SOURCE 00–09 / SOURCE 07 INCLUDED
+RSM-4 = ACTIVATION ALIGNMENT ELIGIBLE / NOT YET AUTHORIZED
+Gate B = INACTIVE
 ```

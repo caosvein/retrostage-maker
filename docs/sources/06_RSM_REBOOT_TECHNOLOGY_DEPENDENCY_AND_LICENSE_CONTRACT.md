@@ -5,11 +5,11 @@
 **Project:** RetroStage Maker  
 **Distribution intent:** Commercial proprietary desktop creator distributed through Steam and other approved Windows channels  
 **Document date:** 2026-08-05  
-**Document state:** `APPROVED REBOOT BASELINE / PRE-REPOSITORY`  
-**Repository:** `NOT YET CREATED`  
-**Primary branch:** `NOT YET ESTABLISHED`  
+**Document state:** `ACTIVE TECHNOLOGY/DEPENDENCY CONTRACT / RSM-3 DEVELOPMENT TOOLCHAIN BASELINE VERIFIED / PRODUCTION DEPENDENCIES MILESTONE-GATED`  
+**Repository:** `PRESENT — C:\RetroStage\retrostage-maker`  
+**Primary branch:** `main`  
 **Governing source:** `00_RSM_REBOOT_PROJECT_CHARTER.md`  
-**Verification scope:** Direct-dependency and upstream-license baseline verified before repository creation; final transitive and packaged-artifact approval remains repository- and lockfile-dependent  
+**Verification scope:** RSM-3 established and verified the repository, lockfile, development-tool dependency baseline, compliance evidence, SBOM/notices, and audit gates; later production dependency admission remains milestone-owned and final packaged-artifact approval remains repository- and lockfile-dependent  
 **Supersedes:** Pre-loss live dependency manifests, package-version assumptions, and technology-state claims  
 **Preserves:** Approved Babylon.js/Electron direction, RetroStage-owned canonical data, evidence-driven dependency review, commercial license discipline, and source-of-truth separation
 
@@ -39,14 +39,14 @@ This document is not:
 
 - proof that any package has been installed,
 - proof that a repository exists,
-- a replacement for the future `pnpm-lock.yaml`,
+- a replacement for the current or future `pnpm-lock.yaml`,
 - final legal advice,
 - permission to copy code from an unlicensed repository,
 - permission to package every tool mentioned as a candidate,
 - proof that a dependency works across Editor Preview, PIE, and Export,
 - permission for a third-party library to become canonical project authority.
 
-The future repository, exact manifests, lockfile, packaged artifacts, generated SBOM, native-binary inventory, and release notices remain the final implementation evidence.
+The current and future repository, exact manifests, lockfile, packaged artifacts, generated SBOM, native-binary inventory, and release notices remain the final implementation evidence.
 
 ---
 
@@ -69,33 +69,36 @@ The following charter rules are binding here:
 11. Native cinematic authoring remains a RetroStage capability; no hypothetical companion product is part of the approved stack.
 12. The exported player must not include the editor, development tools, Babylon Inspector, source assets, or unnecessary authoring dependencies.
 
-When this document conflicts with the charter, the charter wins. When this document conflicts with a future live repository manifest, the conflict must be resolved explicitly; neither source silently overrides the other.
+When this document conflicts with the charter, the charter wins. When this document conflicts with a current or future live repository manifest, the conflict must be resolved explicitly; neither source silently overrides the other.
 
 ---
 
-## 3. Truthful Reboot State
+## 3. Current Verification Scope and Physical Boundary
 
-At approval time:
+The original pre-repository approval distinguished approved direction from physical installation. Current truth is:
 
 ```text
-Live repository: NONE
-Installed reboot dependencies: NONE
+Live repository: PRESENT — C:\RetroStage\retrostage-maker
+RSM-3 repository and lockfile baseline: ESTABLISHED / VERIFIED
+RSM-3 development-tool dependencies: ESTABLISHED / VERIFIED
+RSM-3 compliance, SBOM/notices, and audit gates: ESTABLISHED / VERIFIED
+Later production dependencies: MILESTONE-GATED / NOT ADMITTED BY THIS SOURCE UPDATE
 Approved technology direction: YES
-Exact lockfile: NONE
+Exact lockfile authority: CURRENT REPOSITORY
 Packaged product artifact: NONE
-Final transitive license audit: NOT YET POSSIBLE
-Final native/WASM inventory: NOT YET POSSIBLE
+Final production transitive license audit: MILESTONE-GATED
+Final production native/WASM inventory: MILESTONE-GATED
 Final Steam release approval: NOT YET POSSIBLE
 ```
 
 This contract therefore distinguishes between:
 
 - **approved direction** — a technology or package family may be used,
-- **bootstrap candidate version** — the current upstream version family to verify when creating the repository,
+- **bootstrap candidate version** — the upstream version family originally verified when creating the repository or later re-verified at the owning admission milestone,
 - **locked repository version** — the exact version later recorded in manifests and `pnpm-lock.yaml`,
 - **release-approved artifact** — the exact dependency graph and packaged binaries that pass final audit.
 
-No approved direction may be described as physically installed until repository evidence exists.
+No approved direction may be described as physically installed unless repository, lockfile, and artifact evidence establishes it. Physical repository truth outranks planning claims.
 
 ---
 
@@ -342,9 +345,9 @@ Later milestones must establish and commit exact versions only when their depend
 - TypeBox and Ajv at RSM-11,
 - all later milestone-gated packages at their owning milestone.
 
-### 7.4 Pre-repository verification snapshot
+### 7.4 Historical pre-repository verification snapshot
 
-The following versions were current verification candidates on 2026-08-05. They are not proof of installation. Each candidate must be rechecked immediately before its owning milestone admits the dependency; only the RSM-3 toolchain candidates are rechecked before repository creation.
+The following versions were verification candidates on 2026-08-05. They are not proof of installation. RSM-3 toolchain candidates were rechecked during repository bootstrap; every later candidate must be rechecked immediately before its owning milestone admits the dependency.
 
 | Technology | Reboot candidate baseline | Locking rule |
 |---|---:|---|
@@ -1778,11 +1781,11 @@ External interchange must use RetroStage-owned, versioned, validated contracts a
 
 ## 31. Open Exact-Version and Milestone Decisions
 
-The following decisions are intentionally open because no live repository or admitted dependency graph exists. Each must be closed by its responsible roadmap milestone and recorded without changing the product direction.
+The RSM-3 toolchain selections are governed by current repository manifests and lockfile evidence. Remaining production-dependency decisions stay open until their responsible roadmap milestone admits the relevant dependency graph, and must be closed without changing the product direction.
 
-### 31.1 Exact pnpm release
+### 31.1 Exact pnpm release — resolved by RSM-3 repository evidence
 
-Select the current stable release compatible with Node 24, pin it through `packageManager`, and verify clean install on a second environment.
+The exact selection is governed by the current repository `packageManager` field, lockfile, and accepted clean-environment evidence. Any later change must follow dependency upgrade control.
 
 ### 31.2 Exact React 19.2 patch
 
@@ -1796,9 +1799,9 @@ Select the latest supported 8.2 patch when RSM-5 opens and verify compatibility 
 
 At RSM-11, verify current upstream `typebox` package compatibility and select one identity. Do not install both old and new package lines.
 
-### 31.5 CycloneDX command/package identity
+### 31.5 CycloneDX command/package identity — resolved for the RSM-3 baseline
 
-Select the maintained official PNPM-compatible CycloneDX generator and pin the exact package/tool release.
+The current native pnpm CycloneDX/SBOM baseline is governed by repository scripts, lockfile, and accepted compliance evidence. Any future replacement or version change must follow dependency admission and upgrade control.
 
 ### 31.6 Windows installer maker
 
@@ -1892,7 +1895,7 @@ Minor exact-version updates that preserve these boundaries may be handled throug
 
 ## 34. Upstream Verification Ledger
 
-This ledger records the authoritative upstream source family used for the pre-repository decision. Exact release verification must be repeated at bootstrap.
+This ledger records the authoritative upstream source family used for the historical pre-repository decision. RSM-3 bootstrap verification is complete; exact release verification must be repeated for each later milestone-owned admission or upgrade.
 
 | Technology | Upstream reference | License/status used for this contract |
 |---|---|---|

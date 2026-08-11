@@ -6,9 +6,9 @@
 **Distribution intent:** Commercial proprietary desktop creator distributed through Steam and other approved Windows channels  
 **Source generation:** Reboot / clean-start  
 **Document date:** 2026-08-05  
-**Document state:** `PLANNED ARCHITECTURE / PRE-REPOSITORY`  
-**Repository:** `NOT YET CREATED`  
-**Primary branch:** `NOT YET ESTABLISHED`  
+**Document state:** `APPROVED PLANNED ARCHITECTURE / REPOSITORY FOUNDATION ESTABLISHED / PRODUCT IMPLEMENTATION MILESTONE-GATED`  
+**Repository:** `PRESENT — C:\RetroStage\retrostage-maker`  
+**Primary branch:** `main`  
 **Governing charter:** `00_RSM_REBOOT_PROJECT_CHARTER.md`  
 **Technology authority:** `06_RSM_REBOOT_TECHNOLOGY_DEPENDENCY_AND_LICENSE_CONTRACT.md`  
 **Roadmap authority:** `01_RSM_REBOOT_CANONICAL_ROADMAP.md`  
@@ -51,7 +51,7 @@ This document is not:
 - permission for Babylon, Electron, React, SQLite, or any other dependency to own canonical project truth,
 - a substitute for repository inspection, architecture tests, milestone validation, or committed evidence.
 
-The future repository manifests, package public entrypoints, architecture tests, dependency graph, lockfile, build outputs, and committed source remain the implementation evidence.
+Current and future repository manifests, package public entrypoints, architecture tests, dependency graph, lockfile, build outputs, and committed source remain the implementation evidence.
 
 ---
 
@@ -64,7 +64,7 @@ This map is subordinate to the following sources:
 3. `01_RSM_REBOOT_CANONICAL_ROADMAP.md`
 4. `05_RSM_REBOOT_PRODUCT_DECISIONS_AND_DEFERRED_SCOPE.md`
 5. this architecture and package map
-6. future current-state, active-milestone, and repository-local evidence
+6. current-state, active-milestone, and repository-local evidence
 
 Use authority by question:
 
@@ -82,20 +82,20 @@ Use authority by question:
 
 If this document conflicts with a higher authority, the higher authority wins and this document must be corrected.
 
-If a future repository intentionally differs from this planned map, the difference must be resolved through explicit architecture change control. The repository does not silently invalidate an approved boundary, and this document does not silently override observed repository truth.
+If the current or a future repository intentionally differs from this planned map, the difference must be resolved through explicit architecture change control. The repository does not silently invalidate an approved boundary, and this document does not silently override observed repository truth.
 
 ---
 
-## 3. Truthful Reboot State
+## 3. Current Architecture/Implementation Boundary
 
-At the date of this source:
+Current durable truth:
 
 ```text
-Project state: PRE-REPOSITORY / REBOOT PLANNING
-Live repository: NONE
-Implemented reboot applications: NONE
-Implemented reboot packages: NONE
-Installed reboot dependencies: NONE
+Repository foundation: ESTABLISHED BY CLOSED RSM-3
+Product architecture implementation: MILESTONE-GATED / NOT IMPLIED BY THIS SOURCE
+Current implementation truth: repository inspection + Source 02/08
+Implemented reboot product applications: NONE
+Implemented reboot product packages: NONE
 Approved application direction: Electron editor + separate Electron player
 Approved renderer direction: Babylon.js 9 adapter
 Approved language direction: TypeScript

@@ -2,19 +2,20 @@
 
 **Document ID:** `09_RSM_REBOOT_HISTORICAL_SOURCE_INDEX`  
 **Project:** RetroStage Maker  
-**Milestone:** `RSM-2 — Canonical Roadmap / Reboot Source-Set Reconstruction`  
+**Milestone:** `CROSS-MILESTONE HISTORICAL AUTHORITY — RSM-2-S9 PROVENANCE RETAINED`  
 **Source slice:** `RSM-2-S9 — Historical Source Index / Retention / Supersession Map`  
 **Product gate:** `Gate A — Governed Reboot`  
 **Document date:** 2026-08-09  
-**Document state:** `SOURCE COMPLETE / REVIEWED BY RSM-2-V1 / ALIGN1 CURRENT PHYSICAL-LOSS STATUS`  
-**Active work mode:** `CURRENT-AUTHORITY ALIGNMENT / HISTORICAL IDENTITY GOVERNANCE`  
-**Repository:** `NOT YET CREATED`  
+**Document state:** `ACTIVE HISTORICAL SOURCE AUTHORITY / RSM-3 GOVERNED EXCEPTION APPLIED / REBOOT SOURCE 07 MATERIALIZED`  
+**Active work mode:** `CROSS-MILESTONE HISTORICAL IDENTITY GOVERNANCE`  
+**Repository:** `PRESENT — C:\RetroStage\retrostage-maker`  
 **Historical source generation:** `2026-07 PRE-LOSS`  
 **Reboot source generation:** `2026-08 CLEAN-START`  
 **Governing live-state source:** `02_RSM_REBOOT_CURRENT_PROJECT_STATE.md`  
 **Governing active-milestone source:** `08_RSM_REBOOT_CURRENT_MILESTONE.md`  
+**Current-state authority:** `Source 02 / Source 08`  
 **Review result:** `RSM-2-V1 — PASS AFTER MATERIAL ALIGNMENT CORRECTIONS`  
-**Immediate next control step:** `RSM-3-I1 — Local Git Repository / Source Import / Initial Commit Candidate`  
+**Immediate next control step:** `Replace the ChatGPT project source collection with the independently accepted final Source 00–09 package, then execute RSM-4 activation alignment`  
 
 ---
 
@@ -53,19 +54,21 @@ The governing rule is:
 
 ---
 
-## 2. Truthful Reboot State
+## 2. Current Reboot and Historical-Authority State
 
-At the date of this source:
+Current truth:
 
 ```text
-Project state: PRE-REPOSITORY / RSM-3-I1 AUTHORIZED
-Live reboot repository: NONE
-Remote origin: NONE
-Current Git HEAD: NONE
-Installed reboot dependencies: NONE
-Implemented reboot capabilities: NONE
-Current milestone: RSM-3
-Current task: RSM-3-I1 — AUTHORIZED / READY FOR EXECUTION
+Project state: RSM-3 CLOSED / PRODUCT STRATEGY ALIGNMENT PASS / PSA2 FINAL SOURCE SET INDEPENDENT PASS
+Live reboot repository: PRESENT — C:\RetroStage\retrostage-maker
+Remote origin: https://github.com/caosvein/retrostage-maker.git
+Current Git HEAD: 5cec4ae7ef05dfe392b0e768dd9ca7d91a5dbc4e
+RSM-3 development-tool baseline: ESTABLISHED / VERIFIED
+Implemented reboot product capabilities: NONE
+Current milestone/control: POST-RSM-3 PSA2-ALIGN1 — FINAL SOURCE-SET ACCEPTANCE / RSM-4 ACTIVATION HANDOFF
+Current task: FINAL PROJECT SOURCE REPLACEMENT / RSM-4 ACTIVATION ALIGNMENT
+RSM-4: ACTIVATION ALIGNMENT ELIGIBLE / NOT YET AUTHORIZED
+Gate B: INACTIVE
 Historical source identity/provenance: PRESERVED
 Historical pre-loss source files: HISTORICAL_IDENTITY_PRESERVED_BYTES_UNAVAILABLE
 RECOVERY1 physical result: 0/9
@@ -106,18 +109,18 @@ Status: HISTORICAL / NON-LIVE
 
 The pre-loss generation contains product reasoning, architecture discoveries, roadmap intent, workflow rules, snapshots, and command patterns recorded before the local repository was lost.
 
-### 3.2 Reboot generation
+### 3.2 Reboot generation origin snapshot (historical)
 
 ```text
 Generation label: REBOOT
 Primary date range: 2026-08 onward
-Repository: NOT YET CREATED at RSM-2
-Current gate: Gate A — Governed Reboot
-Current milestone: reboot RSM-2
-Status: LIVE SOURCE AUTHORITY
+Repository at RSM-2: NOT YET CREATED
+Gate at source origin: Gate A — Governed Reboot
+Milestone at source origin: reboot RSM-2
+Current generation status: LIVE SOURCE AUTHORITY
 ```
 
-The reboot generation defines the product and engineering plan that will govern the clean-start repository.
+The reboot generation defines the product and engineering plan that governs the clean-start repository.
 
 ### 3.3 No silent continuity
 
@@ -252,10 +255,10 @@ The line counts and hashes identify the copies physically inspected during RSM-2
 | Durable product decisions and deferred scope | `05_RSM_PRODUCT_DECISIONS_AND_DEFERRED_SCOPE.md` | `05_RSM_REBOOT_PRODUCT_DECISIONS_AND_DEFERRED_SCOPE.md` |
 | Active milestone | `06_RSM_CURRENT_MILESTONE_RSM-25.md` | `08_RSM_REBOOT_CURRENT_MILESTONE.md` |
 | Technology, dependency, and license direction | historical files and old manifests described by them | `06_RSM_REBOOT_TECHNOLOGY_DEPENDENCY_AND_LICENSE_CONTRACT.md` |
-| Repository commands and validation | `07_RSM_REPOSITORY_COMMANDS_AND_VALIDATION.md` | future `07_RSM_REBOOT_REPOSITORY_COMMANDS_AND_VALIDATION.md` after RSM-3 materializes the repository |
+| Repository commands and validation | `07_RSM_REPOSITORY_COMMANDS_AND_VALIDATION.md` | `07_RSM_REBOOT_REPOSITORY_COMMANDS_AND_VALIDATION.md` |
 | Source-refresh handoff | `README_POST_I5_ALIGNMENT_REFRESH.md` | `02_RSM_REBOOT_CURRENT_PROJECT_STATE.md`, `08_RSM_REBOOT_CURRENT_MILESTONE.md`, and this index |
 
-The absence of a completed reboot successor for repository commands is intentional. Exact commands cannot be authoritative before the new repository, manifests, scripts, shell expectations, and paths physically exist.
+The reboot successor for repository commands is now materialized as `07_RSM_REBOOT_REPOSITORY_COMMANDS_AND_VALIDATION.md`, derived from physical RSM-3 repository, manifest, script, shell, path, validation, backup, and restore evidence.
 
 ---
 
@@ -782,7 +785,7 @@ It may not prove:
 
 Commands from this file must not be executed by copy/paste as live project authority.
 
-Before a command becomes live, RSM-3 must establish:
+Before command patterns from this historical file could be superseded by live reboot authority, RSM-3 had to establish:
 
 - the actual repository root,
 - the actual operating shell,
@@ -796,15 +799,15 @@ Before a command becomes live, RSM-3 must establish:
 
 Safe Git inspection and exact-scope review remain approved principles.
 
-The exact command source will be rebuilt from the physical reboot repository.
+The exact reboot command source was rebuilt from the physical reboot repository and is now authoritative as `07_RSM_REBOOT_REPOSITORY_COMMANDS_AND_VALIDATION.md`.
 
-### 15.6 Future live replacement
+### 15.6 Current live replacement
 
 ```text
 07_RSM_REBOOT_REPOSITORY_COMMANDS_AND_VALIDATION.md
 ```
 
-This future file is intentionally deferred until RSM-3 produces real repository evidence.
+This live reboot source was materialized during RSM-3 from real repository evidence and is not a reconstruction of the historical Source 07.
 
 ---
 
@@ -1049,7 +1052,7 @@ Do not use it to assert:
 - that an API signature is current,
 - or that an old internal abstraction should be copied unchanged.
 
-The reboot architecture map is the current planned authority. The future repository will determine physical truth.
+The reboot architecture map is the current planned authority. Current and future repository evidence determines physical truth.
 
 ---
 
@@ -1331,10 +1334,21 @@ This index assumes the following reboot sources are available:
 | `04_RSM_REBOOT_ENGINEERING_AND_REVIEW_WORKFLOW.md` | Work, evidence, review, commit, restore, and release discipline |
 | `05_RSM_REBOOT_PRODUCT_DECISIONS_AND_DEFERRED_SCOPE.md` | Adopted, deferred, conditional, rejected, and open decisions |
 | `06_RSM_REBOOT_TECHNOLOGY_DEPENDENCY_AND_LICENSE_CONTRACT.md` | Technology, dependency, license, and supply-chain policy |
-| `08_RSM_REBOOT_CURRENT_MILESTONE.md` | Active RSM-3-I1 scope, status, and handoff |
+| `07_RSM_REBOOT_REPOSITORY_COMMANDS_AND_VALIDATION.md` | Authoritative observed repository commands and RSM-3 validation truth |
+| `08_RSM_REBOOT_CURRENT_MILESTONE.md` | Active milestone/control scope, status, and handoff |
 | `09_RSM_REBOOT_HISTORICAL_SOURCE_INDEX.md` | Historical identity, governed-loss, and supersession policy |
 
-The absence of `07_RSM_REBOOT_REPOSITORY_COMMANDS_AND_VALIDATION.md` is expected until a physical repository is created.
+`07_RSM_REBOOT_REPOSITORY_COMMANDS_AND_VALIDATION.md` is materialized and authoritative within the live reboot Source 00–09 package.
+
+Identity distinction:
+
+```text
+historical 07_RSM_REPOSITORY_COMMANDS_AND_VALIDATION.md
+!=
+reboot 07_RSM_REBOOT_REPOSITORY_COMMANDS_AND_VALIDATION.md
+```
+
+The historical identity remains `HISTORICAL_IDENTITY_PRESERVED_BYTES_UNAVAILABLE`. The reboot Source 07 is newly materialized operational authority, not a reconstruction of historical Source 07.
 
 ---
 
@@ -1359,7 +1373,7 @@ The absence of `07_RSM_REBOOT_REPOSITORY_COMMANDS_AND_VALIDATION.md` is expected
 | External cinematic bridge | Replaced by generic interchange contract |
 | Controlled AI/MCP | Reboot Decisions and Roadmap |
 | Repository review discipline | Reboot Workflow |
-| Old commands | Future reboot command source after RSM-3 |
+| Old commands | `07_RSM_REBOOT_REPOSITORY_COMMANDS_AND_VALIDATION.md` as materialized reboot authority; never historical reconstruction |
 | Old current state | Reboot Current Project State |
 | Old current milestone | Reboot Current Milestone |
 
@@ -1503,10 +1517,10 @@ RSM-2-V1 — Source-Set Consistency Review
 
 RSM-2-V1 subsequently passed after material alignment corrections, and RSM-2-CLOSE1 closed the source-reconstruction milestone.
 
-The current handoff is now controlled by sources 02 and 08:
+The current handoff is controlled by sources 02 and 08:
 
 ```text
-RSM-3-I1 — Local Git Repository / Source Import / Initial Commit Candidate
+POST-RSM-3 PSA2 — FINAL REBOOT SOURCE-SET CONSOLIDATION / INDEPENDENT PASS
 ```
 
 This index remains authoritative for historical-source interpretation. It does not independently control current milestone status.
@@ -1540,9 +1554,10 @@ All nine entries are `HISTORICAL_IDENTITY_PRESERVED_BYTES_UNAVAILABLE`. The rebo
 RSM-2-S9 — Historical Source Index / Retention / Supersession Map
 Historical state: SOURCE COMPLETE / RSM-2-V1 REVIEWED / RSM-2 CLOSED
 Current overlay: HISTORICAL_IDENTITY_PRESERVED_BYTES_UNAVAILABLE (9/9)
-Current task: RSM-3-I1 — AUTHORIZED / READY FOR EXECUTION
-Repository: NOT YET CREATED
-Implementation capabilities: NONE
+Current task: FINAL PROJECT SOURCE REPLACEMENT / RSM-4 ACTIVATION ALIGNMENT
+Repository: PRESENT — C:\RetroStage\retrostage-maker
+Reboot Source 07: MATERIALIZED / AUTHORITATIVE / NOT HISTORICAL RECONSTRUCTION
+Product implementation capabilities: NONE
 ```
 
-Sources 02 and 08 control the current task. This index controls historical interpretation and the bounded governed-loss status; it does not claim I1 execution or authorize a later phase.
+Sources 02 and 08 control the current task. This index controls historical interpretation and the bounded governed-loss status; it does not authorize RSM-4 or Gate B.

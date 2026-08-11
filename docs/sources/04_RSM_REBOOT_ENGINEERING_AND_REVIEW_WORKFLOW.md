@@ -5,8 +5,10 @@
 **Project:** RetroStage Maker  
 **Source generation:** Reboot / clean-start  
 **Prepared:** 2026-08-05  
-**State:** `SOURCE COMPLETE / PRE-REPOSITORY` once approved  
+**State:** `ACTIVE WORKFLOW AUTHORITY / RSM-3 REPOSITORY BASELINE ESTABLISHED / RSM-4 ACTIVATION NEXT`  
 **Live implementation implication:** None  
+**Live reboot repository:** `PRESENT — C:\RetroStage\retrostage-maker`  
+**Authoritative repository-command source:** `07_RSM_REBOOT_REPOSITORY_COMMANDS_AND_VALIDATION.md`  
 **Governing sources:**
 
 - `00_RSM_REBOOT_PROJECT_CHARTER.md`
@@ -85,34 +87,35 @@ Use the source authoritative for each question.
 | How must work be executed and reviewed? | This document |
 | What physically exists? | Current repository, manifests, lockfiles, tests, packaged artifacts, and inspected behavior |
 | What is active now? | `02_RSM_REBOOT_CURRENT_PROJECT_STATE.md` and `08_RSM_REBOOT_CURRENT_MILESTONE.md` |
-| Which commands are valid now? | After RSM-3: `07_RSM_REBOOT_REPOSITORY_COMMANDS_AND_VALIDATION.md` plus current manifests; before RSM-3, no repository command source is authoritative |
+| Which commands are valid now? | `07_RSM_REBOOT_REPOSITORY_COMMANDS_AND_VALIDATION.md` plus current manifests and repository inspection |
 | What did the pre-loss project establish? | `09_RSM_REBOOT_HISTORICAL_SOURCE_INDEX.md` and its indexed evidence |
 
 ---
 
-## 3. Truthful Reboot State
+## 3. Current Workflow Applicability
 
-At the time this workflow source is prepared:
+Current durable truth:
 
 ```text
-Live reboot repository: NOT YET CREATED
-Implemented reboot milestones: NONE
-Current work mode: SOURCE AUTHORING
+Live reboot repository: PRESENT — C:\RetroStage\retrostage-maker
+Repository baseline: ESTABLISHED BY CLOSED RSM-3
+Authoritative repository-command source: 07_RSM_REBOOT_REPOSITORY_COMMANDS_AND_VALIDATION.md
+Product implementation: MILESTONE-GATED / NOT IMPLIED BY THIS SOURCE
+RSM-4: ACTIVATION ALIGNMENT ELIGIBLE / NOT YET AUTHORIZED
 Historical repository evidence: DESIGN AND PROCESS EVIDENCE ONLY
 Approved baseline direction: Electron + Babylon.js 9 + RetroStage-owned canonical data
 ```
 
-This workflow must not imply that:
+This workflow does not by itself prove that:
 
 - any package exists,
 - any script exists,
 - any test passes,
-- any branch exists,
-- any commit exists,
+- any particular branch or commit is current without repository inspection,
 - any milestone is implemented,
 - any dependency has been installed.
 
-Repository-specific requirements become active after RSM-3 creates and verifies the reboot repository.
+Repository-specific workflow requirements are physically applicable. The final reboot Source 00–09 package is independently accepted; RSM-4 activation alignment is eligible, but RSM-4 has not yet activated the full workflow as a milestone.
 
 ---
 
@@ -1996,7 +1999,7 @@ Evidence files must not be mistaken for product source authority.
 
 ## 57. Branch and Worktree Direction
 
-The exact branch policy belongs to the repository command source after RSM-3.
+The exact branch policy belongs to the current repository command source; this ownership became physically applicable after RSM-3 established the repository baseline.
 
 Until formally changed:
 
@@ -2236,9 +2239,9 @@ Those belong in:
 
 ---
 
-## 65. Immediate Handoff
+## 65. Historical Source-Authoring Handoff
 
-After approval of this workflow source, prepare:
+After original approval of this workflow source, the source-authoring handoff was:
 
 ```text
 02_RSM_REBOOT_CURRENT_PROJECT_STATE.md
@@ -2250,7 +2253,7 @@ Then prepare:
 08_RSM_REBOOT_CURRENT_MILESTONE.md
 ```
 
-At the current pre-repository stage, those sources must truthfully state:
+At that historical pre-repository stage, those sources were required to state:
 
 - source reconstruction status,
 - no live reboot implementation,
@@ -2258,7 +2261,7 @@ At the current pre-repository stage, those sources must truthfully state:
 - completed authoritative source documents,
 - the next approved source or repository-bootstrap task.
 
-`07_RSM_REBOOT_REPOSITORY_COMMANDS_AND_VALIDATION.md` should be finalized only after RSM-3 establishes the actual repository path, branch, manifests, scripts, and operating commands.
+`07_RSM_REBOOT_REPOSITORY_COMMANDS_AND_VALIDATION.md` was finalized after RSM-3 established the actual repository path, branch, manifests, scripts, and operating commands; it is now materialized and authoritative.
 
 ---
 

@@ -16,7 +16,7 @@ const expectedDirectDevDependencies = new Map<string, string>([
   ["prettier", "3.5.2"],
   ["typescript", "6.0.3"],
   ["typescript-eslint", "8.66.0"],
-  ["vitest", "3.0.7"],
+  ["vitest", "3.2.6"],
 ]);
 
 const expectedPackageNames = new Map<string, string>([
@@ -25,7 +25,7 @@ const expectedPackageNames = new Map<string, string>([
   ["packages/test-fixtures", "@retrostage/test-fixtures"],
 ]);
 
-const forbiddenEarlyRoots = new Set([".github", "apps", "scripts", "tools"]);
+const forbiddenEarlyRoots = new Set(["apps", "scripts", "tools"]);
 
 function normalizePath(path: string): string {
   return path.replaceAll("\\\\", "/").replace(/^\.\//u, "");

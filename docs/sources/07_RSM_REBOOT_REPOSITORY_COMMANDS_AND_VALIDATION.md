@@ -1,11 +1,11 @@
 # RetroStage Maker — Repository Commands and Validation
 
 **Document ID:** `07_RSM_REBOOT_REPOSITORY_COMMANDS_AND_VALIDATION`  
-**Role:** Draft operating command and validation source derived from physical RSM-3-I4 execution  
+**Role:** Authoritative operating command and validation source derived from physical RSM-3-I4 execution  
 **Project:** RetroStage Maker  
 **Observation date:** 2026-08-10  
 **Timezone:** Europe/Istanbul  
-**State:** `INDEPENDENTLY ACCEPTED / PENDING REPOSITORY SYNC AND I4 CLOSURE`
+**State:** `AUTHORITATIVE REPOSITORY COMMAND SOURCE / RSM-3 CLOSED / PRODUCT STRATEGY PASS / RSM-4 BASELINE INPUT`
 
 ---
 
@@ -415,8 +415,8 @@ Never:
 - restore from an incomplete or unverified generation;
 - include credentials, tokens, private keys, recovery secrets, or untracked secret state;
 - change BitLocker as part of RSM-3 RETRY2; or
-- treat this draft as I4 closure or V1 authorization.
+- treat this operational source alone as I4 closure or V1 authorization.
 
 ---
 
-`SOURCE 07 = INDEPENDENTLY ACCEPTED / PENDING REPOSITORY SYNC AND I4 CLOSURE`
+`SOURCE 07 = AUTHORITATIVE REPOSITORY COMMAND SOURCE / RSM-3 CLOSED / PRODUCT STRATEGY PASS / RSM-4 BASELINE INPUT`

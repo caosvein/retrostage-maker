@@ -5,8 +5,9 @@
 **Project:** RetroStage Maker  
 **Roadmap namespace:** `RSM-0` → `RSM-120`  
 **Document date:** 2026-08-05  
-**Document state:** `PRE-REPOSITORY / REBOOT PLANNING`  
-**Repository:** `NOT YET CREATED`  
+**Document state:** `ACTIVE CANONICAL ROADMAP / RSM-3 CLOSED / POST-RSM-3 STRATEGY ALIGNED`  
+**Repository:** `ESTABLISHED — live physical truth belongs to Source 02/07 and repository inspection`  
+**Primary branch:** `main`  
 **Primary product target:** `RSM-120 — First Playable Public Alpha / Investor Demo Candidate`  
 **Governed by:** `00_RSM_REBOOT_PROJECT_CHARTER.md`  
 **Technology authority:** `06_RSM_REBOOT_TECHNOLOGY_DEPENDENCY_AND_LICENSE_CONTRACT.md`  
@@ -276,6 +277,15 @@ Unless a milestone explicitly narrows the requirement, closure requires:
 - Push the first baseline to an off-device remote.
 - Perform and record a clean-clone/bootstrap/restore test.
 **Exit:** A clean supported machine can clone, install, validate, and build the approved empty foundation without relying on lost local state.
+
+### POST-RSM-3 PRODUCT STRATEGY ALIGNMENT — Non-Numbered Inter-Milestone Control
+**Purpose:** Lock durable commercial creator-rights, exported-game legal/credits metadata, pricing-boundary, and localization-safe architecture decisions before engineering/review gate activation.  
+**Boundary:**
+- Roadmap renumbering is `FALSE`.
+- An `RSM-3.5` milestone is `FALSE`.
+- RSM-4 implementation is `NOT STARTED`.
+- Production dependency changes are `NONE`.
+**Exit:** The strategy decisions are independently accepted in live source authority and RSM-4 may then be activated under separate authority.
 
 ## RSM-4 — Engineering / Review / Milestone Gate Baseline
 **Purpose:** Activate evidence-driven task, review, commit, and closure discipline before product implementation begins.  
@@ -727,11 +737,19 @@ Unless a milestone explicitly narrows the requirement, closure requires:
 **Purpose:** Give all player-facing text stable identity before full localization tooling.  
 **Third-party placement:** RetroStage documents and schema validation.  
 **Key deliverables:**
-- Define string tables, locale keys, fallback, formatting arguments, and source context.
+- Define string tables, stable string identity, source locale, locale keys, fallback, formatting arguments, and source context.
+- Define a Unicode normalization policy and deterministic diagnostics for incompatible or malformed text.
+- Define grapheme-cluster-aware fixtures covering combining marks and emoji.
+- Define representative CJK strings and CJK line-breaking direction.
+- Define long German/French expansion fixtures.
+- Define font fallback and missing-glyph diagnostics direction.
+- Define IME-safe input contract direction and RTL/Bidi readiness direction.
+- Define pseudo-localization fixtures and overflow/truncation diagnostics direction.
 - Prevent display text from becoming persistent reference identity.
 - Create missing-key diagnostics.
 - Prepare later subtitle, UI, and accessibility integration.
-**Exit:** Narrative and UI text can be replaced by locale without changing gameplay references.
+- Keep full player/editor UI localization behavior in later owners such as RSM-87 and RSM-119.
+**Exit:** Narrative and UI text can be replaced by locale without changing persistent gameplay references, and deterministic localization fixtures diagnose normalization, grapheme, glyph, expansion, directionality, and layout risks for later UI/runtime consumers.
 
 ## RSM-49 — Objective / Task Runtime
 **Purpose:** Create lightweight goals, conditions, progress, completion, and presentation events.  
@@ -1189,6 +1207,19 @@ Unless a milestone explicitly narrows the requirement, closure requires:
 - Prevent unsafe filenames and identity collisions.
 **Exit:** A project produces a correctly branded standalone game without leaking RetroStage editor identity where inappropriate.
 
+### RSM-93-ADD1 — Exported Game Legal / Credits Metadata Contract
+**Purpose:** Define canonical exported-game legal/credits metadata and creator/publisher identity without forcing RetroStage product branding.  
+**Key deliverables:**
+- Define canonical creator, developer, and publisher identity fields.
+- Define copyright and legal fields.
+- Support optional creator-defined credits.
+- Define asset-attribution references.
+- Keep generated third-party software notices distinct from creator-authored credits.
+- Define localization-ready legal and credit references.
+- Require no mandatory RetroStage splash/logo metadata.
+- Map project-owned metadata into exports deterministically.
+**Exit:** An exported project can produce correct creator-owned identity/legal/credits metadata without leaking RetroStage editor identity or omitting required third-party notices.
+
 ## RSM-94 — Cooked Content Manifest / Runtime Content Contract
 **Purpose:** Define the complete manifest for scenes, assets, shaders, audio, UI, presentation, and runtime settings.  
 **Third-party placement:** RetroStage compiler; approved asset tools and Babylon runtime loader.  
@@ -1454,6 +1485,22 @@ Unless a milestone explicitly narrows the requirement, closure requires:
 - Complete installer/update channel, Steam depot direction, signing, third-party notices, SBOM, native/WASM inventory, product licensing, and asset-license handling.
 **Exit:** A release-candidate editor can be installed, learned, used, recovered, secured, audited, and legally distributed through approved Windows channels.
 
+### RSM-119-ADD1 — Commercial Model / Steam Go-to-Market Contract
+**Purpose:** Finalize commercial/store-facing policy from current market/store evidence without turning mutable commercial values into architecture constants.  
+**Key deliverables:**
+- Verify creator commercial/export-rights policy consistency.
+- Verify the `0%` RetroStage engine royalty policy and the absence of a per-game/export fee or creator-revenue cap.
+- Define paid Alpha/Early Access to same-product `1.0` entitlement continuity.
+- Define the Steam/store product identity and edition/SKU boundary.
+- Produce a current evidence-based retail/Early Access pricing recommendation.
+- Produce a current evidence-based regional-pricing approach.
+- Produce a current evidence-based discount/promotion policy.
+- Produce a current evidence-based Early Access duration and transition plan.
+- Produce a current language/territory rollout recommendation.
+- Record current marketing/wishlist goals when useful and mark them explicitly non-architectural.
+- Verify consistency with final EULA/store text and third-party rights.
+**Exit:** Commercial launch/Alpha policy is evidence-backed, legally and operationally consistent with product architecture, and exact mutable values are recorded as release evidence rather than permanent technical invariants.
+
 ## RSM-120 — First Playable Public Alpha / Investor Demo Candidate
 **Purpose:** Prove RetroStage Maker as a coherent commercial creator product.  
 **Third-party placement:** No new dependency may enter solely to force closure; all shipped components require final artifact-level approval.  
@@ -1606,11 +1653,11 @@ RSM-2-V1-SOURCE-SET-CONSISTENCY-REVIEW.md
 RSM-2-CLOSE1-SOURCE-RECONSTRUCTION-CLOSURE.md
 ```
 
-`07_RSM_REBOOT_REPOSITORY_COMMANDS_AND_VALIDATION.md` is intentionally excluded from the pre-repository sequence. It may be created or finalized only during RSM-3 after physical repository paths, manifests, scripts, commands, branch state, clean-clone behavior, and restore evidence exist.
+`07_RSM_REBOOT_REPOSITORY_COMMANDS_AND_VALIDATION.md` was intentionally excluded from the pre-repository sequence. It was created and finalized during RSM-3 after physical repository paths, manifests, scripts, commands, branch state, clean-clone behavior, and restore evidence existed; it is now materialized authority in the final reboot source package.
 
 RSM-3 may activate only after the source set establishes:
 
-- current truthful pre-repository state,
+- then-truthful pre-repository state,
 - active milestone authority,
 - planned package topology,
 - repository-path and remote selection requirements,
