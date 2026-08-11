@@ -1,76 +1,99 @@
-# RSM-4 — Closure Candidate Report
+# RSM-4 — Final Closure Report
 
-## Authoritative Contract
+## Final Authority
 
-- Controlling independent authority: bootstrap `Outputs/RSM-4-V1-RERUN1-CHATGPT-INDEPENDENT-REVIEW.md`, SHA-256 `021C6DE5021DF91AD70B04FD9C73F712955E36307CD27320A448CC78C3EB2F81`.
-- Executor contract: bootstrap `Prompts/RSM-4-CLOSE1-CODEX-TERMINAL-AUTHORITY-AND-EVIDENCE-ALIGNMENT-PROMPT.md`, SHA-256 `5105482E87F6B595D9971A36E24E3F96BB46FA88F2E0E3A1F902C4132E15A23C`.
+- Independent final closure review: bootstrap `Outputs/RSM-4-CLOSE1-CHATGPT-INDEPENDENT-FINAL-CLOSURE-REVIEW.md`, SHA-256 `157EFEB08A587F9650054732E4232EACD7FDFCB076A435F326CE22B52BC8ABCD`.
+- Final closure and POSTCLOSE1 synchronization authority: bootstrap `Outputs/RSM-4-FINAL-CLOSURE-AND-POSTCLOSE1-ALIGN1-AUTHORITY.md`, SHA-256 `AF55E7CF27C58606C962F221812FBC0742167164148460802D92936C9838AECA`.
 
-## Accepted Implementation Slices
+## Accepted Implementation and Validation Chain
 
-- `RSM-4-I1`: materially complete; accepted implementation, commit, push, and hosted-CI chain.
-- `RSM-4-FIX1`: materially complete; accepted lifecycle-safe Source identity remediation, commit, push, and hosted-CI chain.
-- Original `RSM-4-V1`: retained historical material-failure evidence.
-- `RSM-4-V1-RERUN1`: independent PASS; CLOSE1 eligible with closure-sequencing correction.
+- `RSM-4-I1`: `COMPLETED`; accepted implementation, commit, normal push, and hosted-CI chain.
+- `RSM-4-FIX1`: `COMPLETED`; accepted lifecycle-safe Source identity remediation, commit, normal push, and hosted-CI chain.
+- Original `RSM-4-V1`: retained as historical material-failure evidence.
+- `RSM-4-V1-RERUN1`: independent PASS; no remaining material implementation blocker.
+- `RSM-4-CLOSE1` independently staged candidate: `PASS`.
 
-## Milestone-Wide Validation
+## Verified Closure Commit and Push
 
-This candidate carries forward the independently accepted RSM-4-V1-RERUN1 result and requires fresh candidate validation recorded in `RSM-4-CLOSE1-VALIDATION-REPORT.md`. That repository-local report is executor validation, not independent staged acceptance.
+```text
+closure commit = 53565f354a1427251806f2e4457ade018d222dc0
+parent = 1f6634b59d7f6773e5ac58273de3b95dceba963f
+closure commit subject = workflow: align rsm-4 closure authority
+normal push = PASS
+force push = FALSE
+origin/main at closure = 53565f354a1427251806f2e4457ade018d222dc0
+physical remote main at closure = 53565f354a1427251806f2e4457ade018d222dc0
+```
 
-## Acceptance Matrix
+The exact accepted CLOSE1 candidate became the verified RSM-4 closure commit. No future POSTCLOSE1 alignment commit is part of or substituted for this closure identity.
 
-| ID | Requirement | Evidence | Result |
-|---|---|---|---|
-| `C1-01` | I1/FIX1 chronology truthful | Physical external authority chain indexed in the evidence manifest | `READY FOR REVIEW` |
-| `C1-02` | Current Source authority aligned without premature finality | Source 00/02/04/08/09 and exact repository copies | `READY FOR REVIEW` |
-| `C1-03` | Source identities governed | `SOURCE-MANIFEST.tsv` and physical hashes | `READY FOR REVIEW` |
-| `C1-04` | Evidence state represents one ACTIVE CLOSE1 task | Milestone evidence manifest | `READY FOR REVIEW` |
-| `C1-05` | Full validation | Candidate validation report | `PASS` |
-| `C1-06` | Independent staged review | No review exists yet | `PENDING` |
+## Verified Hosted Closure CI
 
-## Repository / Commit / Remote Evidence
+```text
+workflow = CI
+run ID = 31536395689
+job ID = 93928397354
+head SHA = 53565f354a1427251806f2e4457ade018d222dc0
+head branch = main
+event = push
+status = completed
+conclusion = success
+failed jobs = 0
+failed steps = 0
+```
 
-- Verified pre-CLOSE1 implementation baseline: `1f6634b59d7f6773e5ac58273de3b95dceba963f`.
-- Entry origin/main and physical remote main matched that baseline.
-- Verified implementation hosted CI: run `31529314116`; job `93905231438`; push; completed; success.
-- CLOSE1 commit: `FALSE`.
-- CLOSE1 push: `FALSE`.
-- No future CLOSE1 commit or hosted-CI identity is known or claimed.
+The hosted run was naturally push-triggered; no manual duplicate dispatch was used.
 
-## Restore / Clean-Machine Evidence
+## Source and Evidence Closure Integrity
 
-RSM-3 accepted clean-clone, backup, and isolated-restore evidence remains historical physical baseline context. This pre-closure alignment candidate does not rerun or claim a new restore.
+At the observed closure boundary:
 
-## Dependency / License State
+```text
+live Source == repository Source == SOURCE-MANIFEST SHA = 10/10 PASS
+repository content mutation after push = 0
+live Source mutation during PUSH1 = 0
+```
 
-No dependency, package manifest, lockfile, CI, compliance, license, notice, native, WASM, or product-path change is permitted or claimed.
+The POSTCLOSE1 synchronization updates only volatile current-state Source 02/08, their repository copies and manifest rows, and terminal RSM-4 evidence. It does not re-decide closure.
 
-## Known Risks
+## Final Acceptance Matrix
 
-- Independent review, commit, push, hosted CI, and final closure acceptance remain future gates.
-- Source 02/08 intentionally describe the current pre-closure state and require a separate `RSM-4-POSTCLOSE1-ALIGN1` only after final closure truth is established and accepted.
+| ID | Requirement | Result |
+|---|---|---|
+| `C1-01` | I1/FIX1 chronology truthful and completed | `PASS` |
+| `C1-02` | Exact CLOSE1 staged candidate independently reviewed | `PASS` |
+| `C1-03` | Exact accepted commit observed | `PASS` |
+| `C1-04` | Normal push and remote convergence observed | `PASS` |
+| `C1-05` | Exact push-triggered hosted CI terminal success | `PASS` |
+| `C1-06` | Independent final closure review | `PASS` |
 
-## Deferred Work and Future Ownership
+## Product, Dependency, and Next-Gate Boundary
 
-- Independent staged-candidate review: ChatGPT reviewer.
-- Exact commit and normal push: separate owner authorization.
-- Hosted CI and final milestone closure decision: later observed evidence and independent authority.
-- Post-closure current-truth synchronization: later `RSM-4-POSTCLOSE1-ALIGN1` task.
-- Gate B or RSM-5 consideration: only after accepted post-closure synchronization.
+No dependency, package manifest, lockfile, CI, compliance, license, notice, native, WASM, tooling, application/package product, schema, runtime, editor, player, Preview/PIE, or Export implementation is changed or authorized by this finalization.
+
+```text
+RSM-4 = CLOSED
+Gate A — Governed Reboot = PASS / CLOSED
+Gate B — Secure Vertical Slice = ELIGIBLE / NOT YET ACTIVE
+RSM-5 = NOT STARTED
+RSM-5 implementation = NOT AUTHORIZED
+product implementation = NOT STARTED
+```
+
+Gate B eligibility is not activation. RSM-5 requires separate activation authority after independently accepted POSTCLOSE1 current-truth synchronization.
 
 ## Final Decision
 
-`RSM-4 CLOSURE CANDIDATE READY / INDEPENDENT REVIEW PENDING`
+`RSM-4-CLOSE1 = FINAL PASS`
 
-Current authority remains:
+`RSM-4 = CLOSED`
 
-```text
-RSM-4 = OPEN
-commit = FALSE
-push = FALSE
-Gate B = INACTIVE
-RSM-5 = BLOCKED
-```
+`Gate A = PASS / CLOSED`
+
+`Gate B = ELIGIBLE / NOT YET ACTIVE`
+
+`RSM-5 = NOT STARTED / NOT AUTHORIZED`
 
 ## Next Handoff
 
-`ChatGPT independent RSM-4-CLOSE1 staged-candidate review`
+`ChatGPT independent RSM-4-POSTCLOSE1-ALIGN1 staged-candidate review`

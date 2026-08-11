@@ -1,26 +1,26 @@
 # RetroStage Maker — Reboot Current Milestone
 
 **Document ID:** `08_RSM_REBOOT_CURRENT_MILESTONE`  
-**Role:** Authoritative active-milestone and next-control source  
+**Role:** Authoritative milestone-handoff and next-control source  
 **Project:** RetroStage Maker  
-**Current gate:** `Gate A — Governed Reboot / Gate B INACTIVE`  
-**Current milestone/control:** `RSM-4 — ENGINEERING / REVIEW / MILESTONE GATE BASELINE / RSM-4-CLOSE1 TERMINAL AUTHORITY AND EVIDENCE ALIGNMENT`  
-**Current task:** `RSM-4-CLOSE1 — PRE-CLOSURE TERMINAL AUTHORITY / EVIDENCE ALIGNMENT CANDIDATE`  
-**Milestone/control state:** `RSM-4 OPEN / CLOSURE CANDIDATE`  
-**Task state:** `ACTIVE / NOT YET INDEPENDENTLY REVIEWED`  
-**Snapshot date:** 2026-08-11  
+**Current gate:** `Gate A — Governed Reboot PASS / CLOSED / Gate B ELIGIBLE / NOT YET ACTIVE`  
+**Current milestone/control:** `RSM-4 CLOSED / RSM-4-POSTCLOSE1-ALIGN1 CURRENT-TRUTH SYNCHRONIZATION`  
+**Current task:** `RSM-4-POSTCLOSE1-ALIGN1 — CURRENT-TRUTH SYNCHRONIZATION / NO PRODUCT IMPLEMENTATION`  
+**Milestone/control state:** `RSM-4 CLOSED / GATE A PASS / CLOSED`  
+**Task state:** `POST-CLOSURE SYNCHRONIZATION CANDIDATE / INDEPENDENT REVIEW NOT YET PERFORMED`  
+**Snapshot date:** 2026-08-12  
 **Timezone:** Europe/Istanbul  
 **Repository:** `PRESENT — C:\RetroStage\retrostage-maker`  
 **RSM-2:** `CLOSED / SOURCE PASS`  
-**RSM-4:** `OPEN / CLOSURE CANDIDATE`
+**RSM-4:** `CLOSED`
 
 ---
 
 ## 1. Purpose
 
-This document controls the RSM-4-CLOSE1 terminal authority/evidence alignment candidate while retaining accepted RSM-3 repository, clean-clone, LF portability, backup, restore, and Source 07 evidence as historical physical baseline context.
+This document records the durable RSM-4 milestone handoff after final independent closure PASS while retaining accepted RSM-3 repository, clean-clone, LF portability, backup, restore, and Source 07 evidence as historical physical baseline context.
 
-RSM-4-I1 and RSM-4-FIX1 are materially complete and accepted. RSM-4-V1-RERUN1 is PASS and CLOSE1 eligible. CLOSE1 is active but not yet independently reviewed; RSM-4 remains open, Gate B is inactive, RSM-5 is blocked, and product implementation has not started.
+RSM-4-I1 and RSM-4-FIX1 are completed and accepted. RSM-4-V1-RERUN1 passed, RSM-4-CLOSE1 received FINAL PASS, and RSM-4 is closed. Gate A is PASS / CLOSED. Gate B is eligible but not yet active; RSM-5 is not started and requires separate activation authority; no product implementation task is active.
 
 ---
 
@@ -41,52 +41,51 @@ RSM-4-I1 and RSM-4-FIX1 are materially complete and accepted. RSM-4-V1-RERUN1 is
 | RSM-3-CLOSE1 | `INDEPENDENT PASS / RSM-3 CLOSED` |
 | POST-RSM-3 PRODUCT STRATEGY ALIGNMENT | `PASS` |
 | POST-RSM-3 PSA2 | `INDEPENDENT PASS / FINAL SOURCE SET ACCEPTED` |
-| RSM-4-I1 | `MATERIALLY COMPLETE / ACCEPTED` |
-| RSM-4-FIX1 | `MATERIALLY COMPLETE / ACCEPTED` |
+| RSM-4-I1 | `COMPLETED / ACCEPTED` |
+| RSM-4-FIX1 | `COMPLETED / ACCEPTED` |
 | RSM-4-V1 | `HISTORICAL MATERIAL FAILURE` |
 | RSM-4-V1-RERUN1 | `PASS / CLOSE1 ELIGIBLE` |
-| RSM-4-CLOSE1 | `ACTIVE / NOT YET INDEPENDENTLY REVIEWED` |
-| RSM-4 | `OPEN / CLOSURE CANDIDATE` |
-| Gate B | `INACTIVE` |
-| RSM-5 | `BLOCKED` |
+| RSM-4-CLOSE1 | `FINAL PASS / COMPLETED` |
+| RSM-4 | `CLOSED` |
+| Gate A | `PASS / CLOSED` |
+| RSM-4-POSTCLOSE1-ALIGN1 | `CURRENT-TRUTH SYNCHRONIZATION / NO PRODUCT IMPLEMENTATION` |
+| Gate B | `ELIGIBLE / NOT YET ACTIVE` |
+| RSM-5 | `NOT STARTED / SEPARATE ACTIVATION AUTHORITY REQUIRED` |
 
 Historical FIX/failure artifacts remain evidence history. The original failed clone remains preserved and is not promoted as current success evidence.
 
 ---
 
-## 3. Verified Pre-CLOSE1 Implementation Baseline
+## 3. Verified RSM-4 Closure Commit / Baseline
 
 ```text
 Repository: C:\RetroStage\retrostage-maker
 Branch: main
-Verified pre-CLOSE1 implementation baseline: 1f6634b59d7f6773e5ac58273de3b95dceba963f
-Parent: 483b2a29a491c8c5ccbacf06eb1f06f8fdb9e606
-Baseline subject: workflow: make source identity validation lifecycle-safe
-Commit count at baseline: 8
-Tree paths at baseline: 210
-Entry working tree/index: CLEAN before CLOSE1 candidate authoring
-Unexpected untracked non-ignored files: 0
+Verified RSM-4 closure commit/baseline: 53565f354a1427251806f2e4457ade018d222dc0
+Parent: 1f6634b59d7f6773e5ac58273de3b95dceba963f
+Closure commit subject: workflow: align rsm-4 closure authority
+Commit count at closure baseline: 9
+Tree paths at closure baseline: 214
 Origin: https://github.com/caosvein/retrostage-maker.git
-origin/main at entry: 1f6634b59d7f6773e5ac58273de3b95dceba963f
-physical remote main at entry: 1f6634b59d7f6773e5ac58273de3b95dceba963f
-Upstream: origin/main
-RSM-4-CLOSE1 commit: FALSE
-RSM-4-CLOSE1 push: FALSE
+Normal push: PASS
+Verified origin/main at closure: 53565f354a1427251806f2e4457ade018d222dc0
+Verified physical remote main at closure: 53565f354a1427251806f2e4457ade018d222dc0
+Verified upstream at closure: origin/main
 ```
 
-This SHA is the verified implementation baseline observed before CLOSE1 candidate authoring, not a prediction of a future CLOSE1 commit or an eternal-current HEAD claim.
+This SHA is explicitly the verified RSM-4 closure commit/baseline, not an eternal-current HEAD claim and not a prediction of a future POSTCLOSE1 commit.
 
 The accepted LF policy preserves `docs/evidence/**` and `compliance/THIRD_PARTY_NOTICES.html` as byte-exact exceptions.
 
 ---
 
-## 4. Verified Implementation Hosted CI
+## 4. Verified RSM-4 Closure Hosted CI
 
 ```text
 Workflow: CI
-Run ID: 31529314116
-Job ID: 93905231438
-Head SHA: 1f6634b59d7f6773e5ac58273de3b95dceba963f
+Run ID: 31536395689
+Job ID: 93928397354
+Head SHA: 53565f354a1427251806f2e4457ade018d222dc0
 Head branch: main
 Event: push
 Status: completed
@@ -94,7 +93,7 @@ Conclusion: success
 Duplicate manual dispatch: FALSE
 ```
 
-CI configuration and deterministic compliance checks are committed and physically proven on GitHub-hosted infrastructure for the verified pre-CLOSE1 implementation baseline. No future CLOSE1 hosted-CI identity is known or claimed.
+CI configuration and deterministic compliance checks are physically proven on GitHub-hosted infrastructure for the verified RSM-4 closure commit. No future POSTCLOSE1 hosted-CI identity is known or claimed.
 
 Dependency Review Action remains deferred because of platform capability. The visible low advisory remains non-blocking; no high/critical blocker is hidden.
 
@@ -210,13 +209,13 @@ The Source 07 operational content is independently accepted as RSM-3 repository-
 
 ---
 
-## 8. Current CLOSE1 Candidate Boundary
+## 8. Post-Closure Synchronization Boundary
 
-RSM-3 remains independently closed. The RSM-4-I1 implementation and RSM-4-FIX1 remediation chains are materially complete and accepted, and RSM-4-V1-RERUN1 independently passed.
+RSM-3 remains independently closed. The RSM-4-I1 implementation and RSM-4-FIX1 remediation chains are completed and accepted, RSM-4-V1-RERUN1 independently passed, and RSM-4-CLOSE1 received FINAL PASS.
 
-This task aligns terminal current authority, repository Source identities, and milestone evidence into one exact pre-closure candidate. It does not alter dependencies, CI, product paths, tooling, or accepted historical evidence.
+RSM-4-POSTCLOSE1-ALIGN1 synchronizes already-established closure truth into current authority, repository Source identities, and terminal milestone evidence. It does not alter dependencies, CI, product paths, tooling, or accepted historical evidence.
 
-This candidate does not close RSM-4, activate Gate B, authorize RSM-5, claim independent CLOSE1 review, or predict a future commit, push, or hosted-CI identity.
+This synchronization does not re-decide RSM-4 closure, activate Gate B, authorize RSM-5, or predict a future POSTCLOSE1 commit, push, or hosted-CI identity.
 
 ---
 
@@ -237,18 +236,20 @@ No synthetic historical bytes are promoted.
 ## 10. Remaining Controlled Sequence
 
 ```text
-RSM-4-I1 (MATERIALLY COMPLETE / ACCEPTED)
-→ RSM-4-FIX1 (MATERIALLY COMPLETE / ACCEPTED)
+RSM-4-I1 (COMPLETED / ACCEPTED)
+→ RSM-4-FIX1 (COMPLETED / ACCEPTED)
 → RSM-4-V1 (HISTORICAL MATERIAL FAILURE)
 → RSM-4-V1-RERUN1 (PASS / CLOSE1 ELIGIBLE)
-→ RSM-4-CLOSE1 CANDIDATE (ACTIVE / INDEPENDENT REVIEW PENDING)
-→ independent staged review
-→ separately authorized commit / normal push / hosted CI
-→ independent final closure acceptance
-→ RSM-4-POSTCLOSE1-ALIGN1 current-truth synchronization
+→ RSM-4-CLOSE1 (FINAL INDEPENDENT PASS)
+→ verified closure commit 53565f354a1427251806f2e4457ade018d222dc0
+→ normal push / hosted CI 31536395689 / 93928397354 / success
+→ RSM-4 CLOSED / Gate A PASS / CLOSED
+→ RSM-4-POSTCLOSE1-ALIGN1 current-truth synchronization candidate
+→ independent staged review / separately authorized commit and push
+→ separate RSM-5 activation decision, if later authorized
 ```
 
-RSM-4 remains open. Gate B remains inactive, RSM-5 remains blocked, and product implementation remains not started.
+RSM-4 remains closed. Gate B remains eligible but not yet active, RSM-5 remains not started and not authorized, and product implementation remains not started.
 
 ---
 
@@ -256,19 +257,19 @@ RSM-4 remains open. Gate B remains inactive, RSM-5 remains blocked, and product 
 
 ```text
 milestone = RSM-4
-current task = RSM-4-CLOSE1
-task type = TERMINAL AUTHORITY / EVIDENCE ALIGNMENT / CLOSURE CANDIDATE
-verified pre-CLOSE1 implementation baseline = 1f6634b59d7f6773e5ac58273de3b95dceba963f
-verified baseline CI = run 31529314116 / job 93905231438 / success
-RSM-4-I1 = MATERIALLY COMPLETE
-RSM-4-FIX1 = MATERIALLY COMPLETE
+current task = RSM-4-POSTCLOSE1-ALIGN1
+task type = CURRENT-TRUTH SYNCHRONIZATION / NO PRODUCT IMPLEMENTATION
+verified RSM-4 closure commit/baseline = 53565f354a1427251806f2e4457ade018d222dc0
+verified RSM-4 closure CI = run 31536395689 / job 93928397354 / completed / success
+RSM-4-I1 = COMPLETED
+RSM-4-FIX1 = COMPLETED
 RSM-4-V1-RERUN1 = PASS
-RSM-4-CLOSE1 = ACTIVE / NOT YET INDEPENDENTLY REVIEWED
-RSM-4 = OPEN
-commit = FALSE
-push = FALSE
-Gate B = INACTIVE
-RSM-5 = BLOCKED
+RSM-4-CLOSE1 = FINAL PASS / COMPLETED
+RSM-4 = CLOSED
+Gate A = PASS / CLOSED
+Gate B = ELIGIBLE / NOT YET ACTIVE
+RSM-5 = NOT STARTED / NOT AUTHORIZED
+RSM-5 implementation = NOT AUTHORIZED
 product implementation = NOT STARTED
-next handoff = ChatGPT independent RSM-4-CLOSE1 staged-candidate review
+next handoff = ChatGPT independent RSM-4-POSTCLOSE1-ALIGN1 staged-candidate review
 ```

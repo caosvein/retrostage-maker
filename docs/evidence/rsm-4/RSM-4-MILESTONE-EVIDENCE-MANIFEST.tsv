@@ -1,4 +1,4 @@
 milestone_id	task_id	title	status	evidence_path	decision
 RSM-4	RSM-4-I1	Repository Workflow Baseline Activation	COMPLETED	docs/evidence/rsm-4/rsm-4-i1/RSM-4-I1-EVIDENCE-MANIFEST.md	MATERIALLY ACCEPTED / IMPLEMENTATION CHAIN COMPLETE
 RSM-4	RSM-4-FIX1	Lifecycle-Safe Source Identity Policy Remediation	COMPLETED	docs/evidence/rsm-4/rsm-4-close1/RSM-4-CLOSE1-EVIDENCE-MANIFEST.md	MATERIALLY ACCEPTED / REMEDIATION CHAIN COMPLETE
-RSM-4	RSM-4-CLOSE1	Terminal Authority and Evidence Alignment Candidate	ACTIVE	docs/evidence/rsm-4/rsm-4-close1/RSM-4-CLOSE1-EVIDENCE-MANIFEST.md	NOT YET INDEPENDENTLY REVIEWED
+RSM-4	RSM-4-CLOSE1	Terminal Authority and Evidence Alignment	COMPLETED	docs/evidence/rsm-4/rsm-4-close1/RSM-4-CLOSE1-EVIDENCE-MANIFEST.md	FINAL PASS / RSM-4 CLOSED / GATE A PASS AND CLOSED

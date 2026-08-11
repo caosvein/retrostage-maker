@@ -2,11 +2,11 @@
 
 ## Task Identity
 
-- Task: `RSM-4-CLOSE1 — Pre-Closure Terminal Authority / Evidence Alignment Candidate`
-- Mode: `SOURCE AUTHORING + REPOSITORY ALIGNMENT + VALIDATION + EXACT STAGING`
-- Expected/actual entry baseline: `1f6634b59d7f6773e5ac58273de3b95dceba963f`
+- Task: `RSM-4-CLOSE1 — Final Closure Record`
+- Mode: `TERMINAL CLOSURE EVIDENCE / OBSERVED COMMIT + PUSH + HOSTED CI + INDEPENDENT FINAL PASS`
+- Verified RSM-4 closure commit/baseline: `53565f354a1427251806f2e4457ade018d222dc0`
 - Branch: `main`
-- Entry repository state: clean; staged `0`; unstaged tracked `0`; unexpected untracked `0`; stash `0`
+- Closure result: `RSM-4-CLOSE1 FINAL PASS / RSM-4 CLOSED / GATE A PASS AND CLOSED`
 
 ## Evidence Classification Vocabulary
 
@@ -40,31 +40,43 @@ All paths below are physical bootstrap paths under `C:\RetroStage\bootstrap\RSM-
 | `Outputs/RSM-4-V1-RERUN1-READINESS-REPORT.md` | `A52134D902109405A07C19EF1E69D3316D3920FA754AF6E6DA7A179A819AD822` | `OBSERVED` | CLOSE1 eligible |
 | `Outputs/RSM-4-V1-RERUN1-CHATGPT-INDEPENDENT-REVIEW.md` | `021C6DE5021DF91AD70B04FD9C73F712955E36307CD27320A448CC78C3EB2F81` | `APPROVED CONTRACT` | Controlling PASS and closure-sequencing correction |
 | `Prompts/RSM-4-CLOSE1-CODEX-TERMINAL-AUTHORITY-AND-EVIDENCE-ALIGNMENT-PROMPT.md` | `5105482E87F6B595D9971A36E24E3F96BB46FA88F2E0E3A1F902C4132E15A23C` | `APPROVED CONTRACT` | Exact executor contract |
+| `Outputs/RSM-4-CLOSE1-CHATGPT-INDEPENDENT-STAGED-CANDIDATE-REVIEW.md` | `A69CEB58FE250E94A854BF6B76DFB3B2648E9CFD4124E3EC682FC2A80BF6749F` | `APPROVED CONTRACT` | CLOSE1 staged candidate PASS |
+| `Outputs/RSM-4-CLOSE1-OWNER-COMMIT-AUTHORIZATION.md` | `2073EB04480D563DD2173E46850CD50087D622D4123FED9B9ED16870587E4784` | `APPROVED CONTRACT` | Exact CLOSE1 commit authorization |
+| `Outputs/RSM-4-CLOSE1-COMMIT1-POST-COMMIT-EVIDENCE.md` | `17A32E8035CAE85AE681FD7F9DD4D95E65B21557E8E56038A54C50B96BF2D30F` | `OBSERVED` | Exact accepted CLOSE1 commit evidence |
+| `Outputs/RSM-4-CLOSE1-COMMIT1-READINESS-REPORT.md` | `E03A26BB9C1B202B7562858415DDBD129D57E540AB87F973185A39FED2764D97` | `OBSERVED` | Post-commit readiness evidence |
+| `Outputs/RSM-4-CLOSE1-CHATGPT-INDEPENDENT-POST-COMMIT-REVIEW.md` | `01174FFABEFD62B17959457D3A98C10AF51BEDBDE98120CDDCEF66DE4267F8A2` | `APPROVED CONTRACT` | CLOSE1 post-commit PASS / PUSH1 eligible |
+| `Outputs/RSM-4-CLOSE1-PUSH1-OWNER-AUTHORIZATION.md` | `5A779697D6DF89A538BC3C8CDB22100DAAB7817CD69528EC5C135198AD845035` | `APPROVED CONTRACT` | Normal fast-forward push authorization |
+| `Outputs/RSM-4-CLOSE1-PUSH1-REMOTE-AND-HOSTED-CI-EVIDENCE.md` | `E27CD0146B597E22C84BC60053D0518F378A7EC2705D803A6C8FC377CE9C7142` | `OBSERVED` | Exact push, remote convergence, and hosted-CI success |
+| `Outputs/RSM-4-CLOSE1-PUSH1-READINESS-REPORT.md` | `4BF755AB4FE9E5DC0B9CA0197515626CDE04498CCDF53715A3E9DCBB9F23CD54` | `OBSERVED` | Final closure review readiness |
+| `Outputs/RSM-4-CLOSE1-CHATGPT-INDEPENDENT-FINAL-CLOSURE-REVIEW.md` | `157EFEB08A587F9650054732E4232EACD7FDFCB076A435F326CE22B52BC8ABCD` | `APPROVED CONTRACT` | RSM-4-CLOSE1 FINAL PASS / RSM-4 CLOSED |
+| `Outputs/RSM-4-FINAL-CLOSURE-AND-POSTCLOSE1-ALIGN1-AUTHORITY.md` | `AF55E7CF27C58606C962F221812FBC0742167164148460802D92936C9838AECA` | `APPROVED CONTRACT` | POSTCLOSE1 current-truth synchronization authority |
 
 ## Scope and Files
 
-- Allowed live Source scope: exactly Source `00/02/04/08/09`.
-- Allowed repository scope: exactly 11 paths: seven modified and four added.
-- Forbidden scope: Source `01/03/05/06/07`; tooling; dependencies; lockfile; CI; compliance; product paths; historical evidence rewrite; commit; push.
+- Historical CLOSE1 candidate scope: Source `00/02/04/08/09` and the independently accepted exact 11-path repository candidate.
+- Observed closure chain: exact commit `53565f354a1427251806f2e4457ade018d222dc0`, normal push, hosted CI run `31536395689` / job `93928397354`, and independent final PASS.
+- POSTCLOSE1 scope is current-truth synchronization only; no tooling, dependency, lockfile, CI, compliance, product, or historical evidence mutation is authorized.
 
 ## Impact
 
-- Dependencies/manifests/lockfiles: only the Source identity manifest changes; package manifests and lockfile must not change.
+- Dependencies/manifests/lockfiles: package manifests and lockfile did not change in the closure chain; POSTCLOSE1 changes only the Source identity manifest.
 - Schema/migration/recovery: none.
 - Architecture/authority: current-source and milestone-evidence alignment only; no product architecture change.
 - Editor/player and Preview/PIE/Export: not implemented and out of task scope.
 
 ## Negative / Fail-Closed Evidence
 
-- Baseline, remote, hosted CI, controlling authority, Source identities, scope, active-task uniqueness, premature finality, future identity, product-start, and Source 09 governed-loss preservation are fail-closed gates.
+- Baseline, remote, hosted CI, controlling authority, Source identities, scope, terminal milestone state, future POSTCLOSE1 identity, product-start, and Source 09 governed-loss preservation remain fail-closed gates.
 
 ## Final Inventory and Handoff
 
-- Reviewer decision: `NOT YET REVIEWED`
-- Commit: `FALSE`
-- Push: `FALSE`
+- RSM-4-CLOSE1 reviewer decision: `FINAL PASS`
+- Verified closure commit: `53565f354a1427251806f2e4457ade018d222dc0`
+- Normal push: `PASS`
+- Hosted closure CI: `31536395689 / 93928397354 / completed / success`
 - Restore: not owned by this alignment candidate
-- Milestone: `RSM-4 OPEN / CLOSURE CANDIDATE`
-- Gate B: `INACTIVE`
-- RSM-5: `BLOCKED`
-- Next handoff: `ChatGPT independent RSM-4-CLOSE1 staged-candidate review`
+- Milestone: `RSM-4 CLOSED`
+- Gate A: `PASS / CLOSED`
+- Gate B: `ELIGIBLE / NOT YET ACTIVE`
+- RSM-5: `NOT STARTED / NOT AUTHORIZED`
+- Next handoff: `ChatGPT independent RSM-4-POSTCLOSE1-ALIGN1 staged-candidate review`
