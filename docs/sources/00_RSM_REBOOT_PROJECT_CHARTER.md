@@ -85,14 +85,13 @@ Approved technology direction: Babylon.js 9 + Electron
 Next source task: technology/dependency contract, then canonical reboot roadmap
 ```
 
-Current lifecycle note:
+Durable lifecycle note:
 
 ```text
 RSM-3: CLOSED
 POST-RSM-3 PRODUCT STRATEGY ALIGNMENT: PASS
-RSM-4: NOT YET STARTED
-Gate B: INACTIVE
-Live current-state authority: Source 02 / Source 08
+Detailed current milestone, task, product-gate, and next-control authority: Source 02 / Source 08
+This foundational charter does not independently close a milestone, activate a gate, or authorize a later milestone.
 ```
 
 ---

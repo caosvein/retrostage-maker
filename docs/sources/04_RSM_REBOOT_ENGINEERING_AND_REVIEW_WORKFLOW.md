@@ -5,7 +5,7 @@
 **Project:** RetroStage Maker  
 **Source generation:** Reboot / clean-start  
 **Prepared:** 2026-08-05  
-**State:** `ACTIVE WORKFLOW AUTHORITY / RSM-3 REPOSITORY BASELINE ESTABLISHED / RSM-4 ACTIVATION NEXT`  
+**State:** `ACTIVE WORKFLOW AUTHORITY / REPOSITORY WORKFLOW PHYSICALLY ACTIVATED / LIFECYCLE-SAFE SOURCE IDENTITY POLICY ACTIVE`  
 **Live implementation implication:** None  
 **Live reboot repository:** `PRESENT — C:\RetroStage\retrostage-maker`  
 **Authoritative repository-command source:** `07_RSM_REBOOT_REPOSITORY_COMMANDS_AND_VALIDATION.md`  
@@ -101,7 +101,9 @@ Live reboot repository: PRESENT — C:\RetroStage\retrostage-maker
 Repository baseline: ESTABLISHED BY CLOSED RSM-3
 Authoritative repository-command source: 07_RSM_REBOOT_REPOSITORY_COMMANDS_AND_VALIDATION.md
 Product implementation: MILESTONE-GATED / NOT IMPLIED BY THIS SOURCE
-RSM-4: ACTIVATION ALIGNMENT ELIGIBLE / NOT YET AUTHORIZED
+Repository engineering/review workflow: PHYSICALLY ACTIVATED
+Lifecycle-safe Source identity policy: ACTIVE
+Current detailed milestone/control authority: Source 02 / Source 08
 Historical repository evidence: DESIGN AND PROCESS EVIDENCE ONLY
 Approved baseline direction: Electron + Babylon.js 9 + RetroStage-owned canonical data
 ```
@@ -115,7 +117,7 @@ This workflow does not by itself prove that:
 - any milestone is implemented,
 - any dependency has been installed.
 
-Repository-specific workflow requirements are physically applicable. The final reboot Source 00–09 package is independently accepted; RSM-4 activation alignment is eligible, but RSM-4 has not yet activated the full workflow as a milestone.
+Repository-specific workflow requirements are physically active. The one-active-task, exact-scope, staging, independent-review, commit, push, dependency-admission, and architecture-check disciplines are materialized and enforced in repository reality. The current control is terminal closure alignment; Sources 02 and 08 own its volatile status.
 
 ---
 
@@ -2040,7 +2042,7 @@ Its exit requires a supported clean environment to clone, install, validate, and
 
 ## 59. RSM-4 Workflow Activation Application
 
-RSM-4 activates this workflow in repository reality.
+RSM-4 physically activated this workflow in repository reality. Its workflow and lifecycle-safe Source identity controls remain active independently of a volatile milestone-status string.
 
 Required deliverables include:
 

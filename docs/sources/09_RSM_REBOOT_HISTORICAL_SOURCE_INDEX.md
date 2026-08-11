@@ -15,7 +15,7 @@
 **Governing active-milestone source:** `08_RSM_REBOOT_CURRENT_MILESTONE.md`  
 **Current-state authority:** `Source 02 / Source 08`  
 **Review result:** `RSM-2-V1 — PASS AFTER MATERIAL ALIGNMENT CORRECTIONS`  
-**Immediate next control step:** `Replace the ChatGPT project source collection with the independently accepted final Source 00–09 package, then execute RSM-4 activation alignment`  
+**Immediate next control step:** `Delegated to the current-state authorities in Source 02 and Source 08`  
 
 ---
 
@@ -62,13 +62,11 @@ Current truth:
 Project state: RSM-3 CLOSED / PRODUCT STRATEGY ALIGNMENT PASS / PSA2 FINAL SOURCE SET INDEPENDENT PASS
 Live reboot repository: PRESENT — C:\RetroStage\retrostage-maker
 Remote origin: https://github.com/caosvein/retrostage-maker.git
-Current Git HEAD: 5cec4ae7ef05dfe392b0e768dd9ca7d91a5dbc4e
 RSM-3 development-tool baseline: ESTABLISHED / VERIFIED
 Implemented reboot product capabilities: NONE
-Current milestone/control: POST-RSM-3 PSA2-ALIGN1 — FINAL SOURCE-SET ACCEPTANCE / RSM-4 ACTIVATION HANDOFF
-Current task: FINAL PROJECT SOURCE REPLACEMENT / RSM-4 ACTIVATION ALIGNMENT
-RSM-4: ACTIVATION ALIGNMENT ELIGIBLE / NOT YET AUTHORIZED
-Gate B: INACTIVE
+Current milestone/control, task, repository baseline, and gate state: DELEGATED TO SOURCE 02 / SOURCE 08
+Accepted durable product-strategy decisions: D-073 through D-079 PRESERVED / authority remains Source 05
+Canonical numeric roadmap ancestry: RSM-0 through RSM-120 PRESERVED / authority remains Source 01
 Historical source identity/provenance: PRESERVED
 Historical pre-loss source files: HISTORICAL_IDENTITY_PRESERVED_BYTES_UNAVAILABLE
 RECOVERY1 physical result: 0/9
@@ -1517,13 +1515,7 @@ RSM-2-V1 — Source-Set Consistency Review
 
 RSM-2-V1 subsequently passed after material alignment corrections, and RSM-2-CLOSE1 closed the source-reconstruction milestone.
 
-The current handoff is controlled by sources 02 and 08:
-
-```text
-POST-RSM-3 PSA2 — FINAL REBOOT SOURCE-SET CONSOLIDATION / INDEPENDENT PASS
-```
-
-This index remains authoritative for historical-source interpretation. It does not independently control current milestone status.
+The current handoff is controlled exclusively by Sources 02 and 08. This index remains authoritative for historical-source interpretation and the governed-loss exception; it does not independently control or duplicate the current milestone, task, repository baseline, gate state, or next-control status.
 
 ---
 
@@ -1554,10 +1546,10 @@ All nine entries are `HISTORICAL_IDENTITY_PRESERVED_BYTES_UNAVAILABLE`. The rebo
 RSM-2-S9 — Historical Source Index / Retention / Supersession Map
 Historical state: SOURCE COMPLETE / RSM-2-V1 REVIEWED / RSM-2 CLOSED
 Current overlay: HISTORICAL_IDENTITY_PRESERVED_BYTES_UNAVAILABLE (9/9)
-Current task: FINAL PROJECT SOURCE REPLACEMENT / RSM-4 ACTIVATION ALIGNMENT
+Current task and milestone: DELEGATED TO SOURCE 02 / SOURCE 08
 Repository: PRESENT — C:\RetroStage\retrostage-maker
 Reboot Source 07: MATERIALIZED / AUTHORITATIVE / NOT HISTORICAL RECONSTRUCTION
 Product implementation capabilities: NONE
 ```
 
-Sources 02 and 08 control the current task. This index controls historical interpretation and the bounded governed-loss status; it does not authorize RSM-4 or Gate B.
+Sources 02 and 08 control the current task, milestone, and gate state. This index controls historical interpretation and the bounded governed-loss status; it does not authorize a milestone or product gate.
