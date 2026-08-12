@@ -2,17 +2,23 @@ import tseslint from "typescript-eslint";
 
 export default tseslint.config(
   {
-    ignores: ["dist/**", "node_modules/**", "docs/**"],
+    ignores: [
+      "dist/**",
+      "node_modules/**",
+      "docs/**",
+      "apps/editor-electron/.vite/**",
+      "apps/editor-electron/out/**",
+    ],
   },
   ...tseslint.configs.recommendedTypeChecked.map((config) => ({
     ...config,
-    files: ["tooling/**/*.ts"],
+    files: ["tooling/**/*.ts", "apps/editor-electron/src/**/*.ts"],
   })),
   {
-    files: ["tooling/**/*.ts"],
+    files: ["tooling/**/*.ts", "apps/editor-electron/src/**/*.ts"],
     languageOptions: {
       parserOptions: {
-        project: "./tsconfig.json",
+        project: ["./tsconfig.json", "./apps/editor-electron/tsconfig.json"],
         tsconfigRootDir: import.meta.dirname,
       },
     },
@@ -21,7 +27,7 @@ export default tseslint.config(
     },
   },
   {
-    files: ["tooling/**/*.mjs", "*.config.mjs"],
+    files: ["tooling/**/*.mjs", "*.config.mjs", "apps/editor-electron/**/*.mjs"],
     languageOptions: {
       ecmaVersion: "latest",
       sourceType: "module",

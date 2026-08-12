@@ -32,8 +32,7 @@ import {
 
 const MODULE_PATH = fileURLToPath(import.meta.url);
 const REPOSITORY_ROOT = path.resolve(path.dirname(MODULE_PATH), "..", "..");
-const EXPECTED_LOCK_SHA256 = "CA4D42AB5A23D84F3A106C2458BE1C3204F58E42A13C04AC85CABC197F9939A0";
-const EXPECTED_DIRECT_DEPENDENCIES = Object.freeze({
+const EXPECTED_ROOT_DIRECT_DEPENDENCIES = Object.freeze({
   "dependency-cruiser": "16.10.0",
   eslint: "9.21.0",
   knip: "6.32.0",
@@ -42,6 +41,13 @@ const EXPECTED_DIRECT_DEPENDENCIES = Object.freeze({
   "typescript-eslint": "8.66.0",
   vitest: "3.2.6",
 });
+const EXPECTED_APPLICATION_DIRECT_DEPENDENCIES = Object.freeze({
+  "@electron-forge/core": "7.11.2",
+  electron: "43.4.0",
+  vite: "8.2.1",
+});
+const EXPECTED_EXOTIC_SOURCE =
+  "https://codeload.github.com/electron/node-gyp/tar.gz/06b29aafb7708acef8b3669835c8a7857ebc92d2";
 const ARTIFACT_FILES = Object.freeze([
   "bom.cdx.json",
   "dependency-inventory.json",
@@ -93,18 +99,66 @@ function runPnpm(args, acceptedStatuses = [0]) {
 }
 
 function assertDependencyBaseline() {
-  const packageJson = JSON.parse(readFileSync(path.join(REPOSITORY_ROOT, "package.json"), "utf8"));
-  const actual = packageJson.devDependencies ?? {};
-  if (JSON.stringify(actual) !== JSON.stringify(EXPECTED_DIRECT_DEPENDENCIES)) {
-    throw new Error("Direct dependency baseline differs from the accepted seven exact identities.");
+  const rootPackageJson = JSON.parse(
+    readFileSync(path.join(REPOSITORY_ROOT, "package.json"), "utf8"),
+  );
+  const applicationPackageJson = JSON.parse(
+    readFileSync(path.join(REPOSITORY_ROOT, "apps", "editor-electron", "package.json"), "utf8"),
+  );
+  if (
+    JSON.stringify(rootPackageJson.devDependencies ?? {}) !==
+    JSON.stringify(EXPECTED_ROOT_DIRECT_DEPENDENCIES)
+  ) {
+    throw new Error("Root direct dependency baseline differs from the accepted seven identities.");
   }
-  if (Object.keys(packageJson.dependencies ?? {}).length !== 0) {
-    throw new Error("Product/runtime direct dependencies are not authorized in I3.");
+  if (
+    JSON.stringify(applicationPackageJson.devDependencies ?? {}) !==
+    JSON.stringify(EXPECTED_APPLICATION_DIRECT_DEPENDENCIES)
+  ) {
+    throw new Error(
+      "Electron app direct dependency baseline differs from the accepted three identities.",
+    );
   }
-  if (sha256File(path.join(REPOSITORY_ROOT, "pnpm-lock.yaml")) !== EXPECTED_LOCK_SHA256) {
-    throw new Error("pnpm-lock.yaml differs from the accepted immutable PRE1 identity.");
+  if (
+    Object.keys(rootPackageJson.dependencies ?? {}).length !== 0 ||
+    Object.keys(applicationPackageJson.dependencies ?? {}).length !== 0
+  ) {
+    throw new Error("Production npm runtime direct dependencies are not authorized in RSM-5-I1.");
   }
-  return packageJson;
+
+  const workspace = readFileSync(path.join(REPOSITORY_ROOT, "pnpm-workspace.yaml"), "utf8");
+  for (const fragment of [
+    '  - "apps/*"',
+    "autoInstallPeers: false",
+    "blockExoticSubdeps: false",
+    "strictPeerDependencies: true",
+    "ignoreScripts: true",
+    'savePrefix: ""',
+    "  - electron@43.4.0",
+    "  tar: 7.5.22",
+    '  "eslint@9.21.0>@eslint/plugin-kit": 0.3.4',
+  ]) {
+    if (!workspace.includes(fragment)) throw new Error(`Workspace policy drift: ${fragment}`);
+  }
+
+  const lock = readFileSync(path.join(REPOSITORY_ROOT, "pnpm-lock.yaml"), "utf8");
+  for (const fragment of [
+    "eslint@9.21.0>@eslint/plugin-kit: 0.3.4",
+    "'@eslint/plugin-kit@0.3.4':",
+    "tar@7.5.22:",
+    "electron@43.4.0:",
+  ]) {
+    if (!lock.includes(fragment)) throw new Error(`Lock graph identity missing: ${fragment}`);
+  }
+  const exoticSources = new Set(
+    lock.match(
+      /https:\/\/codeload\.github\.com\/[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+\/tar\.gz\/[0-9a-f]{40}/gu,
+    ) ?? [],
+  );
+  if (exoticSources.size !== 1 || !exoticSources.has(EXPECTED_EXOTIC_SOURCE)) {
+    throw new Error(`Exotic source set differs: ${[...exoticSources].join(",") || "ABSENT"}`);
+  }
+  return { rootPackageJson, applicationPackageJson };
 }
 
 function walkDependencyNode(node, identities) {
@@ -194,6 +248,49 @@ function readEvidenceFiles(packagePath) {
     });
 }
 
+function buildElectronBundledLicenseEvidence(snapshotHost) {
+  const sourceRoot = path.join(
+    REPOSITORY_ROOT,
+    "apps",
+    "editor-electron",
+    "node_modules",
+    "electron",
+    "dist",
+  );
+  const packagedRoot = path.join(
+    REPOSITORY_ROOT,
+    "apps",
+    "editor-electron",
+    "out",
+    `RetroStageMaker-${snapshotHost.platform}-${snapshotHost.architecture}`,
+  );
+  const evidence = [];
+  for (const filename of ["LICENSE", "LICENSES.chromium.html"]) {
+    const sourcePath = path.join(sourceRoot, filename);
+    const packagedPath = path.join(packagedRoot, filename);
+    if (!existsSync(sourcePath) || !existsSync(packagedPath)) {
+      throw new Error(`Electron bundled license evidence missing: ${filename}`);
+    }
+    const sourceBytes = readFileSync(sourcePath);
+    const packagedBytes = readFileSync(packagedPath);
+    if (!sourceBytes.equals(packagedBytes)) {
+      throw new Error(`Electron bundled license package identity mismatch: ${filename}`);
+    }
+    for (const [role, filePath, bytes] of [
+      ["ACQUIRED_ELECTRON_DISTRIBUTION", sourcePath, sourceBytes],
+      ["FORGE_UNPACKAGED_APPLICATION", packagedPath, packagedBytes],
+    ]) {
+      evidence.push({
+        role,
+        path: relativeRepositoryPath(filePath),
+        bytes: bytes.length,
+        sha256: sha256Bytes(bytes),
+      });
+    }
+  }
+  return evidence;
+}
+
 function walkArtifactFiles(rootPath) {
   const files = [];
   const visit = (directory) => {
@@ -213,6 +310,84 @@ function walkArtifactFiles(rootPath) {
   };
   visit(rootPath);
   return files;
+}
+
+function walkAllFiles(rootPath) {
+  const files = [];
+  const visit = (directory) => {
+    for (const entry of readdirSync(directory, { withFileTypes: true }).sort((left, right) =>
+      left.name.localeCompare(right.name, "en"),
+    )) {
+      if (entry.isSymbolicLink()) continue;
+      const entryPath = path.join(directory, entry.name);
+      if (entry.isDirectory()) visit(entryPath);
+      else if (entry.isFile()) files.push(entryPath);
+    }
+  };
+  visit(rootPath);
+  return files;
+}
+
+function buildMplPackagedDistributionEvidence(snapshotHost, nativeArtifacts) {
+  const packagedApplicationRoot = path.join(
+    REPOSITORY_ROOT,
+    "apps",
+    "editor-electron",
+    "out",
+    `RetroStageMaker-${snapshotHost.platform}-${snapshotHost.architecture}`,
+    "resources",
+    "app",
+  );
+  if (!existsSync(packagedApplicationRoot)) {
+    throw new Error("Forge unpackaged application is missing for MPL distribution inspection.");
+  }
+
+  const packagedFiles = walkAllFiles(packagedApplicationRoot);
+  const installedMplNativeHashes = new Set(
+    nativeArtifacts
+      .filter((artifact) => artifact.owningPackage.startsWith("lightningcss"))
+      .map((artifact) => artifact.sha256),
+  );
+  const packagedPathIdentityMatches = packagedFiles
+    .map((filePath) => relativeRepositoryPath(filePath))
+    .filter((filePath) => filePath.toLowerCase().includes("lightningcss"));
+  const packagedNativeHashMatches = packagedFiles
+    .map((filePath) => ({ path: relativeRepositoryPath(filePath), sha256: sha256File(filePath) }))
+    .filter((entry) => installedMplNativeHashes.has(entry.sha256));
+  const textExtensions = new Set([".cjs", ".css", ".html", ".js", ".json", ".mjs", ".ts"]);
+  const packagedTextIdentityMatches = packagedFiles
+    .filter((filePath) => textExtensions.has(path.extname(filePath).toLowerCase()))
+    .filter((filePath) => readFileSync(filePath, "utf8").toLowerCase().includes("lightningcss"))
+    .map((filePath) => relativeRepositoryPath(filePath));
+  const packagedNodeModulesPresent = existsSync(path.join(packagedApplicationRoot, "node_modules"));
+  const coveredExecutableOrSourcePresent =
+    packagedNodeModulesPresent ||
+    packagedPathIdentityMatches.length !== 0 ||
+    packagedNativeHashMatches.length !== 0 ||
+    packagedTextIdentityMatches.length !== 0;
+  if (coveredExecutableOrSourcePresent) {
+    throw new Error(
+      "BLOCKED — MPL-COVERED LIGHTNING CSS CONTENT PRESENT WITHOUT A REVIEWED RELEASE-DISTRIBUTION MECHANISM",
+    );
+  }
+
+  return {
+    identities: ["lightningcss@1.33.0", "lightningcss-win32-x64-msvc@1.33.0"],
+    packagedApplicationRoot: relativeRepositoryPath(packagedApplicationRoot),
+    packagedResourceFileCount: packagedFiles.length,
+    packagedNodeModulesPresent,
+    installedMplNativeArtifactCount: installedMplNativeHashes.size,
+    packagedPathIdentityMatches,
+    packagedNativeHashMatches,
+    packagedTextIdentityMatches,
+    coveredExecutableOrSourcePresent,
+    distributionDisposition:
+      "BUILD_ONLY / PHYSICALLY ABSENT FROM CURRENT FORGE UNPACKAGED APPLICATION",
+    sourceAvailabilityFulfillment:
+      "NOT TRIGGERED FOR THIS CANDIDATE ARTIFACT; RE-EVALUATE AND PROVIDE MPL-COVERED SOURCE IF A FUTURE RELEASE ARTIFACT PHYSICALLY DISTRIBUTES THE COMPONENT",
+    noticeFulfillment:
+      "MPL identity, license material, and build-graph provenance remain retained in the governed compliance notices.",
+  };
 }
 
 function inferPlatform(value) {
@@ -236,8 +411,13 @@ function packagePurl(name, version) {
   return `pkg:npm/${encodedName}@${version}`;
 }
 
-function buildPackageState(graph, rootPackageJson) {
-  const directNames = new Set(Object.keys(rootPackageJson.devDependencies));
+function buildPackageState(graph, rootPackageJson, applicationPackageJson) {
+  const directIdentities = new Set(
+    [
+      ...Object.entries(rootPackageJson.devDependencies ?? {}),
+      ...Object.entries(applicationPackageJson.devDependencies ?? {}),
+    ].map(([name, version]) => `${name}@${version}`),
+  );
   const packages = [];
   const nativeArtifacts = [];
   const wasmArtifacts = [];
@@ -274,6 +454,18 @@ function buildPackageState(graph, rootPackageJson) {
           : path.basename(artifactPath).toLowerCase().includes(".so")
             ? ".so"
             : path.extname(artifactPath).toLowerCase();
+      const provenance = createArtifactProvenanceFields({
+        name: node.name,
+        version: node.version,
+        artifactType: physicalArtifactType,
+        repository: declaredRepository,
+        noticeSourceUrl,
+        licenseNoticeLocations,
+      });
+      if (node.name === "electron") {
+        provenance.packagedRole =
+          "RSM-5-I1 ELECTRON SECURE SHELL RUNTIME / NOT FINAL RELEASE PACKAGE";
+      }
       const record = {
         owningPackage: node.name,
         version: node.version,
@@ -283,14 +475,7 @@ function buildPackageState(graph, rootPackageJson) {
         license,
         provenanceSourceIdentity: identity,
         distributionScope: DISTRIBUTION_SCOPE,
-        ...createArtifactProvenanceFields({
-          name: node.name,
-          version: node.version,
-          artifactType: physicalArtifactType,
-          repository: declaredRepository,
-          noticeSourceUrl,
-          licenseNoticeLocations,
-        }),
+        ...provenance,
       };
       if (artifactType === "WASM") {
         wasmArtifacts.push(record);
@@ -309,8 +494,13 @@ function buildPackageState(graph, rootPackageJson) {
       version: node.version,
       identity,
       purl: packagePurl(node.name, node.version),
-      direct:
-        directNames.has(node.name) && rootPackageJson.devDependencies[node.name] === node.version,
+      direct: directIdentities.has(identity),
+      directWorkspace:
+        rootPackageJson.devDependencies?.[node.name] === node.version
+          ? "ROOT"
+          : applicationPackageJson.devDependencies?.[node.name] === node.version
+            ? "apps/editor-electron"
+            : "TRANSITIVE",
       dependencyScope: "development",
       license,
       author,
@@ -340,13 +530,14 @@ function buildPackageState(graph, rootPackageJson) {
   return { packages, nativeArtifacts, wasmArtifacts };
 }
 
-function buildInventory(packages, snapshotHost) {
+function buildInventory(packages, snapshotHost, electronBundledLicenseEvidence) {
   const entries = packages.map((entry) => ({
     name: entry.name,
     version: entry.version,
     identity: entry.identity,
     purl: entry.purl,
     direct: entry.direct,
+    directWorkspace: entry.directWorkspace,
     dependencyScope: entry.dependencyScope,
     license: entry.license,
     author: entry.author,
@@ -363,6 +554,7 @@ function buildInventory(packages, snapshotHost) {
     baselineHost: BASELINE_HOST,
     snapshotHost,
     distributionScope: DISTRIBUTION_SCOPE,
+    electronBundledLicenseEvidence,
     summary: {
       exactInstalledExternalPackageVersionCount: entries.length,
       directCount: entries.filter((entry) => entry.direct).length,
@@ -374,19 +566,25 @@ function buildInventory(packages, snapshotHost) {
   };
 }
 
-function specialObligation(identity, license) {
+function specialObligation(identity, license, mplDistributionEvidence) {
   if (identity === "argparse@2.0.1") {
     return "Retain applicable Python/PSF, BeOpen, CNRI, and CWI license/copyright text; describe covered derivative changes when applicable.";
   }
   if (identity === "minimatch@10.2.6") {
     return "Give recipients the Blue Oak Model License 1.0.0 text or its permitted canonical link.";
   }
+  if (identity === "lightningcss@1.33.0" || identity === "lightningcss-win32-x64-msvc@1.33.0") {
+    return `Retain MPL-2.0 license/source-availability obligations. Current physical package observation: ${mplDistributionEvidence.distributionDisposition}; ${mplDistributionEvidence.sourceAvailabilityFulfillment}`;
+  }
+  if (identity === "type-fest@0.13.1" || identity === "type-fest@1.4.0") {
+    return "Upstream metadata remains (MIT OR CC0-1.0); the exact owner commercial disposition selects the MIT branch without rewriting upstream metadata.";
+  }
   return license
     ? "Preserve applicable license and copyright material when distributing this development/bootstrap dependency."
     : "No standalone license identity was discovered; distribution is blocked.";
 }
 
-function buildLicenseReview(packages, snapshotHost) {
+function buildLicenseReview(packages, snapshotHost, mplDistributionEvidence) {
   const entries = packages.map((entry) => ({
     name: entry.name,
     version: entry.version,
@@ -406,7 +604,18 @@ function buildLicenseReview(packages, snapshotHost) {
     ownerExactException: entry.ownerExactException,
     prohibited: entry.prohibited,
     distributionScope: entry.distributionScope,
-    notes: specialObligation(entry.identity, entry.license),
+    ownerCommercialDisposition:
+      entry.identity === "type-fest@0.13.1" || entry.identity === "type-fest@1.4.0"
+        ? "MIT SELECTED FROM UPSTREAM (MIT OR CC0-1.0) EXPRESSION"
+        : entry.ownerExactException
+          ? "HUMAN PROJECT OWNER APPROVED — EXACT IDENTITY/LICENSE ONLY"
+          : "NOT APPLICABLE",
+    packagedArtifactDisposition:
+      entry.identity === "lightningcss@1.33.0" ||
+      entry.identity === "lightningcss-win32-x64-msvc@1.33.0"
+        ? mplDistributionEvidence
+        : null,
+    notes: specialObligation(entry.identity, entry.license, mplDistributionEvidence),
   }));
   const count = (classification) =>
     entries.filter((entry) => entry.classification === classification).length;
@@ -415,6 +624,11 @@ function buildLicenseReview(packages, snapshotHost) {
     baselineHost: BASELINE_HOST,
     snapshotHost,
     distributionScope: DISTRIBUTION_SCOPE,
+    currentHostOwnerApprovedIdentities: entries
+      .filter((entry) => entry.ownerExactException)
+      .map((entry) => entry.identity)
+      .sort((left, right) => left.localeCompare(right, "en")),
+    mplCoveredComponentEvidence: mplDistributionEvidence,
     policy: {
       automaticallyAdmissible: [...AUTOMATIC_LICENSES].sort((left, right) =>
         left.localeCompare(right, "en"),
@@ -437,7 +651,12 @@ function buildLicenseReview(packages, snapshotHost) {
   };
 }
 
-function buildNotices(packages, snapshotHost) {
+function buildNotices(
+  packages,
+  snapshotHost,
+  electronBundledLicenseEvidence,
+  mplDistributionEvidence,
+) {
   const entries = packages.map((entry) => ({
     name: entry.name,
     version: entry.version,
@@ -446,7 +665,7 @@ function buildNotices(packages, snapshotHost) {
     safeSourceUrl: entry.safeNoticeSourceUrl,
     classification: entry.classification,
     distributionScope: entry.distributionScope,
-    specialObligation: specialObligation(entry.identity, entry.license),
+    specialObligation: specialObligation(entry.identity, entry.license, mplDistributionEvidence),
     licenseFiles: entry.evidenceFiles.filter((file) => file.type === "LICENSE"),
     noticeFiles: entry.evidenceFiles.filter((file) => file.type === "NOTICE_OR_COPYRIGHT"),
   }));
@@ -454,7 +673,12 @@ function buildNotices(packages, snapshotHost) {
     (entry) => entry.licenseFiles.length + entry.noticeFiles.length === 0,
   ).length;
   return {
-    output: renderNoticesHtml(entries, snapshotHost),
+    output: renderNoticesHtml(
+      entries,
+      snapshotHost,
+      electronBundledLicenseEvidence,
+      mplDistributionEvidence,
+    ),
     sourceLinkFallbackCount,
     metadataOnlyFallbackCount: 0,
     noticeProvenanceBlockerCount: 0,
@@ -462,7 +686,7 @@ function buildNotices(packages, snapshotHost) {
 }
 
 function buildSecurityFindings(snapshotHost) {
-  const audit = runPnpm(["audit", "--json"], [0, 1]);
+  const audit = runPnpm(["audit", "--json"], [0]);
   const parsed = JSON.parse(audit.stdout);
   const findings = [];
   for (const advisory of Object.values(parsed.advisories ?? {})) {
@@ -482,9 +706,7 @@ function buildSecurityFindings(snapshotHost) {
         blocking: disposition.blocking,
         state: disposition.state,
         notes:
-          advisoryIdentity === "GHSA-xffm-g5w8-qvg7"
-            ? "PRE1 carry-forward: open, visible, non-blocking low-severity development-tool finding."
-            : "Current read-only pnpm audit finding.",
+          "Current full pnpm audit finding; candidate readiness requires this list to be empty.",
       });
     }
   }
@@ -513,11 +735,12 @@ function buildSecurityFindings(snapshotHost) {
     },
     carryForward: {
       advisory: "GHSA-xffm-g5w8-qvg7",
-      package: "@eslint/plugin-kit@0.2.8",
+      package: "@eslint/plugin-kit@0.3.4",
       severity: "low",
       state: findings.some((finding) => finding.advisory === "GHSA-xffm-g5w8-qvg7")
-        ? "OPEN_NON_BLOCKING"
-        : "NOT_PRESENT_IN_CURRENT_AUDIT",
+        ? "UNEXPECTED_PRESENT"
+        : "REMEDIATED_NOT_PRESENT_IN_CURRENT_AUDIT",
+      remediation: 'parent-scoped pnpm override "eslint@9.21.0>@eslint/plugin-kit": 0.3.4',
     },
     findings,
   };
@@ -608,16 +831,20 @@ function buildCanonicalSbom() {
 function buildReadme() {
   return `# Compliance baseline
 
-This directory is the deterministic RSM-3-I3 bootstrap/tooling compliance baseline.
+This directory is the deterministic RSM-5-I1 secure Electron shell compliance baseline.
 
 - Distribution scope: \`${DISTRIBUTION_SCOPE}\`.
 - The SBOM is native pnpm CycloneDX 1.7 with only volatile serial/timestamp fields removed.
 - The accepted physical baseline host is \`${BASELINE_HOST.platform}/${BASELINE_HOST.architecture}\`; only platform-neutral artifacts are byte-compared on other hosts.
-- License policy applies only the two exact owner exceptions recorded in \`license-review.json\`.
+- License policy applies only exact package/version/license owner dispositions recorded in \`license-review.json\`; broad family approval is forbidden.
+- The owner-exception policy is limited to the exact 14 Human Project Owner-approved current Windows/x64 identities; non-current-platform Lightning CSS identities are not pre-approved.
 - Notice fallbacks require an approved safe source link; native/WASM records carry explicit provenance, runtime, packaged-role, and removal contracts.
-- Low and moderate security findings remain visible; high and critical findings block validation.
+- MPL-covered Lightning CSS is physically verified as build-only and absent from the current Forge unpackaged application; license review and notices retain the exact absence/source-availability evidence and require a future artifact-specific recheck.
+- Candidate readiness requires the complete current audit to remain zero at every severity; the parent-scoped plugin-kit remediation stays visible in \`security-findings.json\`.
+- Electron acquisition remains explicit while lifecycle scripts stay disabled. The sole lock-pinned exotic source is \`@electron/node-gyp\` commit \`06b29aafb7708acef8b3669835c8a7857ebc92d2\`, and \`tar@7.5.22\` remains exact.
+- Electron and Chromium bundled license files are physically verified in the acquired distribution and Forge unpackaged application.
 - Dependency Review Action is deferred because the current private user-owned repository is not platform-eligible.
-- These artifacts are not final product-release or legal approval.
+- These artifacts are not final product-release notice completeness or legal approval.
 
 Regenerate with \`pnpm run compliance:generate\` and verify with \`pnpm run compliance:check\`.
 `;
@@ -629,23 +856,26 @@ function assertNoBlockers(licenseReview, securityFindings) {
     licenseReview.summary.prohibited +
     licenseReview.summary.unknownNoLicense;
   if (licenseBlockers !== 0) throw new Error(`License blocker count is ${licenseBlockers}.`);
-  if (securityFindings.summary.blocking !== 0) {
+  if (securityFindings.summary.total !== 0 || securityFindings.summary.blocking !== 0) {
+    throw new Error(`Current full audit is not zero: ${JSON.stringify(securityFindings.summary)}.`);
+  }
+  const expectedOwnerIdentities = [...OWNER_EXCEPTIONS.keys()].sort((left, right) =>
+    left.localeCompare(right, "en"),
+  );
+  const observedOwnerIdentities = licenseReview.packages
+    .filter((entry) => entry.ownerExactException)
+    .map((entry) => entry.identity)
+    .sort((left, right) => left.localeCompare(right, "en"));
+  if (JSON.stringify(observedOwnerIdentities) !== JSON.stringify(expectedOwnerIdentities)) {
+    throw new Error("Exact owner-approved license identity set is missing or misclassified.");
+  }
+  if (expectedOwnerIdentities.length !== 14) {
     throw new Error(
-      `High/critical vulnerability blocker count is ${securityFindings.summary.blocking}.`,
+      `Owner-approved identity policy count is ${expectedOwnerIdentities.length}; expected 14.`,
     );
   }
-  if (
-    !licenseReview.packages.some(
-      (entry) => entry.identity === "argparse@2.0.1" && entry.ownerExactException,
-    ) ||
-    !licenseReview.packages.some(
-      (entry) => entry.identity === "minimatch@10.2.6" && entry.ownerExactException,
-    )
-  ) {
-    throw new Error("An exact owner-approved license identity is missing or misclassified.");
-  }
-  if (securityFindings.carryForward.state !== "OPEN_NON_BLOCKING") {
-    throw new Error("Required low advisory carry-forward is not visible in the current audit.");
+  if (securityFindings.carryForward.state !== "REMEDIATED_NOT_PRESENT_IN_CURRENT_AUDIT") {
+    throw new Error("Plugin-kit remediation visibility differs from the accepted RESUME1 state.");
   }
 }
 
@@ -653,12 +883,26 @@ export function generateCompliance(destinationPath) {
   const destination = path.resolve(destinationPath);
   mkdirSync(destination, { recursive: true });
   const snapshotHost = { platform: process.platform, architecture: process.arch };
-  const rootPackageJson = assertDependencyBaseline();
+  const { rootPackageJson, applicationPackageJson } = assertDependencyBaseline();
   const graph = readActiveDependencyGraph();
-  const { packages, nativeArtifacts, wasmArtifacts } = buildPackageState(graph, rootPackageJson);
-  const inventory = buildInventory(packages, snapshotHost);
-  const licenseReview = buildLicenseReview(packages, snapshotHost);
-  const notices = buildNotices(packages, snapshotHost);
+  const electronBundledLicenseEvidence = buildElectronBundledLicenseEvidence(snapshotHost);
+  const { packages, nativeArtifacts, wasmArtifacts } = buildPackageState(
+    graph,
+    rootPackageJson,
+    applicationPackageJson,
+  );
+  const mplDistributionEvidence = buildMplPackagedDistributionEvidence(
+    snapshotHost,
+    nativeArtifacts,
+  );
+  const inventory = buildInventory(packages, snapshotHost, electronBundledLicenseEvidence);
+  const licenseReview = buildLicenseReview(packages, snapshotHost, mplDistributionEvidence);
+  const notices = buildNotices(
+    packages,
+    snapshotHost,
+    electronBundledLicenseEvidence,
+    mplDistributionEvidence,
+  );
   const securityFindings = buildSecurityFindings(snapshotHost);
   const sbom = buildCanonicalSbom();
   assertNoBlockers(licenseReview, securityFindings);
@@ -719,6 +963,10 @@ export function generateCompliance(destinationPath) {
     licenseSummary: licenseReview.summary,
     securitySummary: securityFindings.summary,
     carryForwardState: securityFindings.carryForward.state,
+    currentHostOwnerApprovedIdentities: licenseReview.currentHostOwnerApprovedIdentities,
+    currentHostOwnerExceptionCount: licenseReview.currentHostOwnerApprovedIdentities.length,
+    mplCoveredComponentDistributed: mplDistributionEvidence.coveredExecutableOrSourcePresent,
+    mplPackagedResourceFileCount: mplDistributionEvidence.packagedResourceFileCount,
     baselineHost: BASELINE_HOST,
     snapshotHost,
     metadataOnlyFallbackCount: notices.metadataOnlyFallbackCount,
@@ -726,6 +974,7 @@ export function generateCompliance(destinationPath) {
     noticeProvenanceBlockerCount: notices.noticeProvenanceBlockerCount,
     nativeRequiredFieldCompleteCount: nativeArtifacts.length,
     nativeProvenanceBlockerCount: provenanceIssues.length,
+    electronBundledLicenseEvidenceCount: electronBundledLicenseEvidence.length,
   };
 }
 

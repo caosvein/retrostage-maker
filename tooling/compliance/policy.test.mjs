@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   HOST_SENSITIVE_ARTIFACTS,
+  OWNER_EXCEPTIONS,
   PLATFORM_NEUTRAL_ARTIFACTS,
   artifactComparisonDisposition,
   classifyArtifactPath,
@@ -44,6 +45,47 @@ describe("RSM-3-I3 compliance policy", () => {
       classifyLicenseIdentity({ name: "minimatch", version: "10.2.6", license: "BlueOak-1.0.0" })
         .classification,
     ).toBe("OWNER_APPROVED_EXACT_TRANSITIVE_DEV_TOOL_LICENSE");
+  });
+
+  it("locks owner exceptions to the exact fourteen Windows/x64 identities", () => {
+    expect([...OWNER_EXCEPTIONS.keys()]).toEqual([
+      "argparse@2.0.1",
+      "caniuse-lite@1.0.30001809",
+      "chownr@3.0.0",
+      "lightningcss@1.33.0",
+      "lightningcss-win32-x64-msvc@1.33.0",
+      "minimatch@10.2.6",
+      "minipass@7.1.3",
+      "minipass-flush@1.0.7",
+      "spdx-exceptions@2.5.0",
+      "spdx-license-ids@3.0.23",
+      "tar@7.5.22",
+      "type-fest@0.13.1",
+      "type-fest@1.4.0",
+      "yallist@5.0.0",
+    ]);
+  });
+
+  it("does not pre-approve non-current-platform Lightning CSS identities", () => {
+    for (const name of [
+      "lightningcss-android-arm64",
+      "lightningcss-darwin-arm64",
+      "lightningcss-darwin-x64",
+      "lightningcss-freebsd-x64",
+      "lightningcss-linux-arm64-gnu",
+      "lightningcss-linux-arm64-musl",
+      "lightningcss-linux-arm-gnueabihf",
+      "lightningcss-linux-x64-gnu",
+      "lightningcss-linux-x64-musl",
+      "lightningcss-win32-arm64-msvc",
+    ]) {
+      expect(classifyLicenseIdentity({ name, version: "1.33.0", license: "MPL-2.0" })).toEqual({
+        classification: "UNAPPROVED_MANUAL_REVIEW",
+        manualReviewRequired: true,
+        ownerExactException: false,
+        prohibited: false,
+      });
+    }
   });
 
   it("does not transfer an approved license to another identity", () => {
@@ -211,6 +253,12 @@ describe("RSM-3-I3 compliance policy", () => {
   it("normalizes GitHub git protocol source URLs", () => {
     expect(normalizeSafeSourceUrl("git://github.com/example/project.git")).toBe(
       "https://github.com/example/project.git",
+    );
+  });
+
+  it("normalizes npm GitHub shorthand source identities", () => {
+    expect(normalizeSafeSourceUrl("kevva/compare-version")).toBe(
+      "https://github.com/kevva/compare-version",
     );
   });
 

@@ -7,6 +7,7 @@ import { fileURLToPath } from "node:url";
 import { afterEach, describe, expect, it } from "vitest";
 
 import {
+  EXPECTED_APPLICATION_DEV_DEPENDENCIES,
   EXPECTED_DIRECT_DEV_DEPENDENCIES,
   EXPECTED_SOURCE_LAYOUT,
   REQUIRED_PATHS,
@@ -74,6 +75,10 @@ function createFixture(activeTaskCount = 0) {
         private: true,
         type: "module",
         scripts: {
+          "electron:acquire": "node apps/editor-electron/node_modules/electron/install.js",
+          "electron:build": "pnpm --dir apps/editor-electron run build",
+          "electron:package": "pnpm --dir apps/editor-electron run package",
+          "electron:smoke": "pnpm --dir apps/editor-electron run smoke",
           "workflow:check": "node tooling/workflow-policy.mjs",
           validate: "pnpm run workflow:check",
         },
@@ -82,6 +87,30 @@ function createFixture(activeTaskCount = 0) {
       null,
       2,
     )}\n`,
+  );
+  write(
+    root,
+    "apps/editor-electron/package.json",
+    `${JSON.stringify(
+      {
+        name: "@retrostage/editor-electron",
+        private: true,
+        type: "module",
+        devDependencies: EXPECTED_APPLICATION_DEV_DEPENDENCIES,
+      },
+      null,
+      2,
+    )}\n`,
+  );
+  write(
+    root,
+    "pnpm-workspace.yaml",
+    `packages:\n  - "packages/*"\n  - "apps/*"\n\nautoInstallPeers: false\nblockExoticSubdeps: false\nstrictPeerDependencies: true\nignoreScripts: true\nsavePrefix: ""\nminimumReleaseAgeExclude:\n  - electron@43.4.0\noverrides:\n  tar: 7.5.22\n  "eslint@9.21.0>@eslint/plugin-kit": 0.3.4\n`,
+  );
+  write(
+    root,
+    "pnpm-lock.yaml",
+    `lockfileVersion: '9.0'\noverrides:\n  eslint@9.21.0>@eslint/plugin-kit: 0.3.4\n  tar: 7.5.22\npackages:\n  '@eslint/plugin-kit@0.3.4': {}\n  '@electron/node-gyp@https://codeload.github.com/electron/node-gyp/tar.gz/06b29aafb7708acef8b3669835c8a7857ebc92d2': {}\n  electron@43.4.0: {}\n  tar@7.5.22: {}\n`,
   );
   for (const [packagePath, name] of [
     ["packages/core", "@retrostage/core"],
@@ -233,11 +262,11 @@ describe("RSM-4 workflow policy", () => {
     expect(issueCodes(validateFixture(fixture))).toContain("SOURCE_FILE_HASH_MISMATCH");
   });
 
-  it("fails when an RSM-4 product application root appears", () => {
+  it("fails when an unexpected application root appears", () => {
     const fixture = createFixture();
-    write(fixture.root, "apps/editor-electron/package.json", "{}\n");
+    write(fixture.root, "apps/player-electron/package.json", "{}\n");
     expect(issueCodes(validateFixture(fixture))).toContain(
-      "REPOSITORY_POLICY_FORBIDDEN_EARLY_ROOT",
+      "REPOSITORY_POLICY_UNAUTHORIZED_APPLICATION_PATH",
     );
   });
 
@@ -266,7 +295,70 @@ describe("RSM-4 workflow policy", () => {
     packageJson.devDependencies.vite = "8.2.0";
     write(fixture.root, "package.json", `${JSON.stringify(packageJson, null, 2)}\n`);
     const codes = issueCodes(validateFixture(fixture));
-    expect(codes).toContain("REPOSITORY_POLICY_DIRECT_DEPENDENCY_MISSING_OR_INEXACT");
-    expect(codes).toContain("REPOSITORY_POLICY_UNAUTHORIZED_DIRECT_DEPENDENCY");
+    expect(codes).toContain("REPOSITORY_POLICY_ROOT_DIRECT_DEPENDENCY_MISSING_OR_INEXACT");
+    expect(codes).toContain("REPOSITORY_POLICY_ROOT_DIRECT_UNAUTHORIZED_DEPENDENCY");
+  });
+
+  it("fails closed on plugin-vite, Vite downgrade, tar drift, a second exotic and missing security control", () => {
+    const pluginFixture = createFixture();
+    const appPath = path.join(pluginFixture.root, "apps/editor-electron/package.json");
+    const appPackage = JSON.parse(readFileSync(appPath, "utf8"));
+    appPackage.devDependencies["@electron-forge/plugin-vite"] = "7.11.2";
+    appPackage.devDependencies.vite = "7.3.6";
+    write(
+      pluginFixture.root,
+      "apps/editor-electron/package.json",
+      `${JSON.stringify(appPackage, null, 2)}\n`,
+    );
+    const pluginCodes = issueCodes(validateFixture(pluginFixture));
+    expect(pluginCodes).toContain("REPOSITORY_POLICY_APPLICATION_DIRECT_UNAUTHORIZED_DEPENDENCY");
+    expect(pluginCodes).toContain(
+      "REPOSITORY_POLICY_APPLICATION_DIRECT_DEPENDENCY_MISSING_OR_INEXACT",
+    );
+
+    const supplyFixture = createFixture();
+    const workspace = readFileSync(
+      path.join(supplyFixture.root, "pnpm-workspace.yaml"),
+      "utf8",
+    ).replace("tar: 7.5.22", "tar: 7.5.20");
+    write(supplyFixture.root, "pnpm-workspace.yaml", workspace);
+    const lock = `${readFileSync(path.join(supplyFixture.root, "pnpm-lock.yaml"), "utf8")}  x@https://codeload.github.com/example/x/tar.gz/${"a".repeat(40)}: {}\n`;
+    write(supplyFixture.root, "pnpm-lock.yaml", lock);
+    expect(issueCodes(validateFixture(supplyFixture))).toEqual(
+      expect.arrayContaining(["WORKSPACE_POLICY_DRIFT", "EXOTIC_SOURCE_SET_INVALID"]),
+    );
+
+    const scriptFixture = createFixture();
+    const rootPath = path.join(scriptFixture.root, "package.json");
+    const rootPackage = JSON.parse(readFileSync(rootPath, "utf8"));
+    delete rootPackage.scripts["electron:smoke"];
+    write(scriptFixture.root, "package.json", `${JSON.stringify(rootPackage, null, 2)}\n`);
+    expect(issueCodes(validateFixture(scriptFixture))).toContain(
+      "ELECTRON_SCRIPT_MISSING_OR_INEXACT",
+    );
+
+    const securityFixture = createFixture();
+    const mainPath = "apps/editor-electron/src/main/main.ts";
+    const main = readFileSync(path.join(securityFixture.root, mainPath), "utf8").replace(
+      "nodeIntegration: false",
+      "nodeIntegration: true",
+    );
+    write(securityFixture.root, mainPath, main);
+    expect(issueCodes(validateFixture(securityFixture))).toContain(
+      "REQUIRED_TEMPLATE_FIELD_MISSING",
+    );
+
+    const preloadFixture = createFixture();
+    write(
+      preloadFixture.root,
+      "apps/editor-electron/src/preload/preload.ts",
+      `${readFileSync(
+        path.join(preloadFixture.root, "apps/editor-electron/src/preload/preload.ts"),
+        "utf8",
+      )}\nvoid process.env;\n`,
+    );
+    expect(issueCodes(validateFixture(preloadFixture))).toContain(
+      "PRELOAD_PRIVILEGED_SURFACE_PRESENT",
+    );
   });
 });

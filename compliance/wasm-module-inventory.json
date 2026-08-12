@@ -5,7 +5,7 @@
     "platform": "win32"
   },
   "count": 0,
-  "distributionScope": "DEVELOPMENT / BOOTSTRAP TOOLING ONLY",
+  "distributionScope": "RSM-5-I1 DEVELOPMENT / SECURE ELECTRON SHELL CANDIDATE / NOT FINAL RELEASE",
   "scanExtension": ".wasm",
   "schemaVersion": 1,
   "snapshotHost": {

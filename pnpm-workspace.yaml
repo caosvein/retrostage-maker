@@ -1,7 +1,14 @@
 packages:
   - "packages/*"
+  - "apps/*"
 
 autoInstallPeers: false
+blockExoticSubdeps: false
 strictPeerDependencies: true
 ignoreScripts: true
 savePrefix: ""
+minimumReleaseAgeExclude:
+  - electron@43.4.0
+overrides:
+  tar: 7.5.22
+  "eslint@9.21.0>@eslint/plugin-kit": 0.3.4

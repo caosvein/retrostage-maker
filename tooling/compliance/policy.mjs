@@ -1,7 +1,8 @@
 import path from "node:path";
 import { URL } from "node:url";
 
-export const DISTRIBUTION_SCOPE = "DEVELOPMENT / BOOTSTRAP TOOLING ONLY";
+export const DISTRIBUTION_SCOPE =
+  "RSM-5-I1 DEVELOPMENT / SECURE ELECTRON SHELL CANDIDATE / NOT FINAL RELEASE";
 
 export const BASELINE_HOST = Object.freeze({
   platform: "win32",
@@ -24,29 +25,35 @@ export const AUTOMATIC_LICENSES = new Set([
   "Apache-2.0",
   "BSD-2-Clause",
   "BSD-3-Clause",
-  "CC0-1.0",
   "ISC",
   "MIT",
   "Unlicense",
   "Zlib",
 ]);
 
-export const OWNER_EXCEPTIONS = new Map([
-  [
-    "argparse@2.0.1",
-    {
-      license: "Python-2.0",
-      scope: DISTRIBUTION_SCOPE,
-    },
-  ],
-  [
-    "minimatch@10.2.6",
-    {
-      license: "BlueOak-1.0.0",
-      scope: DISTRIBUTION_SCOPE,
-    },
-  ],
+const OWNER_EXCEPTION_IDENTITIES = Object.freeze([
+  ["argparse@2.0.1", "Python-2.0"],
+  ["caniuse-lite@1.0.30001809", "CC-BY-4.0"],
+  ["chownr@3.0.0", "BlueOak-1.0.0"],
+  ["lightningcss@1.33.0", "MPL-2.0"],
+  ["lightningcss-win32-x64-msvc@1.33.0", "MPL-2.0"],
+  ["minimatch@10.2.6", "BlueOak-1.0.0"],
+  ["minipass@7.1.3", "BlueOak-1.0.0"],
+  ["minipass-flush@1.0.7", "BlueOak-1.0.0"],
+  ["spdx-exceptions@2.5.0", "CC-BY-3.0"],
+  ["spdx-license-ids@3.0.23", "CC0-1.0"],
+  ["tar@7.5.22", "BlueOak-1.0.0"],
+  ["type-fest@0.13.1", "(MIT OR CC0-1.0)"],
+  ["type-fest@1.4.0", "(MIT OR CC0-1.0)"],
+  ["yallist@5.0.0", "BlueOak-1.0.0"],
 ]);
+
+export const OWNER_EXCEPTIONS = new Map(
+  OWNER_EXCEPTION_IDENTITIES.map(([identity, license]) => [
+    identity,
+    { license, scope: DISTRIBUTION_SCOPE },
+  ]),
+);
 
 const PROHIBITED_LICENSE_PATTERN =
   /(?:^|[^A-Za-z])(?:AGPL|GPL-2\.0|GPL-3\.0|SSPL|BUSL|Business Source License|Commons Clause|PolyForm|Non-Commercial|No-Derivatives)(?:$|[^A-Za-z])/i;
@@ -113,6 +120,9 @@ export function normalizeSafeSourceUrl(value) {
   if (typeof value !== "string") return "";
   let candidate = value.trim();
   if (!candidate) return "";
+  if (/^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/u.test(candidate)) {
+    candidate = `https://github.com/${candidate}`;
+  }
   if (/^git\+https?:\/\//iu.test(candidate)) candidate = candidate.slice(4);
   else if (/^git:\/\/github\.com\//iu.test(candidate)) {
     candidate = `https://github.com/${candidate.slice("git://github.com/".length)}`;
@@ -161,7 +171,12 @@ export function artifactComparisonDisposition({ artifactName, platform, architec
   };
 }
 
-export function renderNoticesHtml(entries, snapshotHost = BASELINE_HOST) {
+export function renderNoticesHtml(
+  entries,
+  snapshotHost = BASELINE_HOST,
+  bundledElectronEvidence = [],
+  mplDistributionEvidence = null,
+) {
   const sorted = [...entries].sort((left, right) =>
     `${left.name}@${left.version}`.localeCompare(`${right.name}@${right.version}`, "en"),
   );
@@ -200,6 +215,33 @@ ${fallback}
 </section>`;
   });
 
+  const electronEvidenceSection = `<section id="electron-bundled-license-evidence">
+<h2>Electron / Chromium bundled license evidence</h2>
+<p>This physical evidence covers the RSM-5-I1 Electron shell candidate only. It does not claim final release-package notice completeness.</p>
+<ul>
+${bundledElectronEvidence
+  .map(
+    (entry) =>
+      `<li><code>${escapeHtml(entry.path)}</code> — ${escapeHtml(String(entry.bytes))} bytes — SHA-256 <code>${escapeHtml(entry.sha256)}</code></li>`,
+  )
+  .join("\n")}
+</ul>
+</section>`;
+
+  const mplEvidenceSection = mplDistributionEvidence
+    ? `<section id="mpl-covered-component-distribution-evidence">
+<h2>MPL-covered Lightning CSS distribution evidence</h2>
+<p>Identities: <code>${escapeHtml(mplDistributionEvidence.identities.join(", "))}</code></p>
+<p>Packaged application root: <code>${escapeHtml(mplDistributionEvidence.packagedApplicationRoot)}</code></p>
+<p>Packaged resource files scanned: ${escapeHtml(String(mplDistributionEvidence.packagedResourceFileCount))}</p>
+<p>Packaged node_modules present: ${escapeHtml(String(mplDistributionEvidence.packagedNodeModulesPresent))}</p>
+<p>Covered executable or source present: ${escapeHtml(String(mplDistributionEvidence.coveredExecutableOrSourcePresent))}</p>
+<p>Disposition: ${escapeHtml(mplDistributionEvidence.distributionDisposition)}</p>
+<p>Source availability: ${escapeHtml(mplDistributionEvidence.sourceAvailabilityFulfillment)}</p>
+<p>Notice fulfillment: ${escapeHtml(mplDistributionEvidence.noticeFulfillment)}</p>
+</section>`
+    : "";
+
   return `<!doctype html>
 <html lang="en">
 <head>
@@ -213,10 +255,12 @@ ${fallback}
 </head>
 <body>
 <h1>RetroStage Maker Third-Party Notices</h1>
-<p>Scope: ${escapeHtml(DISTRIBUTION_SCOPE)}. This is a bootstrap/tooling baseline, not final product-release approval.</p>
+<p>Scope: ${escapeHtml(DISTRIBUTION_SCOPE)}.</p>
 <p>Accepted baseline host: ${escapeHtml(BASELINE_HOST.platform)}/${escapeHtml(BASELINE_HOST.architecture)}. Physical snapshot host: ${escapeHtml(snapshotHost.platform)}/${escapeHtml(snapshotHost.architecture)}.</p>
 <p>Package entries: ${sorted.length}</p>
 ${sections.join("\n")}
+${mplEvidenceSection}
+${electronEvidenceSection}
 </body>
 </html>
 `;
@@ -282,7 +326,11 @@ export function validateArtifactProvenance(record) {
   if (!Array.isArray(record.licenseNoticeLocations) || record.licenseNoticeLocations.length === 0) {
     issues.push("licenseNoticeLocations:MISSING");
   }
-  if (record.packagedRole !== "DEVELOPMENT_BUILD_TOOL_ONLY / NOT EDITOR_OR_PLAYER_PACKAGED") {
+  const allowedPackagedRoles = new Set([
+    "DEVELOPMENT_BUILD_TOOL_ONLY / NOT EDITOR_OR_PLAYER_PACKAGED",
+    "RSM-5-I1 ELECTRON SECURE SHELL RUNTIME / NOT FINAL RELEASE PACKAGE",
+  ]);
+  if (!allowedPackagedRoles.has(record.packagedRole)) {
     issues.push("packagedRole:OUT_OF_SCOPE");
   }
   if (!record.replacementRemovalProcedure?.includes("pnpm-lock.yaml")) {

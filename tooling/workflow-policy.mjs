@@ -19,6 +19,12 @@ export const EXPECTED_DIRECT_DEV_DEPENDENCIES = Object.freeze({
   vitest: "3.2.6",
 });
 
+export const EXPECTED_APPLICATION_DEV_DEPENDENCIES = Object.freeze({
+  "@electron-forge/core": "7.11.2",
+  electron: "43.4.0",
+  vite: "8.2.1",
+});
+
 export const EXPECTED_SOURCE_LAYOUT = Object.freeze({
   "00": "00_RSM_REBOOT_PROJECT_CHARTER.md",
   "01": "01_RSM_REBOOT_CANONICAL_ROADMAP.md",
@@ -50,6 +56,28 @@ export const REQUIRED_PATHS = Object.freeze([
   "docs/evidence/rsm-4/rsm-4-i1/RSM-4-I1-STAGED-CANDIDATE-REPORT.md",
   "tooling/workflow-policy.mjs",
   "tooling/workflow-policy.test.mjs",
+  "apps/editor-electron/package.json",
+  "apps/editor-electron/tsconfig.json",
+  "apps/editor-electron/forge.config.mjs",
+  "apps/editor-electron/vite.main.config.mjs",
+  "apps/editor-electron/vite.preload.config.mjs",
+  "apps/editor-electron/vite.renderer.config.mjs",
+  "apps/editor-electron/src/main/main.ts",
+  "apps/editor-electron/src/preload/preload.ts",
+  "apps/editor-electron/src/shell-api.ts",
+  "apps/editor-electron/src/renderer/index.html",
+  "apps/editor-electron/src/renderer/renderer.ts",
+  "apps/editor-electron/src/renderer/styles.css",
+  "apps/editor-electron/src/renderer/global.d.ts",
+  "apps/editor-electron/scripts/forge.mjs",
+  "apps/editor-electron/scripts/smoke.mjs",
+  "apps/editor-electron/test/security-contract.test.mjs",
+  "apps/editor-electron/test/import-boundary.test.mjs",
+  "docs/evidence/rsm-5/RSM-5-MILESTONE-EVIDENCE-MANIFEST.tsv",
+  "docs/evidence/rsm-5/rsm-5-i1/RSM-5-I1-TASK-PLAN.md",
+  "docs/evidence/rsm-5/rsm-5-i1/RSM-5-I1-EVIDENCE-MANIFEST.md",
+  "docs/evidence/rsm-5/rsm-5-i1/RSM-5-I1-VALIDATION-REPORT.md",
+  "docs/evidence/rsm-5/rsm-5-i1/RSM-5-I1-STAGED-CANDIDATE-REPORT.md",
 ]);
 
 export const REQUIRED_TEXT_FRAGMENTS = Object.freeze({
@@ -133,6 +161,37 @@ export const REQUIRED_TEXT_FRAGMENTS = Object.freeze({
     "## Validation Requirements",
     "## Closure Criteria",
   ]),
+  "docs/evidence/rsm-5/rsm-5-i1/RSM-5-I1-TASK-PLAN.md": Object.freeze([
+    "## Baseline",
+    "## Allowed Scope",
+    "## Forbidden Scope",
+    "## Validation Requirements",
+    "## Closure Criteria",
+    "49",
+  ]),
+  "apps/editor-electron/src/main/main.ts": Object.freeze([
+    "nodeIntegration: false",
+    "contextIsolation: true",
+    "sandbox: true",
+    "webSecurity: true",
+    "allowRunningInsecureContent: false",
+    "webviewTag: false",
+    'webContents.on("will-navigate"',
+    "setWindowOpenHandler",
+    'return { action: "deny" }',
+  ]),
+  "apps/editor-electron/src/preload/preload.ts": Object.freeze([
+    "contextBridge.exposeInMainWorld",
+    "Object.freeze",
+    "privilegedIpc: false",
+    "filesystem: false",
+  ]),
+  "apps/editor-electron/src/renderer/index.html": Object.freeze([
+    "default-src 'none'",
+    "script-src 'self'",
+    "connect-src 'none'",
+    "frame-ancestors 'none'",
+  ]),
 });
 
 function issue(code, detail) {
@@ -173,7 +232,11 @@ export function parseTsv(text) {
 function walkFiles(rootPath, currentPath = rootPath) {
   const files = [];
   for (const entry of readdirSync(currentPath, { withFileTypes: true })) {
-    if (entry.isDirectory() && new Set([".git", "dist", "node_modules"]).has(entry.name)) continue;
+    if (
+      entry.isDirectory() &&
+      new Set([".git", ".vite", "coverage", "dist", "node_modules", "out"]).has(entry.name)
+    )
+      continue;
     const absolute = path.join(currentPath, entry.name);
     if (entry.isDirectory()) files.push(...walkFiles(rootPath, absolute));
     else if (entry.isFile()) files.push(normalizePath(path.relative(rootPath, absolute)));
@@ -322,10 +385,95 @@ function validateRepositoryAndDependencies(rootPath, repositoryPaths, issues) {
     issues.push(issue("VALIDATE_CHAIN_MISSING_WORKFLOW_CHECK", "validate"));
   }
 
+  const requiredScripts = {
+    "electron:acquire": "node apps/editor-electron/node_modules/electron/install.js",
+    "electron:build": "pnpm --dir apps/editor-electron run build",
+    "electron:package": "pnpm --dir apps/editor-electron run package",
+    "electron:smoke": "pnpm --dir apps/editor-electron run smoke",
+  };
+  for (const [name, command] of Object.entries(requiredScripts)) {
+    if (rootPackage.scripts?.[name] !== command) {
+      issues.push(issue("ELECTRON_SCRIPT_MISSING_OR_INEXACT", `${name}: ${command}`));
+    }
+  }
+
+  const applicationPackagePath = path.join(rootPath, "apps", "editor-electron", "package.json");
+  const applicationPackage = existsSync(applicationPackagePath)
+    ? JSON.parse(readUtf8(applicationPackagePath))
+    : { name: "", devDependencies: {} };
+  const forgePath = path.join(rootPath, "apps", "editor-electron", "forge.config.mjs");
+  const forgeText = existsSync(forgePath) ? readUtf8(forgePath) : "";
+  if (/\b(?:plugins|makers|publishers)\s*:/u.test(forgeText)) {
+    issues.push(issue("FORGE_PLUGIN_MAKER_PUBLISHER_PRESENT", "forge.config.mjs"));
+  }
+  const preloadPath = path.join(
+    rootPath,
+    "apps",
+    "editor-electron",
+    "src",
+    "preload",
+    "preload.ts",
+  );
+  const preloadText = existsSync(preloadPath) ? readUtf8(preloadPath) : "";
+  if (/ipcRenderer|node:(?:fs|child_process)|\bprocess\b|\bdialog\b/u.test(preloadText)) {
+    issues.push(issue("PRELOAD_PRIVILEGED_SURFACE_PRESENT", "src/preload/preload.ts"));
+  }
+  const rendererPath = path.join(
+    rootPath,
+    "apps",
+    "editor-electron",
+    "src",
+    "renderer",
+    "renderer.ts",
+  );
+  const rendererText = existsSync(rendererPath) ? readUtf8(rendererPath) : "";
+  if (/(?:electron|node:[A-Za-z0-9_/-]+|\brequire\s*\(|\bprocess\b)/u.test(rendererText)) {
+    issues.push(issue("RENDERER_PRIVILEGED_SURFACE_PRESENT", "src/renderer/renderer.ts"));
+  }
+
+  const workspacePath = path.join(rootPath, "pnpm-workspace.yaml");
+  const workspace = existsSync(workspacePath) ? readUtf8(workspacePath) : "";
+  for (const fragment of [
+    '  - "apps/*"',
+    "autoInstallPeers: false",
+    "blockExoticSubdeps: false",
+    "strictPeerDependencies: true",
+    "ignoreScripts: true",
+    'savePrefix: ""',
+    "  - electron@43.4.0",
+    "  tar: 7.5.22",
+    '  "eslint@9.21.0>@eslint/plugin-kit": 0.3.4',
+  ]) {
+    if (!workspace.includes(fragment)) issues.push(issue("WORKSPACE_POLICY_DRIFT", fragment));
+  }
+
+  const lockPath = path.join(rootPath, "pnpm-lock.yaml");
+  const lock = existsSync(lockPath) ? readUtf8(lockPath) : "";
+  const exoticUrls = new Set(
+    lock.match(
+      /https:\/\/codeload\.github\.com\/[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+\/tar\.gz\/[0-9a-f]{40}/gu,
+    ) ?? [],
+  );
+  const expectedExotic =
+    "https://codeload.github.com/electron/node-gyp/tar.gz/06b29aafb7708acef8b3669835c8a7857ebc92d2";
+  if (exoticUrls.size !== 1 || !exoticUrls.has(expectedExotic)) {
+    issues.push(issue("EXOTIC_SOURCE_SET_INVALID", [...exoticUrls].join(",") || "ABSENT"));
+  }
+  for (const fragment of [
+    "eslint@9.21.0>@eslint/plugin-kit: 0.3.4",
+    "'@eslint/plugin-kit@0.3.4':",
+    "tar@7.5.22:",
+    "electron@43.4.0:",
+  ]) {
+    if (!lock.includes(fragment)) issues.push(issue("LOCK_IDENTITY_MISSING", fragment));
+  }
+
   const bootstrapIssues = validateRepositoryBootstrap({
     repositoryPaths,
     directDevDependencies: rootPackage.devDependencies ?? {},
     packageNames: readPackageNames(rootPath),
+    applicationPackageName: applicationPackage.name ?? "",
+    applicationDevDependencies: applicationPackage.devDependencies ?? {},
   });
   for (const bootstrapIssue of bootstrapIssues) {
     issues.push(issue(`REPOSITORY_POLICY_${bootstrapIssue.code}`, bootstrapIssue.detail));

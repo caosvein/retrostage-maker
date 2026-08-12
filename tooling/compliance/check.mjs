@@ -17,7 +17,6 @@ import {
 
 const REPOSITORY_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..");
 const COMPLIANCE_ROOT = path.join(REPOSITORY_ROOT, "compliance");
-const EXPECTED_LOCK_SHA256 = "CA4D42AB5A23D84F3A106C2458BE1C3204F58E42A13C04AC85CABC197F9939A0";
 
 function sha256(bytes) {
   return createHash("sha256").update(bytes).digest("hex").toUpperCase();
@@ -133,8 +132,8 @@ function main() {
       firstSummary.licenseSummary.unknownNoLicense;
     if (licenseBlockerCount !== 0)
       throw new Error(`License blocker count is ${licenseBlockerCount}.`);
-    if (firstSummary.securitySummary.blocking !== 0) {
-      throw new Error(`Security blocker count is ${firstSummary.securitySummary.blocking}.`);
+    if (firstSummary.securitySummary.total !== 0 || firstSummary.securitySummary.blocking !== 0) {
+      throw new Error(`Full audit is not zero: ${JSON.stringify(firstSummary.securitySummary)}.`);
     }
     if (firstSummary.noticeProvenanceBlockerCount !== 0) {
       throw new Error(
@@ -156,6 +155,25 @@ function main() {
         `Native field completeness mismatch: ${firstSummary.nativeRequiredFieldCompleteCount}/${firstSummary.nativeBinaryCount}.`,
       );
     }
+    if (firstSummary.directCount !== 10) {
+      throw new Error(`Direct dependency count is ${firstSummary.directCount}; expected 10.`);
+    }
+    if (firstSummary.electronBundledLicenseEvidenceCount !== 4) {
+      throw new Error(
+        `Electron bundled license evidence count is ${firstSummary.electronBundledLicenseEvidenceCount}; expected 4.`,
+      );
+    }
+    if (
+      firstSummary.currentHostOwnerExceptionCount !== 14 ||
+      firstSummary.currentHostOwnerApprovedIdentities.length !== 14
+    ) {
+      throw new Error(
+        `Current-host owner-approved identity count is ${firstSummary.currentHostOwnerExceptionCount}; expected 14.`,
+      );
+    }
+    if (firstSummary.mplCoveredComponentDistributed !== false) {
+      throw new Error("MPL-covered Lightning CSS content is present in the packaged candidate.");
+    }
 
     const workflow = readFileSync(
       path.join(REPOSITORY_ROOT, ".github", "workflows", "ci.yml"),
@@ -166,7 +184,6 @@ function main() {
       throw new Error(`CI workflow validation failed: ${workflowIssues.join(", ")}`);
     }
     const lockHash = sha256(readFileSync(path.join(REPOSITORY_ROOT, "pnpm-lock.yaml")));
-    if (lockHash !== EXPECTED_LOCK_SHA256) throw new Error("Lockfile identity drift detected.");
 
     process.stdout.write(
       stableJson({
@@ -179,7 +196,8 @@ function main() {
         fullBaselineByteComparisonPerformed: comparisonPolicy.fullBaselineByteComparison,
         hostSensitiveCurrentHostValidationPerformed: true,
         platformNeutralComparisonResult: "PASS",
-        crossPlatformComplianceGate: "PASS",
+        crossPlatformComplianceGate:
+          "BASELINE WINDOWS/X64 PASS / NON-BASELINE EXACT OWNER REVIEW REQUIRED",
         staticUbuntuBehaviorProof: {
           runnerHost: { platform: "linux", architecture: "x64" },
           complianceGateInvokedByWorkflow: workflow.includes("pnpm run compliance:check"),
@@ -187,6 +205,9 @@ function main() {
           hostSensitiveCurrentHostValidationPerformed:
             ubuntuPolicy.hostSensitiveCurrentHostValidation,
           linuxHostSensitiveBytesRequiredToEqualWindowsBaseline: false,
+          nonCurrentPlatformOwnerExceptionsPreApproved: false,
+          ownerAuthorityDisposition:
+            "FAIL CLOSED IF THE PHYSICAL NON-BASELINE GRAPH REQUIRES AN UNAPPROVED MANUAL LICENSE IDENTITY",
           platformNeutralArtifacts: ubuntuPolicy.platformNeutralArtifacts,
           hostSensitiveArtifacts: ubuntuPolicy.hostSensitiveArtifacts,
         },

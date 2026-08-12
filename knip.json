@@ -4,6 +4,19 @@
     ".": {
       "ignore": ["dependency-cruiser.config.cjs"]
     },
-    "packages/*": {}
+    "packages/*": {},
+    "apps/editor-electron": {
+      "ignoreBinaries": ["ps", "tasklist.exe"],
+      "entry": [
+        "src/main/main.ts",
+        "src/preload/preload.ts",
+        "src/renderer/renderer.ts",
+        "scripts/*.mjs",
+        "test/*.test.mjs",
+        "vite.*.config.mjs",
+        "forge.config.mjs"
+      ],
+      "project": ["src/**/*.ts", "scripts/*.mjs", "test/*.test.mjs", "*.config.mjs"]
+    }
   }
 }
