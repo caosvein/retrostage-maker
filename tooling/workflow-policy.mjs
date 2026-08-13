@@ -25,6 +25,14 @@ export const EXPECTED_APPLICATION_DEV_DEPENDENCIES = Object.freeze({
   vite: "8.2.1",
 });
 
+const APPROVED_NODE_GYP_SOURCES = new Set([
+  "https://codeload.github.com/electron/node-gyp/tar.gz/06b29aafb7708acef8b3669835c8a7857ebc92d2",
+  "git+https://github.com/electron/node-gyp.git#06b29aafb7708acef8b3669835c8a7857ebc92d2",
+]);
+
+const EXOTIC_SOURCE_PATTERN =
+  /(?:https:\/\/codeload\.github\.com\/[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+\/tar\.gz\/[A-Za-z0-9_.-]+|(?:git\+(?:https?|ssh)|git|ssh):\/\/(?:git@)?[A-Za-z0-9.-]+\/[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+\.git#[A-Za-z0-9_.-]+|git@[A-Za-z0-9.-]+:[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+\.git#[A-Za-z0-9_.-]+|github:[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+#[A-Za-z0-9_.-]+)/gu;
+
 export const EXPECTED_SOURCE_LAYOUT = Object.freeze({
   "00": "00_RSM_REBOOT_PROJECT_CHARTER.md",
   "01": "01_RSM_REBOOT_CANONICAL_ROADMAP.md",
@@ -449,15 +457,12 @@ function validateRepositoryAndDependencies(rootPath, repositoryPaths, issues) {
 
   const lockPath = path.join(rootPath, "pnpm-lock.yaml");
   const lock = existsSync(lockPath) ? readUtf8(lockPath) : "";
-  const exoticUrls = new Set(
-    lock.match(
-      /https:\/\/codeload\.github\.com\/[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+\/tar\.gz\/[0-9a-f]{40}/gu,
-    ) ?? [],
-  );
-  const expectedExotic =
-    "https://codeload.github.com/electron/node-gyp/tar.gz/06b29aafb7708acef8b3669835c8a7857ebc92d2";
-  if (exoticUrls.size !== 1 || !exoticUrls.has(expectedExotic)) {
-    issues.push(issue("EXOTIC_SOURCE_SET_INVALID", [...exoticUrls].join(",") || "ABSENT"));
+  const exoticSources = new Set(lock.match(EXOTIC_SOURCE_PATTERN) ?? []);
+  if (
+    exoticSources.size !== 1 ||
+    !APPROVED_NODE_GYP_SOURCES.has(exoticSources.values().next().value)
+  ) {
+    issues.push(issue("EXOTIC_SOURCE_SET_INVALID", [...exoticSources].join(",") || "ABSENT"));
   }
   for (const fragment of [
     "eslint@9.21.0>@eslint/plugin-kit: 0.3.4",

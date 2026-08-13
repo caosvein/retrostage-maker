@@ -435,11 +435,11 @@
       "version": "5.1.0"
     },
     {
-      "bom-ref": "pkg:npm/%40electron/node-gyp@10.2.0-electron.1?vcs_url=https%3A%2F%2Fcodeload.github.com%2Felectron%2Fnode-gyp%2Ftar.gz%2F06b29aafb7708acef8b3669835c8a7857ebc92d2",
+      "bom-ref": "pkg:npm/%40electron/node-gyp@10.2.0-electron.1?vcs_url=git%2Bhttps%3A%2F%2Fgithub.com%2Felectron%2Fnode-gyp.git%2306b29aafb7708acef8b3669835c8a7857ebc92d2",
       "externalReferences": [
         {
           "type": "distribution",
-          "url": "https://codeload.github.com/electron/node-gyp/tar.gz/06b29aafb7708acef8b3669835c8a7857ebc92d2"
+          "url": "git+https://github.com/electron/node-gyp.git#06b29aafb7708acef8b3669835c8a7857ebc92d2"
         }
       ],
       "group": "@electron",
@@ -450,7 +450,7 @@
           "value": "true"
         }
       ],
-      "purl": "pkg:npm/%40electron/node-gyp@10.2.0-electron.1?vcs_url=https%3A%2F%2Fcodeload.github.com%2Felectron%2Fnode-gyp%2Ftar.gz%2F06b29aafb7708acef8b3669835c8a7857ebc92d2",
+      "purl": "pkg:npm/%40electron/node-gyp@10.2.0-electron.1?vcs_url=git%2Bhttps%3A%2F%2Fgithub.com%2Felectron%2Fnode-gyp.git%2306b29aafb7708acef8b3669835c8a7857ebc92d2",
       "scope": "excluded",
       "type": "library",
       "version": "10.2.0-electron.1"
@@ -4749,33 +4749,6 @@
       "version": "1.0.3"
     },
     {
-      "bom-ref": "pkg:npm/%40types/yauzl@2.10.3",
-      "externalReferences": [
-        {
-          "hashes": [
-            {
-              "alg": "SHA-512",
-              "content": "a09a1fb6fd0b4ae683644dcb7b80db297f8a4bd1b7e8dcce7926a9f745082b4c8c03f36128986a9521ad3433913516886d07f38d70eb41ad32b49ea63511b3fd"
-            }
-          ],
-          "type": "distribution",
-          "url": "https://registry.npmjs.org/@types/yauzl/-/yauzl-2.10.3.tgz"
-        }
-      ],
-      "group": "@types",
-      "name": "yauzl",
-      "properties": [
-        {
-          "name": "cdx:npm:package:development",
-          "value": "true"
-        }
-      ],
-      "purl": "pkg:npm/%40types/yauzl@2.10.3",
-      "scope": "excluded",
-      "type": "library",
-      "version": "2.10.3"
-    },
-    {
       "bom-ref": "pkg:npm/%40typescript-eslint/eslint-plugin@8.66.0",
       "externalReferences": [
         {
@@ -6657,32 +6630,6 @@
       "scope": "excluded",
       "type": "library",
       "version": "4.28.8"
-    },
-    {
-      "bom-ref": "pkg:npm/buffer-crc32@0.2.13",
-      "externalReferences": [
-        {
-          "hashes": [
-            {
-              "alg": "SHA-512",
-              "content": "54ef47b7ffa9dd237b48a5aa72b804ce319b4522584f1f90d694d00b4c2b5aa1f1d2fa49ada43a1ad1f1f2dbdc835ae52b56f2854e6071cc603a08fb0744c391"
-            }
-          ],
-          "type": "distribution",
-          "url": "https://registry.npmjs.org/buffer-crc32/-/buffer-crc32-0.2.13.tgz"
-        }
-      ],
-      "name": "buffer-crc32",
-      "properties": [
-        {
-          "name": "cdx:npm:package:development",
-          "value": "true"
-        }
-      ],
-      "purl": "pkg:npm/buffer-crc32@0.2.13",
-      "scope": "excluded",
-      "type": "library",
-      "version": "0.2.13"
     },
     {
       "bom-ref": "pkg:npm/buffer-from@1.1.2",
@@ -8947,32 +8894,6 @@
       "version": "3.1.3"
     },
     {
-      "bom-ref": "pkg:npm/extract-zip@2.0.1",
-      "externalReferences": [
-        {
-          "hashes": [
-            {
-              "alg": "SHA-512",
-              "content": "183854f67b70b8ac865dd6415204c87bebd79d68f47e9a5412d3032f4fa275de52b5af131a91ecb27fdebac03d9ab3ebf6a343ca6e92c406198cdbc29fff5106"
-            }
-          ],
-          "type": "distribution",
-          "url": "https://registry.npmjs.org/extract-zip/-/extract-zip-2.0.1.tgz"
-        }
-      ],
-      "name": "extract-zip",
-      "properties": [
-        {
-          "name": "cdx:npm:package:development",
-          "value": "true"
-        }
-      ],
-      "purl": "pkg:npm/extract-zip@2.0.1",
-      "scope": "excluded",
-      "type": "library",
-      "version": "2.0.1"
-    },
-    {
       "bom-ref": "pkg:npm/fast-deep-equal@3.1.3",
       "externalReferences": [
         {
@@ -9153,32 +9074,6 @@
       "scope": "excluded",
       "type": "library",
       "version": "2.0.0"
-    },
-    {
-      "bom-ref": "pkg:npm/fd-slicer@1.1.0",
-      "externalReferences": [
-        {
-          "hashes": [
-            {
-              "alg": "SHA-512",
-              "content": "704d6ab01fd5c32428cd9faad5d1b147c2c160d65ea1f84475434648c6d00f71b0da50335fd65bdee214e846dcfc59b28e8f405967e79f4014087aad7afb3ff2"
-            }
-          ],
-          "type": "distribution",
-          "url": "https://registry.npmjs.org/fd-slicer/-/fd-slicer-1.1.0.tgz"
-        }
-      ],
-      "name": "fd-slicer",
-      "properties": [
-        {
-          "name": "cdx:npm:package:development",
-          "value": "true"
-        }
-      ],
-      "purl": "pkg:npm/fd-slicer@1.1.0",
-      "scope": "excluded",
-      "type": "library",
-      "version": "1.1.0"
     },
     {
       "bom-ref": "pkg:npm/fdir@6.5.0",
@@ -14121,32 +14016,6 @@
       "version": "1.0.1"
     },
     {
-      "bom-ref": "pkg:npm/pend@1.2.0",
-      "externalReferences": [
-        {
-          "hashes": [
-            {
-              "alg": "SHA-512",
-              "content": "1776acbf8d94b97721773b7ec57a9f5b538695505efa6c5ada6a88d29839c801d93ef16663763a76b49ffc643503ce9681610df4ace1fd6ae029aea219c1d72e"
-            }
-          ],
-          "type": "distribution",
-          "url": "https://registry.npmjs.org/pend/-/pend-1.2.0.tgz"
-        }
-      ],
-      "name": "pend",
-      "properties": [
-        {
-          "name": "cdx:npm:package:development",
-          "value": "true"
-        }
-      ],
-      "purl": "pkg:npm/pend@1.2.0",
-      "scope": "excluded",
-      "type": "library",
-      "version": "1.2.0"
-    },
-    {
       "bom-ref": "pkg:npm/picocolors@1.1.1",
       "externalReferences": [
         {
@@ -18073,32 +17942,6 @@
       "version": "17.7.3"
     },
     {
-      "bom-ref": "pkg:npm/yauzl@2.10.0",
-      "externalReferences": [
-        {
-          "hashes": [
-            {
-              "alg": "SHA-512",
-              "content": "a786bd23a5fa9eee888681a606a01c6c9cb59a50b88f6eef10f657f45e0be3fbd94f72f2ab5564147c3f57f3d4701f41ba8f831b7887913d31dd0c9ae7ccdcde"
-            }
-          ],
-          "type": "distribution",
-          "url": "https://registry.npmjs.org/yauzl/-/yauzl-2.10.0.tgz"
-        }
-      ],
-      "name": "yauzl",
-      "properties": [
-        {
-          "name": "cdx:npm:package:development",
-          "value": "true"
-        }
-      ],
-      "purl": "pkg:npm/yauzl@2.10.0",
-      "scope": "excluded",
-      "type": "library",
-      "version": "2.10.0"
-    },
-    {
       "bom-ref": "pkg:npm/yocto-queue@0.1.0",
       "externalReferences": [
         {
@@ -18269,7 +18112,7 @@
         "pkg:npm/nopt@6.0.0",
         "pkg:npm/proc-log@2.0.1"
       ],
-      "ref": "pkg:npm/%40electron/node-gyp@10.2.0-electron.1?vcs_url=https%3A%2F%2Fcodeload.github.com%2Felectron%2Fnode-gyp%2Ftar.gz%2F06b29aafb7708acef8b3669835c8a7857ebc92d2"
+      "ref": "pkg:npm/%40electron/node-gyp@10.2.0-electron.1?vcs_url=git%2Bhttps%3A%2F%2Fgithub.com%2Felectron%2Fnode-gyp.git%2306b29aafb7708acef8b3669835c8a7857ebc92d2"
     },
     {
       "dependsOn": [
@@ -18287,12 +18130,12 @@
     },
     {
       "dependsOn": [
+        "pkg:npm/%40electron-internal/extract-zip@1.0.5",
         "pkg:npm/%40electron/asar@3.4.1",
         "pkg:npm/%40electron/notarize@2.5.0",
         "pkg:npm/%40electron/osx-sign@1.3.3",
         "pkg:npm/%40electron/universal@2.0.3",
         "pkg:npm/%40electron/windows-sign@1.2.2",
-        "pkg:npm/extract-zip@2.0.1",
         "pkg:npm/fs-extra@11.4.0",
         "pkg:npm/galactus@1.0.0",
         "pkg:npm/get-package-info@1.0.0",
@@ -18305,7 +18148,7 @@
     },
     {
       "dependsOn": [
-        "pkg:npm/%40electron/node-gyp@10.2.0-electron.1?vcs_url=https%3A%2F%2Fcodeload.github.com%2Felectron%2Fnode-gyp%2Ftar.gz%2F06b29aafb7708acef8b3669835c8a7857ebc92d2",
+        "pkg:npm/%40electron/node-gyp@10.2.0-electron.1?vcs_url=git%2Bhttps%3A%2F%2Fgithub.com%2Felectron%2Fnode-gyp.git%2306b29aafb7708acef8b3669835c8a7857ebc92d2",
         "pkg:npm/node-abi@3.94.0",
         "pkg:npm/node-api-version@0.2.1",
         "pkg:npm/ora@5.4.1",
@@ -18990,10 +18833,6 @@
       "ref": "pkg:npm/%40types/responselike@1.0.3"
     },
     {
-      "dependsOn": [],
-      "ref": "pkg:npm/%40types/yauzl@2.10.3"
-    },
-    {
       "dependsOn": [
         "pkg:npm/%40typescript-eslint/scope-manager@8.66.0",
         "pkg:npm/%40typescript-eslint/type-utils@8.66.0",
@@ -19356,10 +19195,6 @@
     },
     {
       "dependsOn": [],
-      "ref": "pkg:npm/buffer-crc32@0.2.13"
-    },
-    {
-      "dependsOn": [],
       "ref": "pkg:npm/buffer-from@1.1.2"
     },
     {
@@ -19394,6 +19229,7 @@
     {
       "dependsOn": [
         "pkg:npm/clone-response@1.0.3",
+        "pkg:npm/get-stream@5.2.0",
         "pkg:npm/normalize-url@6.1.0"
       ],
       "ref": "pkg:npm/cacheable-request@7.0.4"
@@ -19638,7 +19474,6 @@
     },
     {
       "dependsOn": [
-        "pkg:npm/%40electron-internal/extract-zip@1.0.5",
         "pkg:npm/%40electron/get@5.1.0",
         "pkg:npm/%40types/node@24.13.3"
       ],
@@ -19873,14 +19708,6 @@
       "ref": "pkg:npm/exponential-backoff@3.1.3"
     },
     {
-      "dependsOn": [
-        "pkg:npm/%40types/yauzl@2.10.3",
-        "pkg:npm/get-stream@5.2.0",
-        "pkg:npm/yauzl@2.10.0"
-      ],
-      "ref": "pkg:npm/extract-zip@2.0.1"
-    },
-    {
       "dependsOn": [],
       "ref": "pkg:npm/fast-deep-equal@3.1.3"
     },
@@ -19917,12 +19744,6 @@
         "pkg:npm/walk-up-path@4.0.0"
       ],
       "ref": "pkg:npm/fd-package-json@2.0.0"
-    },
-    {
-      "dependsOn": [
-        "pkg:npm/pend@1.2.0"
-      ],
-      "ref": "pkg:npm/fd-slicer@1.1.0"
     },
     {
       "dependsOn": [],
@@ -20952,10 +20773,6 @@
     },
     {
       "dependsOn": [],
-      "ref": "pkg:npm/pend@1.2.0"
-    },
-    {
-      "dependsOn": [],
       "ref": "pkg:npm/picocolors@1.1.1"
     },
     {
@@ -21808,13 +21625,6 @@
         "pkg:npm/y18n@5.0.8"
       ],
       "ref": "pkg:npm/yargs@17.7.3"
-    },
-    {
-      "dependsOn": [
-        "pkg:npm/buffer-crc32@0.2.13",
-        "pkg:npm/fd-slicer@1.1.0"
-      ],
-      "ref": "pkg:npm/yauzl@2.10.0"
     },
     {
       "dependsOn": [],

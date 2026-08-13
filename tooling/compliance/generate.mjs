@@ -46,8 +46,12 @@ const EXPECTED_APPLICATION_DIRECT_DEPENDENCIES = Object.freeze({
   electron: "43.4.0",
   vite: "8.2.1",
 });
-const EXPECTED_EXOTIC_SOURCE =
-  "https://codeload.github.com/electron/node-gyp/tar.gz/06b29aafb7708acef8b3669835c8a7857ebc92d2";
+const APPROVED_NODE_GYP_SOURCES = new Set([
+  "https://codeload.github.com/electron/node-gyp/tar.gz/06b29aafb7708acef8b3669835c8a7857ebc92d2",
+  "git+https://github.com/electron/node-gyp.git#06b29aafb7708acef8b3669835c8a7857ebc92d2",
+]);
+const EXOTIC_SOURCE_PATTERN =
+  /(?:https:\/\/codeload\.github\.com\/[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+\/tar\.gz\/[A-Za-z0-9_.-]+|(?:git\+(?:https?|ssh)|git|ssh):\/\/(?:git@)?[A-Za-z0-9.-]+\/[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+\.git#[A-Za-z0-9_.-]+|git@[A-Za-z0-9.-]+:[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+\.git#[A-Za-z0-9_.-]+|github:[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+#[A-Za-z0-9_.-]+)/gu;
 const ARTIFACT_FILES = Object.freeze([
   "bom.cdx.json",
   "dependency-inventory.json",
@@ -71,6 +75,38 @@ function sha256File(filePath) {
 
 function normalizePath(value) {
   return value.replaceAll("\\", "/");
+}
+
+function normalizeNoticeTextLineEndings(value) {
+  return value.replace(/\r\n?|\n/gu, "\n");
+}
+
+function encodeTerminalSpacesInEscapedNoticeHtml(value) {
+  let representedHtml = value;
+  for (const heading of ["typescript 5.4.5", "typescript 6.0.3"]) {
+    const headingMarker = `<h2>${heading}</h2>`;
+    const headingIndex = representedHtml.indexOf(headingMarker);
+    if (headingIndex === -1 || representedHtml.indexOf(headingMarker, headingIndex + 1) !== -1) {
+      throw new Error(`Notice terminal-space target is not unique: ${heading}`);
+    }
+    const sectionStart = representedHtml.lastIndexOf('<section id="package-', headingIndex);
+    const sectionEndMarker = "</section>";
+    const sectionEnd = representedHtml.indexOf(sectionEndMarker, headingIndex);
+    if (sectionStart === -1 || sectionEnd === -1) {
+      throw new Error(`Notice terminal-space section is missing: ${heading}`);
+    }
+    const sectionAfter = sectionEnd + sectionEndMarker.length;
+    const section = representedHtml.slice(sectionStart, sectionAfter);
+    const terminalSpaces = section.match(/ +(?=\n)/gu) ?? [];
+    if (terminalSpaces.length !== 1) {
+      throw new Error(`Notice terminal-space count is not exact for ${heading}`);
+    }
+    const representedSection = section.replace(/ +(?=\n)/gu, (spaces) =>
+      "&#32;".repeat(spaces.length),
+    );
+    representedHtml = `${representedHtml.slice(0, sectionStart)}${representedSection}${representedHtml.slice(sectionAfter)}`;
+  }
+  return representedHtml;
 }
 
 function relativeRepositoryPath(filePath) {
@@ -150,12 +186,11 @@ function assertDependencyBaseline() {
   ]) {
     if (!lock.includes(fragment)) throw new Error(`Lock graph identity missing: ${fragment}`);
   }
-  const exoticSources = new Set(
-    lock.match(
-      /https:\/\/codeload\.github\.com\/[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+\/tar\.gz\/[0-9a-f]{40}/gu,
-    ) ?? [],
-  );
-  if (exoticSources.size !== 1 || !exoticSources.has(EXPECTED_EXOTIC_SOURCE)) {
+  const exoticSources = new Set(lock.match(EXOTIC_SOURCE_PATTERN) ?? []);
+  if (
+    exoticSources.size !== 1 ||
+    !APPROVED_NODE_GYP_SOURCES.has(exoticSources.values().next().value)
+  ) {
     throw new Error(`Exotic source set differs: ${[...exoticSources].join(",") || "ABSENT"}`);
   }
   return { rootPackageJson, applicationPackageJson };
@@ -666,19 +701,24 @@ function buildNotices(
     classification: entry.classification,
     distributionScope: entry.distributionScope,
     specialObligation: specialObligation(entry.identity, entry.license, mplDistributionEvidence),
-    licenseFiles: entry.evidenceFiles.filter((file) => file.type === "LICENSE"),
-    noticeFiles: entry.evidenceFiles.filter((file) => file.type === "NOTICE_OR_COPYRIGHT"),
+    licenseFiles: entry.evidenceFiles
+      .filter((file) => file.type === "LICENSE")
+      .map((file) => ({ ...file, text: normalizeNoticeTextLineEndings(file.text) })),
+    noticeFiles: entry.evidenceFiles
+      .filter((file) => file.type === "NOTICE_OR_COPYRIGHT")
+      .map((file) => ({ ...file, text: normalizeNoticeTextLineEndings(file.text) })),
   }));
   const sourceLinkFallbackCount = entries.filter(
     (entry) => entry.licenseFiles.length + entry.noticeFiles.length === 0,
   ).length;
+  const escapedHtml = renderNoticesHtml(
+    entries,
+    snapshotHost,
+    electronBundledLicenseEvidence,
+    mplDistributionEvidence,
+  );
   return {
-    output: renderNoticesHtml(
-      entries,
-      snapshotHost,
-      electronBundledLicenseEvidence,
-      mplDistributionEvidence,
-    ),
+    output: encodeTerminalSpacesInEscapedNoticeHtml(escapedHtml),
     sourceLinkFallbackCount,
     metadataOnlyFallbackCount: 0,
     noticeProvenanceBlockerCount: 0,

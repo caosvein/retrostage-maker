@@ -442,8 +442,8 @@
       "licenseFiles": [
         {
           "name": "LICENSE",
-          "path": "node_modules/.pnpm/@electron+node-gyp@https+++_0964e79e403a2c52a2de25ee291fe4fc/node_modules/@electron/node-gyp/LICENSE",
-          "sha256": "662A1B0115251CFB29C6AED0F221F8847BC49C6365D1C53A62C9F4BCCC2489C3"
+          "path": "node_modules/.pnpm/@electron+node-gyp@git+http_ca2695615d49d2b08e9b2af94c7cf33d/node_modules/@electron/node-gyp/LICENSE",
+          "sha256": "855AE36906C2D355C6AD1B8EE53EBBE81AFCDB79A1236F6436E0AF3A7F2BC85D"
         }
       ],
       "manualReviewRequired": false,
@@ -1789,31 +1789,6 @@
       "prohibited": false,
       "safeNoticeSourceUrl": "https://github.com/DefinitelyTyped/DefinitelyTyped.git",
       "version": "1.0.3"
-    },
-    {
-      "author": "",
-      "classification": "AUTOMATICALLY_ADMISSIBLE",
-      "distributionScope": "RSM-5-I1 DEVELOPMENT / SECURE ELECTRON SHELL CANDIDATE / NOT FINAL RELEASE",
-      "evidenceSource": "Installed package.json plus physical top-level license/notice files",
-      "identity": "@types/yauzl@2.10.3",
-      "license": "MIT",
-      "licenseFiles": [
-        {
-          "name": "LICENSE",
-          "path": "node_modules/.pnpm/@types+yauzl@2.10.3/node_modules/@types/yauzl/LICENSE",
-          "sha256": "C2CFCCB812FE482101A8F04597DFC5A9991A6B2748266C47AC91B6A5AAE15383"
-        }
-      ],
-      "manualReviewRequired": false,
-      "name": "@types/yauzl",
-      "notes": "Preserve applicable license and copyright material when distributing this development/bootstrap dependency.",
-      "noticeFiles": [],
-      "ownerCommercialDisposition": "NOT APPLICABLE",
-      "ownerExactException": false,
-      "packagedArtifactDisposition": null,
-      "prohibited": false,
-      "safeNoticeSourceUrl": "https://github.com/DefinitelyTyped/DefinitelyTyped.git",
-      "version": "2.10.3"
     },
     {
       "author": "",
@@ -3583,31 +3558,6 @@
       "prohibited": false,
       "safeNoticeSourceUrl": "https://github.com/browserslist/browserslist",
       "version": "4.28.8"
-    },
-    {
-      "author": "Brian J. Brennan <brianloveswords@gmail.com>",
-      "classification": "AUTOMATICALLY_ADMISSIBLE",
-      "distributionScope": "RSM-5-I1 DEVELOPMENT / SECURE ELECTRON SHELL CANDIDATE / NOT FINAL RELEASE",
-      "evidenceSource": "Installed package.json plus physical top-level license/notice files",
-      "identity": "buffer-crc32@0.2.13",
-      "license": "MIT",
-      "licenseFiles": [
-        {
-          "name": "LICENSE",
-          "path": "node_modules/.pnpm/buffer-crc32@0.2.13/node_modules/buffer-crc32/LICENSE",
-          "sha256": "14895B82E3367B66BDB127FE91505F8615491F2A23EB1C0B7D8F7C54BE67F57A"
-        }
-      ],
-      "manualReviewRequired": false,
-      "name": "buffer-crc32",
-      "notes": "Preserve applicable license and copyright material when distributing this development/bootstrap dependency.",
-      "noticeFiles": [],
-      "ownerCommercialDisposition": "NOT APPLICABLE",
-      "ownerExactException": false,
-      "packagedArtifactDisposition": null,
-      "prohibited": false,
-      "safeNoticeSourceUrl": "https://github.com/brianloveswords/buffer-crc32.git",
-      "version": "0.2.13"
     },
     {
       "author": "",
@@ -5755,19 +5705,13 @@
       "version": "3.1.3"
     },
     {
-      "author": "max ogden",
+      "author": "",
       "classification": "AUTOMATICALLY_ADMISSIBLE",
       "distributionScope": "RSM-5-I1 DEVELOPMENT / SECURE ELECTRON SHELL CANDIDATE / NOT FINAL RELEASE",
       "evidenceSource": "Installed package.json plus physical top-level license/notice files",
-      "identity": "extract-zip@2.0.1",
+      "identity": "extract-zip@1.0.5",
       "license": "BSD-2-Clause",
-      "licenseFiles": [
-        {
-          "name": "LICENSE",
-          "path": "node_modules/.pnpm/extract-zip@2.0.1_supports-color@8.1.1/node_modules/extract-zip/LICENSE",
-          "sha256": "77B2DE947C65F3062FB347118CA198CA50898EAD84A8509D8153FA65741F029B"
-        }
-      ],
+      "licenseFiles": [],
       "manualReviewRequired": false,
       "name": "extract-zip",
       "notes": "Preserve applicable license and copyright material when distributing this development/bootstrap dependency.",
@@ -5776,8 +5720,8 @@
       "ownerExactException": false,
       "packagedArtifactDisposition": null,
       "prohibited": false,
-      "safeNoticeSourceUrl": "https://github.com/maxogden/extract-zip",
-      "version": "2.0.1"
+      "safeNoticeSourceUrl": "https://github.com/electron/extract-zip",
+      "version": "1.0.5"
     },
     {
       "author": "Evgeny Poberezkin",
@@ -5953,31 +5897,6 @@
       "prohibited": false,
       "safeNoticeSourceUrl": "https://github.com/es-tooling/fd-package-json.git",
       "version": "2.0.0"
-    },
-    {
-      "author": "Andrew Kelley <superjoe30@gmail.com>",
-      "classification": "AUTOMATICALLY_ADMISSIBLE",
-      "distributionScope": "RSM-5-I1 DEVELOPMENT / SECURE ELECTRON SHELL CANDIDATE / NOT FINAL RELEASE",
-      "evidenceSource": "Installed package.json plus physical top-level license/notice files",
-      "identity": "fd-slicer@1.1.0",
-      "license": "MIT",
-      "licenseFiles": [
-        {
-          "name": "LICENSE",
-          "path": "node_modules/.pnpm/fd-slicer@1.1.0/node_modules/fd-slicer/LICENSE",
-          "sha256": "176D95320D565CB034D8323797B6CD6160238F625453687F98AAD2085C46C3B3"
-        }
-      ],
-      "manualReviewRequired": false,
-      "name": "fd-slicer",
-      "notes": "Preserve applicable license and copyright material when distributing this development/bootstrap dependency.",
-      "noticeFiles": [],
-      "ownerCommercialDisposition": "NOT APPLICABLE",
-      "ownerExactException": false,
-      "packagedArtifactDisposition": null,
-      "prohibited": false,
-      "safeNoticeSourceUrl": "https://github.com/andrewrk/node-fd-slicer.git",
-      "version": "1.1.0"
     },
     {
       "author": "thecodrr <thecodrr@protonmail.com>",
@@ -10445,31 +10364,6 @@
       "version": "1.0.1"
     },
     {
-      "author": "Andrew Kelley <superjoe30@gmail.com>",
-      "classification": "AUTOMATICALLY_ADMISSIBLE",
-      "distributionScope": "RSM-5-I1 DEVELOPMENT / SECURE ELECTRON SHELL CANDIDATE / NOT FINAL RELEASE",
-      "evidenceSource": "Installed package.json plus physical top-level license/notice files",
-      "identity": "pend@1.2.0",
-      "license": "MIT",
-      "licenseFiles": [
-        {
-          "name": "LICENSE",
-          "path": "node_modules/.pnpm/pend@1.2.0/node_modules/pend/LICENSE",
-          "sha256": "7E64ACFFCB0D20D33F5A86949FFD4A99AE045B10C7332A9C3A58635876C16880"
-        }
-      ],
-      "manualReviewRequired": false,
-      "name": "pend",
-      "notes": "Preserve applicable license and copyright material when distributing this development/bootstrap dependency.",
-      "noticeFiles": [],
-      "ownerCommercialDisposition": "NOT APPLICABLE",
-      "ownerExactException": false,
-      "packagedArtifactDisposition": null,
-      "prohibited": false,
-      "safeNoticeSourceUrl": "https://github.com/andrewrk/node-pend.git",
-      "version": "1.2.0"
-    },
-    {
       "author": "Alexey Raspopov",
       "classification": "AUTOMATICALLY_ADMISSIBLE",
       "distributionScope": "RSM-5-I1 DEVELOPMENT / SECURE ELECTRON SHELL CANDIDATE / NOT FINAL RELEASE",
@@ -14184,31 +14078,6 @@
       "version": "17.7.3"
     },
     {
-      "author": "Josh Wolfe <thejoshwolfe@gmail.com>",
-      "classification": "AUTOMATICALLY_ADMISSIBLE",
-      "distributionScope": "RSM-5-I1 DEVELOPMENT / SECURE ELECTRON SHELL CANDIDATE / NOT FINAL RELEASE",
-      "evidenceSource": "Installed package.json plus physical top-level license/notice files",
-      "identity": "yauzl@2.10.0",
-      "license": "MIT",
-      "licenseFiles": [
-        {
-          "name": "LICENSE",
-          "path": "node_modules/.pnpm/yauzl@2.10.0/node_modules/yauzl/LICENSE",
-          "sha256": "B303783D5EB7CA50B853FFA5F145E4E7998FAB339831D848F507CA6CD970577A"
-        }
-      ],
-      "manualReviewRequired": false,
-      "name": "yauzl",
-      "notes": "Preserve applicable license and copyright material when distributing this development/bootstrap dependency.",
-      "noticeFiles": [],
-      "ownerCommercialDisposition": "NOT APPLICABLE",
-      "ownerExactException": false,
-      "packagedArtifactDisposition": null,
-      "prohibited": false,
-      "safeNoticeSourceUrl": "https://github.com/thejoshwolfe/yauzl.git",
-      "version": "2.10.0"
-    },
-    {
       "author": "Sindre Sorhus <sindresorhus@gmail.com> (https://sindresorhus.com/)",
       "classification": "AUTOMATICALLY_ADMISSIBLE",
       "distributionScope": "RSM-5-I1 DEVELOPMENT / SECURE ELECTRON SHELL CANDIDATE / NOT FINAL RELEASE",
@@ -14350,9 +14219,9 @@
     "platform": "win32"
   },
   "summary": {
-    "automaticallyAdmissible": 560,
+    "automaticallyAdmissible": 555,
     "ownerApprovedExact": 14,
-    "packageCount": 574,
+    "packageCount": 569,
     "prohibited": 0,
     "unapprovedManualReview": 0,
     "unknownNoLicense": 0

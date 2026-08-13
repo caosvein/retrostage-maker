@@ -6,12 +6,25 @@ import process from "node:process";
 import { clearTimeout, setTimeout } from "node:timers";
 import { setTimeout as delay } from "node:timers/promises";
 import { createRequire } from "node:module";
+import { fileURLToPath } from "node:url";
 
 const require = createRequire(import.meta.url);
 const applicationRoot = path.resolve(import.meta.dirname, "..");
-const electronExecutable = require("electron");
-const temporaryRoot = mkdtempSync(path.join(os.tmpdir(), "retrostage-rsm5-smoke-"));
 const timeoutMilliseconds = 45_000;
+const processClockToleranceMilliseconds = 1_500;
+const windowsInventoryCommand = String.raw`
+$ErrorActionPreference = 'Stop'
+Get-CimInstance Win32_Process | ForEach-Object {
+  [pscustomobject]@{
+    ProcessId = [int]$_.ProcessId
+    ParentProcessId = [int]$_.ParentProcessId
+    Name = [string]$_.Name
+    ExecutablePath = if ($null -eq $_.ExecutablePath) { $null } else { [string]$_.ExecutablePath }
+    CommandLine = if ($null -eq $_.CommandLine) { $null } else { [string]$_.CommandLine }
+    CreationDate = if ($null -eq $_.CreationDate) { $null } else { $_.CreationDate.ToUniversalTime().ToString('O') }
+  } | ConvertTo-Json -Compress
+}
+`;
 
 function packagedExecutablePath() {
   if (process.platform === "win32") {
@@ -23,25 +36,72 @@ function packagedExecutablePath() {
   throw new Error(`RSM5_SMOKE_UNSUPPORTED_PLATFORM:${process.platform}`);
 }
 
+function developmentExecutablePath() {
+  return require("electron");
+}
+
 function launchCommand(executable, arguments_) {
   if (process.platform === "linux")
     return { command: "xvfb-run", arguments: ["-a", executable, ...arguments_] };
   return { command: executable, arguments: arguments_ };
 }
 
-function processCount(executable) {
-  const executableName = path.basename(executable).toLowerCase();
-  if (process.platform === "win32") {
-    const observation = spawnSync(
-      "tasklist.exe",
-      ["/FO", "CSV", "/NH", "/FI", `IMAGENAME eq ${path.basename(executable)}`],
-      { encoding: "utf8", windowsHide: true },
+function runRequiredSandboxCommand(command, arguments_, failureCode) {
+  const observation = spawnSync(command, arguments_, { encoding: "utf8" });
+  if (observation.error || observation.status !== 0 || observation.signal !== null) {
+    throw new Error(
+      `${failureCode}:${JSON.stringify({
+        command,
+        arguments: arguments_,
+        status: observation.status,
+        signal: observation.signal,
+        stdout: observation.stdout,
+        stderr: observation.stderr,
+        error: observation.error?.message ?? null,
+      })}`,
     );
-    if (observation.status !== 0) throw new Error("RSM5_PROCESS_OBSERVATION_FAILED:tasklist");
-    return observation.stdout
-      .split(/\r?\n/u)
-      .filter((line) => line.trim().toLowerCase().startsWith(`"${executableName}"`)).length;
   }
+  return observation;
+}
+
+function prepareGitHubActionsLinuxSuidSandbox(executable) {
+  if (process.platform !== "linux" || process.env.GITHUB_ACTIONS !== "true") return;
+
+  const sandboxHelper = path.join(path.dirname(executable), "chrome-sandbox");
+  if (!existsSync(sandboxHelper)) {
+    throw new Error(`RSM5_SMOKE_SUID_HELPER_MISSING:${sandboxHelper}`);
+  }
+
+  runRequiredSandboxCommand(
+    "sudo",
+    ["-n", "chown", "root:root", sandboxHelper],
+    "RSM5_SMOKE_SUID_CHOWN_FAILED",
+  );
+  runRequiredSandboxCommand(
+    "sudo",
+    ["-n", "chmod", "4755", sandboxHelper],
+    "RSM5_SMOKE_SUID_CHMOD_FAILED",
+  );
+  const verification = runRequiredSandboxCommand(
+    "stat",
+    ["-c", "%U:%G %a", sandboxHelper],
+    "RSM5_SMOKE_SUID_STAT_FAILED",
+  );
+  const observedIdentity = verification.stdout.trim();
+  if (observedIdentity !== "root:root 4755") {
+    throw new Error(
+      `RSM5_SMOKE_SUID_VERIFICATION_FAILED:${JSON.stringify({
+        helper: sandboxHelper,
+        expected: "root:root 4755",
+        observed: observedIdentity,
+        stderr: verification.stderr,
+      })}`,
+    );
+  }
+}
+
+function linuxProcessCount(executable) {
+  const executableName = path.basename(executable).toLowerCase();
   const observation = spawnSync("ps", ["-eo", "comm="], { encoding: "utf8" });
   if (observation.status !== 0) throw new Error("RSM5_PROCESS_OBSERVATION_FAILED:ps");
   return observation.stdout
@@ -49,22 +109,182 @@ function processCount(executable) {
     .filter((line) => path.basename(line.trim()).toLowerCase() === executableName).length;
 }
 
-async function runMode(mode) {
+export function normalizeWindowsExecutablePath(executablePath) {
+  if (typeof executablePath !== "string" || executablePath.trim() === "") return null;
+  return path.win32.normalize(executablePath.trim()).toLowerCase();
+}
+
+export function windowsProcessIdentity(processRecord) {
+  const processId = Number(processRecord.processId ?? processRecord.ProcessId);
+  const creationDate = processRecord.creationDate ?? processRecord.CreationDate;
+  if (!Number.isInteger(processId) || processId < 0 || typeof creationDate !== "string")
+    return null;
+  const creationTimeMilliseconds = Date.parse(creationDate);
+  if (!Number.isFinite(creationTimeMilliseconds)) return null;
+  return `${processId}\u0000${new Date(creationTimeMilliseconds).toISOString()}`;
+}
+
+function normalizeWindowsProcessRecord(processRecord) {
+  const processId = Number(processRecord.processId ?? processRecord.ProcessId);
+  const parentProcessId = Number(processRecord.parentProcessId ?? processRecord.ParentProcessId);
+  const creationDate = processRecord.creationDate ?? processRecord.CreationDate;
+  const creationTimeMilliseconds = Date.parse(creationDate);
+  if (
+    !Number.isInteger(processId) ||
+    processId < 0 ||
+    !Number.isInteger(parentProcessId) ||
+    parentProcessId < 0 ||
+    !Number.isFinite(creationTimeMilliseconds)
+  ) {
+    return null;
+  }
+  return {
+    processId,
+    parentProcessId,
+    name: String(processRecord.name ?? processRecord.Name ?? ""),
+    executablePath: processRecord.executablePath ?? processRecord.ExecutablePath ?? null,
+    commandLine: processRecord.commandLine ?? processRecord.CommandLine ?? null,
+    creationDate: new Date(creationTimeMilliseconds).toISOString(),
+    creationTimeMilliseconds,
+  };
+}
+
+export function readWindowsProcessInventory() {
+  const observation = spawnSync(
+    "powershell.exe",
+    ["-NoProfile", "-NonInteractive", "-Command", windowsInventoryCommand],
+    { encoding: "utf8", windowsHide: true },
+  );
+  if (observation.error || observation.status !== 0 || observation.signal !== null) {
+    throw new Error(
+      `RSM5_PROCESS_OBSERVATION_FAILED:Win32_Process:${JSON.stringify({
+        status: observation.status,
+        signal: observation.signal,
+        stderr: observation.stderr,
+        error: observation.error?.message ?? null,
+      })}`,
+    );
+  }
+  return observation.stdout
+    .split(/\r?\n/u)
+    .filter((line) => line.trim() !== "")
+    .map((line) => normalizeWindowsProcessRecord(JSON.parse(line)))
+    .filter((processRecord) => processRecord !== null);
+}
+
+export function exactPathProcessIdentities(processInventory, executablePath) {
+  const normalizedExecutablePath = normalizeWindowsExecutablePath(executablePath);
+  return new Set(
+    processInventory
+      .filter(
+        (processRecord) =>
+          normalizeWindowsExecutablePath(processRecord.executablePath) === normalizedExecutablePath,
+      )
+      .map(windowsProcessIdentity)
+      .filter((identity) => identity !== null),
+  );
+}
+
+function hasRootLineage(processRecord, processById, rootProcessId) {
+  if (processRecord.processId === rootProcessId) return true;
+  const visited = new Set([processRecord.processId]);
+  let parentProcessId = processRecord.parentProcessId;
+  while (
+    Number.isInteger(parentProcessId) &&
+    parentProcessId > 0 &&
+    !visited.has(parentProcessId)
+  ) {
+    if (parentProcessId === rootProcessId) return true;
+    visited.add(parentProcessId);
+    const parent = processById.get(parentProcessId);
+    if (!parent) return false;
+    parentProcessId = parent.parentProcessId;
+  }
+  return false;
+}
+
+export function relatedWindowsProcesses({
+  processInventory,
+  executablePath,
+  preExistingIdentities,
+  rootProcessId,
+  launchTimeMilliseconds,
+  closeTimeMilliseconds,
+  clockToleranceMilliseconds = processClockToleranceMilliseconds,
+}) {
+  const normalizedExecutablePath = normalizeWindowsExecutablePath(executablePath);
+  if (!normalizedExecutablePath) throw new Error("RSM5_PROCESS_IDENTITY_EXECUTABLE_PATH_MISSING");
+  if (!Number.isInteger(rootProcessId) || rootProcessId <= 0) {
+    throw new Error("RSM5_PROCESS_IDENTITY_ROOT_PID_INVALID");
+  }
+  const normalizedInventory = processInventory
+    .map(normalizeWindowsProcessRecord)
+    .filter((processRecord) => processRecord !== null);
+  const processById = new Map(
+    normalizedInventory.map((processRecord) => [processRecord.processId, processRecord]),
+  );
+  const earliestCreation = launchTimeMilliseconds - clockToleranceMilliseconds;
+  const latestCreation = closeTimeMilliseconds + clockToleranceMilliseconds;
+
+  return normalizedInventory.flatMap((processRecord) => {
+    const identity = windowsProcessIdentity(processRecord);
+    if (identity && preExistingIdentities.has(identity)) return [];
+    if (
+      processRecord.creationTimeMilliseconds < earliestCreation ||
+      processRecord.creationTimeMilliseconds > latestCreation
+    ) {
+      return [];
+    }
+    const exactExecutablePath =
+      normalizeWindowsExecutablePath(processRecord.executablePath) === normalizedExecutablePath;
+    const lineageCorroborated = hasRootLineage(processRecord, processById, rootProcessId);
+    const executablePathUnreadable =
+      normalizeWindowsExecutablePath(processRecord.executablePath) === null;
+    if (!exactExecutablePath && !(executablePathUnreadable && lineageCorroborated)) return [];
+    return [
+      {
+        ...processRecord,
+        identity,
+        exactExecutablePath,
+        executablePathUnreadable,
+        lineageCorroborated,
+      },
+    ];
+  });
+}
+
+export function assertNoRelatedWindowsProcesses(mode, relatedProcesses) {
+  if (relatedProcesses.length !== 0) {
+    throw new Error(`RSM5_SMOKE_ORPHAN_PROCESS:${mode}:${relatedProcesses.length}`);
+  }
+}
+
+async function runMode(mode, temporaryRoot) {
   const resultPath = path.join(temporaryRoot, `${mode}.json`);
   const packaged = mode === "packaged";
-  const executable = packaged ? packagedExecutablePath() : electronExecutable;
+  const executable = packaged ? packagedExecutablePath() : developmentExecutablePath();
   if (!existsSync(executable)) throw new Error(`RSM5_SMOKE_EXECUTABLE_MISSING:${executable}`);
   const applicationArguments = packaged ? [] : [applicationRoot];
   applicationArguments.push(`--rsm5-smoke-result=${resultPath}`);
   const launch = launchCommand(executable, applicationArguments);
-  const processCountBefore = processCount(executable);
+  const preLaunchInventory = process.platform === "win32" ? readWindowsProcessInventory() : [];
+  const preExistingIdentities =
+    process.platform === "win32"
+      ? exactPathProcessIdentities(preLaunchInventory, executable)
+      : new Set();
+  const processCountBefore =
+    process.platform === "win32" ? preExistingIdentities.size : linuxProcessCount(executable);
+  prepareGitHubActionsLinuxSuidSandbox(executable);
 
+  const launchTimeMilliseconds = Date.now();
+  let rootProcessId = null;
   const observation = await new Promise((resolve, reject) => {
     const child = spawn(launch.command, launch.arguments, {
       cwd: applicationRoot,
       stdio: ["ignore", "pipe", "pipe"],
       windowsHide: true,
     });
+    rootProcessId = child.pid;
     let stdout = "";
     let stderr = "";
     child.stdout.on("data", (chunk) => {
@@ -86,6 +306,7 @@ async function runMode(mode) {
       resolve({ code, signal, stdout, stderr });
     });
   });
+  const closeTimeMilliseconds = Date.now();
 
   if (observation.code !== 0 || observation.signal !== null) {
     const recorded = existsSync(resultPath) ? readFileSync(resultPath, "utf8").trim() : "ABSENT";
@@ -99,15 +320,42 @@ async function runMode(mode) {
     throw new Error(`RSM5_SMOKE_RESULT_FAILURE:${mode}:${JSON.stringify(result)}`);
   }
   await delay(250);
-  const processCountAfter = processCount(executable);
-  const remainingApplicationProcessCount = Math.max(0, processCountAfter - processCountBefore);
-  if (remainingApplicationProcessCount !== 0) {
+  const postCloseInventory = process.platform === "win32" ? readWindowsProcessInventory() : [];
+  const relatedProcesses =
+    process.platform === "win32"
+      ? relatedWindowsProcesses({
+          processInventory: postCloseInventory,
+          executablePath: executable,
+          preExistingIdentities,
+          rootProcessId,
+          launchTimeMilliseconds,
+          closeTimeMilliseconds,
+        })
+      : [];
+  const processCountAfter =
+    process.platform === "win32"
+      ? exactPathProcessIdentities(postCloseInventory, executable).size
+      : linuxProcessCount(executable);
+  const remainingApplicationProcessCount =
+    process.platform === "win32"
+      ? relatedProcesses.length
+      : Math.max(0, processCountAfter - processCountBefore);
+  if (process.platform === "win32") {
+    assertNoRelatedWindowsProcesses(mode, relatedProcesses);
+  } else if (remainingApplicationProcessCount !== 0) {
     throw new Error(`RSM5_SMOKE_ORPHAN_PROCESS:${mode}:${remainingApplicationProcessCount}`);
   }
   return {
     mode,
     processExit: observation.code,
     cleanExit: observation.code === 0 && observation.signal === null,
+    processIdentityMatcher:
+      process.platform === "win32" ? "EXACT_WINDOWS_PROCESS_IDENTITY" : "NAME",
+    rootProcessId,
+    launchTime: new Date(launchTimeMilliseconds).toISOString(),
+    closeTime: new Date(closeTimeMilliseconds).toISOString(),
+    preExistingExactPathIdentityCount: preExistingIdentities.size,
+    relatedProcesses,
     processCountBefore,
     processCountAfter,
     remainingApplicationProcessCount,
@@ -115,10 +363,20 @@ async function runMode(mode) {
   };
 }
 
-try {
-  const development = await runMode("development");
-  const packaged = await runMode("packaged");
-  process.stdout.write(`${JSON.stringify({ result: "PASS", development, packaged }, null, 2)}\n`);
-} finally {
-  rmSync(temporaryRoot, { force: true, recursive: true });
+async function main() {
+  const temporaryRoot = mkdtempSync(path.join(os.tmpdir(), "retrostage-rsm5-smoke-"));
+  try {
+    const development = await runMode("development", temporaryRoot);
+    const packaged = await runMode("packaged", temporaryRoot);
+    process.stdout.write(`${JSON.stringify({ result: "PASS", development, packaged }, null, 2)}\n`);
+  } finally {
+    rmSync(temporaryRoot, { force: true, recursive: true });
+  }
+}
+
+const isMainModule =
+  typeof process.argv[1] === "string" &&
+  path.resolve(process.argv[1]) === path.resolve(fileURLToPath(import.meta.url));
+if (isMainModule) {
+  await main();
 }

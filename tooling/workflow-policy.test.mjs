@@ -142,6 +142,16 @@ function issueCodes(issues) {
   return issues.map(({ code }) => code);
 }
 
+const APPROVED_NODE_GYP_COMMIT = "06b29aafb7708acef8b3669835c8a7857ebc92d2";
+const APPROVED_NODE_GYP_CODELOAD = `https://codeload.github.com/electron/node-gyp/tar.gz/${APPROVED_NODE_GYP_COMMIT}`;
+const APPROVED_NODE_GYP_GIT = `git+https://github.com/electron/node-gyp.git#${APPROVED_NODE_GYP_COMMIT}`;
+
+function replaceNodeGypSource(fixture, replacement) {
+  const lockPath = path.join(fixture.root, "pnpm-lock.yaml");
+  const lock = readFileSync(lockPath, "utf8").replace(APPROVED_NODE_GYP_CODELOAD, replacement);
+  write(fixture.root, "pnpm-lock.yaml", lock);
+}
+
 afterEach(() => {
   for (const root of temporaryRoots.splice(0)) rmSync(root, { force: true, recursive: true });
 });
@@ -164,6 +174,75 @@ describe("RSM-4 workflow policy", () => {
 
   it("passes with one ACTIVE milestone task", () => {
     expect(validateFixture(createFixture(1))).toEqual([]);
+  });
+
+  it("accepts the exact codeload node-gyp repository and commit identity", () => {
+    expect(validateFixture(createFixture())).toEqual([]);
+  });
+
+  it("accepts the pnpm-normal git+https node-gyp repository and commit identity", () => {
+    const fixture = createFixture();
+    replaceNodeGypSource(fixture, APPROVED_NODE_GYP_GIT);
+    expect(validateFixture(fixture)).toEqual([]);
+  });
+
+  it("rejects a wrong node-gyp commit", () => {
+    const fixture = createFixture();
+    replaceNodeGypSource(fixture, `git+https://github.com/electron/node-gyp.git#${"a".repeat(40)}`);
+    expect(issueCodes(validateFixture(fixture))).toContain("EXOTIC_SOURCE_SET_INVALID");
+  });
+
+  it("rejects a wrong node-gyp repository owner", () => {
+    const fixture = createFixture();
+    replaceNodeGypSource(
+      fixture,
+      `git+https://github.com/example/node-gyp.git#${APPROVED_NODE_GYP_COMMIT}`,
+    );
+    expect(issueCodes(validateFixture(fixture))).toContain("EXOTIC_SOURCE_SET_INVALID");
+  });
+
+  it("rejects a short node-gyp commit", () => {
+    const fixture = createFixture();
+    replaceNodeGypSource(
+      fixture,
+      `git+https://github.com/electron/node-gyp.git#${APPROVED_NODE_GYP_COMMIT.slice(0, 12)}`,
+    );
+    expect(issueCodes(validateFixture(fixture))).toContain("EXOTIC_SOURCE_SET_INVALID");
+  });
+
+  it("rejects git+http for the approved node-gyp identity", () => {
+    const fixture = createFixture();
+    replaceNodeGypSource(
+      fixture,
+      `git+http://github.com/electron/node-gyp.git#${APPROVED_NODE_GYP_COMMIT}`,
+    );
+    expect(issueCodes(validateFixture(fixture))).toContain("EXOTIC_SOURCE_SET_INVALID");
+  });
+
+  it("rejects git+ssh for the approved node-gyp identity", () => {
+    const fixture = createFixture();
+    replaceNodeGypSource(
+      fixture,
+      `git+ssh://git@github.com/electron/node-gyp.git#${APPROVED_NODE_GYP_COMMIT}`,
+    );
+    expect(issueCodes(validateFixture(fixture))).toContain("EXOTIC_SOURCE_SET_INVALID");
+  });
+
+  it("rejects a second exotic source", () => {
+    const fixture = createFixture();
+    const lock = readFileSync(path.join(fixture.root, "pnpm-lock.yaml"), "utf8");
+    write(
+      fixture.root,
+      "pnpm-lock.yaml",
+      `${lock}  x@https://codeload.github.com/example/x/tar.gz/${"a".repeat(40)}: {}\n`,
+    );
+    expect(issueCodes(validateFixture(fixture))).toContain("EXOTIC_SOURCE_SET_INVALID");
+  });
+
+  it("rejects a missing approved node-gyp source", () => {
+    const fixture = createFixture();
+    replaceNodeGypSource(fixture, "registry-only-node-gyp");
+    expect(issueCodes(validateFixture(fixture))).toContain("EXOTIC_SOURCE_SET_INVALID");
   });
 
   it("fails when a required workflow path is missing", () => {

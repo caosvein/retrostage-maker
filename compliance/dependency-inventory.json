@@ -1333,24 +1333,6 @@
       "direct": false,
       "directWorkspace": "TRANSITIVE",
       "distributionScope": "RSM-5-I1 DEVELOPMENT / SECURE ELECTRON SHELL CANDIDATE / NOT FINAL RELEASE",
-      "homepage": "https://github.com/DefinitelyTyped/DefinitelyTyped/tree/master/types/yauzl",
-      "identity": "@types/yauzl@2.10.3",
-      "license": "MIT",
-      "lockedInstalledResolutionIdentity": "@types/yauzl@2.10.3",
-      "name": "@types/yauzl",
-      "native": false,
-      "purl": "pkg:npm/%40types/yauzl@2.10.3",
-      "repository": "https://github.com/DefinitelyTyped/DefinitelyTyped.git",
-      "safeNoticeSourceUrl": "https://github.com/DefinitelyTyped/DefinitelyTyped.git",
-      "version": "2.10.3",
-      "wasm": false
-    },
-    {
-      "author": "",
-      "dependencyScope": "development",
-      "direct": false,
-      "directWorkspace": "TRANSITIVE",
-      "distributionScope": "RSM-5-I1 DEVELOPMENT / SECURE ELECTRON SHELL CANDIDATE / NOT FINAL RELEASE",
       "homepage": "https://typescript-eslint.io/packages/eslint-plugin",
       "identity": "@typescript-eslint/eslint-plugin@8.66.0",
       "license": "MIT",
@@ -2621,24 +2603,6 @@
       "repository": "https://github.com/browserslist/browserslist",
       "safeNoticeSourceUrl": "https://github.com/browserslist/browserslist",
       "version": "4.28.8",
-      "wasm": false
-    },
-    {
-      "author": "Brian J. Brennan <brianloveswords@gmail.com>",
-      "dependencyScope": "development",
-      "direct": false,
-      "directWorkspace": "TRANSITIVE",
-      "distributionScope": "RSM-5-I1 DEVELOPMENT / SECURE ELECTRON SHELL CANDIDATE / NOT FINAL RELEASE",
-      "homepage": "https://github.com/brianloveswords/buffer-crc32",
-      "identity": "buffer-crc32@0.2.13",
-      "license": "MIT",
-      "lockedInstalledResolutionIdentity": "buffer-crc32@0.2.13",
-      "name": "buffer-crc32",
-      "native": false,
-      "purl": "pkg:npm/buffer-crc32@0.2.13",
-      "repository": "https://github.com/brianloveswords/buffer-crc32.git",
-      "safeNoticeSourceUrl": "https://github.com/brianloveswords/buffer-crc32.git",
-      "version": "0.2.13",
       "wasm": false
     },
     {
@@ -4208,21 +4172,21 @@
       "wasm": false
     },
     {
-      "author": "max ogden",
+      "author": "",
       "dependencyScope": "development",
       "direct": false,
       "directWorkspace": "TRANSITIVE",
       "distributionScope": "RSM-5-I1 DEVELOPMENT / SECURE ELECTRON SHELL CANDIDATE / NOT FINAL RELEASE",
       "homepage": "",
-      "identity": "extract-zip@2.0.1",
+      "identity": "extract-zip@1.0.5",
       "license": "BSD-2-Clause",
-      "lockedInstalledResolutionIdentity": "extract-zip@2.0.1",
+      "lockedInstalledResolutionIdentity": "extract-zip@1.0.5",
       "name": "extract-zip",
-      "native": false,
-      "purl": "pkg:npm/extract-zip@2.0.1",
-      "repository": "https://github.com/maxogden/extract-zip",
-      "safeNoticeSourceUrl": "https://github.com/maxogden/extract-zip",
-      "version": "2.0.1",
+      "native": true,
+      "purl": "pkg:npm/extract-zip@1.0.5",
+      "repository": "https://github.com/electron/extract-zip",
+      "safeNoticeSourceUrl": "https://github.com/electron/extract-zip",
+      "version": "1.0.5",
       "wasm": false
     },
     {
@@ -4349,24 +4313,6 @@
       "repository": "https://github.com/es-tooling/fd-package-json.git",
       "safeNoticeSourceUrl": "https://github.com/es-tooling/fd-package-json.git",
       "version": "2.0.0",
-      "wasm": false
-    },
-    {
-      "author": "Andrew Kelley <superjoe30@gmail.com>",
-      "dependencyScope": "development",
-      "direct": false,
-      "directWorkspace": "TRANSITIVE",
-      "distributionScope": "RSM-5-I1 DEVELOPMENT / SECURE ELECTRON SHELL CANDIDATE / NOT FINAL RELEASE",
-      "homepage": "",
-      "identity": "fd-slicer@1.1.0",
-      "license": "MIT",
-      "lockedInstalledResolutionIdentity": "fd-slicer@1.1.0",
-      "name": "fd-slicer",
-      "native": false,
-      "purl": "pkg:npm/fd-slicer@1.1.0",
-      "repository": "https://github.com/andrewrk/node-fd-slicer.git",
-      "safeNoticeSourceUrl": "https://github.com/andrewrk/node-fd-slicer.git",
-      "version": "1.1.0",
       "wasm": false
     },
     {
@@ -7592,24 +7538,6 @@
       "wasm": false
     },
     {
-      "author": "Andrew Kelley <superjoe30@gmail.com>",
-      "dependencyScope": "development",
-      "direct": false,
-      "directWorkspace": "TRANSITIVE",
-      "distributionScope": "RSM-5-I1 DEVELOPMENT / SECURE ELECTRON SHELL CANDIDATE / NOT FINAL RELEASE",
-      "homepage": "",
-      "identity": "pend@1.2.0",
-      "license": "MIT",
-      "lockedInstalledResolutionIdentity": "pend@1.2.0",
-      "name": "pend",
-      "native": false,
-      "purl": "pkg:npm/pend@1.2.0",
-      "repository": "https://github.com/andrewrk/node-pend.git",
-      "safeNoticeSourceUrl": "https://github.com/andrewrk/node-pend.git",
-      "version": "1.2.0",
-      "wasm": false
-    },
-    {
       "author": "Alexey Raspopov",
       "dependencyScope": "development",
       "direct": false,
@@ -10310,24 +10238,6 @@
       "wasm": false
     },
     {
-      "author": "Josh Wolfe <thejoshwolfe@gmail.com>",
-      "dependencyScope": "development",
-      "direct": false,
-      "directWorkspace": "TRANSITIVE",
-      "distributionScope": "RSM-5-I1 DEVELOPMENT / SECURE ELECTRON SHELL CANDIDATE / NOT FINAL RELEASE",
-      "homepage": "https://github.com/thejoshwolfe/yauzl",
-      "identity": "yauzl@2.10.0",
-      "license": "MIT",
-      "lockedInstalledResolutionIdentity": "yauzl@2.10.0",
-      "name": "yauzl",
-      "native": false,
-      "purl": "pkg:npm/yauzl@2.10.0",
-      "repository": "https://github.com/thejoshwolfe/yauzl.git",
-      "safeNoticeSourceUrl": "https://github.com/thejoshwolfe/yauzl.git",
-      "version": "2.10.0",
-      "wasm": false
-    },
-    {
       "author": "Sindre Sorhus <sindresorhus@gmail.com> (https://sindresorhus.com/)",
       "dependencyScope": "development",
       "direct": false,
@@ -10371,9 +10281,9 @@
   },
   "summary": {
     "directCount": 10,
-    "exactInstalledExternalPackageVersionCount": 574,
-    "nativePackageCount": 10,
-    "transitiveCount": 564,
+    "exactInstalledExternalPackageVersionCount": 569,
+    "nativePackageCount": 11,
+    "transitiveCount": 559,
     "wasmPackageCount": 0
   }
 }
