@@ -875,10 +875,6 @@ function buildCanonicalSbom() {
 }
 
 function buildReadme(ownerExceptionState) {
-  const hostObservedIdentities =
-    ownerExceptionState.hostObservedAppliedIdentities.join(", ") || "NONE";
-  const approvedButDormantIdentities =
-    ownerExceptionState.approvedButDormantIdentities.join(", ") || "NONE";
   return `# Compliance baseline
 
 This directory is the deterministic RSM-5-I1 secure Electron shell compliance baseline.
@@ -888,8 +884,7 @@ This directory is the deterministic RSM-5-I1 secure Electron shell compliance ba
 - The accepted physical baseline host is \`${BASELINE_HOST.platform}/${BASELINE_HOST.architecture}\`; only platform-neutral artifacts are byte-compared on other hosts.
 - License policy applies only exact package/version/license owner dispositions recorded in \`license-review.json\`; broad family approval is forbidden.
 - The owner-exception policy contains exactly ${ownerExceptionState.policyWideApprovedCount} Human Project Owner-approved package/version/license identities; broad family or platform-prefix approval is forbidden.
-- The current ${ownerExceptionState.host.platform}/${ownerExceptionState.host.architecture} installed graph applies ${ownerExceptionState.hostObservedAppliedCount} exact owner exceptions: ${hostObservedIdentities}.
-- Approved-but-dormant identities absent from this host graph: ${approvedButDormantIdentities}.
+- On every installed host, applied owner exceptions must be an exact-identity subset of that policy-wide approved set; platform-specific approved identities may remain dormant when absent from the current host graph.
 - Notice fallbacks require an approved safe source link; native/WASM records carry explicit provenance, runtime, packaged-role, and removal contracts.
 - MPL-covered Lightning CSS is physically verified as build-only and absent from the current Forge unpackaged application; license review and notices retain the exact absence/source-availability evidence and require a future artifact-specific recheck.
 - Candidate readiness requires the complete current audit to remain zero at every severity; the parent-scoped plugin-kit remediation stays visible in \`security-findings.json\`.
