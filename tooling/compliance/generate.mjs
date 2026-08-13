@@ -23,6 +23,7 @@ import {
   classifyLicenseIdentity,
   createArtifactProvenanceFields,
   normalizeSafeSourceUrl,
+  ownerExceptionApplicationState,
   renderNoticesHtml,
   selectSafeNoticeSource,
   stableJson,
@@ -61,6 +62,11 @@ const ARTIFACT_FILES = Object.freeze([
   "wasm-module-inventory.json",
   "security-findings.json",
   "README.md",
+]);
+const LIGHTNINGCSS_MPL_IDENTITIES = Object.freeze([
+  "lightningcss@1.33.0",
+  "lightningcss-linux-x64-gnu@1.33.0",
+  "lightningcss-win32-x64-msvc@1.33.0",
 ]);
 const LICENSE_FILE_PATTERN = /^(?:LICENSE|LICENCE|COPYING)(?:[.\-_]|$)/iu;
 const NOTICE_FILE_PATTERN = /^(?:NOTICE|COPYRIGHT)(?:[.\-_]|$)/iu;
@@ -380,7 +386,9 @@ function buildMplPackagedDistributionEvidence(snapshotHost, nativeArtifacts) {
   const packagedFiles = walkAllFiles(packagedApplicationRoot);
   const installedMplNativeHashes = new Set(
     nativeArtifacts
-      .filter((artifact) => artifact.owningPackage.startsWith("lightningcss"))
+      .filter((artifact) =>
+        LIGHTNINGCSS_MPL_IDENTITIES.includes(`${artifact.owningPackage}@${artifact.version}`),
+      )
       .map((artifact) => artifact.sha256),
   );
   const packagedPathIdentityMatches = packagedFiles
@@ -407,7 +415,7 @@ function buildMplPackagedDistributionEvidence(snapshotHost, nativeArtifacts) {
   }
 
   return {
-    identities: ["lightningcss@1.33.0", "lightningcss-win32-x64-msvc@1.33.0"],
+    identities: [...LIGHTNINGCSS_MPL_IDENTITIES],
     packagedApplicationRoot: relativeRepositoryPath(packagedApplicationRoot),
     packagedResourceFileCount: packagedFiles.length,
     packagedNodeModulesPresent,
@@ -608,7 +616,7 @@ function specialObligation(identity, license, mplDistributionEvidence) {
   if (identity === "minimatch@10.2.6") {
     return "Give recipients the Blue Oak Model License 1.0.0 text or its permitted canonical link.";
   }
-  if (identity === "lightningcss@1.33.0" || identity === "lightningcss-win32-x64-msvc@1.33.0") {
+  if (LIGHTNINGCSS_MPL_IDENTITIES.includes(identity)) {
     return `Retain MPL-2.0 license/source-availability obligations. Current physical package observation: ${mplDistributionEvidence.distributionDisposition}; ${mplDistributionEvidence.sourceAvailabilityFulfillment}`;
   }
   if (identity === "type-fest@0.13.1" || identity === "type-fest@1.4.0") {
@@ -645,11 +653,9 @@ function buildLicenseReview(packages, snapshotHost, mplDistributionEvidence) {
         : entry.ownerExactException
           ? "HUMAN PROJECT OWNER APPROVED — EXACT IDENTITY/LICENSE ONLY"
           : "NOT APPLICABLE",
-    packagedArtifactDisposition:
-      entry.identity === "lightningcss@1.33.0" ||
-      entry.identity === "lightningcss-win32-x64-msvc@1.33.0"
-        ? mplDistributionEvidence
-        : null,
+    packagedArtifactDisposition: LIGHTNINGCSS_MPL_IDENTITIES.includes(entry.identity)
+      ? mplDistributionEvidence
+      : null,
     notes: specialObligation(entry.identity, entry.license, mplDistributionEvidence),
   }));
   const count = (classification) =>
@@ -868,7 +874,11 @@ function buildCanonicalSbom() {
   return { output, componentCount: Array.isArray(sbom.components) ? sbom.components.length : 0 };
 }
 
-function buildReadme() {
+function buildReadme(ownerExceptionState) {
+  const hostObservedIdentities =
+    ownerExceptionState.hostObservedAppliedIdentities.join(", ") || "NONE";
+  const approvedButDormantIdentities =
+    ownerExceptionState.approvedButDormantIdentities.join(", ") || "NONE";
   return `# Compliance baseline
 
 This directory is the deterministic RSM-5-I1 secure Electron shell compliance baseline.
@@ -877,7 +887,9 @@ This directory is the deterministic RSM-5-I1 secure Electron shell compliance ba
 - The SBOM is native pnpm CycloneDX 1.7 with only volatile serial/timestamp fields removed.
 - The accepted physical baseline host is \`${BASELINE_HOST.platform}/${BASELINE_HOST.architecture}\`; only platform-neutral artifacts are byte-compared on other hosts.
 - License policy applies only exact package/version/license owner dispositions recorded in \`license-review.json\`; broad family approval is forbidden.
-- The owner-exception policy is limited to the exact 14 Human Project Owner-approved current Windows/x64 identities; non-current-platform Lightning CSS identities are not pre-approved.
+- The owner-exception policy contains exactly ${ownerExceptionState.policyWideApprovedCount} Human Project Owner-approved package/version/license identities; broad family or platform-prefix approval is forbidden.
+- The current ${ownerExceptionState.host.platform}/${ownerExceptionState.host.architecture} installed graph applies ${ownerExceptionState.hostObservedAppliedCount} exact owner exceptions: ${hostObservedIdentities}.
+- Approved-but-dormant identities absent from this host graph: ${approvedButDormantIdentities}.
 - Notice fallbacks require an approved safe source link; native/WASM records carry explicit provenance, runtime, packaged-role, and removal contracts.
 - MPL-covered Lightning CSS is physically verified as build-only and absent from the current Forge unpackaged application; license review and notices retain the exact absence/source-availability evidence and require a future artifact-specific recheck.
 - Candidate readiness requires the complete current audit to remain zero at every severity; the parent-scoped plugin-kit remediation stays visible in \`security-findings.json\`.
@@ -906,17 +918,20 @@ function assertNoBlockers(licenseReview, securityFindings) {
     .filter((entry) => entry.ownerExactException)
     .map((entry) => entry.identity)
     .sort((left, right) => left.localeCompare(right, "en"));
-  if (JSON.stringify(observedOwnerIdentities) !== JSON.stringify(expectedOwnerIdentities)) {
-    throw new Error("Exact owner-approved license identity set is missing or misclassified.");
-  }
-  if (expectedOwnerIdentities.length !== 14) {
+  const ownerExceptionState = ownerExceptionApplicationState({
+    observedIdentities: observedOwnerIdentities,
+    platform: licenseReview.snapshotHost.platform,
+    architecture: licenseReview.snapshotHost.architecture,
+  });
+  if (expectedOwnerIdentities.length !== 15) {
     throw new Error(
-      `Owner-approved identity policy count is ${expectedOwnerIdentities.length}; expected 14.`,
+      `Owner-approved identity policy count is ${expectedOwnerIdentities.length}; expected 15.`,
     );
   }
   if (securityFindings.carryForward.state !== "REMEDIATED_NOT_PRESENT_IN_CURRENT_AUDIT") {
     throw new Error("Plugin-kit remediation visibility differs from the accepted RESUME1 state.");
   }
+  return ownerExceptionState;
 }
 
 export function generateCompliance(destinationPath) {
@@ -945,7 +960,7 @@ export function generateCompliance(destinationPath) {
   );
   const securityFindings = buildSecurityFindings(snapshotHost);
   const sbom = buildCanonicalSbom();
-  assertNoBlockers(licenseReview, securityFindings);
+  const ownerExceptionState = assertNoBlockers(licenseReview, securityFindings);
 
   const provenanceIssues = [...nativeArtifacts, ...wasmArtifacts].flatMap((artifact) =>
     validateArtifactProvenance(artifact).map(
@@ -985,7 +1000,7 @@ export function generateCompliance(destinationPath) {
     ["native-binary-inventory.json", stableJson(nativeInventory)],
     ["wasm-module-inventory.json", stableJson(wasmInventory)],
     ["security-findings.json", stableJson(securityFindings)],
-    ["README.md", buildReadme()],
+    ["README.md", buildReadme(ownerExceptionState)],
   ]);
   for (const [name, content] of outputs)
     writeFileSync(path.join(destination, name), content, "utf8");
@@ -1005,6 +1020,8 @@ export function generateCompliance(destinationPath) {
     carryForwardState: securityFindings.carryForward.state,
     currentHostOwnerApprovedIdentities: licenseReview.currentHostOwnerApprovedIdentities,
     currentHostOwnerExceptionCount: licenseReview.currentHostOwnerApprovedIdentities.length,
+    policyWideOwnerExceptionCount: ownerExceptionState.policyWideApprovedCount,
+    approvedButDormantOwnerExceptionIdentities: ownerExceptionState.approvedButDormantIdentities,
     mplCoveredComponentDistributed: mplDistributionEvidence.coveredExecutableOrSourcePresent,
     mplPackagedResourceFileCount: mplDistributionEvidence.packagedResourceFileCount,
     baselineHost: BASELINE_HOST,

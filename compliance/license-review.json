@@ -25,6 +25,7 @@
     "distributionDisposition": "BUILD_ONLY / PHYSICALLY ABSENT FROM CURRENT FORGE UNPACKAGED APPLICATION",
     "identities": [
       "lightningcss@1.33.0",
+      "lightningcss-linux-x64-gnu@1.33.0",
       "lightningcss-win32-x64-msvc@1.33.0"
     ],
     "installedMplNativeArtifactCount": 1,
@@ -8168,6 +8169,7 @@
         "distributionDisposition": "BUILD_ONLY / PHYSICALLY ABSENT FROM CURRENT FORGE UNPACKAGED APPLICATION",
         "identities": [
           "lightningcss@1.33.0",
+          "lightningcss-linux-x64-gnu@1.33.0",
           "lightningcss-win32-x64-msvc@1.33.0"
         ],
         "installedMplNativeArtifactCount": 1,
@@ -8209,6 +8211,7 @@
         "distributionDisposition": "BUILD_ONLY / PHYSICALLY ABSENT FROM CURRENT FORGE UNPACKAGED APPLICATION",
         "identities": [
           "lightningcss@1.33.0",
+          "lightningcss-linux-x64-gnu@1.33.0",
           "lightningcss-win32-x64-msvc@1.33.0"
         ],
         "installedMplNativeArtifactCount": 1,
@@ -14158,6 +14161,11 @@
       },
       {
         "identity": "lightningcss@1.33.0",
+        "license": "MPL-2.0",
+        "scope": "RSM-5-I1 DEVELOPMENT / SECURE ELECTRON SHELL CANDIDATE / NOT FINAL RELEASE"
+      },
+      {
+        "identity": "lightningcss-linux-x64-gnu@1.33.0",
         "license": "MPL-2.0",
         "scope": "RSM-5-I1 DEVELOPMENT / SECURE ELECTRON SHELL CANDIDATE / NOT FINAL RELEASE"
       },

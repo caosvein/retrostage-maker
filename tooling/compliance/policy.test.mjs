@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   HOST_SENSITIVE_ARTIFACTS,
+  OWNER_EXCEPTION_IDENTITIES,
   OWNER_EXCEPTIONS,
   PLATFORM_NEUTRAL_ARTIFACTS,
   artifactComparisonDisposition,
@@ -11,6 +12,7 @@ import {
   createArtifactProvenanceFields,
   escapeHtml,
   normalizeSafeSourceUrl,
+  ownerExceptionApplicationState,
   renderNoticesHtml,
   selectSafeNoticeSource,
   validateActionReference,
@@ -47,12 +49,13 @@ describe("RSM-3-I3 compliance policy", () => {
     ).toBe("OWNER_APPROVED_EXACT_TRANSITIVE_DEV_TOOL_LICENSE");
   });
 
-  it("locks owner exceptions to the exact fourteen Windows/x64 identities", () => {
+  it("locks owner exceptions to the exact fifteen Human Project Owner-approved identities", () => {
     expect([...OWNER_EXCEPTIONS.keys()]).toEqual([
       "argparse@2.0.1",
       "caniuse-lite@1.0.30001809",
       "chownr@3.0.0",
       "lightningcss@1.33.0",
+      "lightningcss-linux-x64-gnu@1.33.0",
       "lightningcss-win32-x64-msvc@1.33.0",
       "minimatch@10.2.6",
       "minipass@7.1.3",
@@ -64,6 +67,15 @@ describe("RSM-3-I3 compliance policy", () => {
       "type-fest@1.4.0",
       "yallist@5.0.0",
     ]);
+    expect(new Set(OWNER_EXCEPTION_IDENTITIES.map(([identity]) => identity)).size).toBe(15);
+    for (const name of ["lightningcss-linux-x64-gnu", "lightningcss-win32-x64-msvc"]) {
+      expect(classifyLicenseIdentity({ name, version: "1.33.0", license: "MPL-2.0" })).toEqual({
+        classification: "OWNER_APPROVED_EXACT_TRANSITIVE_DEV_TOOL_LICENSE",
+        manualReviewRequired: false,
+        ownerExactException: true,
+        prohibited: false,
+      });
+    }
   });
 
   it("does not pre-approve non-current-platform Lightning CSS identities", () => {
@@ -75,7 +87,6 @@ describe("RSM-3-I3 compliance policy", () => {
       "lightningcss-linux-arm64-gnu",
       "lightningcss-linux-arm64-musl",
       "lightningcss-linux-arm-gnueabihf",
-      "lightningcss-linux-x64-gnu",
       "lightningcss-linux-x64-musl",
       "lightningcss-win32-arm64-msvc",
     ]) {
@@ -88,11 +99,52 @@ describe("RSM-3-I3 compliance policy", () => {
     }
   });
 
-  it("does not transfer an approved license to another identity", () => {
+  it("does not transfer approval by family, prefix, version, or license-only matching", () => {
+    for (const candidate of [
+      { name: "lightningcss-linux-x64-musl", version: "1.33.0", license: "MPL-2.0" },
+      { name: "lightningcss-linux-x64-gnu-extra", version: "1.33.0", license: "MPL-2.0" },
+      { name: "lightningcss-linux-x64-gnu", version: "1.32.0", license: "MPL-2.0" },
+      { name: "unapproved-package", version: "1.33.0", license: "MPL-2.0" },
+      { name: "other", version: "10.2.6", license: "BlueOak-1.0.0" },
+    ]) {
+      expect(classifyLicenseIdentity(candidate).classification).toBe("UNAPPROVED_MANUAL_REVIEW");
+    }
+  });
+
+  it("models host-observed owner exceptions as an exact subset of policy", () => {
+    const observedIdentities = [...OWNER_EXCEPTIONS.keys()].filter(
+      (identity) => identity !== "lightningcss-linux-x64-gnu@1.33.0",
+    );
+    const expectedObservedIdentities = [...observedIdentities].sort((left, right) =>
+      left.localeCompare(right, "en"),
+    );
     expect(
-      classifyLicenseIdentity({ name: "other", version: "10.2.6", license: "BlueOak-1.0.0" })
-        .classification,
-    ).toBe("UNAPPROVED_MANUAL_REVIEW");
+      ownerExceptionApplicationState({
+        observedIdentities,
+        platform: "win32",
+        architecture: "x64",
+      }),
+    ).toEqual({
+      policyWideApprovedCount: 15,
+      hostObservedAppliedCount: 14,
+      hostObservedAppliedIdentities: expectedObservedIdentities,
+      approvedButDormantIdentities: ["lightningcss-linux-x64-gnu@1.33.0"],
+      host: { platform: "win32", architecture: "x64" },
+    });
+    expect(() =>
+      ownerExceptionApplicationState({
+        observedIdentities: [...observedIdentities, observedIdentities[0]],
+        platform: "win32",
+        architecture: "x64",
+      }),
+    ).toThrow("OWNER_EXCEPTION_HOST_DUPLICATE");
+    expect(() =>
+      ownerExceptionApplicationState({
+        observedIdentities: [...observedIdentities, "lightningcss-linux-x64-musl@1.33.0"],
+        platform: "win32",
+        architecture: "x64",
+      }),
+    ).toThrow("OWNER_EXCEPTION_HOST_UNKNOWN");
   });
 
   it("escapes untrusted notice text", () => {

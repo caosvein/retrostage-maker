@@ -31,11 +31,12 @@ export const AUTOMATIC_LICENSES = new Set([
   "Zlib",
 ]);
 
-const OWNER_EXCEPTION_IDENTITIES = Object.freeze([
+export const OWNER_EXCEPTION_IDENTITIES = Object.freeze([
   ["argparse@2.0.1", "Python-2.0"],
   ["caniuse-lite@1.0.30001809", "CC-BY-4.0"],
   ["chownr@3.0.0", "BlueOak-1.0.0"],
   ["lightningcss@1.33.0", "MPL-2.0"],
+  ["lightningcss-linux-x64-gnu@1.33.0", "MPL-2.0"],
   ["lightningcss-win32-x64-msvc@1.33.0", "MPL-2.0"],
   ["minimatch@10.2.6", "BlueOak-1.0.0"],
   ["minipass@7.1.3", "BlueOak-1.0.0"],
@@ -54,6 +55,54 @@ export const OWNER_EXCEPTIONS = new Map(
     { license, scope: DISTRIBUTION_SCOPE },
   ]),
 );
+
+function duplicateIdentities(identities) {
+  const seen = new Set();
+  const duplicates = new Set();
+  for (const identity of identities) {
+    if (seen.has(identity)) duplicates.add(identity);
+    seen.add(identity);
+  }
+  return [...duplicates].sort((left, right) => left.localeCompare(right, "en"));
+}
+
+export function ownerExceptionApplicationState({ observedIdentities, platform, architecture }) {
+  const policyIdentities = OWNER_EXCEPTION_IDENTITIES.map(([identity]) => identity);
+  const duplicatePolicyIdentities = duplicateIdentities(policyIdentities);
+  if (duplicatePolicyIdentities.length !== 0) {
+    throw new Error(`OWNER_EXCEPTION_POLICY_DUPLICATE:${duplicatePolicyIdentities.join(",")}`);
+  }
+
+  const observed = [...observedIdentities];
+  const duplicateObservedIdentities = duplicateIdentities(observed);
+  if (duplicateObservedIdentities.length !== 0) {
+    throw new Error(`OWNER_EXCEPTION_HOST_DUPLICATE:${duplicateObservedIdentities.join(",")}`);
+  }
+
+  const policySet = new Set(policyIdentities);
+  const unknownObservedIdentities = observed
+    .filter((identity) => !policySet.has(identity))
+    .sort((left, right) => left.localeCompare(right, "en"));
+  if (unknownObservedIdentities.length !== 0) {
+    throw new Error(`OWNER_EXCEPTION_HOST_UNKNOWN:${unknownObservedIdentities.join(",")}`);
+  }
+
+  const hostObservedAppliedIdentities = observed.sort((left, right) =>
+    left.localeCompare(right, "en"),
+  );
+  const observedSet = new Set(hostObservedAppliedIdentities);
+  const approvedButDormantIdentities = policyIdentities
+    .filter((identity) => !observedSet.has(identity))
+    .sort((left, right) => left.localeCompare(right, "en"));
+
+  return {
+    policyWideApprovedCount: policyIdentities.length,
+    hostObservedAppliedCount: hostObservedAppliedIdentities.length,
+    hostObservedAppliedIdentities,
+    approvedButDormantIdentities,
+    host: { platform, architecture },
+  };
+}
 
 const PROHIBITED_LICENSE_PATTERN =
   /(?:^|[^A-Za-z])(?:AGPL|GPL-2\.0|GPL-3\.0|SSPL|BUSL|Business Source License|Commons Clause|PolyForm|Non-Commercial|No-Derivatives)(?:$|[^A-Za-z])/i;
