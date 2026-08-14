@@ -4,23 +4,25 @@
 **Role:** Authoritative milestone-handoff and next-control source  
 **Project:** RetroStage Maker  
 **Current gate:** `Gate B — ACTIVE / CURRENT`  
-**Current milestone/control:** `RSM-5 AUTHORIZED / CURRENT`  
-**Current task:** `RSM-5-I1 — ELECTRON SECURE SHELL FOUNDATION`  
-**Milestone/control state:** `RSM-4 CLOSED / GATE A PASS-CLOSED / GATE B ACTIVE-CURRENT`  
-**Task state:** `CURRENT IMPLEMENTATION TASK / INDEPENDENT STAGED-CANDIDATE REVIEW PENDING`  
-**Snapshot date:** 2026-08-12  
+**Last closed milestone:** `RSM-5 — MILESTONE CLOSED / PASS`  
+**Next milestone boundary:** `RSM-6 — Babylon.js 9 Viewport / Renderer Adapter Bootstrap`  
+**Current task:** `NONE`  
+**Milestone/control state:** `RSM-5 CLOSED-PASS / GATE A PASS-CLOSED / GATE B ACTIVE-CURRENT / RSM-6 NOT AUTHORIZED`  
+**Task state:** `NO CURRENT IMPLEMENTATION TASK`  
+**Snapshot date:** 2026-08-14  
 **Timezone:** Europe/Istanbul  
 **Repository:** `PRESENT — C:\RetroStage\retrostage-maker`  
 **RSM-2:** `CLOSED / SOURCE PASS`  
-**RSM-4:** `CLOSED`
+**RSM-4:** `CLOSED`  
+**RSM-5:** `MILESTONE CLOSED / PASS`
 
 ---
 
 ## 1. Purpose
 
-This document records the durable RSM-4 milestone handoff after final independent closure PASS while retaining accepted RSM-3 repository, clean-clone, LF portability, backup, restore, and Source 07 evidence as historical physical baseline context.
+This document records the durable post-RSM-5 milestone handoff after RSM-5-I1, V1, and CLOSE1 independently passed, while retaining accepted RSM-3/RSM-4 repository, portability, backup, restore, workflow, and Source 07 evidence as historical baseline context.
 
-RSM-4-I1 and RSM-4-FIX1 are completed and accepted. RSM-4-V1-RERUN1 passed, RSM-4-CLOSE1 and POSTCLOSE1 alignment received independent acceptance, and RSM-4 is closed. Gate A is PASS / CLOSED. Gate B is ACTIVE / CURRENT, RSM-5 is AUTHORIZED / CURRENT, and RSM-5-I1 is the current implementation task pending independent staged-candidate review.
+RSM-5 is `MILESTONE CLOSED / PASS`; RSM-5-I1 is `ACCEPTED / COMPLETE`; RSM-5-V1 and RSM-5-CLOSE1 are `INDEPENDENT PASS`. Gate B remains `ACTIVE / CURRENT` because it spans RSM-5 through RSM-18. RSM-6 is next in roadmap order, but it is `NOT STARTED / NOT AUTHORIZED` and no implementation task is current.
 
 ---
 
@@ -49,9 +51,12 @@ RSM-4-I1 and RSM-4-FIX1 are completed and accepted. RSM-4-V1-RERUN1 passed, RSM-
 | RSM-4 | `CLOSED` |
 | Gate A | `PASS / CLOSED` |
 | RSM-4-POSTCLOSE1-ALIGN1 | `COMPLETED / ACCEPTED` |
-| Gate B | `ACTIVE / CURRENT` |
-| RSM-5 | `AUTHORIZED / CURRENT` |
-| RSM-5-I1 | `CURRENT IMPLEMENTATION TASK / INDEPENDENT REVIEW PENDING` |
+| Gate B | `ACTIVE / CURRENT — spans RSM-5 through RSM-18` |
+| RSM-5 | `MILESTONE CLOSED / PASS` |
+| RSM-5-I1 | `ACCEPTED / COMPLETE` |
+| RSM-5-V1 | `INDEPENDENT PASS` |
+| RSM-5-CLOSE1 | `INDEPENDENT PASS` |
+| RSM-6 | `NEXT MILESTONE BOUNDARY / NOT STARTED / NOT AUTHORIZED` |
 
 Historical FIX/failure artifacts remain evidence history. The original failed clone remains preserved and is not promoted as current success evidence.
 
@@ -80,7 +85,7 @@ The accepted LF policy preserves `docs/evidence/**` and `compliance/THIRD_PARTY_
 
 ---
 
-## 4. Verified RSM-4 Closure Hosted CI
+## 4. Verified RSM-4 and RSM-5 Hosted CI
 
 ```text
 Workflow: CI
@@ -98,11 +103,27 @@ CI configuration and deterministic compliance checks are physically proven on Gi
 
 Dependency Review Action remains deferred because of platform capability. The accepted parent-scoped `eslint@9.21.0>@eslint/plugin-kit = 0.3.4` remediation produces a current full audit of zero at every severity; no finding is suppressed.
 
-The stable decoupled toolchain authority remains exact: `electron@43.4.0`, `@electron-forge/core@7.11.2`, `vite@8.2.1`, and `tar@7.5.22`; `@electron-forge/plugin-vite` remains `DEFERRED_STABLE_ADMISSION`.
+The accepted RSM-5 product baseline was normally published and validated by its natural push-triggered run:
+
+```text
+Closed RSM-5 product baseline: ea4aae0e6c34404db5a08a725f3c99c4051e813b
+Closed tree: 29a5bacc457c060b335ee4731cd38f7d496931d9
+Run ID: 31750886944
+Job ID: 94616133933
+Attempt: 1
+Event: push
+Head branch: main
+Status: completed
+Conclusion: success
+```
+
+The natural CI failures `31714213773` and `31743840726` remain preserved as remediated historical failures; `31750886944` is the accepted natural success for the exact closed baseline.
+
+The stable decoupled toolchain authority remains exact: `electron@43.4.0`, `@electron-forge/core@7.11.2`, `vite@8.2.1`, and `tar@7.5.22`; `@electron-forge/plugin-vite` remains absent/deferred.
 
 ---
 
-## 5. Fresh Clone and Reproducibility Truth
+## 5. Historical RSM-3/I4 Fresh Clone and Reproducibility Truth
 
 ```text
 Fresh target: D:\RSM-Validation\clean-clone-retry2
@@ -130,7 +151,7 @@ The historical target `D:\RSM-Validation\clean-clone` was not modified, deleted,
 
 ---
 
-## 6. Backup and Restore Truth
+## 6. Historical RSM-3/I4 Backup and Restore Truth
 
 Governed backup scope:
 
@@ -212,76 +233,69 @@ The Source 07 operational content is independently accepted as RSM-3 repository-
 
 ---
 
-## 8. RSM-5-I1 Current Implementation Boundary
+## 8. Accepted RSM-5 Validation Truth
 
-RSM-3 remains independently closed. The RSM-4-I1 implementation and RSM-4-FIX1 remediation chains are completed and accepted, RSM-4-V1-RERUN1 independently passed, and RSM-4-CLOSE1 received FINAL PASS.
+```text
+RSM-5-I1 = ACCEPTED / COMPLETE
+RSM-5-V1 = INDEPENDENT PASS
+RSM-5-CLOSE1 = INDEPENDENT PASS
+full tests = 81/81 PASS
+targeted security/architecture = 14/14 PASS
+development smoke = PASS
+packaged smoke = PASS
+remaining RetroStage process = 0
+compliance determinism = 8/8 PASS
+license/security/native/notice blockers = 0/0/0/0
+audit info/low/moderate/high/critical = 0/0/0/0/0
+forbidden RSM-6/Babylon production scope = ABSENT
+```
 
-RSM-4-POSTCLOSE1-ALIGN1 has synchronized established closure truth into current authority and is independently accepted. The present candidate implements only the RSM-5-I1 secure Electron shell within its exact reviewed path, dependency, security, compliance, Source, and staging boundary.
-
-This candidate does not re-decide RSM-4 closure, mark RSM-5-I1 complete, close RSM-5 or Gate B, authorize RSM-6, or predict a future commit, push, or hosted-CI identity.
+The independently accepted capability is the secure Electron desktop shell foundation. No Babylon production dependency or RSM-6 product implementation is admitted.
 
 ---
 
 ## 9. Product and Historical Boundaries
 
-The closed RSM-3 baseline owns repository, toolchain, quality, compliance, off-device backup, reproducibility, restore, and command documentation truth.
+The closed RSM-3 baseline continues to own repository, toolchain, quality, compliance, off-device backup, reproducibility, restore, and command documentation truth. RSM-4 remains closed and owns the engineering/review workflow baseline. RSM-5 now owns the independently accepted secure Electron shell foundation.
 
-A physical staged RSM-5-I1 secure Electron shell implementation candidate is present, while independently accepted/closed RSM-5-I1 product capability remains absent and RSM-5-I1 remains incomplete. Babylon, React editor/product work, product schemas, runtime systems, export/player, assets, Flow Graph, sequencer, Steam integration, and later dependencies remain unimplemented and unauthorized.
+Babylon viewport/renderer adapters, React editor/product work, project/scene persistence, gameplay/runtime, export/player, assets, Flow Graph, sequencer, Steam integration, and later dependencies remain future scope. They are not implemented or authorized by this alignment.
 
-Historical source state remains:
-
-`HISTORICAL_IDENTITY_PRESERVED_BYTES_UNAVAILABLE`
-
-No synthetic historical bytes are promoted.
+Historical source state remains `HISTORICAL_IDENTITY_PRESERVED_BYTES_UNAVAILABLE`; no synthetic historical bytes are promoted.
 
 ---
 
 ## 10. Remaining Controlled Sequence
 
 ```text
-RSM-4-I1 (COMPLETED / ACCEPTED)
-→ RSM-4-FIX1 (COMPLETED / ACCEPTED)
-→ RSM-4-V1 (HISTORICAL MATERIAL FAILURE)
-→ RSM-4-V1-RERUN1 (PASS / CLOSE1 ELIGIBLE)
-→ RSM-4-CLOSE1 (FINAL INDEPENDENT PASS)
-→ verified closure commit 53565f354a1427251806f2e4457ade018d222dc0
-→ normal push / hosted CI 31536395689 / 93928397354 / success
-→ RSM-4 CLOSED / Gate A PASS / CLOSED
-→ RSM-4-POSTCLOSE1-ALIGN1 completed / independently accepted
-→ POSTCLOSE1 commit 74304c858782c27d73f1294c2c430af4def6e128 / normal push PASS / hosted CI 31541756617 / 93945494354 / success
-→ Gate B ACTIVE / CURRENT
-→ RSM-5 AUTHORIZED / CURRENT
-→ RSM-5-I1 current implementation task
-→ independent staged-candidate review / separately authorized commit and push
+RSM-5-I1 = ACCEPTED / COMPLETE
+→ final commit ea4aae0e6c34404db5a08a725f3c99c4051e813b
+→ natural hosted CI 31750886944 / 94616133933 / attempt 1 / push / success
+→ RSM-5-V1 = INDEPENDENT PASS
+→ RSM-5-CLOSE1 = INDEPENDENT PASS
+→ RSM-5 = MILESTONE CLOSED / PASS
+→ Gate B = ACTIVE / CURRENT
+→ RSM-6 = NEXT MILESTONE BOUNDARY / NOT STARTED / NOT AUTHORIZED
+→ separate Human Project Owner authorization for RSM-6 admission/current-state audit
 ```
 
-RSM-4 remains closed and Gate A remains PASS / CLOSED. Gate B is ACTIVE / CURRENT and RSM-5 is AUTHORIZED / CURRENT. RSM-5-I1 remains a current candidate, not a completed task; RSM-6 is not started or authorized.
+Gate B does not close with RSM-5. Gate B spans RSM-5 through RSM-18. RSM-5 closure does not authorize RSM-6 implementation.
 
 ---
 
 ## 11. Current Milestone Statement
 
 ```text
-milestone = RSM-5
-current task = RSM-5-I1
-task type = ELECTRON SECURE SHELL FOUNDATION / CURRENT IMPLEMENTATION TASK
-current accepted repository baseline = 74304c858782c27d73f1294c2c430af4def6e128
-verified RSM-4 closure commit/baseline = 53565f354a1427251806f2e4457ade018d222dc0
-verified RSM-4 closure CI = run 31536395689 / job 93928397354 / completed / success
-POSTCLOSE1 commit = 74304c858782c27d73f1294c2c430af4def6e128
-POSTCLOSE1 hosted CI = run 31541756617 / job 93945494354 / push / completed / success
-RSM-4-I1 = COMPLETED
-RSM-4-FIX1 = COMPLETED
-RSM-4-V1-RERUN1 = PASS
-RSM-4-CLOSE1 = FINAL PASS / COMPLETED
-RSM-4 = CLOSED
-Gate A = PASS / CLOSED
-Gate B = ACTIVE / CURRENT
-RSM-5 = AUTHORIZED / CURRENT
-RSM-5-I1 = CURRENT IMPLEMENTATION TASK / NOT COMPLETE
-physical staged RSM-5-I1 secure-shell implementation candidate = PRESENT
-independently accepted/closed RSM-5-I1 product capability = NOT YET
-current audit = info 0 / low 0 / moderate 0 / high 0 / critical 0
+current gate = Gate B — ACTIVE / CURRENT
+last closed milestone = RSM-5 — MILESTONE CLOSED / PASS
+RSM-5-I1 = ACCEPTED / COMPLETE
+RSM-5-V1 = INDEPENDENT PASS
+RSM-5-CLOSE1 = INDEPENDENT PASS
+closed product baseline = ea4aae0e6c34404db5a08a725f3c99c4051e813b
+closed tree = 29a5bacc457c060b335ee4731cd38f7d496931d9
+accepted natural CI = 31750886944 / 94616133933 / attempt 1 / push / completed-success
+next milestone boundary = RSM-6 — Babylon.js 9 Viewport / Renderer Adapter Bootstrap
 RSM-6 = NOT STARTED / NOT AUTHORIZED
-next handoff = ChatGPT independent RSM-5-I1 staged-candidate review
+current implementation task = NONE
+Babylon production dependency/admission = ABSENT
+next handoff = separate Human Project Owner authorization for RSM-6 admission/current-state audit
 ```
