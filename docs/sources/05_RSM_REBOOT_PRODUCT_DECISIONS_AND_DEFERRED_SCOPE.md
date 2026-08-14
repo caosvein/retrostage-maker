@@ -5,8 +5,8 @@
 **Project:** RetroStage Maker  
 **Distribution intent:** Commercial proprietary desktop creator distributed through Steam and other approved Windows channels  
 **Source generation:** Reboot / clean-start  
-**Document date:** 2026-08-05  
-**Document state:** `ACTIVE DECISION REGISTRY / RSM-3 CLOSED / POST-RSM-3 PRODUCT STRATEGY ALIGNED`  
+**Document date:** 2026-08-14  
+**Document state:** `ACTIVE DECISION REGISTRY / RSM-5 CLOSURE-ALIGNED / PRE-RSM-6 RENDERER AND ENGINEERING-ACCELERATION DECISIONS CLARIFIED`  
 **Repository:** `ESTABLISHED — current physical truth belongs to repository inspection and Source 02/07`  
 **Primary branch:** `main`  
 **Governing charter:** `00_RSM_REBOOT_PROJECT_CHARTER.md`  
@@ -764,17 +764,46 @@ Babylon.js 9 is the only approved 3D rendering and runtime-adapter foundation fo
 It may provide:
 
 - viewport rendering,
-- cameras,
+- cameras and camera-input primitives behind RetroStage controller semantics,
 - materials,
 - animation playback,
 - particles,
 - picking and gizmos,
 - GPU execution,
 - loaders,
-- Frame Graph facilities,
+- `AssetContainer`-based derived resource lifecycle,
+- `UtilityLayerRenderer` and other editor-overlay/render-isolation primitives,
+- `NullEngine` for headless adapter-conformance testing,
+- `SceneInstrumentation` as a source for RetroStage-owned diagnostics snapshots,
+- development-only Inspector UI/headless CLI diagnostics,
+- Frame Graph facilities and later presentation backends,
+- thin-instance/batching, selection visualization, capture, NodeMaterial, advanced materials, and VFX backends when their owning milestones justify them,
 - runtime visual projection.
 
-It may not own canonical product data or creator semantics.
+RetroStage should use these proven Babylon primitives when they reduce boilerplate and lifecycle bugs, but it may not delegate canonical product data or creator semantics.
+
+The following authority separations are durable:
+
+```text
+Babylon Scene serialization != .rsmscene
+Babylon node/object IDs != RetroStage stable IDs
+Babylon picking != canonical selection authority
+GizmoManager != command/mutation authority
+AssetContainer != canonical asset document
+NodeMaterial != canonical RetroStage material document
+Frame Graph != canonical PresentationProfile
+Babylon GUI != RetroStage editor UI authority
+Babylon Flow Graph != RetroStage gameplay authority
+Inspector/CLI mutation != RetroStage authoring authority
+```
+
+Data direction remains one-way by default:
+
+```text
+RetroStage canonical truth
+→ validated renderer projection
+→ Babylon derived runtime state
+```
 
 ### Consequence
 
@@ -1914,7 +1943,12 @@ Raw exceptions and console logs are not sufficient release diagnostics.
 
 Representative projects and deterministic fixtures must cover:
 
-- migrations,
+- known-valid and known-invalid canonical documents,
+- corrupt/truncated save or project cases,
+- schema migrations and future-version rejection,
+- stable-ID/reference preservation and remapping,
+- deterministic save/reload round trips,
+- renderer-adapter projection/lifecycle/disposal conformance,
 - camera profiles,
 - interaction,
 - objectives and inventory,
@@ -1930,12 +1964,28 @@ Representative projects and deterministic fixtures must cover:
 - sequences,
 - export.
 
+The Golden Fixture Corpus is a versioned RetroStage-owned test asset, not a third-party dependency. A deterministic round-trip harness must support:
+
+```text
+load
+→ parse
+→ canonical model
+→ save
+→ reload
+→ semantic/byte-policy comparison
+```
+
+An Adapter Conformance Kit should standardize checks that renderer/importer/exporter adapters preserve stable IDs, obey canonical authority boundaries, avoid derived-state leakage, and dispose resources correctly.
+
+Property-based testing may supplement this corpus when generated inputs find classes of edge cases that fixed fixtures cannot efficiently enumerate.
+
 ### Consequence
 
-Regression evidence must use product-representative fixtures, not only isolated unit tests.
+Regression evidence must use product-representative fixtures, deterministic round-trip checks, and adapter-boundary tests rather than only isolated unit tests.
 
 ### Roadmap ownership
 
+- RSM-6–8
 - RSM-30
 - RSM-112–113
 
@@ -2385,11 +2435,63 @@ No table entry authorizes implementation before the canonical roadmap reaches it
 
 ## 85. Conditional Third-Party and Tooling Registry
 
-The following are not baseline dependencies and require exact future audit.
+The following are not automatically installed merely because their direction is approved. Exact dependency admission remains milestone-owned.
+
+### 85.1 Adopted internal engineering-acceleration direction
+
+RetroStage should deliberately automate repetitive engineering evidence where automation reduces human transcription error without weakening owner/reviewer gates.
+
+A future RetroStage-owned Governance/Evidence CLI may collect:
+
+- SHA-256 and byte counts,
+- Git blob/tree/parent/ref identities,
+- exact patch/path boundaries,
+- Source-manifest/repository/live equality,
+- dependency/native/WASM evidence,
+- audit summaries,
+- CI run/head/event/attempt/job/step identities.
+
+It must remain read-only/evidence-first by default and must not silently authorize, stage, commit, push, rerun CI, repair drift, or replace independent review. No command name is canonical until it physically exists and passes its owning review.
+
+### 85.2 Third-party candidates
 
 | Candidate | Status | Owning work | Required proof |
 |---|---|---:|---|
+| `fast-check` | Milestone-gated / development-only preferred | RSM-7 / RSM-8 | Exact package/license, deterministic seeds/replay policy, CI time budget, property tests that add value beyond fixtures |
+| Testing Library family (`@testing-library/react`, DOM helpers, user-event where appropriate) | Approved in principle / development-only | RSM-9 onward | Exact package set/license, compatibility with selected React/Vitest environment, semantic-query discipline, preference for real-browser Playwright/Vitest Browser actions where appropriate |
+| Storybook | Conditional / development-only component workbench | RSM-9 onward | Exact package family/license/transitives, Vite/React compatibility, local/offline operation, telemetry/config review, demonstrated reduction in component-state/design-system iteration cost |
+| `dnd-kit` family | Milestone-gated UI interaction backend | RSM-13 or first real hierarchy/asset drag-drop slice | Exact package family/license, API maturity, keyboard/accessibility behavior, virtualization compatibility, command/validation adapter proof |
+| Piscina | Conditional / Node-only worker orchestration | Asset/export/index/validation work after measured CPU bottleneck | Exact package/license, Node compatibility, cancellation/shutdown behavior, optional-native dependency inventory, measured benefit |
+| Changesets | Conditional / development-release tooling | First real multi-package publication/release-management need | Exact package/license, proof that package-version/changelog automation reduces work rather than adding ceremony |
+| `ts-pattern` | Conditional convenience | Complex discriminated-union hotspots only | Exact package/license, compile-time impact, demonstrated readability/exhaustiveness benefit over native TypeScript |
+| `@babylonjs/addons` | Conditional renderer capability family | Feature-owning Babylon/render milestone | Exact imported addon(s), bundle impact, API maturity, license/transitive review; never admit the package merely as a grab-bag |
 | `@babylonjs/havok` | Milestone-gated | RSM-17 / RSM-28 | Exact package, WASM inventory, license, behavior, performance |
+
+### 85.3 Deliberate non-selections / friction controls
+
+The following were reviewed during the pre-RSM-6 technology freeze and are intentionally **not** baseline selections:
+
+```text
+axe-core / @axe-core/*
+Comlink
+MSW
+Zod
+broad Storybook addon bundles
+```
+
+Rationale:
+
+- `axe-core` is valuable, but its MPL-2.0 licensing/notice/source obligations and current upstream licensing-identifier discussion create more compliance friction than RetroStage needs in the foundation. It may be reconsidered development-only at a later accessibility milestone after a focused license review.
+- Comlink is a sound Apache-2.0 worker-RPC library, but RetroStage already has explicit Electron IPC boundaries plus a conditional Piscina direction for Node worker pools. A second RPC abstraction is deferred until a concrete browser/Web Worker use case proves it removes more complexity than it adds.
+- MSW is not selected because the current product is not network/API-centric; add only if a real service-mocking need emerges.
+- Zod is not selected because RetroStage already owns the TypeBox/Ajv runtime-schema direction; parallel schema authorities would increase drift risk.
+- Storybook itself is only a conditional workbench. Addons are not inherited wholesale; each addon may introduce separate dependencies, telemetry, browser binaries, or licenses.
+
+### 85.4 Pre-RSM-6 dependency-surface freeze
+
+After this clarification, no new third-party library should be added to canonical planning merely because it is popular or convenient. New additions require an owning milestone, a concrete reduction in code/error/maintenance cost, license/transitive evidence, and an explicit authority boundary.
+
+This freeze does not prevent future admissions; it prevents speculative dependency accumulation.
 | `better-sqlite3` | Milestone-gated | RSM-33 / RSM-74 | Native binary inventory, Electron ABI, rebuild policy |
 | Recast/Detour adapter | Milestone-gated/open adapter | RSM-59 | Exact adapter, license, navmesh lifecycle, debug path |
 | React Flow | Milestone-gated | RSM-104 | UI-only adapter boundary and license verification |

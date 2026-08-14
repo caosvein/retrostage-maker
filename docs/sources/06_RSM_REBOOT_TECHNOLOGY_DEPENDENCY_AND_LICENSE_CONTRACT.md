@@ -4,8 +4,8 @@
 **Role:** Authoritative technology baseline, dependency-admission policy, licensing contract, and third-party integration boundary  
 **Project:** RetroStage Maker  
 **Distribution intent:** Commercial proprietary desktop creator distributed through Steam and other approved Windows channels  
-**Document date:** 2026-08-05  
-**Document state:** `ACTIVE TECHNOLOGY/DEPENDENCY CONTRACT / RSM-3 DEVELOPMENT TOOLCHAIN BASELINE VERIFIED / PRODUCTION DEPENDENCIES MILESTONE-GATED`  
+**Document date:** 2026-08-14  
+**Document state:** `ACTIVE TECHNOLOGY/DEPENDENCY CONTRACT / RSM-5 CLOSED / PRE-RSM-6 BABYLON AND ENGINEERING-ACCELERATION CONTRACT CLARIFIED / PRODUCTION DEPENDENCIES MILESTONE-GATED`  
 **Repository:** `PRESENT — C:\RetroStage\retrostage-maker`  
 **Primary branch:** `main`  
 **Governing source:** `00_RSM_REBOOT_PROJECT_CHARTER.md`  
@@ -353,12 +353,18 @@ The following versions were verification candidates on 2026-08-05. They are not 
 |---|---:|---|
 | Node.js | `24.18.1` LTS | Exact external toolchain version |
 | Electron | `43.3.0` | Exact dependency |
-| Babylon.js modular packages | `9.19.1` | Exact and aligned across official packages |
+| Babylon.js modular packages | `9.19.1` recorded as an unverified historical candidate | **Do not admit from this value.** Re-query the official registry at RSM-6 and lock a physically proven compatible exact package set. |
 | TypeScript | `6.0.3` | Exact development dependency |
 | React | Latest patched `19.2.x` | Exact patch selected at RSM-9 |
 | React DOM | Same release as React | Exact and aligned at RSM-9 |
 | Vite | Latest supported `8.2.x` | Exact patch selected at RSM-5 |
 | pnpm | Current supported stable compatible with Node 24 | Exact release selected and recorded at bootstrap |
+
+### 7.4.1 Current Babylon registry observation — discovery evidence only
+
+A 2026-08-14 review of official npm/Babylon publication surfaces observed the Babylon 9 package family around the `9.18.1` line, including `@babylonjs/core` and official scope entries for loaders/materials/serializers/inspector. The previously recorded `9.19.1` value is therefore not admissible evidence and must not be copied into the lockfile.
+
+This observation is intentionally **not** an RSM-6 admission. When RSM-6 opens, the dependency gate must query the registry again, prove the exact versions available at that time, inspect package metadata/transitives/notices, and commit only the selected compatible set.
 
 ### 7.5 Upgrade control
 
@@ -518,32 +524,45 @@ Removing bundled notice files to reduce package size is prohibited.
 
 ## 10. Babylon.js 9 Renderer and Runtime-Adapter Contract
 
-### 10.1 Approved packages
+### 10.1 Approved package families and RSM-6 admission shape
+
+Primary RSM-6 package families:
 
 ```text
 @babylonjs/core
 @babylonjs/loaders
-@babylonjs/materials
-@babylonjs/serializers
 ```
 
-Development-only candidate:
+Development-only RSM-6 candidate:
 
 ```text
 @babylonjs/inspector
 ```
 
+Feature-gated official families that are approved in principle but are not automatically required by RSM-6:
+
+```text
+@babylonjs/materials
+@babylonjs/serializers
+@babylonjs/addons
+```
+
+`@babylonjs/materials` enters only when a selected material capability is required. `@babylonjs/serializers` remains restricted to conversion/debug/derived output and may be deferred. `@babylonjs/addons` is a feature-specific candidate family, not a baseline grab-bag dependency.
+
 ### 10.2 License
 
 The official Babylon.js repository and modular packages are governed by Apache-2.0, subject to package-specific verification and retained notices.
 
-### 10.3 Package policy
+### 10.3 Package and import policy
 
 - Use official scoped modular packages.
+- Prefer narrow ESM imports/tree-shakable entrypoints from `@babylonjs/core`; broad `Legacy/legacy` imports are not the production baseline.
 - Do not use the legacy monolithic `babylonjs` package in parallel.
-- Keep official Babylon packages on one compatible exact version line unless upstream explicitly requires otherwise.
+- Keep official Babylon packages on a physically proven compatible exact set; do not assume patch alignment merely from naming.
 - `@babylonjs/serializers` is permitted for conversion, debugging, or derived output only.
 - `@babylonjs/inspector` is development-only and forbidden from production editor and player artifacts.
+- Inspector headless/CLI connectivity may support diagnostic evidence, screenshots, entity queries, and performance traces in development, but Inspector edits are never canonical authoring authority.
+- `@babylonjs/addons` requires feature-by-feature admission and bundle/API review.
 - `react-babylonjs` is not part of the baseline; the renderer adapter remains RetroStage-owned.
 
 ### 10.4 Canonical boundary
@@ -575,15 +594,24 @@ Babylon may provide:
 
 - WebGPU/WebGL execution,
 - scene rendering,
-- cameras,
+- cameras and camera-input primitives behind RetroStage controller semantics,
 - lights and shadows,
 - materials and textures,
 - animation playback,
 - particles and VFX primitives,
-- picking and gizmos,
-- frame-graph and post-process execution,
+- picking primitives behind RetroStage stable-ID/selection adapters,
+- gizmos behind RetroStage command/validation/mutation authority,
+- `AssetContainer` lifecycle for derived loaded resources,
+- `UtilityLayerRenderer` and related render isolation for editor-only overlays,
+- `NullEngine` for headless renderer-adapter conformance tests,
+- `SceneInstrumentation` as an input to RetroStage-owned diagnostic snapshots,
+- development-only Inspector UI/headless CLI diagnostics,
+- frame-graph and post-process execution behind a RetroStage backend seam,
+- later selection visualization, thin-instance/batching, capture, NodeMaterial, advanced material, and VFX backends at their owning milestones,
 - loading of supported cooked assets,
 - debug rendering in development.
+
+RSM-6 must establish explicit disposal/lifetime rules for scene, asset containers, overlays, temporary resources, diagnostics hooks, and adapter teardown.
 
 RetroStage remains responsible for:
 
@@ -1243,6 +1271,90 @@ renderer adapter → editor-private mutation implementation
 
 Knip findings must be reviewed; generated entry points and Electron packaging hooks may require explicit configuration rather than blanket ignore rules.
 
+### 19.8 fast-check
+
+**Classification:** `DEVELOPMENT_ONLY / MILESTONE_GATED`  
+**License family:** MIT  
+**Preferred entry:** RSM-7/RSM-8 after exact package admission  
+**Use:** property-based tests for schemas, stable IDs, reference remapping, migrations, deterministic round trips, command invariants, and selected async/race-sensitive contracts.
+
+Property-based testing supplements example tests and the Golden Fixture Corpus; it does not become canonical-data generation or validation authority. Seeds/counterexamples required for a failure must be reproducible.
+
+### 19.9 RetroStage-owned deterministic fixtures, conformance, and evidence tooling
+
+The following are approved internal engineering directions and do not require a third-party runtime dependency by themselves:
+
+```text
+Golden Fixture Corpus
+Deterministic Round-Trip Harness
+Adapter Conformance Kit
+Governance / Evidence CLI
+```
+
+The Governance/Evidence CLI may automate read-only collection of hashes, Git identities, patch/path boundaries, Source equality, dependency evidence, and hosted-CI identities. It must not silently stage, commit, push, rerun CI, mutate Sources, repair drift, authorize work, or replace independent review.
+
+No hypothetical command is added to Source 07 until physically implemented and accepted.
+
+### 19.10 Testing Library family
+
+**Classification:** `DEVELOPMENT_ONLY / RSM-9+ MILESTONE-GATED`  
+**License family:** MIT  
+**Candidate packages:** `@testing-library/react`, `@testing-library/dom`, and `@testing-library/user-event` only where a simulated-DOM test remains justified.
+
+Use:
+
+- user-oriented React/DOM assertions,
+- semantic queries by accessible role/name/text,
+- interaction tests that survive internal component refactors,
+- Inspector/hierarchy/panel state tests that do not couple to React component instances.
+
+Policy:
+
+- prefer real-browser Playwright or Vitest Browser actions when the test benefits from real browser behavior;
+- use `user-event` for jsdom/happy-dom tests where a real browser is unnecessary;
+- do not treat Testing Library success as packaged Electron acceptance;
+- keep these packages out of production bundles.
+
+### 19.11 Storybook
+
+**Classification:** `DEVELOPMENT_ONLY / CONDITIONAL / RSM-9+`  
+**License family:** MIT  
+**Use:** isolated development, documentation, and review of RetroStage-owned UI components, states, design tokens, focus behavior, empty/error/loading states, and selected interaction stories.
+
+Admission requirements:
+
+- exact React/Vite-compatible package set,
+- transitive/license/telemetry review,
+- local/offline developer operation,
+- no required hosted Chromatic/service dependency,
+- measurable reduction in component-state/design-system iteration cost.
+
+Storybook is not the production editor shell, canonical design authority, or release acceptance truth. Addons are separate dependency decisions.
+
+### 19.12 dnd-kit family
+
+**Classification:** `MILESTONE_GATED UI INTERACTION BACKEND / RSM-13+`  
+**License family:** MIT  
+**Candidate family:** current `@dnd-kit/*` packages, with exact package selection deferred to the owning slice.
+
+Possible use:
+
+- hierarchy reorder/reparent gestures,
+- asset/list drag-and-drop,
+- keyboard-accessible drag/drop interaction,
+- collision/sensor primitives behind RetroStage UI adapters.
+
+Durable boundary:
+
+```text
+dnd-kit drag result / sortable state
+→ RetroStage intent
+→ validated command
+→ canonical mutation
+```
+
+Toolkit object IDs, sensor state, collision results, and DOM order are never canonical entity/asset authority.
+
 ---
 
 ## 20. Packaging and Windows Distribution
@@ -1402,8 +1514,16 @@ The following matrix records the approved or planned direct-dependency position 
 | Chokidar | Filesystem observation | Foundation editor runtime | MIT | Approved | Events require review pipeline |
 | fflate | ZIP/archive helpers | Foundation runtime | MIT | Approved | Archive/transport only |
 | Pino | Structured logging | Foundation runtime/build | MIT | Approved | Privacy/redaction rules apply |
-| Babylon.js scoped packages | Renderer/runtime adapter | Foundation runtime | Apache-2.0 | Approved | One aligned version line; retain notices |
-| Babylon Inspector | Development diagnostics | Development only | Apache-2.0 | Conditional dev approval | Forbidden from production packages |
+| Babylon.js scoped packages | Renderer/runtime adapter | Foundation runtime | Apache-2.0 | Approved | Exact compatible set proven at RSM-6; retain notices; prefer scoped ESM imports |
+| Babylon Inspector | Development diagnostics / optional headless CLI | Development only | Apache-2.0 | Conditional dev approval | Forbidden from production packages; never canonical mutation authority |
+| `@babylonjs/addons` | Feature-specific Babylon extensions | Milestone-gated/conditional | Apache-2.0 | Approved family only | Admit exact addon need, bundle/API evidence, and transitive graph; not baseline |
+| fast-check | Property-based testing | Development only | MIT | Approved in principle | Preferred RSM-7/8; reproducible seeds/counterexamples; not packaged |
+| Testing Library family | React/DOM behavior testing | Development only | MIT | Approved in principle | RSM-9+; semantic tests; prefer real browser where appropriate; not packaged |
+| Storybook | Component workbench | Development only / conditional | MIT | Conditional | RSM-9+; exact Vite/React/transitive/telemetry review; no hosted service requirement |
+| dnd-kit family | Drag/drop interaction primitives | Milestone-gated editor UI | MIT | Approved in principle | RSM-13+; exact package/API maturity review; command/validation adapter required |
+| Piscina | Node worker-thread pool | Conditional Node-only tooling/runtime adapter | MIT | Conditional | Admit only after measured CPU bottleneck; audit optional native dependency path |
+| Changesets | Package version/changelog tooling | Development/release only | MIT | Conditional | Only when real multi-package publication/version workflow exists |
+| ts-pattern | Exhaustive TypeScript pattern matching | Conditional convenience | MIT | Conditional | Demonstrate readability/error reduction and acceptable typecheck cost |
 | glTF-Transform | Asset transformation | Milestone-gated pipeline | MIT | Approved in principle | Enters at RSM-75; external invoked tools separate |
 | meshoptimizer | Mesh optimization | Milestone-gated pipeline | MIT | Approved in principle | Enters at RSM-75; preserve attribution/notice coverage |
 | Vitest | Unit/contract tests | Development only | MIT | Approved | Not packaged |
@@ -1667,9 +1787,11 @@ The approved production families enter only when their roadmap milestone opens a
 | Milestone | Dependency families |
 |---|---|
 | RSM-5 | Electron, Electron Forge core, Forge Vite plugin, Vite |
-| RSM-6 | `@babylonjs/core`, loaders, selected materials support, serializers restricted to derived/debug use |
-| RSM-9 | React, React DOM, selected Radix packages, Golden Layout, react-window |
+| RSM-6 | `@babylonjs/core`, `@babylonjs/loaders`; `@babylonjs/inspector` development-only if the diagnostic gate is accepted; materials/serializers only when the exact RSM-6 slice requires them; addons remain feature-gated |
+| RSM-7 / RSM-8 | `fast-check` development-only if exact admission proves value for schema/round-trip/stable-ID/migration invariants |
+| RSM-9 | React, React DOM, selected Radix packages, Golden Layout, react-window; Testing Library family development-only; Storybook only if its conditional component-workbench gate is accepted |
 | RSM-10 | Zustand, XState |
+| RSM-13 | `dnd-kit` family only if the hierarchy/asset interaction slice proves a real drag/drop need and exact package/API admission passes |
 | RSM-11 | one approved TypeBox package identity, Ajv |
 | RSM-14 | Chokidar, only if external-change observation is required by the slice |
 | RSM-15 | fflate, only for approved snapshot/archive behavior |
@@ -1705,7 +1827,20 @@ pino
 @babylonjs/loaders
 @babylonjs/materials
 @babylonjs/serializers
+@babylonjs/inspector
+@babylonjs/addons
 @babylonjs/havok
+fast-check
+@testing-library/react
+@testing-library/dom
+@testing-library/user-event
+storybook
+@storybook/react-vite
+@dnd-kit/react
+@dnd-kit/dom
+piscina
+@changesets/cli
+ts-pattern
 better-sqlite3
 Recast wrappers
 @xyflow/react
@@ -1760,6 +1895,15 @@ Ant Design
 Bootstrap
 react-babylonjs
 msgpackr
+axe-core / @axe-core packages without a focused later MPL/compliance review
+Comlink without a concrete browser/Web Worker RPC need
+MSW without a concrete network/service-mocking need
+Zod or any second parallel runtime-schema authority
+Storybook addon bundles without exact addon-by-addon review
+Piscina without measured CPU-bound need
+Changesets before a real multi-package release/version workflow
+ts-pattern as a project-wide default without demonstrated value
+broad `@babylonjs/addons` admission without an exact feature need
 remote telemetry exporters
 hosted backend services
 ```
@@ -1810,6 +1954,10 @@ Defer until distribution requirements are known. Audit Squirrel, WiX, ZIP, or ot
 ### 31.7 Recast adapter
 
 Defer until the navigation milestone. Upstream Recast approval does not select a JavaScript wrapper.
+
+### 31.8 Exact Babylon.js 9 modular package set
+
+RSM-6 must re-query the official registry immediately before admission. The current 2026-08-14 observation around `9.18.1` is discovery evidence only. The selected set must prove exact package availability, compatibility, license/notices, transitive graph, bundle impact, and lockfile determinism. The historical `9.19.1` candidate is not trusted admission evidence.
 
 These open details do not reopen the Babylon/Electron architecture decision.
 
@@ -1933,6 +2081,15 @@ This ledger records the authoritative upstream source family used for the histor
 | React Flow | `https://github.com/xyflow/xyflow` | MIT core |
 | Monaco Editor | `https://github.com/microsoft/monaco-editor` | MIT |
 | OpenTelemetry JS | `https://github.com/open-telemetry/opentelemetry-js` | Apache-2.0 |
+| fast-check | `https://github.com/dubzzz/fast-check` | MIT; development-only candidate |
+| Testing Library React | `https://github.com/testing-library/react-testing-library` | MIT; development-only candidate |
+| Testing Library DOM | `https://github.com/testing-library/dom-testing-library` | MIT; development-only candidate |
+| Testing Library user-event | `https://github.com/testing-library/user-event` | MIT; development-only candidate |
+| Storybook | `https://github.com/storybookjs/storybook` | MIT; conditional development-only workbench |
+| dnd-kit | `https://github.com/clauderic/dnd-kit` | MIT; milestone-gated UI interaction candidate |
+| Piscina | `https://github.com/piscinajs/piscina` | MIT; conditional Node worker-thread candidate |
+| Changesets | `https://github.com/changesets/changesets` | MIT; conditional release/version tooling |
+| ts-pattern | `https://github.com/gvergnaud/ts-pattern` | MIT; conditional convenience dependency |
 | msgpackr | `https://github.com/kriszyp/msgpackr` | MIT |
 | KTX-Software | `https://github.com/KhronosGroup/KTX-Software` | Mixed; conditional audit only |
 

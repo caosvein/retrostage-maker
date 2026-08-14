@@ -4,8 +4,8 @@
 **Role:** Canonical long-range product, architecture, dependency-order, and product-gate roadmap  
 **Project:** RetroStage Maker  
 **Roadmap namespace:** `RSM-0` → `RSM-120`  
-**Document date:** 2026-08-05  
-**Document state:** `ACTIVE CANONICAL ROADMAP / RSM-3 CLOSED / POST-RSM-3 STRATEGY ALIGNED`  
+**Document date:** 2026-08-14  
+**Document state:** `ACTIVE CANONICAL ROADMAP / RSM-5 CLOSURE-ALIGNED / PRE-RSM-6 CAPABILITY AND TOOLING CLARIFIED`  
 **Repository:** `ESTABLISHED — live physical truth belongs to Source 02/07 and repository inspection`  
 **Primary branch:** `main`  
 **Primary product target:** `RSM-120 — First Playable Public Alpha / Investor Demo Candidate`  
@@ -153,6 +153,10 @@ Every production dependency must have:
 - exact-version and lockfile evidence,
 - transitive/native/WASM review where applicable,
 - a replacement or removal path.
+
+RetroStage should prefer mature permissively licensed libraries when they remove low-value boilerplate, reduce known error classes, or provide well-tested infrastructure without replacing RetroStage product semantics. Convenience is not enough by itself; the dependency must reduce total maintenance risk.
+
+RetroStage-owned development tooling may automate repetitive evidence collection such as SHA-256, Git blob/tree/parent identity, patch boundaries, Source-manifest equality, remote refs, and CI run identity. Such tooling remains evidence collection only: it does not become owner authorization, independent review, validation truth, or an implicit stage/commit/push authority.
 
 ### 4.8 The core product is self-contained
 
@@ -310,44 +314,57 @@ Unless a milestone explicitly narrows the requirement, closure requires:
 **Exit:** A branded RetroStage shell launches securely and architecture tests reject unsafe renderer access patterns.
 
 ## RSM-6 — Babylon.js 9 Viewport / Renderer Adapter Bootstrap
-**Purpose:** Create the sole 3D viewport and renderer-adapter foundation without making Babylon canonical.  
-**Third-party placement:** `@babylonjs/core`, `@babylonjs/loaders`, selected materials support, and serializers restricted to derived/debug use.  
+**Purpose:** Create the sole 3D viewport and renderer-adapter foundation while using Babylon's proven derived-runtime primitives aggressively enough to reduce boilerplate, without making Babylon canonical.  
+**Third-party placement:** `@babylonjs/core` and `@babylonjs/loaders` are the primary RSM-6 family; `@babylonjs/inspector` is `DEVELOPMENT_ONLY`; selected materials/serializers enter only when an exact RSM-6 need proves them; broad addon packages remain feature-gated rather than baseline.  
 **Key deliverables:**
-- Create a viewport, camera, grid, render loop, resize handling, and device-loss direction.
-- Define renderer handles keyed by RetroStage stable identity.
+- Create the viewport, camera/controller seam, grid, render loop, resize handling, and device/context-loss direction.
+- Define adapter-owned stable-ID ↔ transient Babylon-handle registries.
+- Route Babylon picking through RetroStage stable identity and selection intent; Babylon hit results never become canonical selection.
+- Establish `AssetContainer`-based derived asset/resource ownership and explicit create/dispose/teardown rules.
+- Establish `UtilityLayerRenderer` plus a RetroStage-owned render-classification seam for editor overlays, gizmos, selection/debug visuals, and later capture surfaces.
+- Establish a `GizmoManager` seam with RetroStage retaining selection, command, validation, and mutation authority.
+- Establish `NullEngine` as a headless adapter-conformance backend; it supplements but never replaces real WebGL/WebGPU/Electron renderer validation.
+- Expose `SceneInstrumentation` through RetroStage-owned diagnostics snapshots instead of leaking Babylon instrumentation objects across package boundaries.
+- Keep Babylon Inspector UI and headless Inspector/CLI connectivity development-only, diagnostic-oriented, removable from production artifacts, and non-authoritative for canonical mutation.
+- Prefer narrow ESM imports/tree-shaking; legacy monolithic imports are not the baseline.
 - Keep Babylon scene objects replaceable and disposable.
-- Keep Babylon Inspector development-only.
-**Exit:** A derived scene can render in the editor while headless canonical documents remain possible.
+- Reserve a Frame Graph/backend seam without moving advanced post-processing or presentation authoring into RSM-6.
+**Exit:** A derived scene renders through the real editor viewport, the same adapter foundation can be exercised headlessly through deterministic conformance tests, resource teardown is proven, and canonical documents remain Babylon-independent.
 
 ## RSM-7 — Canonical Project / Scene Document Foundation
 **Purpose:** Define the first versioned project, scene, entity, component-envelope, and asset-reference documents.  
-**Third-party placement:** RetroStage-owned TypeScript packages; no third-party state model may own persistence.  
+**Third-party placement:** RetroStage-owned TypeScript packages own persistence; `fast-check` may enter `DEVELOPMENT_ONLY` after exact admission when property-based tests materially reduce schema/round-trip risk.  
 **Key deliverables:**
 - Define deterministic serialization and explicit schema versions.
 - Separate authoring documents from editor preferences and generated files.
 - Define unknown-data preservation policy.
+- Establish the first Golden Fixture Corpus with known-valid, known-invalid, corrupt, compatibility, and round-trip fixtures.
+- Establish a deterministic `load → parse → canonical model → save → reload → compare` round-trip harness.
 - Create headless fixtures independent of Electron, React, and Babylon.
-**Exit:** Projects and scenes can be created, parsed, serialized, and compared without renderer or UI ownership.
+**Exit:** Projects and scenes can be created, parsed, serialized, round-tripped, and compared without renderer or UI ownership.
 
 ## RSM-8 — Stable Identity / Schema Migration / Reference Foundation
 **Purpose:** Establish durable IDs, reference types, migration order, remapping, and missing-reference diagnostics.  
-**Third-party placement:** TypeBox and Ajv may support shape validation after exact package identity is approved.  
+**Third-party placement:** TypeBox and Ajv may support shape validation after exact package identity is approved; development-only `fast-check` may exercise stable-ID, migration, and reference invariants.  
 **Key deliverables:**
 - Define project, scene, entity, component, asset, and future document identities.
 - Prohibit display-name, array-index, and renderer-object identity as persistent references.
 - Create explicit migration functions and future-version rejection.
 - Create deterministic fixtures for ID preservation and remapping.
-**Exit:** A supported old fixture migrates to the current schema without silent identity or unknown-data loss.
+- Add property-based invariants where generated edge cases provide more value than hand-written examples alone.
+**Exit:** A supported old fixture migrates to the current schema without silent identity or unknown-data loss, and generated/reference edge cases cannot silently break stable-identity guarantees.
 
 ## RSM-9 — Editor Shell / Hierarchy / Inspector Vertical Slice
 **Purpose:** Create the first product-owned editor workspace around the Babylon viewport.  
-**Third-party placement:** React, React DOM, selected Radix primitives, Golden Layout behind an adapter, react-window where scale requires it, CSS Modules, and CSS variables.  
+**Third-party placement:** React, React DOM, selected Radix primitives, Golden Layout behind an adapter, react-window where scale requires it, CSS Modules, and CSS variables. Development-only Testing Library packages are approved in principle for user-oriented React/DOM tests after exact admission. Storybook is a conditional development-only component-workbench candidate, not a product/runtime dependency.  
 **Key deliverables:**
 - Create viewport, hierarchy, inspector, problems placeholder, and project navigation surfaces.
 - Keep panel layout local and non-canonical.
-- Create RetroStage design tokens and terminology.
+- Create RetroStage design tokens, component states, terminology, focus rules, and interaction semantics.
+- Exercise UI behavior with semantic/user-oriented tests rather than component-instance or implementation-detail assertions.
+- If Storybook is admitted, use it only to develop/document/test RetroStage-owned UI components and states in isolation; it must not become the editor shell, canonical design authority, hosted dependency, or required production runtime.
 - Prove keyboard focus and basic accessibility behavior.
-**Exit:** The user can navigate a project and select an entity through a branded RetroStage interface without exposure to a third-party engine editor.
+**Exit:** The user can navigate a project and select an entity through a branded RetroStage interface without exposure to a third-party engine editor, and critical UI behavior is testable without coupling tests to React internals.
 
 ## RSM-10 — Transient State / Workflow / Command Authority Foundation
 **Purpose:** Separate UI state, lifecycle state, and canonical mutation authority.  
@@ -381,13 +398,15 @@ Unless a milestone explicitly narrows the requirement, closure requires:
 
 ## RSM-13 — Selection / Transform / Basic Hierarchy / Scene Projection
 **Purpose:** Connect canonical transform edits to selection, gizmos, hierarchy presentation, and Babylon projection.  
-**Third-party placement:** Babylon gizmo/picking facilities behind RetroStage adapters; React UI remains non-canonical.  
+**Third-party placement:** Babylon gizmo/picking facilities behind RetroStage adapters; React UI remains non-canonical. The modern `dnd-kit` package family is approved in principle as a milestone-gated UI interaction backend for hierarchy/list/asset drag-and-drop when the exact slice proves it reduces bespoke pointer/keyboard/accessibility code.  
 **Key deliverables:**
 - Define the first transform convention and candidate edit flow.
 - Project stable entity IDs to disposable renderer objects.
 - Support create, select, move, rotate, scale, and delete for the minimal slice.
+- Define drag-and-drop intents separately from canonical mutation; any admitted DnD toolkit emits RetroStage intents/commands rather than editing documents directly.
+- Preserve keyboard-accessible reorder/move semantics and deterministic drop validation.
 - Ensure renderer refresh does not reverse-write arbitrary Babylon state.
-**Exit:** Transform edits survive save/reopen and produce matching Preview state from canonical documents.
+**Exit:** Transform edits survive save/reopen and produce matching Preview state from canonical documents; any hierarchy drag/drop path remains replaceable and command-authoritative on the RetroStage side.
 
 ## RSM-14 — Project Create / Open / Save / Dirty-State Foundation
 **Purpose:** Implement project lifecycle and explicit persisted-state boundaries.  
@@ -1524,6 +1543,9 @@ Third-party components enter only through their responsible milestone and do not
 | Electron / Forge / Vite | RSM-5 | Desktop shell and packaging | IPC security, lifecycle semantics, player/editor separation |
 | Babylon.js 9 | RSM-6 | Rendering and runtime facilities | Canonical documents, projection, gameplay, diagnostics, parity |
 | React / Radix / Golden Layout / react-window | RSM-9 | Editor UI and docking | Product UX, design system, panel semantics, creator workflow |
+| Testing Library family | RSM-9 | Maintainable user-oriented React/DOM tests | Product semantics, real-browser/Electron acceptance, accessibility policy |
+| Storybook | RSM-9 or later, conditional development-only | Isolated component/state development and visual review | RetroStage design system, product shell, release UI truth |
+| dnd-kit family | RSM-13 or later, milestone-gated | Pointer/keyboard-accessible drag/drop primitives | Drop validation, command authority, hierarchy/asset semantics |
 | Zustand / XState | RSM-10 | Transient state and workflow lifecycle | Canonical mutation and business rules |
 | TypeBox / Ajv | RSM-8 and RSM-11 | Runtime schemas | Migration, semantic validation, capability truth |
 | Chokidar | RSM-14 | External-change observation | Review, identity, reimport, safe mutation |

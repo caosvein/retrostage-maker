@@ -5,8 +5,8 @@
 **Project:** RetroStage Maker  
 **Distribution intent:** Commercial proprietary desktop creator distributed through Steam and other approved Windows channels  
 **Source generation:** Reboot / clean-start  
-**Document date:** 2026-08-05  
-**Document state:** `APPROVED PLANNED ARCHITECTURE / REPOSITORY FOUNDATION ESTABLISHED / PRODUCT IMPLEMENTATION MILESTONE-GATED`  
+**Document date:** 2026-08-14  
+**Document state:** `APPROVED PLANNED ARCHITECTURE / RSM-5 CLOSURE-ALIGNED / PRE-RSM-6 RENDERER AND TOOLING BOUNDARIES CLARIFIED`  
 **Repository:** `PRESENT — C:\RetroStage\retrostage-maker`  
 **Primary branch:** `main`  
 **Governing charter:** `00_RSM_REBOOT_PROJECT_CHARTER.md`  
@@ -1166,12 +1166,17 @@ Concrete adapters are injected by the application composition root.
 
 - Babylon engine and scene lifecycle,
 - Preview and runtime scene projections,
-- object-to-stable-ID lookup maps,
-- selection/picking/gizmo adapters,
-- camera/light/material/texture projection,
-- renderer resource lifetime,
-- Frame Graph and presentation implementation,
-- development-only Babylon diagnostics adapters.
+- stable-ID ↔ transient Babylon-handle registries,
+- selection/picking adapters that translate Babylon hits into RetroStage identity/intents,
+- camera/controller, light, material, texture, animation, and particle projection,
+- `AssetContainer`-based derived asset/resource ownership,
+- `UtilityLayerRenderer` and render-classification mapping for world/editor-overlay/gizmo/selection/debug/capture surfaces,
+- `GizmoManager` integration seams without command or canonical-mutation authority,
+- explicit renderer resource lifetime and disposal,
+- `NullEngine` headless adapter-conformance support,
+- `SceneInstrumentation` capture behind RetroStage diagnostics contracts,
+- Frame Graph/presentation backend seams and later implementations,
+- development-only Babylon Inspector UI/CLI diagnostic adapters.
 
 **May depend on:**
 
@@ -1325,11 +1330,65 @@ The headless diagnostic-contract package must not import Pino directly. Concrete
 - migration fixtures,
 - command/session fixtures,
 - deterministic runtime fixtures,
-- later golden-project helpers.
+- a versioned Golden Fixture Corpus covering known-valid, known-invalid, corrupt, compatibility, migration, round-trip, asset, and later product-representative cases,
+- deterministic round-trip harness inputs and expected outputs,
+- adapter-conformance fixtures, including headless renderer projection/disposal cases,
+- development-only property-based arbitraries when an admitted tool such as `fast-check` materially improves edge-case coverage.
 
 It must never enter editor or player production bundles.
 
-**Roadmap entry:** RSM-3, RSM-17, RSM-30, RSM-112–113.
+**Roadmap entry:** RSM-3, RSM-6–8, RSM-17, RSM-30, RSM-112–113.
+
+## 15.17 RetroStage-owned governance/evidence tooling
+
+**Role:** development-only automation for repetitive repository, Source, patch, dependency-evidence, and hosted-CI identity collection.
+
+**Class:** `TOOLING / DEVELOPMENT_ONLY / NON_PRODUCT / NON_AUTHORITY`
+
+**May automate:**
+
+- SHA-256 and byte counts,
+- Git blob/tree/parent/ref identity,
+- exact changed-path and patch boundaries,
+- Source-manifest/repository/live equality,
+- dependency/evidence inventories,
+- remote-ref observations,
+- CI run/head/event/attempt/job/step identity capture.
+
+**Must not become:**
+
+- Human Project Owner authorization,
+- independent review,
+- product validation truth,
+- an implicit stage/commit/push authority,
+- a tool that silently repairs drift,
+- a production editor/player dependency.
+
+No `pnpm rsm:*` or equivalent command is canonical merely because this architecture reserves the tooling direction; commands enter Source 07 only after physical implementation and accepted validation.
+
+## 15.18 Editor development/testing acceleration boundaries
+
+RetroStage may use mature development-only UI tooling to reduce repetitive test and component-workbench code without outsourcing product semantics.
+
+Approved directions:
+
+```text
+Testing Library family
+→ semantic React/DOM tests focused on user-visible behavior
+
+Storybook
+→ conditional isolated development/review of RetroStage-owned UI components and states
+
+dnd-kit family
+→ milestone-gated drag/drop primitives behind RetroStage intent/command adapters
+```
+
+Durable boundaries:
+
+- Testing Library does not replace Playwright/Electron acceptance or real-browser validation.
+- Storybook does not become the production editor shell, a hosted service requirement, or the canonical source of design tokens/behavior.
+- DnD toolkit object IDs, collision results, sensors, and sortable state are transient UI implementation details; canonical hierarchy/asset moves remain RetroStage commands with validation.
+- No accessibility or visual-testing addon is inherited automatically through a workbench; each addon/dependency family remains subject to its own license/transitive review.
 
 ---
 
@@ -1556,9 +1615,37 @@ Babylon.js 9 is the sole approved renderer/runtime adapter, but it is not the pr
 - load approved cooked assets,
 - manage Babylon resource creation and disposal,
 - map stable RetroStage IDs to transient Babylon objects,
+- route Babylon picking through RetroStage identity/selection adapters,
+- own `AssetContainer` lifecycle only as derived runtime resource state,
+- isolate editor-only overlays through `UtilityLayerRenderer`/render-classification mappings,
+- integrate `GizmoManager` only behind RetroStage selection/command/validation authority,
+- provide a `NullEngine`-based headless conformance backend for projection/lifecycle tests,
+- expose `SceneInstrumentation` only through RetroStage diagnostics snapshots,
 - implement camera, lighting, fog, materials, animation, particles, and presentation adapters,
-- expose renderer diagnostics through RetroStage contracts,
+- keep Inspector UI/headless CLI connectivity development-only and removable from production bundles,
+- prefer narrow ESM imports and tree-shakable Babylon entrypoints,
+- reserve Frame Graph/presentation seams without making Babylon graph structure canonical,
 - support Preview, PIE, and player runtime modes without sharing forbidden state.
+
+### RSM-6 foundation primitive map
+
+```text
+RetroStage canonical/render contracts
+        ↓
+@retrostage/renderer-babylon9
+        ├─ Engine / Scene / camera / render loop
+        ├─ stable ID ↔ transient handle registry
+        ├─ picking adapter
+        ├─ AssetContainer lifecycle
+        ├─ UtilityLayerRenderer / render-classification seam
+        ├─ GizmoManager seam
+        ├─ NullEngine conformance backend
+        ├─ SceneInstrumentation → RetroStage diagnostics
+        ├─ InspectorDevBridge (DEVELOPMENT_ONLY)
+        └─ FrameGraphBackend seam
+```
+
+The implementation may use Babylon facilities heavily inside the adapter as long as the public/canonical side of the boundary remains RetroStage-owned.
 
 ### Babylon adapter prohibitions
 
@@ -1571,7 +1658,13 @@ It may not:
 - determine gameplay capabilities from a rendered object,
 - store canonical references as object identity,
 - make Babylon Inspector a shipping product surface,
-- expose Babylon objects as public cross-package state.
+- treat Inspector/CLI edits as canonical authoring operations,
+- make Babylon picking the canonical selection authority,
+- make `GizmoManager` the command/mutation authority,
+- make `AssetContainer` the canonical asset document,
+- make NodeMaterial the canonical material document,
+- make Frame Graph the canonical presentation document,
+- expose Babylon objects or instrumentation objects as public cross-package state.
 
 ### Stable mapping
 
@@ -2076,6 +2169,16 @@ Third-party imports must be concentrated in their owning adapter/UI/tooling pack
 | Chokidar | storage/file observation adapter | direct mutation |
 | fflate | archive/recovery adapter | project working format authority |
 | Pino | diagnostic sink adapter | validation authority |
+| OpenTelemetry JS | later diagnostics adapter/local instrumentation | remote telemetry/privacy authority |
+| fast-check | `test-fixtures` / development test tooling | canonical data generation or validation authority |
+| Testing Library family | `editor-app` / development-only UI tests | product acceptance, real-browser/Electron truth, canonical UI semantics |
+| Storybook | conditional development-only component workbench | production editor shell, hosted design authority, canonical product truth |
+| dnd-kit family | hierarchy/list/asset interaction adapter after milestone admission | canonical hierarchy mutation, drop validation, command authority |
+| Piscina | conditional Node-only worker/job adapter | product semantics, canonical mutation, or automatic parallelism policy |
+| Changesets | conditional release/version tooling | product capability/version truth by itself |
+| ts-pattern | conditional TypeScript convenience dependency | canonical domain model or validation semantics |
+| Babylon Inspector | `renderer-babylon9` development-only diagnostics | shipping editor UI or canonical mutation authority |
+| `@babylonjs/addons` | feature-specific renderer adapter only after separate admission | baseline package grab-bag or product authority |
 | glTF-Transform | asset pipeline adapter | asset identity/import policy |
 | meshoptimizer | asset pipeline adapter | quality and LOD product policy |
 | Havok | physics adapter | gameplay semantics |
