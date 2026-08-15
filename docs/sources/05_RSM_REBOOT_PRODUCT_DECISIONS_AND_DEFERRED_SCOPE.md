@@ -2466,6 +2466,20 @@ It must remain read-only/evidence-first by default and must not silently authori
 | `ts-pattern` | Conditional convenience | Complex discriminated-union hotspots only | Exact package/license, compile-time impact, demonstrated readability/exhaustiveness benefit over native TypeScript |
 | `@babylonjs/addons` | Conditional renderer capability family | Feature-owning Babylon/render milestone | Exact imported addon(s), bundle impact, API maturity, license/transitive review; never admit the package merely as a grab-bag |
 | `@babylonjs/havok` | Milestone-gated | RSM-17 / RSM-28 | Exact package, WASM inventory, license, behavior, performance |
+| `better-sqlite3` | Milestone-gated | RSM-33 / RSM-74 | Native binary inventory, Electron ABI, rebuild policy |
+| Recast/Detour adapter | Milestone-gated/open adapter | RSM-59 | Exact adapter, license, navmesh lifecycle, debug path |
+| React Flow | Milestone-gated | RSM-104 | UI-only adapter boundary and license verification |
+| Monaco Editor | Milestone-gated | RSM-98 or later | Proven creator need and package-size impact |
+| OpenTelemetry JS core/local instrumentation | Milestone-gated | RSM-82 | Local-only diagnostics; no remote exporter |
+| OpenTelemetry remote exporters / hosted telemetry | Conditional audit | RSM-115 | Consent, privacy, vendor, endpoint, retention, security |
+| msgpackr | Conditional | Performance audit | Measured IPC need and optional native-addon inventory |
+| KTX-Software / `toktx` | Conditional audit | RSM-76 / RSM-95 | Exact subset, mixed licenses, binary inventory, deterministic value |
+| Basis Universal tools | Conditional audit | RSM-76 / RSM-95 | License, patents, output quality, source preservation |
+| Draco | Conditional audit | RSM-75 / RSM-95 | Binary/WASM identity, license, performance value |
+| FFmpeg and codecs | Conditional audit | RSM-79 / RSM-95 | Codec/patent/license review and distribution plan |
+| Steamworks SDK | Conditional audit | RSM-119 | Exact feature, SDK terms, redistributables, secrets, opt-in behavior |
+| Installer/signing tools | Conditional audit | RSM-102 / RSM-119 | Exact maker, native tools, license, signing and secret handling |
+| External cinematic formats/libraries | Open until audit | RSM-107 | Mapping, round-trip, license, provenance, unsupported-data policy |
 
 ### 85.3 Deliberate non-selections / friction controls
 
@@ -2492,20 +2506,6 @@ Rationale:
 After this clarification, no new third-party library should be added to canonical planning merely because it is popular or convenient. New additions require an owning milestone, a concrete reduction in code/error/maintenance cost, license/transitive evidence, and an explicit authority boundary.
 
 This freeze does not prevent future admissions; it prevents speculative dependency accumulation.
-| `better-sqlite3` | Milestone-gated | RSM-33 / RSM-74 | Native binary inventory, Electron ABI, rebuild policy |
-| Recast/Detour adapter | Milestone-gated/open adapter | RSM-59 | Exact adapter, license, navmesh lifecycle, debug path |
-| React Flow | Milestone-gated | RSM-104 | UI-only adapter boundary and license verification |
-| Monaco Editor | Milestone-gated | RSM-98 or later | Proven creator need and package-size impact |
-| OpenTelemetry JS core/local instrumentation | Milestone-gated | RSM-82 | Local-only diagnostics; no remote exporter |
-| OpenTelemetry remote exporters / hosted telemetry | Conditional audit | RSM-115 | Consent, privacy, vendor, endpoint, retention, security |
-| msgpackr | Conditional | Performance audit | Measured IPC need and optional native-addon inventory |
-| KTX-Software / `toktx` | Conditional audit | RSM-76 / RSM-95 | Exact subset, mixed licenses, binary inventory, deterministic value |
-| Basis Universal tools | Conditional audit | RSM-76 / RSM-95 | License, patents, output quality, source preservation |
-| Draco | Conditional audit | RSM-75 / RSM-95 | Binary/WASM identity, license, performance value |
-| FFmpeg and codecs | Conditional audit | RSM-79 / RSM-95 | Codec/patent/license review and distribution plan |
-| Steamworks SDK | Conditional audit | RSM-119 | Exact feature, SDK terms, redistributables, secrets, opt-in behavior |
-| Installer/signing tools | Conditional audit | RSM-102 / RSM-119 | Exact maker, native tools, license, signing and secret handling |
-| External cinematic formats/libraries | Open until audit | RSM-107 | Mapping, round-trip, license, provenance, unsupported-data policy |
 
 ---
 
