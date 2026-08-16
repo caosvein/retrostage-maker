@@ -533,6 +533,14 @@ Primary RSM-6 package families:
 @babylonjs/loaders
 ```
 
+Exact RSM-6 narrow unscoped exception candidate:
+
+```text
+babylonjs-gltf2interface@9.21.2
+```
+
+This exact identity is not a runtime package family and is not admitted by this contract alone. Independently accepted RSM-6 admission-closure evidence classifies it as an official Babylon-owned, Apache-2.0, declaration-only strict-peer provider with no runtime JavaScript payload, no native/WASM payload, no runtime bundle module presence, and no dependency/peer/optional/script/bin surface of its own. It may be considered only as a package-local development/build-time dependency of the planned `@retrostage/renderer-babylon9` package when paired with exact `@babylonjs/loaders@9.21.2`. This exception creates no authority for the legacy `babylonjs` package or for any other unscoped Babylon package.
+
 Development-only RSM-6 candidate:
 
 ```text
@@ -555,10 +563,14 @@ The official Babylon.js repository and modular packages are governed by Apache-2
 
 ### 10.3 Package and import policy
 
-- Use official scoped modular packages.
+- Use official scoped modular packages as the Babylon production/runtime baseline.
+- The only RSM-6 unscoped exception candidate is exact `babylonjs-gltf2interface@9.21.2`, and only as a package-local development/build-time strict-peer provider for exact `@babylonjs/loaders@9.21.2` inside the planned `@retrostage/renderer-babylon9` package.
+- `babylonjs-gltf2interface` must remain declaration-only in the admitted candidate: no runtime import seam, no runtime bundle presence, no production runtime authority, and no canonical data authority.
+- Peer auto-install is forbidden for the Babylon admission shape; every required peer identity must be explicit and physically reviewable.
+- The narrow `babylonjs-gltf2interface@9.21.2` exception grants no precedent for the legacy monolithic `babylonjs` package or any other unscoped Babylon package.
 - Prefer narrow ESM imports/tree-shakable entrypoints from `@babylonjs/core`; broad `Legacy/legacy` imports are not the production baseline.
 - Do not use the legacy monolithic `babylonjs` package in parallel.
-- Keep official Babylon packages on a physically proven compatible exact set; do not assume patch alignment merely from naming.
+- Keep official Babylon packages on a physically proven compatible exact set; do not assume patch alignment merely from naming or automatically substitute a newer `latest`.
 - `@babylonjs/serializers` is permitted for conversion, debugging, or derived output only.
 - `@babylonjs/inspector` is development-only and forbidden from production editor and player artifacts.
 - Inspector headless/CLI connectivity may support diagnostic evidence, screenshots, entity queries, and performance traces in development, but Inspector edits are never canonical authoring authority.
@@ -1957,9 +1969,21 @@ Defer until the navigation milestone. Upstream Recast approval does not select a
 
 ### 31.8 Exact Babylon.js 9 modular package set
 
-RSM-6 must re-query the official registry immediately before admission. The current 2026-08-14 observation around `9.18.1` is discovery evidence only. The selected set must prove exact package availability, compatibility, license/notices, transitive graph, bundle impact, and lockfile determinism. The historical `9.19.1` candidate is not trusted admission evidence.
+Independently accepted RSM-6-A, FOLLOWUP1/FIX1, B, and C evidence currently supports this exact **pre-admission candidate** set:
 
-These open details do not reopen the Babylon/Electron architecture decision.
+```text
+@babylonjs/core@9.21.2
+@babylonjs/loaders@9.21.2
+babylonjs-gltf2interface@9.21.2
+```
+
+The first two identities are production/runtime adapter admission candidates. `babylonjs-gltf2interface@9.21.2` is only the narrow, non-precedential, declaration-only development/build-time strict-peer exception candidate defined by §10.1 and §10.3. It has no runtime import/bundle authority and does not authorize the legacy `babylonjs` package or any other unscoped Babylon package.
+
+These exact identities are **not admitted or installed by this Source alignment**. Immediately before any future canonical dependency mutation/admission, RSM-6 must re-query the official registry and re-prove exact availability, integrity, upstream/license identity, peer/dependency metadata, transitive graph, bundle impact, runtime-network/offline behavior, and lockfile determinism. A moved registry `latest` does not authorize automatic upgrade or substitution. Exact `9.21.2` may be retained only while its previously accepted evidence remains materially valid; otherwise dependency audit/change control must reopen.
+
+`@babylonjs/inspector` remains deferred from the RSM-6 baseline. `@babylonjs/materials`, `@babylonjs/serializers`, and `@babylonjs/addons` remain feature-gated and are not admitted by this alignment. Draco, KTX2/Basis, Havok, and other decoder/helper/runtime capability families remain outside the RSM-6 baseline until separately owned and admitted.
+
+These open admission steps do not reopen the Babylon/Electron architecture decision.
 
 ---
 
