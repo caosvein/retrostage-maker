@@ -1,10 +1,137 @@
 {
-  "artifacts": [],
+  "artifacts": [
+    {
+      "abiRuntimeRequirements": "WEBASSEMBLY_MODULE / EXACT HOST IMPORT AND RUNTIME CONTRACT NOT ESTABLISHED BY INSTALLED PACKAGE METADATA",
+      "artifactType": ".wasm",
+      "buildProvenance": "PUBLISHED_NPM_PACKAGE_CONTENT / LOCAL BUILD PROVENANCE NOT ESTABLISHED",
+      "distributionScope": "RSM-5-I1 DEVELOPMENT / SECURE ELECTRON SHELL CANDIDATE / NOT FINAL RELEASE",
+      "license": "Apache-2.0",
+      "licenseNoticeLocations": [
+        "node_modules/.pnpm/@babylonjs+core@9.21.2/node_modules/@babylonjs/core/license.md",
+        "node_modules/.pnpm/@babylonjs+core@9.21.2/node_modules/@babylonjs/core/NOTICE.md"
+      ],
+      "owningPackage": "@babylonjs/core",
+      "packagedRole": "DEVELOPMENT_BUILD_TOOL_ONLY / NOT EDITOR_OR_PLAYER_PACKAGED",
+      "packageReleaseUrl": "https://www.npmjs.com/package/%40babylonjs%2Fcore/v/9.21.2",
+      "provenanceSourceIdentity": "@babylonjs/core@9.21.2",
+      "relativeArtifactPath": "node_modules/.pnpm/@babylonjs+core@9.21.2/node_modules/@babylonjs/core/assets/Basis/basis_transcoder.wasm",
+      "replacementRemovalProcedure": "Remove or update owning tool dependency @babylonjs/core@9.21.2 or its transitive parent; review pnpm-lock.yaml changes; regenerate compliance artifacts; run full validation. Do not delete the artifact directly from node_modules.",
+      "sha256": "57EDC886080BBCDA30A399C9D56EFED5813335C8AC968A6F9BB080826C1D099C",
+      "sourceCodeAvailability": "UPSTREAM_REPOSITORY_DECLARED",
+      "sourceRepository": "https://github.com/BabylonJS/Babylon.js.git",
+      "version": "9.21.2"
+    },
+    {
+      "abiRuntimeRequirements": "WEBASSEMBLY_MODULE / EXACT HOST IMPORT AND RUNTIME CONTRACT NOT ESTABLISHED BY INSTALLED PACKAGE METADATA",
+      "artifactType": ".wasm",
+      "buildProvenance": "PUBLISHED_NPM_PACKAGE_CONTENT / LOCAL BUILD PROVENANCE NOT ESTABLISHED",
+      "distributionScope": "RSM-5-I1 DEVELOPMENT / SECURE ELECTRON SHELL CANDIDATE / NOT FINAL RELEASE",
+      "license": "Apache-2.0",
+      "licenseNoticeLocations": [
+        "node_modules/.pnpm/@babylonjs+core@9.21.2/node_modules/@babylonjs/core/license.md",
+        "node_modules/.pnpm/@babylonjs+core@9.21.2/node_modules/@babylonjs/core/NOTICE.md"
+      ],
+      "owningPackage": "@babylonjs/core",
+      "packagedRole": "DEVELOPMENT_BUILD_TOOL_ONLY / NOT EDITOR_OR_PLAYER_PACKAGED",
+      "packageReleaseUrl": "https://www.npmjs.com/package/%40babylonjs%2Fcore/v/9.21.2",
+      "provenanceSourceIdentity": "@babylonjs/core@9.21.2",
+      "relativeArtifactPath": "node_modules/.pnpm/@babylonjs+core@9.21.2/node_modules/@babylonjs/core/assets/Draco/draco_decoder_gltf.wasm",
+      "replacementRemovalProcedure": "Remove or update owning tool dependency @babylonjs/core@9.21.2 or its transitive parent; review pnpm-lock.yaml changes; regenerate compliance artifacts; run full validation. Do not delete the artifact directly from node_modules.",
+      "sha256": "A680D927BED9CB864DDBD63521868891AF2BFBE755092761B4837487618DF8AC",
+      "sourceCodeAvailability": "UPSTREAM_REPOSITORY_DECLARED",
+      "sourceRepository": "https://github.com/BabylonJS/Babylon.js.git",
+      "version": "9.21.2"
+    },
+    {
+      "abiRuntimeRequirements": "WEBASSEMBLY_MODULE / EXACT HOST IMPORT AND RUNTIME CONTRACT NOT ESTABLISHED BY INSTALLED PACKAGE METADATA",
+      "artifactType": ".wasm",
+      "buildProvenance": "PUBLISHED_NPM_PACKAGE_CONTENT / LOCAL BUILD PROVENANCE NOT ESTABLISHED",
+      "distributionScope": "RSM-5-I1 DEVELOPMENT / SECURE ELECTRON SHELL CANDIDATE / NOT FINAL RELEASE",
+      "license": "Apache-2.0",
+      "licenseNoticeLocations": [
+        "node_modules/.pnpm/@babylonjs+core@9.21.2/node_modules/@babylonjs/core/license.md",
+        "node_modules/.pnpm/@babylonjs+core@9.21.2/node_modules/@babylonjs/core/NOTICE.md"
+      ],
+      "owningPackage": "@babylonjs/core",
+      "packagedRole": "DEVELOPMENT_BUILD_TOOL_ONLY / NOT EDITOR_OR_PLAYER_PACKAGED",
+      "packageReleaseUrl": "https://www.npmjs.com/package/%40babylonjs%2Fcore/v/9.21.2",
+      "provenanceSourceIdentity": "@babylonjs/core@9.21.2",
+      "relativeArtifactPath": "node_modules/.pnpm/@babylonjs+core@9.21.2/node_modules/@babylonjs/core/assets/Draco/draco_decoder.wasm",
+      "replacementRemovalProcedure": "Remove or update owning tool dependency @babylonjs/core@9.21.2 or its transitive parent; review pnpm-lock.yaml changes; regenerate compliance artifacts; run full validation. Do not delete the artifact directly from node_modules.",
+      "sha256": "C55A594E8FFD18426D36B27FEA9618AF3DF5E173640A3E56D46F09D76F0574F2",
+      "sourceCodeAvailability": "UPSTREAM_REPOSITORY_DECLARED",
+      "sourceRepository": "https://github.com/BabylonJS/Babylon.js.git",
+      "version": "9.21.2"
+    },
+    {
+      "abiRuntimeRequirements": "WEBASSEMBLY_MODULE / EXACT HOST IMPORT AND RUNTIME CONTRACT NOT ESTABLISHED BY INSTALLED PACKAGE METADATA",
+      "artifactType": ".wasm",
+      "buildProvenance": "PUBLISHED_NPM_PACKAGE_CONTENT / LOCAL BUILD PROVENANCE NOT ESTABLISHED",
+      "distributionScope": "RSM-5-I1 DEVELOPMENT / SECURE ELECTRON SHELL CANDIDATE / NOT FINAL RELEASE",
+      "license": "Apache-2.0",
+      "licenseNoticeLocations": [
+        "node_modules/.pnpm/@babylonjs+core@9.21.2/node_modules/@babylonjs/core/license.md",
+        "node_modules/.pnpm/@babylonjs+core@9.21.2/node_modules/@babylonjs/core/NOTICE.md"
+      ],
+      "owningPackage": "@babylonjs/core",
+      "packagedRole": "DEVELOPMENT_BUILD_TOOL_ONLY / NOT EDITOR_OR_PLAYER_PACKAGED",
+      "packageReleaseUrl": "https://www.npmjs.com/package/%40babylonjs%2Fcore/v/9.21.2",
+      "provenanceSourceIdentity": "@babylonjs/core@9.21.2",
+      "relativeArtifactPath": "node_modules/.pnpm/@babylonjs+core@9.21.2/node_modules/@babylonjs/core/assets/Draco/draco_encoder.wasm",
+      "replacementRemovalProcedure": "Remove or update owning tool dependency @babylonjs/core@9.21.2 or its transitive parent; review pnpm-lock.yaml changes; regenerate compliance artifacts; run full validation. Do not delete the artifact directly from node_modules.",
+      "sha256": "909C36EE55AC343B4B0D0CD724C5112B4883786541C8F02B02684A939DFC975E",
+      "sourceCodeAvailability": "UPSTREAM_REPOSITORY_DECLARED",
+      "sourceRepository": "https://github.com/BabylonJS/Babylon.js.git",
+      "version": "9.21.2"
+    },
+    {
+      "abiRuntimeRequirements": "WEBASSEMBLY_MODULE / EXACT HOST IMPORT AND RUNTIME CONTRACT NOT ESTABLISHED BY INSTALLED PACKAGE METADATA",
+      "artifactType": ".wasm",
+      "buildProvenance": "PUBLISHED_NPM_PACKAGE_CONTENT / LOCAL BUILD PROVENANCE NOT ESTABLISHED",
+      "distributionScope": "RSM-5-I1 DEVELOPMENT / SECURE ELECTRON SHELL CANDIDATE / NOT FINAL RELEASE",
+      "license": "Apache-2.0",
+      "licenseNoticeLocations": [
+        "node_modules/.pnpm/@babylonjs+core@9.21.2/node_modules/@babylonjs/core/license.md",
+        "node_modules/.pnpm/@babylonjs+core@9.21.2/node_modules/@babylonjs/core/NOTICE.md"
+      ],
+      "owningPackage": "@babylonjs/core",
+      "packagedRole": "DEVELOPMENT_BUILD_TOOL_ONLY / NOT EDITOR_OR_PLAYER_PACKAGED",
+      "packageReleaseUrl": "https://www.npmjs.com/package/%40babylonjs%2Fcore/v/9.21.2",
+      "provenanceSourceIdentity": "@babylonjs/core@9.21.2",
+      "relativeArtifactPath": "node_modules/.pnpm/@babylonjs+core@9.21.2/node_modules/@babylonjs/core/assets/glslang/glslang.wasm",
+      "replacementRemovalProcedure": "Remove or update owning tool dependency @babylonjs/core@9.21.2 or its transitive parent; review pnpm-lock.yaml changes; regenerate compliance artifacts; run full validation. Do not delete the artifact directly from node_modules.",
+      "sha256": "D79453E0803EBCDF3753C6B1D8D51543B52FED96F7F0D4AEC94ACD847E225169",
+      "sourceCodeAvailability": "UPSTREAM_REPOSITORY_DECLARED",
+      "sourceRepository": "https://github.com/BabylonJS/Babylon.js.git",
+      "version": "9.21.2"
+    },
+    {
+      "abiRuntimeRequirements": "WEBASSEMBLY_MODULE / EXACT HOST IMPORT AND RUNTIME CONTRACT NOT ESTABLISHED BY INSTALLED PACKAGE METADATA",
+      "artifactType": ".wasm",
+      "buildProvenance": "PUBLISHED_NPM_PACKAGE_CONTENT / LOCAL BUILD PROVENANCE NOT ESTABLISHED",
+      "distributionScope": "RSM-5-I1 DEVELOPMENT / SECURE ELECTRON SHELL CANDIDATE / NOT FINAL RELEASE",
+      "license": "Apache-2.0",
+      "licenseNoticeLocations": [
+        "node_modules/.pnpm/@babylonjs+core@9.21.2/node_modules/@babylonjs/core/license.md",
+        "node_modules/.pnpm/@babylonjs+core@9.21.2/node_modules/@babylonjs/core/NOTICE.md"
+      ],
+      "owningPackage": "@babylonjs/core",
+      "packagedRole": "DEVELOPMENT_BUILD_TOOL_ONLY / NOT EDITOR_OR_PLAYER_PACKAGED",
+      "packageReleaseUrl": "https://www.npmjs.com/package/%40babylonjs%2Fcore/v/9.21.2",
+      "provenanceSourceIdentity": "@babylonjs/core@9.21.2",
+      "relativeArtifactPath": "node_modules/.pnpm/@babylonjs+core@9.21.2/node_modules/@babylonjs/core/assets/twgsl/twgsl.wasm",
+      "replacementRemovalProcedure": "Remove or update owning tool dependency @babylonjs/core@9.21.2 or its transitive parent; review pnpm-lock.yaml changes; regenerate compliance artifacts; run full validation. Do not delete the artifact directly from node_modules.",
+      "sha256": "A434C2DECDBB38CAADF5F486D806384A1543554828C983C77922B2D92579914C",
+      "sourceCodeAvailability": "UPSTREAM_REPOSITORY_DECLARED",
+      "sourceRepository": "https://github.com/BabylonJS/Babylon.js.git",
+      "version": "9.21.2"
+    }
+  ],
   "baselineHost": {
     "architecture": "x64",
     "platform": "win32"
   },
-  "count": 0,
+  "count": 6,
   "distributionScope": "RSM-5-I1 DEVELOPMENT / SECURE ELECTRON SHELL CANDIDATE / NOT FINAL RELEASE",
   "scanExtension": ".wasm",
   "schemaVersion": 1,

@@ -5,6 +5,15 @@
       "ignore": ["dependency-cruiser.config.cjs"]
     },
     "packages/*": {},
+    "packages/renderer-babylon9": {
+      "ignoreDependencies": [
+        "@babylonjs/core",
+        "@babylonjs/loaders",
+        "@retrostage/core",
+        "@retrostage/diagnostics",
+        "babylonjs-gltf2interface"
+      ]
+    },
     "apps/editor-electron": {
       "ignoreBinaries": ["ps", "tasklist.exe"],
       "entry": [

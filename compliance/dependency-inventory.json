@@ -32,6 +32,42 @@
   ],
   "packages": [
     {
+      "author": "",
+      "dependencyScope": "development",
+      "direct": false,
+      "directWorkspace": "TRANSITIVE",
+      "distributionScope": "RSM-5-I1 DEVELOPMENT / SECURE ELECTRON SHELL CANDIDATE / NOT FINAL RELEASE",
+      "homepage": "https://www.babylonjs.com/",
+      "identity": "@babylonjs/core@9.21.2",
+      "license": "Apache-2.0",
+      "lockedInstalledResolutionIdentity": "@babylonjs/core@9.21.2",
+      "name": "@babylonjs/core",
+      "native": false,
+      "purl": "pkg:npm/%40babylonjs/core@9.21.2",
+      "repository": "https://github.com/BabylonJS/Babylon.js.git",
+      "safeNoticeSourceUrl": "https://github.com/BabylonJS/Babylon.js.git",
+      "version": "9.21.2",
+      "wasm": true
+    },
+    {
+      "author": "",
+      "dependencyScope": "development",
+      "direct": false,
+      "directWorkspace": "TRANSITIVE",
+      "distributionScope": "RSM-5-I1 DEVELOPMENT / SECURE ELECTRON SHELL CANDIDATE / NOT FINAL RELEASE",
+      "homepage": "https://www.babylonjs.com/",
+      "identity": "@babylonjs/loaders@9.21.2",
+      "license": "Apache-2.0",
+      "lockedInstalledResolutionIdentity": "@babylonjs/loaders@9.21.2",
+      "name": "@babylonjs/loaders",
+      "native": false,
+      "purl": "pkg:npm/%40babylonjs/loaders@9.21.2",
+      "repository": "https://github.com/BabylonJS/Babylon.js.git",
+      "safeNoticeSourceUrl": "https://github.com/BabylonJS/Babylon.js.git",
+      "version": "9.21.2",
+      "wasm": false
+    },
+    {
       "author": "Samuel Attard",
       "dependencyScope": "development",
       "direct": false,
@@ -2387,6 +2423,24 @@
       "repository": "https://github.com/jonschlinkert/author-regex",
       "safeNoticeSourceUrl": "https://github.com/jonschlinkert/author-regex",
       "version": "1.0.0",
+      "wasm": false
+    },
+    {
+      "author": "",
+      "dependencyScope": "development",
+      "direct": false,
+      "directWorkspace": "TRANSITIVE",
+      "distributionScope": "RSM-5-I1 DEVELOPMENT / SECURE ELECTRON SHELL CANDIDATE / NOT FINAL RELEASE",
+      "homepage": "https://www.babylonjs.com/",
+      "identity": "babylonjs-gltf2interface@9.21.2",
+      "license": "Apache-2.0",
+      "lockedInstalledResolutionIdentity": "babylonjs-gltf2interface@9.21.2",
+      "name": "babylonjs-gltf2interface",
+      "native": false,
+      "purl": "pkg:npm/babylonjs-gltf2interface@9.21.2",
+      "repository": "https://github.com/BabylonJS/Babylon.js.git",
+      "safeNoticeSourceUrl": "https://github.com/BabylonJS/Babylon.js.git",
+      "version": "9.21.2",
       "wasm": false
     },
     {
@@ -10281,9 +10335,9 @@
   },
   "summary": {
     "directCount": 10,
-    "exactInstalledExternalPackageVersionCount": 569,
+    "exactInstalledExternalPackageVersionCount": 572,
     "nativePackageCount": 11,
-    "transitiveCount": 559,
-    "wasmPackageCount": 0
+    "transitiveCount": 562,
+    "wasmPackageCount": 1
   }
 }

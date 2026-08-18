@@ -1,0 +1,14 @@
+{
+  "name": "@retrostage/renderer-babylon9",
+  "version": "0.0.0",
+  "private": true,
+  "dependencies": {
+    "@babylonjs/core": "9.21.2",
+    "@babylonjs/loaders": "9.21.2",
+    "@retrostage/core": "workspace:*",
+    "@retrostage/diagnostics": "workspace:*"
+  },
+  "devDependencies": {
+    "babylonjs-gltf2interface": "9.21.2"
+  }
+}

@@ -3,6 +3,46 @@
   "bomFormat": "CycloneDX",
   "components": [
     {
+      "bom-ref": "pkg:npm/%40babylonjs/core@9.21.2",
+      "externalReferences": [
+        {
+          "hashes": [
+            {
+              "alg": "SHA-512",
+              "content": "cb86eb38d719e17e6b7e888ba9375df63499cf221e27ecc786f37aaa00c2a60548c8cdac2650a8b8b052bcd9fe2a5ee32319b326122f6c1bd4212fecc7c8c553"
+            }
+          ],
+          "type": "distribution",
+          "url": "https://registry.npmjs.org/@babylonjs/core/-/core-9.21.2.tgz"
+        }
+      ],
+      "group": "@babylonjs",
+      "name": "core",
+      "purl": "pkg:npm/%40babylonjs/core@9.21.2",
+      "type": "library",
+      "version": "9.21.2"
+    },
+    {
+      "bom-ref": "pkg:npm/%40babylonjs/loaders@9.21.2",
+      "externalReferences": [
+        {
+          "hashes": [
+            {
+              "alg": "SHA-512",
+              "content": "64f7d5a4d05bc5984bdd79ecdf9e60c881417c482ae2a1806d6fd17f9af0be48af4db41c2904539a9f864e279374fb4470f1814d2055167aff2e2a0a126265bd"
+            }
+          ],
+          "type": "distribution",
+          "url": "https://registry.npmjs.org/@babylonjs/loaders/-/loaders-9.21.2.tgz"
+        }
+      ],
+      "group": "@babylonjs",
+      "name": "loaders",
+      "purl": "pkg:npm/%40babylonjs/loaders@9.21.2",
+      "type": "library",
+      "version": "9.21.2"
+    },
+    {
       "bom-ref": "pkg:npm/%40electron-forge/core-utils@7.11.2",
       "externalReferences": [
         {
@@ -435,11 +475,11 @@
       "version": "5.1.0"
     },
     {
-      "bom-ref": "pkg:npm/%40electron/node-gyp@10.2.0-electron.1?vcs_url=git%2Bhttps%3A%2F%2Fgithub.com%2Felectron%2Fnode-gyp.git%2306b29aafb7708acef8b3669835c8a7857ebc92d2",
+      "bom-ref": "pkg:npm/%40electron/node-gyp@10.2.0-electron.1?vcs_url=https%3A%2F%2Fcodeload.github.com%2Felectron%2Fnode-gyp%2Ftar.gz%2F06b29aafb7708acef8b3669835c8a7857ebc92d2",
       "externalReferences": [
         {
           "type": "distribution",
-          "url": "git+https://github.com/electron/node-gyp.git#06b29aafb7708acef8b3669835c8a7857ebc92d2"
+          "url": "https://codeload.github.com/electron/node-gyp/tar.gz/06b29aafb7708acef8b3669835c8a7857ebc92d2"
         }
       ],
       "group": "@electron",
@@ -450,7 +490,7 @@
           "value": "true"
         }
       ],
-      "purl": "pkg:npm/%40electron/node-gyp@10.2.0-electron.1?vcs_url=git%2Bhttps%3A%2F%2Fgithub.com%2Felectron%2Fnode-gyp.git%2306b29aafb7708acef8b3669835c8a7857ebc92d2",
+      "purl": "pkg:npm/%40electron/node-gyp@10.2.0-electron.1?vcs_url=https%3A%2F%2Fcodeload.github.com%2Felectron%2Fnode-gyp%2Ftar.gz%2F06b29aafb7708acef8b3669835c8a7857ebc92d2",
       "scope": "excluded",
       "type": "library",
       "version": "10.2.0-electron.1"
@@ -6318,6 +6358,25 @@
       "scope": "excluded",
       "type": "library",
       "version": "1.0.0"
+    },
+    {
+      "bom-ref": "pkg:npm/babylonjs-gltf2interface@9.21.2",
+      "externalReferences": [
+        {
+          "hashes": [
+            {
+              "alg": "SHA-512",
+              "content": "2f8b4f3282200f3fe55901582a440c1b4a08ab94b6e19e927376815fa9ef7330cba050ecd776ae682d8e6ce2f64dcdb82225151128c29c36b50f3ac9abf9b435"
+            }
+          ],
+          "type": "distribution",
+          "url": "https://registry.npmjs.org/babylonjs-gltf2interface/-/babylonjs-gltf2interface-9.21.2.tgz"
+        }
+      ],
+      "name": "babylonjs-gltf2interface",
+      "purl": "pkg:npm/babylonjs-gltf2interface@9.21.2",
+      "type": "library",
+      "version": "9.21.2"
     },
     {
       "bom-ref": "pkg:npm/balanced-match@1.0.2",
@@ -17996,6 +18055,14 @@
   ],
   "dependencies": [
     {
+      "dependsOn": [],
+      "ref": "pkg:npm/%40babylonjs/core@9.21.2"
+    },
+    {
+      "dependsOn": [],
+      "ref": "pkg:npm/%40babylonjs/loaders@9.21.2"
+    },
+    {
       "dependsOn": [
         "pkg:npm/parse-author@2.0.0"
       ],
@@ -18112,7 +18179,7 @@
         "pkg:npm/nopt@6.0.0",
         "pkg:npm/proc-log@2.0.1"
       ],
-      "ref": "pkg:npm/%40electron/node-gyp@10.2.0-electron.1?vcs_url=git%2Bhttps%3A%2F%2Fgithub.com%2Felectron%2Fnode-gyp.git%2306b29aafb7708acef8b3669835c8a7857ebc92d2"
+      "ref": "pkg:npm/%40electron/node-gyp@10.2.0-electron.1?vcs_url=https%3A%2F%2Fcodeload.github.com%2Felectron%2Fnode-gyp%2Ftar.gz%2F06b29aafb7708acef8b3669835c8a7857ebc92d2"
     },
     {
       "dependsOn": [
@@ -18148,7 +18215,7 @@
     },
     {
       "dependsOn": [
-        "pkg:npm/%40electron/node-gyp@10.2.0-electron.1?vcs_url=git%2Bhttps%3A%2F%2Fgithub.com%2Felectron%2Fnode-gyp.git%2306b29aafb7708acef8b3669835c8a7857ebc92d2",
+        "pkg:npm/%40electron/node-gyp@10.2.0-electron.1?vcs_url=https%3A%2F%2Fcodeload.github.com%2Felectron%2Fnode-gyp%2Ftar.gz%2F06b29aafb7708acef8b3669835c8a7857ebc92d2",
         "pkg:npm/node-abi@3.94.0",
         "pkg:npm/node-api-version@0.2.1",
         "pkg:npm/ora@5.4.1",
@@ -19128,6 +19195,10 @@
     {
       "dependsOn": [],
       "ref": "pkg:npm/author-regex@1.0.0"
+    },
+    {
+      "dependsOn": [],
+      "ref": "pkg:npm/babylonjs-gltf2interface@9.21.2"
     },
     {
       "dependsOn": [],
@@ -20948,7 +21019,10 @@
     },
     {
       "dependsOn": [
+        "pkg:npm/%40babylonjs/core@9.21.2",
+        "pkg:npm/%40babylonjs/loaders@9.21.2",
         "pkg:npm/%40electron-forge/core@7.11.2",
+        "pkg:npm/babylonjs-gltf2interface@9.21.2",
         "pkg:npm/dependency-cruiser@16.10.0",
         "pkg:npm/electron@43.4.0",
         "pkg:npm/eslint@9.21.0",

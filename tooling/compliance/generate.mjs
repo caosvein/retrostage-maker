@@ -6,6 +6,7 @@ import {
   mkdtempSync,
   readFileSync,
   readdirSync,
+  realpathSync,
   rmSync,
   writeFileSync,
 } from "node:fs";
@@ -22,6 +23,7 @@ import {
   classifyArtifactPath,
   classifyLicenseIdentity,
   createArtifactProvenanceFields,
+  isFirstPartyWorkspaceNode,
   normalizeSafeSourceUrl,
   ownerExceptionApplicationState,
   renderNoticesHtml,
@@ -447,6 +449,94 @@ function inferArchitecture(value) {
     if (normalized.includes(architecture)) return architecture;
   }
   return "UNSPECIFIED";
+}
+
+/**
+ * Resolve the set of first-party workspace package absolute paths from
+ * pnpm-workspace.yaml. Only paths strictly within REPOSITORY_ROOT are
+ * included. Fails closed: any glob pattern that is not a simple "dir/*"
+ * form, or any resolved path that escapes the repository, is ignored.
+ */
+export function readFirstPartyWorkspacePackagePaths(repoRoot = REPOSITORY_ROOT) {
+  const workspaceYaml = readFileSync(path.join(repoRoot, "pnpm-workspace.yaml"), "utf8");
+  const packageGlobs = [];
+  let inPackages = false;
+  for (const line of workspaceYaml.split("\n")) {
+    if (/^packages:\s*$/.test(line)) {
+      inPackages = true;
+      continue;
+    }
+    if (inPackages) {
+      const m = line.match(/^\s+-\s+"([^"]+)"\s*$/);
+      if (m) {
+        packageGlobs.push(m[1]);
+      } else if (/^\S/.test(line)) {
+        inPackages = false;
+      }
+    }
+  }
+  const firstPartyPaths = new Map();
+  const repoResolved = realpathSync(repoRoot);
+  const repoPrefix = repoResolved + path.sep;
+  const nameOwners = new Map(); // name -> realPath (for duplicate detection)
+  const realPathLogicalOwners = new Map(); // realPath -> logicalPkgPath (for ambiguity detection)
+  for (const glob of packageGlobs) {
+    if (!glob.endsWith("/*")) continue;
+    const parentDir = path.join(repoResolved, glob.slice(0, -2));
+    if (!existsSync(parentDir)) continue;
+    for (const entry of readdirSync(parentDir, { withFileTypes: true })) {
+      if (!entry.isDirectory() && !entry.isSymbolicLink()) continue;
+      const logicalPkgPath = path.join(parentDir, entry.name);
+      // Physical real path resolution — fails closed on symlink escape
+      let realPkgPath;
+      try {
+        realPkgPath = realpathSync(logicalPkgPath);
+      } catch (err) {
+        throw new Error(`WORKSPACE_REALPATH_FAILED:${logicalPkgPath}: ${err.message}`);
+      }
+      // Fail closed: real path must be strictly inside real repo root
+      if (!realPkgPath.startsWith(repoPrefix)) {
+        throw new Error(`WORKSPACE_REALPATH_ESCAPE:${logicalPkgPath} realPath=${realPkgPath}`);
+      }
+      // Fail closed: real path must not equal repo root
+      if (realPkgPath === repoResolved) {
+        throw new Error(`WORKSPACE_REALPATH_IS_REPO_ROOT:${logicalPkgPath}`);
+      }
+      const packageJsonPath = path.join(realPkgPath, "package.json");
+      if (!existsSync(packageJsonPath)) continue;
+      let pkgJson;
+      try {
+        const pkgJsonBytes = readFileSync(packageJsonPath, "utf8");
+        pkgJson = JSON.parse(pkgJsonBytes);
+      } catch (err) {
+        // Fail closed: malformed or unreadable manifest
+        throw new Error(`WORKSPACE_MANIFEST_PARSE_FAILED:${packageJsonPath}: ${err.message}`);
+      }
+      const pkgName = typeof pkgJson.name === "string" ? pkgJson.name.trim() : "";
+      if (!pkgName) {
+        throw new Error(`WORKSPACE_MANIFEST_EMPTY_NAME:${packageJsonPath}`);
+      }
+      // Fail closed: duplicate package name
+      if (nameOwners.has(pkgName) && nameOwners.get(pkgName) !== realPkgPath) {
+        throw new Error(
+          `WORKSPACE_DUPLICATE_PACKAGE_NAME:${pkgName} owned_by=${nameOwners.get(pkgName)} and ${realPkgPath}`,
+        );
+      }
+      // Fail closed: ambiguous real ownership (two distinct logical paths → same real path)
+      if (
+        realPathLogicalOwners.has(realPkgPath) &&
+        realPathLogicalOwners.get(realPkgPath) !== logicalPkgPath
+      ) {
+        throw new Error(
+          `WORKSPACE_AMBIGUOUS_REAL_PATH:${realPkgPath} claimed_by=${realPathLogicalOwners.get(realPkgPath)} and ${logicalPkgPath}`,
+        );
+      }
+      nameOwners.set(pkgName, realPkgPath);
+      firstPartyPaths.set(realPkgPath, pkgName);
+      realPathLogicalOwners.set(realPkgPath, logicalPkgPath);
+    }
+  }
+  return firstPartyPaths;
 }
 
 function packagePurl(name, version) {
@@ -934,7 +1024,10 @@ export function generateCompliance(destinationPath) {
   mkdirSync(destination, { recursive: true });
   const snapshotHost = { platform: process.platform, architecture: process.arch };
   const { rootPackageJson, applicationPackageJson } = assertDependencyBaseline();
-  const graph = readActiveDependencyGraph();
+  const firstPartyPaths = readFirstPartyWorkspacePackagePaths();
+  const graph = readActiveDependencyGraph().filter(
+    (node) => !isFirstPartyWorkspaceNode(node, firstPartyPaths, REPOSITORY_ROOT),
+  );
   const electronBundledLicenseEvidence = buildElectronBundledLicenseEvidence(snapshotHost);
   const { packages, nativeArtifacts, wasmArtifacts } = buildPackageState(
     graph,

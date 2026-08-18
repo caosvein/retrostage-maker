@@ -115,6 +115,7 @@ function createFixture(activeTaskCount = 0) {
   for (const [packagePath, name] of [
     ["packages/core", "@retrostage/core"],
     ["packages/diagnostics", "@retrostage/diagnostics"],
+    ["packages/renderer-babylon9", "@retrostage/renderer-babylon9"],
     ["packages/test-fixtures", "@retrostage/test-fixtures"],
   ]) {
     write(root, `${packagePath}/package.json`, `${JSON.stringify({ name }, null, 2)}\n`);

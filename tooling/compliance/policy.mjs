@@ -1,3 +1,4 @@
+import { realpathSync } from "node:fs";
 import path from "node:path";
 import { URL } from "node:url";
 
@@ -189,6 +190,48 @@ export function normalizeSafeSourceUrl(value) {
 
 export function selectSafeNoticeSource({ repository, homepage }) {
   return normalizeSafeSourceUrl(repository) || normalizeSafeSourceUrl(homepage);
+}
+
+/**
+ * Classify whether a dependency graph node is a first-party workspace package.
+ *
+ * A node is first-party if and only if all of the following hold:
+ *   1. Its resolved packagePath is strictly within repositoryRoot (not equal to it).
+ *   2. Its resolved packagePath is present in the declared firstPartyAbsolutePaths set.
+ *
+ * Properties:
+ *   - Canonical workspace links (@retrostage/core, @retrostage/diagnostics) → true
+ *   - Babylon.js and all other external packages → false
+ *   - Namespace-only spoof (@retrostage/fake with non-workspace path) → false
+ *   - Out-of-repository or broken links → false (fail closed)
+ *
+ * @param {{ name: string, version: string, packagePath: string }} node  Dependency graph node.
+ * @param {Map<string,string>} firstPartyMap  Map from canonical real workspace path to canonical package name.
+ * @param {string} repositoryRoot  Physical real path to the repository root.
+ * @returns {boolean}
+ */
+export function isFirstPartyWorkspaceNode(node, firstPartyMap, repositoryRoot) {
+  if (!node || !node.name || !node.version || !node.packagePath) return false;
+
+  // node.version/resolution is current workspace-link form
+  // Only the physically observed resolved graph form (link:) is accepted.
+  // workspace:* in source manifests does not prove link: in the resolved graph.
+  if (!node.version.startsWith("link:")) return false;
+
+  const resolvedPkg = realpathSync(node.packagePath);
+  const resolvedRepo = realpathSync(repositoryRoot);
+
+  // Physical real path must be strictly inside the physical repository real path (no symlink escape)
+  const repoPrefix = resolvedRepo + path.sep;
+  if (!resolvedPkg.startsWith(repoPrefix)) return false;
+
+  // Physical real path must match exactly one canonical workspace real path in the map
+  if (!firstPartyMap.has(resolvedPkg)) return false;
+
+  // node.name exact canonical package name
+  if (firstPartyMap.get(resolvedPkg) !== node.name) return false;
+
+  return true;
 }
 
 export function complianceComparisonPolicy(platform, architecture) {

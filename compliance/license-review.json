@@ -40,6 +40,62 @@
   },
   "packages": [
     {
+      "author": "",
+      "classification": "AUTOMATICALLY_ADMISSIBLE",
+      "distributionScope": "RSM-5-I1 DEVELOPMENT / SECURE ELECTRON SHELL CANDIDATE / NOT FINAL RELEASE",
+      "evidenceSource": "Installed package.json plus physical top-level license/notice files",
+      "identity": "@babylonjs/core@9.21.2",
+      "license": "Apache-2.0",
+      "licenseFiles": [
+        {
+          "name": "license.md",
+          "path": "node_modules/.pnpm/@babylonjs+core@9.21.2/node_modules/@babylonjs/core/license.md",
+          "sha256": "9362EA9EA17CB221A20CBBD63F404710834CC273D2A9A7B60314FD68AB702CD6"
+        }
+      ],
+      "manualReviewRequired": false,
+      "name": "@babylonjs/core",
+      "notes": "Preserve applicable license and copyright material when distributing this development/bootstrap dependency.",
+      "noticeFiles": [
+        {
+          "name": "NOTICE.md",
+          "path": "node_modules/.pnpm/@babylonjs+core@9.21.2/node_modules/@babylonjs/core/NOTICE.md",
+          "sha256": "7F85D099CE3C6E1900A45EE8D5B8FA405E760C746AF687B3EE2081416E48F183"
+        }
+      ],
+      "ownerCommercialDisposition": "NOT APPLICABLE",
+      "ownerExactException": false,
+      "packagedArtifactDisposition": null,
+      "prohibited": false,
+      "safeNoticeSourceUrl": "https://github.com/BabylonJS/Babylon.js.git",
+      "version": "9.21.2"
+    },
+    {
+      "author": "",
+      "classification": "AUTOMATICALLY_ADMISSIBLE",
+      "distributionScope": "RSM-5-I1 DEVELOPMENT / SECURE ELECTRON SHELL CANDIDATE / NOT FINAL RELEASE",
+      "evidenceSource": "Installed package.json plus physical top-level license/notice files",
+      "identity": "@babylonjs/loaders@9.21.2",
+      "license": "Apache-2.0",
+      "licenseFiles": [
+        {
+          "name": "license.md",
+          "path": "node_modules/.pnpm/@babylonjs+loaders@9.21.2_@_cee99a8b91ff85a8307e4f89a3374fa5/node_modules/@babylonjs/loaders/license.md",
+          "sha256": "9362EA9EA17CB221A20CBBD63F404710834CC273D2A9A7B60314FD68AB702CD6"
+        }
+      ],
+      "manualReviewRequired": false,
+      "name": "@babylonjs/loaders",
+      "notes": "Preserve applicable license and copyright material when distributing this development/bootstrap dependency.",
+      "noticeFiles": [],
+      "ownerCommercialDisposition": "NOT APPLICABLE",
+      "ownerExactException": false,
+      "packagedArtifactDisposition": null,
+      "prohibited": false,
+      "safeNoticeSourceUrl": "https://github.com/BabylonJS/Babylon.js.git",
+      "version": "9.21.2"
+    },
+    {
       "author": "Samuel Attard",
       "classification": "AUTOMATICALLY_ADMISSIBLE",
       "distributionScope": "RSM-5-I1 DEVELOPMENT / SECURE ELECTRON SHELL CANDIDATE / NOT FINAL RELEASE",
@@ -443,8 +499,8 @@
       "licenseFiles": [
         {
           "name": "LICENSE",
-          "path": "node_modules/.pnpm/@electron+node-gyp@git+http_ca2695615d49d2b08e9b2af94c7cf33d/node_modules/@electron/node-gyp/LICENSE",
-          "sha256": "855AE36906C2D355C6AD1B8EE53EBBE81AFCDB79A1236F6436E0AF3A7F2BC85D"
+          "path": "node_modules/.pnpm/@electron+node-gyp@https+++_0964e79e403a2c52a2de25ee291fe4fc/node_modules/@electron/node-gyp/LICENSE",
+          "sha256": "662A1B0115251CFB29C6AED0F221F8847BC49C6365D1C53A62C9F4BCCC2489C3"
         }
       ],
       "manualReviewRequired": false,
@@ -3259,6 +3315,31 @@
       "prohibited": false,
       "safeNoticeSourceUrl": "https://github.com/jonschlinkert/author-regex",
       "version": "1.0.0"
+    },
+    {
+      "author": "",
+      "classification": "AUTOMATICALLY_ADMISSIBLE",
+      "distributionScope": "RSM-5-I1 DEVELOPMENT / SECURE ELECTRON SHELL CANDIDATE / NOT FINAL RELEASE",
+      "evidenceSource": "Installed package.json plus physical top-level license/notice files",
+      "identity": "babylonjs-gltf2interface@9.21.2",
+      "license": "Apache-2.0",
+      "licenseFiles": [
+        {
+          "name": "license.md",
+          "path": "node_modules/.pnpm/babylonjs-gltf2interface@9.21.2/node_modules/babylonjs-gltf2interface/license.md",
+          "sha256": "9362EA9EA17CB221A20CBBD63F404710834CC273D2A9A7B60314FD68AB702CD6"
+        }
+      ],
+      "manualReviewRequired": false,
+      "name": "babylonjs-gltf2interface",
+      "notes": "Preserve applicable license and copyright material when distributing this development/bootstrap dependency.",
+      "noticeFiles": [],
+      "ownerCommercialDisposition": "NOT APPLICABLE",
+      "ownerExactException": false,
+      "packagedArtifactDisposition": null,
+      "prohibited": false,
+      "safeNoticeSourceUrl": "https://github.com/BabylonJS/Babylon.js.git",
+      "version": "9.21.2"
     },
     {
       "author": "Julian Gruber <mail@juliangruber.com> (http://juliangruber.com/)",
@@ -14227,9 +14308,9 @@
     "platform": "win32"
   },
   "summary": {
-    "automaticallyAdmissible": 555,
+    "automaticallyAdmissible": 558,
     "ownerApprovedExact": 14,
-    "packageCount": 569,
+    "packageCount": 572,
     "prohibited": 0,
     "unapprovedManualReview": 0,
     "unknownNoLicense": 0

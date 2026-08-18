@@ -4,6 +4,8 @@ interface BootstrapSnapshot {
   readonly packageNames: Readonly<Record<string, string>>;
   readonly applicationPackageName: string;
   readonly applicationDevDependencies: Readonly<Record<string, string>>;
+  readonly rendererDependencies?: Readonly<Record<string, string>>;
+  readonly rendererDevDependencies?: Readonly<Record<string, string>>;
 }
 
 interface PolicyIssue {
@@ -27,9 +29,21 @@ const expectedApplicationDevDependencies = new Map<string, string>([
   ["vite", "8.2.1"],
 ]);
 
+const expectedRendererDependencies = new Map<string, string>([
+  ["@babylonjs/core", "9.21.2"],
+  ["@babylonjs/loaders", "9.21.2"],
+  ["@retrostage/core", "workspace:*"],
+  ["@retrostage/diagnostics", "workspace:*"],
+]);
+
+const expectedRendererDevDependencies = new Map<string, string>([
+  ["babylonjs-gltf2interface", "9.21.2"],
+]);
+
 const expectedPackageNames = new Map<string, string>([
   ["packages/core", "@retrostage/core"],
   ["packages/diagnostics", "@retrostage/diagnostics"],
+  ["packages/renderer-babylon9", "@retrostage/renderer-babylon9"],
   ["packages/test-fixtures", "@retrostage/test-fixtures"],
 ]);
 
@@ -120,6 +134,23 @@ export function validateRepositoryBootstrap(snapshot: BootstrapSnapshot): readon
     issues,
     "APPLICATION_DIRECT",
   );
+
+  if (snapshot.rendererDependencies !== undefined) {
+    validateExactDependencies(
+      snapshot.rendererDependencies,
+      expectedRendererDependencies,
+      issues,
+      "RENDERER_DIRECT",
+    );
+  }
+  if (snapshot.rendererDevDependencies !== undefined) {
+    validateExactDependencies(
+      snapshot.rendererDevDependencies,
+      expectedRendererDevDependencies,
+      issues,
+      "RENDERER_DEV",
+    );
+  }
 
   if (snapshot.applicationPackageName !== "@retrostage/editor-electron") {
     issues.push({
