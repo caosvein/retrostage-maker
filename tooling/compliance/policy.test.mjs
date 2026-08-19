@@ -29,6 +29,7 @@ import {
   selectSafeNoticeSource,
   validateActionReference,
   validateArtifactProvenance,
+  validateWorkflowText,
   vulnerabilityDisposition,
 } from "./policy.mjs";
 import { readFirstPartyWorkspacePackagePaths } from "./generate.mjs";
@@ -1086,5 +1087,162 @@ describe("RSM-6-ADMIT1-FIX5 actual generator-level negative proof", () => {
         /* ignore */
       }
     }
+  });
+});
+
+import { readFileSync } from "node:fs";
+import process from "node:process";
+
+describe("validateWorkflowText", () => {
+  const ciPath = path.join(process.cwd(), ".github/workflows/ci.yml");
+  const canonicalCi = readFileSync(ciPath, "utf8");
+
+  function mutateCanonical(searchValue, replacement) {
+    const mutated = canonicalCi.replace(searchValue, replacement);
+    expect(mutated).not.toBe(canonicalCi);
+    return mutated;
+  }
+
+  function expectIssueCode(workflow, expectedCode) {
+    const issues = validateWorkflowText(workflow);
+    expect(
+      issues.some((issue) => issue === expectedCode || issue.startsWith(`${expectedCode}:`)),
+    ).toBe(true);
+  }
+
+  it("accepts the canonical ci.yml positive fixture", () => {
+    expect(validateWorkflowText(canonicalCi)).toEqual([]);
+  });
+
+  it("detects YAML_TAB_INDENTATION", () => {
+    const mutated = mutateCanonical("  push:", "\tpush:");
+    expectIssueCode(mutated, "YAML_TAB_INDENTATION");
+  });
+
+  it("detects ubuntu-24.04 as RUNNER_MISMATCH", () => {
+    const mutated = mutateCanonical("runs-on: windows-2022", "runs-on: ubuntu-24.04");
+    expectIssueCode(mutated, "RUNNER_MISMATCH");
+  });
+
+  it("detects windows-latest as RUNNER_MISMATCH", () => {
+    const mutated = mutateCanonical("runs-on: windows-2022", "runs-on: windows-latest");
+    expectIssueCode(mutated, "RUNNER_MISMATCH");
+  });
+
+  it("detects a wrong Windows Node archive", () => {
+    const mutated = mutateCanonical(
+      "https://nodejs.org/download/release/v24.19.0/node-v24.19.0-win-x64.zip",
+      "https://nodejs.org/download/release/v24.19.0/node-v24.19.0-win-arm64.zip",
+    );
+    expectIssueCode(mutated, "REQUIRED_FRAGMENT_MISSING");
+  });
+
+  it("detects a wrong Windows Node SHA", () => {
+    const mutated = mutateCanonical(
+      "57f71ab3652e797d84acddc79c81cc9ff1c6ddb2a1974cdb83f00fee9bff4c73",
+      "0000000000000000000000000000000000000000000000000000000000000000",
+    );
+    expectIssueCode(mutated, "REQUIRED_FRAGMENT_MISSING");
+  });
+
+  it("detects a wrong active Node version proof", () => {
+    const mutated = mutateCanonical(
+      "$nodeVersion = (node --version).Trim()",
+      "$nodeVersion = (node -v).Trim()",
+    );
+    expectIssueCode(mutated, "REQUIRED_FRAGMENT_MISSING");
+  });
+
+  it("detects a wrong pnpm version proof", () => {
+    const mutated = mutateCanonical('$pnpmVersion -ne "11.17.0"', '$pnpmVersion -ne "11.16.0"');
+    expectIssueCode(mutated, "REQUIRED_FRAGMENT_MISSING");
+  });
+
+  it("detects missing exact node.exe path-resolution proof", () => {
+    const mutated = mutateCanonical(
+      "$resolvedCandidate = (Resolve-Path $allNodeExes[0].FullName).Path",
+      "$resolvedCandidate = $allNodeExes[0].FullName",
+    );
+    expectIssueCode(mutated, "REQUIRED_FRAGMENT_MISSING");
+  });
+
+  it("detects a missing pwsh shell contract", () => {
+    const mutated = mutateCanonical("shell: pwsh", "shell: bash");
+    expectIssueCode(mutated, "REQUIRED_FRAGMENT_MISSING");
+  });
+
+  it("detects a missing frozen-lockfile install", () => {
+    const mutated = mutateCanonical("run: pnpm install --frozen-lockfile", "run: pnpm install");
+    expectIssueCode(mutated, "REQUIRED_FRAGMENT_MISSING");
+  });
+
+  it("detects a missing validate command", () => {
+    const mutated = mutateCanonical("run: pnpm run validate", "run: pnpm run typecheck");
+    expectIssueCode(mutated, "REQUIRED_FRAGMENT_MISSING");
+  });
+
+  it("detects a missing compliance:check command", () => {
+    const mutated = mutateCanonical(
+      "run: pnpm run compliance:check",
+      "run: pnpm run workflow:check",
+    );
+    expectIssueCode(mutated, "REQUIRED_FRAGMENT_MISSING");
+  });
+
+  it("detects a missing dependency:audit command", () => {
+    const mutated = mutateCanonical(
+      "run: pnpm run dependency:audit",
+      "run: pnpm run workflow:check",
+    );
+    expectIssueCode(mutated, "REQUIRED_FRAGMENT_MISSING");
+  });
+
+  it("detects COMMAND_ORDER_INVALID", () => {
+    const mutated = canonicalCi
+      .replace("run: pnpm run validate", "run: __RSM_VALIDATE_PLACEHOLDER__")
+      .replace("run: pnpm run dependency:audit", "run: pnpm run validate")
+      .replace("run: __RSM_VALIDATE_PLACEHOLDER__", "run: pnpm run dependency:audit");
+    expect(mutated).not.toBe(canonicalCi);
+    expectIssueCode(mutated, "COMMAND_ORDER_INVALID");
+  });
+
+  it("detects an UNEXPECTED_ACTION_REFERENCE", () => {
+    const mutated = mutateCanonical(
+      "      - name: Install exact pnpm",
+      [
+        "      - name: Unexpected third action",
+        "        uses: actions/cache@1111111111111111111111111111111111111111",
+        "",
+        "      - name: Install exact pnpm",
+      ].join("\n"),
+    );
+    expectIssueCode(mutated, "UNEXPECTED_ACTION_REFERENCE");
+  });
+
+  it("detects WRITE_PERMISSION_PRESENT", () => {
+    const mutated = mutateCanonical("contents: read", "contents: write");
+    expectIssueCode(mutated, "WRITE_PERMISSION_PRESENT");
+  });
+
+  it("detects SECRET_REFERENCE_PRESENT", () => {
+    const mutated = mutateCanonical(
+      "permissions:\n  contents: read",
+      "permissions:\n  contents: read\n\nenv:\n  TEST_TOKEN: ${{ secrets.TEST_TOKEN }}",
+    );
+    expectIssueCode(mutated, "SECRET_REFERENCE_PRESENT");
+  });
+
+  it("detects PUBLISH_RELEASE_PUSH_STEP_PRESENT", () => {
+    const mutated = mutateCanonical(
+      "      - name: Enforce the high-severity vulnerability gate",
+      [
+        "      - name: Forbidden push",
+        "        shell: pwsh",
+        "        run: git push",
+        "",
+        "      - name: Enforce the high-severity vulnerability gate",
+      ].join("\n"),
+    );
+    expectIssueCode(mutated, "PUBLISH_RELEASE_PUSH_STEP_PRESENT");
   });
 });

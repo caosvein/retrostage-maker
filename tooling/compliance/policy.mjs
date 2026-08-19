@@ -487,11 +487,51 @@ export function stableJson(value) {
   return `${JSON.stringify(canonicalize(value), null, 2)}\n`;
 }
 
-export function validateWorkflowText(workflow) {
-  const expectedActions = new Map([
+const WINDOWS_PRIMARY_CI_CONTRACT = Object.freeze({
+  actions: new Map([
     ["actions/checkout", "3d3c42e5aac5ba805825da76410c181273ba90b1"],
     ["pnpm/action-setup", "0ebf47130e4866e96fce0953f49152a61190b271"],
-  ]);
+  ]),
+  runner: "windows-2022",
+  nodeUrl: "https://nodejs.org/download/release/v24.19.0/node-v24.19.0-win-x64.zip",
+  nodeSha: "57f71ab3652e797d84acddc79c81cc9ff1c6ddb2a1974cdb83f00fee9bff4c73",
+  nodeExe: "node.exe",
+  nodeVersion: "v24.19.0",
+  pnpmVersion: "11.17.0",
+  fragments: [
+    "https://nodejs.org/download/release/v24.19.0/node-v24.19.0-win-x64.zip",
+    "57f71ab3652e797d84acddc79c81cc9ff1c6ddb2a1974cdb83f00fee9bff4c73",
+    '$expectedNodeExe = Join-Path $nodeRoot "node.exe"',
+    '$allNodeExes = @(Get-ChildItem -Path $nodeRoot -Filter "node.exe" -Recurse -File)',
+    "if ($allNodeExes.Count -ne 1) {",
+    "$resolvedCandidate = (Resolve-Path $allNodeExes[0].FullName).Path",
+    "$resolvedExpected = (Resolve-Path $expectedNodeExe).Path",
+    "if ($resolvedCandidate -ne $resolvedExpected) {",
+    "$nodeVersion = (& $expectedNodeExe --version).Trim()",
+    '$nodeVersion -ne "v24.19.0"',
+    "echo $nodeRoot >> $env:GITHUB_PATH",
+    "$nodeCmd = Get-Command node -CommandType Application -ErrorAction Stop",
+    "$resolvedCommand = (Resolve-Path $nodeCmd.Source).Path",
+    "if ($resolvedCommand -ne $resolvedExpected) {",
+    "$nodeVersion = (node --version).Trim()",
+    "version: 11.17.0",
+    "run_install: false",
+    "$pnpmVersion = (pnpm --version).Trim()",
+    '$pnpmVersion -ne "11.17.0"',
+    "pnpm install --frozen-lockfile",
+    "pnpm run validate",
+    "pnpm run compliance:check",
+    "pnpm run dependency:audit",
+  ],
+  commands: [
+    "pnpm install --frozen-lockfile",
+    "pnpm run validate",
+    "pnpm run compliance:check",
+    "pnpm run dependency:audit",
+  ],
+});
+
+export function validateWorkflowText(workflow) {
   const issues = [];
   const lines = workflow.split(/\r\n|\n|\r/u);
   if (lines.some((line) => line.includes("\t"))) issues.push("YAML_TAB_INDENTATION");
@@ -502,47 +542,53 @@ export function validateWorkflowText(workflow) {
   if (!/^permissions:\s*\n\s{2}contents:\s*read\s*$/mu.test(workflow))
     issues.push("LEAST_PRIVILEGE_PERMISSIONS_MISSING");
   if (/permissions:[\s\S]*?\bwrite\b/iu.test(workflow)) issues.push("WRITE_PERMISSION_PRESENT");
-  if (!/runs-on:\s*ubuntu-24\.04/u.test(workflow)) issues.push("RUNNER_MISMATCH");
+  const runnerLines = lines.filter((line) => /^\s*runs-on:/u.test(line));
+  if (
+    runnerLines.length !== 1 ||
+    runnerLines[0].trim() !== `runs-on: ${WINDOWS_PRIMARY_CI_CONTRACT.runner}`
+  ) {
+    issues.push("RUNNER_MISMATCH");
+  }
   if (!/persist-credentials:\s*false/u.test(workflow)) issues.push("CHECKOUT_CREDENTIALS_PERSIST");
   if (/\$\{\{\s*secrets\./u.test(workflow)) issues.push("SECRET_REFERENCE_PRESENT");
   if (/(?:git\s+push|npm\s+publish|pnpm\s+publish|gh\s+release)/iu.test(workflow))
     issues.push("PUBLISH_RELEASE_PUSH_STEP_PRESENT");
 
   const uses = [...workflow.matchAll(/^\s*-?\s*uses:\s*([^\s#]+).*$/gmu)].map((match) => match[1]);
+  let unexpectedActionReference = uses.length > WINDOWS_PRIMARY_CI_CONTRACT.actions.size;
   for (const reference of uses) {
-    const result = validateActionReference(reference, expectedActions);
-    if (!result.valid) issues.push(`${result.reason}:${reference}`);
+    const result = validateActionReference(reference, WINDOWS_PRIMARY_CI_CONTRACT.actions);
+    if (!result.valid) {
+      if (result.reason === "ACTION_FAMILY_NOT_APPROVED") unexpectedActionReference = true;
+      else issues.push(`${result.reason}:${reference}`);
+    }
   }
-  if (uses.length !== 2) issues.push(`ACTION_COUNT_MISMATCH:${uses.length}`);
+  if (unexpectedActionReference) issues.push("UNEXPECTED_ACTION_REFERENCE");
+  if (uses.length !== WINDOWS_PRIMARY_CI_CONTRACT.actions.size)
+    issues.push(`ACTION_COUNT_MISMATCH:${uses.length}`);
 
-  const requiredFragments = [
-    "https://nodejs.org/download/release/v24.19.0/node-v24.19.0-linux-x64.tar.xz",
-    "14b342e71204f811bde6153be8e04b62aef63c236fef92b55f9c83154b409647",
-    "node --version",
-    'test "$(node --version)" = "v24.19.0"',
-    "version: 11.17.0",
-    "run_install: false",
-    'test "$(pnpm --version)" = "11.17.0"',
-    "pnpm install --frozen-lockfile",
-    "pnpm run validate",
-    "pnpm run compliance:check",
-    "pnpm run dependency:audit",
-  ];
-  for (const fragment of requiredFragments) {
+  for (const fragment of WINDOWS_PRIMARY_CI_CONTRACT.fragments) {
     if (!workflow.includes(fragment)) issues.push(`REQUIRED_FRAGMENT_MISSING:${fragment}`);
   }
 
-  const commandOrder = [
-    "pnpm install --frozen-lockfile",
-    "pnpm run validate",
-    "pnpm run compliance:check",
-    "pnpm run dependency:audit",
-  ].map((command) => workflow.indexOf(command));
+  const commandOrder = WINDOWS_PRIMARY_CI_CONTRACT.commands.map((command) =>
+    workflow.indexOf(command),
+  );
   if (
     commandOrder.some((index) => index < 0) ||
     commandOrder.some((index, i) => i > 0 && index <= commandOrder[i - 1])
   ) {
-    issues.push("REQUIRED_COMMAND_ORDER_INVALID");
+    issues.push("COMMAND_ORDER_INVALID");
   }
+
+  const stepBlocks = workflow.split(/^\s*-\s*name:/mu).slice(1);
+  for (const block of stepBlocks) {
+    if (/^\s*run:/mu.test(block)) {
+      if (!/^\s*shell:\s*pwsh/mu.test(block)) {
+        issues.push("REQUIRED_FRAGMENT_MISSING:shell: pwsh");
+      }
+    }
+  }
+
   return issues;
 }

@@ -9,7 +9,7 @@ permissions:
 
 jobs:
   validation:
-    runs-on: ubuntu-24.04
+    runs-on: windows-2022
     steps:
       - name: Check out the repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -17,24 +17,38 @@ jobs:
           persist-credentials: false
 
       - name: Provision exact official Node.js
-        shell: bash
+        shell: pwsh
         run: |
-          set -euo pipefail
-          archive="$RUNNER_TEMP/node-v24.19.0-linux-x64.tar.xz"
-          node_root="$RUNNER_TEMP/node-v24.19.0-linux-x64"
-          curl --fail --location --silent --show-error \
-            "https://nodejs.org/download/release/v24.19.0/node-v24.19.0-linux-x64.tar.xz" \
-            --output "$archive"
-          echo "14b342e71204f811bde6153be8e04b62aef63c236fef92b55f9c83154b409647  $archive" | sha256sum --check --strict
-          mkdir -p "$node_root"
-          tar -xJf "$archive" --strip-components=1 -C "$node_root"
-          echo "$node_root/bin" >> "$GITHUB_PATH"
-
-      - name: Verify exact Node.js
-        shell: bash
-        run: |
-          node --version
-          test "$(node --version)" = "v24.19.0"
+          $archive = Join-Path $env:RUNNER_TEMP "node-v24.19.0-win-x64.zip"
+          $nodeRoot = Join-Path $env:RUNNER_TEMP "node-v24.19.0-win-x64"
+          $expectedNodeExe = Join-Path $nodeRoot "node.exe"
+          if (Test-Path $nodeRoot) {
+            throw "Pre-existing extraction root detected: $nodeRoot — aborting to prevent contamination."
+          }
+          Invoke-WebRequest -Uri "https://nodejs.org/download/release/v24.19.0/node-v24.19.0-win-x64.zip" -OutFile $archive
+          $actual = (Get-FileHash $archive -Algorithm SHA256).Hash.ToLower()
+          $expected = "57f71ab3652e797d84acddc79c81cc9ff1c6ddb2a1974cdb83f00fee9bff4c73"
+          if ($actual -ne $expected) {
+            throw "Node archive SHA-256 mismatch. expected=$expected actual=$actual"
+          }
+          Expand-Archive -Path $archive -DestinationPath $env:RUNNER_TEMP -Force
+          if (-not (Test-Path $expectedNodeExe -PathType Leaf)) {
+            throw "Expected node.exe not found at: $expectedNodeExe"
+          }
+          $allNodeExes = @(Get-ChildItem -Path $nodeRoot -Filter "node.exe" -Recurse -File)
+          if ($allNodeExes.Count -ne 1) {
+            throw "Expected exactly one node.exe below $nodeRoot but found $($allNodeExes.Count)"
+          }
+          $resolvedCandidate = (Resolve-Path $allNodeExes[0].FullName).Path
+          $resolvedExpected = (Resolve-Path $expectedNodeExe).Path
+          if ($resolvedCandidate -ne $resolvedExpected) {
+            throw "Resolved candidate path mismatch. expected=$resolvedExpected actual=$resolvedCandidate"
+          }
+          $nodeVersion = (& $expectedNodeExe --version).Trim()
+          if ($nodeVersion -ne "v24.19.0") {
+            throw "Direct node.exe version mismatch: $nodeVersion"
+          }
+          echo $nodeRoot >> $env:GITHUB_PATH
 
       - name: Install exact pnpm
         uses: pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271 # v6.0.9
@@ -42,20 +56,38 @@ jobs:
           version: 11.17.0
           run_install: false
 
-      - name: Verify exact pnpm
-        shell: bash
+      - name: Verify exact toolchain
+        shell: pwsh
         run: |
-          pnpm --version
-          test "$(pnpm --version)" = "11.17.0"
+          $nodeRoot = Join-Path $env:RUNNER_TEMP "node-v24.19.0-win-x64"
+          $expectedNodeExe = Join-Path $nodeRoot "node.exe"
+          $resolvedExpected = (Resolve-Path $expectedNodeExe).Path
+          $nodeCmd = Get-Command node -CommandType Application -ErrorAction Stop
+          $resolvedCommand = (Resolve-Path $nodeCmd.Source).Path
+          if ($resolvedCommand -ne $resolvedExpected) {
+            throw "Active node command does not resolve to extracted binary. expected=$resolvedExpected actual=$resolvedCommand"
+          }
+          $nodeVersion = (node --version).Trim()
+          if ($nodeVersion -ne "v24.19.0") {
+            throw "Node version mismatch: $nodeVersion"
+          }
+          $pnpmVersion = (pnpm --version).Trim()
+          if ($pnpmVersion -ne "11.17.0") {
+            throw "pnpm version mismatch: $pnpmVersion"
+          }
 
       - name: Install from the immutable lockfile
+        shell: pwsh
         run: pnpm install --frozen-lockfile
 
       - name: Validate the empty foundation
+        shell: pwsh
         run: pnpm run validate
 
       - name: Verify deterministic compliance artifacts
+        shell: pwsh
         run: pnpm run compliance:check
 
       - name: Enforce the high-severity vulnerability gate
+        shell: pwsh
         run: pnpm run dependency:audit
