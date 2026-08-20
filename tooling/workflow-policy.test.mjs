@@ -269,7 +269,9 @@ describe("RSM-4 workflow policy", () => {
     const lines = readFileSync(manifest, "utf8").trimEnd().split("\n");
     write(fixture.root, "docs/sources/SOURCE-MANIFEST.tsv", `${lines.slice(0, -1).join("\n")}\n`);
     expect(issueCodes(validateFixture(fixture))).toContain("SOURCE_MANIFEST_MISSING_ROW");
+  });
 
+  it("fails when the Source manifest schema is invalid", () => {
     const schemaFixture = createFixture();
     const schemaManifest = path.join(schemaFixture.root, "docs/sources/SOURCE-MANIFEST.tsv");
     const schemaText = readFileSync(schemaManifest, "utf8").replace(
