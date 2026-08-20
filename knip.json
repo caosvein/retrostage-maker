@@ -9,7 +9,6 @@
       "entry": ["src/index.ts", "src/editor.ts", "src/headless.ts", "test/*.test.ts"],
       "project": ["src/**/*.ts", "test/**/*.ts"],
       "ignoreDependencies": [
-        "@babylonjs/core",
         "@babylonjs/loaders",
         "@retrostage/core",
         "@retrostage/diagnostics",

@@ -60,8 +60,21 @@ function snapshot(overrides = {}) {
       "packages/renderer-babylon9/src/editor.ts",
       "packages/renderer-babylon9/src/headless.ts",
       "packages/renderer-babylon9/src/contracts/public.ts",
+      "packages/renderer-babylon9/src/engine/engine-port.ts",
+      "packages/renderer-babylon9/src/engine/babylon-engine-factory.ts",
+      "packages/renderer-babylon9/src/engine/renderer-adapter.ts",
+      "packages/renderer-babylon9/src/scene/scene-port.ts",
+      "packages/renderer-babylon9/src/scene/babylon-scene-factory.ts",
+      "packages/renderer-babylon9/src/surface/host-capability.ts",
+      "packages/renderer-babylon9/src/surface/resize-controller.ts",
+      "packages/renderer-babylon9/src/surface/context-controller.ts",
       "packages/renderer-babylon9/test/type-leak.test.ts",
       "packages/renderer-babylon9/test/entry-isolation.test.ts",
+      "packages/renderer-babylon9/test/lifecycle.test.ts",
+      "packages/renderer-babylon9/test/resize-host.test.ts",
+      "packages/renderer-babylon9/test/context-loss.test.ts",
+      "packages/renderer-babylon9/test/disposal-leak.test.ts",
+      "packages/renderer-babylon9/test/runtime-import-policy.test.ts",
       "packages/test-fixtures/package.json",
     ],
     directDevDependencies: rootDependencies,
@@ -167,14 +180,27 @@ describe("RSM-6-ADMIT1 repository policy", () => {
     expect(validateRepositoryBootstrap(snapshot({ packageNames: unexpected }))).not.toEqual([]);
   });
 
-  it("rejects premature renderer runtime files and a missing required I1 path", () => {
+  it("accepts the exact complete I2 renderer path set", () => {
+    expect(validateRepositoryBootstrap(snapshot())).toEqual([]);
+  });
+
+  it("rejects a missing required I2 path once I2 is active", () => {
+    const baseline = snapshot();
+    const withoutContextTest = baseline.repositoryPaths.filter(
+      (path) => path !== "packages/renderer-babylon9/test/context-loss.test.ts",
+    );
+    const issues = validateRepositoryBootstrap(snapshot({ repositoryPaths: withoutContextTest }));
+    expect(issues.map(({ code }) => code)).toContain("REQUIRED_RENDERER_I2_PATH_MISSING");
+  });
+
+  it("rejects a later-slice renderer path and a missing required I1 path", () => {
     const baseline = snapshot();
     const withoutHeadless = baseline.repositoryPaths.filter(
       (path) => path !== "packages/renderer-babylon9/src/headless.ts",
     );
     const issues = validateRepositoryBootstrap(
       snapshot({
-        repositoryPaths: [...withoutHeadless, "packages/renderer-babylon9/src/engine/runtime.ts"],
+        repositoryPaths: [...withoutHeadless, "packages/renderer-babylon9/src/camera/runtime.ts"],
       }),
     );
     expect(issues.map(({ code }) => code)).toContain("PRODUCT_PACKAGE_NOT_EMPTY_FOUNDATION");

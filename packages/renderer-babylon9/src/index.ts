@@ -1,5 +1,9 @@
+export { createRendererAdapter } from "./engine/renderer-adapter.js";
+export { createRendererHostSurfaceCapability } from "./surface/host-capability.js";
+
 export type {
   RendererAdapter,
+  RendererContextObservation,
   RendererDiagnosticSnapshot,
   RendererExtent,
   RendererFailure,
@@ -9,6 +13,7 @@ export type {
   RendererHealth,
   RendererHostSurface,
   RendererHostSurfaceCapability,
+  RendererHostSurfaceCapabilityBinding,
   RendererInputModifiers,
   RendererIntentListener,
   RendererJsonPrimitive,

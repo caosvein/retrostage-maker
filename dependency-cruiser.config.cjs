@@ -33,11 +33,35 @@ module.exports = {
       to: { path: "^packages/renderer-babylon9/src/(?:editor|headless)\\.ts$" },
     },
     {
+      name: "renderer-babylon-imports-only-in-exact-private-factories",
+      severity: "error",
+      from: {
+        path: "^packages/renderer-babylon9/src",
+        pathNot:
+          "^packages/renderer-babylon9/src/(?:engine/babylon-engine-factory|scene/babylon-scene-factory)\\.ts$",
+      },
+      to: { path: "^@babylonjs/" },
+    },
+    {
+      name: "renderer-private-factories-may-import-only-babylon-core-root",
+      severity: "error",
+      from: {
+        path: "^packages/renderer-babylon9/src/(?:engine/babylon-engine-factory|scene/babylon-scene-factory)\\.ts$",
+      },
+      to: { path: "^@babylonjs/(?!core$)" },
+    },
+    {
+      name: "renderer-tests-must-not-import-babylon-runtime",
+      severity: "error",
+      from: { path: "^packages/renderer-babylon9/test" },
+      to: { path: "^@babylonjs/" },
+    },
+    {
       name: "renderer-source-must-remain-browser-safe-and-ui-independent",
       severity: "error",
       from: { path: "^packages/renderer-babylon9/src" },
       to: {
-        path: "^(?:@babylonjs/|electron$|react(?:-dom)?$|node:|fs$|path$|child_process$|better-sqlite3$|sqlite)",
+        path: "^(?:electron$|react(?:-dom)?$|@retrostage/editor-ui-react$|node:|fs$|path$|child_process$|better-sqlite3$|sqlite)",
       },
     },
     {

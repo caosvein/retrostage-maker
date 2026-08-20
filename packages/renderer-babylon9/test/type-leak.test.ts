@@ -14,10 +14,12 @@ interface ImportMetaWithGlob {
 }
 
 const publicEntries = ["index.ts", "editor.ts", "headless.ts"] as const;
-const moduleSpecifierPattern = /(?:import|export)\s+(?:type\s+)?[^;]*?from\s+["']([^"']+)["']/gu;
+const exportSpecifierPattern = /export\s+(?:type\s+)?[^;]*?from\s+["']([^"']+)["']/gu;
 const babylonSpecifierPattern = /(?:from\s+|import\s*\()\s*["'](@babylonjs\/[^"']+)["']/gu;
 const forbiddenTypePattern =
   /\b(?:Engine|WebGPUEngine|Scene|Mesh|TransformNode|AssetContainer|PickingInfo|UtilityLayerRenderer|GizmoManager|NullEngine|SceneInstrumentation)\b/u;
+const forbiddenDomTypePattern =
+  /\b(?:HTMLCanvasElement|OffscreenCanvas|CanvasRenderingContext2D|WebGLRenderingContext|WebGL2RenderingContext)\b/u;
 
 function resolveLocalModule(from: string, specifier: string): string | null {
   if (!specifier.startsWith(".")) return null;
@@ -31,7 +33,44 @@ function resolveLocalModule(from: string, specifier: string): string | null {
   return normalized.join("/").replace(/\.js$/u, ".ts");
 }
 
-function scanPublicTypeGraph(
+function findBalancedBrace(source: string, openIndex: number): number {
+  let depth = 0;
+  for (let index = openIndex; index < source.length; index += 1) {
+    const character = source[index];
+    if (character === "{") depth += 1;
+    if (character === "}") {
+      depth -= 1;
+      if (depth === 0) return index;
+    }
+  }
+  return source.length - 1;
+}
+
+function exportedDeclarationSurface(source: string): string {
+  const declarations: string[] = [];
+  const exportPattern = /\bexport\s+(?=(?:type|interface|class|function|const|let|var|\{))/gu;
+  for (const match of source.matchAll(exportPattern)) {
+    const start = match.index;
+    const remainder = source.slice(start);
+    const braceOffset = remainder.indexOf("{");
+    const semicolonOffset = remainder.indexOf(";");
+    if (braceOffset >= 0 && (semicolonOffset < 0 || braceOffset < semicolonOffset)) {
+      if (/^export\s+function\b/u.test(remainder)) {
+        declarations.push(remainder.slice(0, braceOffset));
+      } else {
+        const end = findBalancedBrace(source, start + braceOffset);
+        declarations.push(source.slice(start, end + 1));
+      }
+      continue;
+    }
+    declarations.push(
+      remainder.slice(0, semicolonOffset < 0 ? remainder.length : semicolonOffset + 1),
+    );
+  }
+  return declarations.join("\n");
+}
+
+function scanPublicDeclarationGraph(
   modules: ReadonlyMap<string, string>,
   entries: readonly string[],
 ): readonly string[] {
@@ -48,18 +87,22 @@ function scanPublicTypeGraph(
       issues.push(`UNRESOLVED_PUBLIC_MODULE:${modulePath}`);
       continue;
     }
-    if (source.includes("@babylonjs/") || forbiddenTypePattern.test(source)) {
+    const declarations = exportedDeclarationSurface(source);
+    if (declarations.includes("@babylonjs/") || forbiddenTypePattern.test(declarations)) {
       issues.push(`BABYLON_PUBLIC_TYPE_LEAK:${modulePath}`);
     }
+    if (forbiddenDomTypePattern.test(declarations)) {
+      issues.push(`DOM_PUBLIC_TYPE_LEAK:${modulePath}`);
+    }
     babylonSpecifierPattern.lastIndex = 0;
-    for (const match of source.matchAll(babylonSpecifierPattern)) {
+    for (const match of declarations.matchAll(babylonSpecifierPattern)) {
       const specifier = match[1];
       if (specifier !== undefined) {
         issues.push(`BABYLON_PUBLIC_SPECIFIER:${modulePath}:${specifier}`);
       }
     }
-    moduleSpecifierPattern.lastIndex = 0;
-    for (const match of source.matchAll(moduleSpecifierPattern)) {
+    exportSpecifierPattern.lastIndex = 0;
+    for (const match of source.matchAll(exportSpecifierPattern)) {
       const specifier = match[1];
       if (specifier === undefined) continue;
       const local = resolveLocalModule(modulePath, specifier);
@@ -81,18 +124,39 @@ function physicalPublicModules(): ReadonlyMap<string, string> {
   );
 }
 
-describe("RSM-6-I1 public type isolation", () => {
+describe("RSM-6-I2 public type isolation", () => {
   it("accepts all three physical public entry declaration graphs", () => {
-    expect(scanPublicTypeGraph(physicalPublicModules(), publicEntries)).toEqual([]);
+    expect(scanPublicDeclarationGraph(physicalPublicModules(), publicEntries)).toEqual([]);
   });
 
   it("rejects a synthetic in-memory Babylon type in a public signature", () => {
     const synthetic = new Map([
       ["index.ts", 'export interface Leak { readonly scene: import("@babylonjs/core").Scene; }'],
     ]);
-    expect(scanPublicTypeGraph(synthetic, ["index.ts"])).toEqual([
+    expect(scanPublicDeclarationGraph(synthetic, ["index.ts"])).toEqual([
       "BABYLON_PUBLIC_TYPE_LEAK:index.ts",
       "BABYLON_PUBLIC_SPECIFIER:index.ts:@babylonjs/core",
     ]);
+  });
+
+  it("rejects a synthetic DOM implementation type in a public signature", () => {
+    const synthetic = new Map([
+      ["index.ts", "export interface Leak { readonly canvas: HTMLCanvasElement; }"],
+    ]);
+    expect(scanPublicDeclarationGraph(synthetic, ["index.ts"])).toEqual([
+      "DOM_PUBLIC_TYPE_LEAK:index.ts",
+    ]);
+  });
+
+  it("accepts a private Babylon implementation import behind an explicit public seam", () => {
+    const synthetic = new Map([
+      ["index.ts", 'export { createAdapter } from "./adapter.js";'],
+      [
+        "adapter.ts",
+        'import { createEngine } from "./private-factory.js";\nexport function createAdapter(): { readonly ready: boolean } { return { ready: Boolean(createEngine) }; }',
+      ],
+      ["private-factory.ts", 'import { Engine } from "@babylonjs/core";'],
+    ]);
+    expect(scanPublicDeclarationGraph(synthetic, ["index.ts"])).toEqual([]);
   });
 });

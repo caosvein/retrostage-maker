@@ -21,6 +21,14 @@ export interface RendererHostSurfaceCapability {
   readonly [rendererHostSurfaceCapabilityBrand]: "RendererHostSurfaceCapability";
 }
 
+export type RendererContextObservation = "lost" | "restored";
+
+export interface RendererHostSurfaceCapabilityBinding {
+  observeContextState(listener: (state: RendererContextObservation) => void): RendererUnsubscribe;
+  observeResize(listener: (extent: RendererExtent) => void): RendererUnsubscribe;
+  resolveNativeSurface(): unknown;
+}
+
 export interface RendererHostSurface {
   readonly available: boolean;
   readonly capability: RendererHostSurfaceCapability;
@@ -156,12 +164,16 @@ export type RendererUnsubscribe = () => void;
 export interface RendererAdapter {
   readonly lifecycleState: RendererLifecycleState;
 
+  attachSurface(host: RendererHostSurface): Promise<RendererOperationResult>;
   captureDiagnosticSnapshot(): RendererDiagnosticSnapshot;
+  detachSurface(): Promise<readonly RendererFailure[]>;
   dispose(): Promise<readonly RendererFailure[]>;
   initialize(host: RendererHostSurface): Promise<RendererOperationResult>;
   onFailure(listener: RendererFailureListener): RendererUnsubscribe;
   onLifecycleState(listener: RendererStateListener): RendererUnsubscribe;
   onPickIntent(listener: RendererIntentListener<RendererPickIntent>): RendererUnsubscribe;
   project(input: RendererProjectionInput): Promise<RendererProjectionResult>;
+  render(): RendererOperationResult;
+  resize(): RendererOperationResult;
   start(): Promise<RendererOperationResult>;
 }

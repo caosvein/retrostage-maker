@@ -78,6 +78,22 @@ const expectedRendererFoundationPaths = new Set([
   "packages/renderer-babylon9/test/entry-isolation.test.ts",
 ]);
 
+const expectedRendererI2Paths = new Set([
+  "packages/renderer-babylon9/src/engine/engine-port.ts",
+  "packages/renderer-babylon9/src/engine/babylon-engine-factory.ts",
+  "packages/renderer-babylon9/src/engine/renderer-adapter.ts",
+  "packages/renderer-babylon9/src/scene/scene-port.ts",
+  "packages/renderer-babylon9/src/scene/babylon-scene-factory.ts",
+  "packages/renderer-babylon9/src/surface/host-capability.ts",
+  "packages/renderer-babylon9/src/surface/resize-controller.ts",
+  "packages/renderer-babylon9/src/surface/context-controller.ts",
+  "packages/renderer-babylon9/test/lifecycle.test.ts",
+  "packages/renderer-babylon9/test/resize-host.test.ts",
+  "packages/renderer-babylon9/test/context-loss.test.ts",
+  "packages/renderer-babylon9/test/disposal-leak.test.ts",
+  "packages/renderer-babylon9/test/runtime-import-policy.test.ts",
+]);
+
 const forbiddenEarlyRoots = new Set(["scripts", "tools"]);
 
 function normalizePath(path: string): string {
@@ -125,7 +141,7 @@ export function validateRepositoryBootstrap(snapshot: BootstrapSnapshot): readon
     const productPackageMatch = /^(packages\/[^/]+)\/(.+)$/u.exec(path);
     const isRendererFoundationPath =
       productPackageMatch?.[1] === "packages/renderer-babylon9" &&
-      expectedRendererFoundationPaths.has(path);
+      (expectedRendererFoundationPaths.has(path) || expectedRendererI2Paths.has(path));
     if (
       productPackageMatch !== null &&
       productPackageMatch[2] !== "package.json" &&
@@ -149,6 +165,16 @@ export function validateRepositoryBootstrap(snapshot: BootstrapSnapshot): readon
     for (const expectedPath of expectedRendererFoundationPaths) {
       if (!normalizedRepositoryPaths.includes(expectedPath)) {
         issues.push({ code: "REQUIRED_RENDERER_FOUNDATION_PATH_MISSING", detail: expectedPath });
+      }
+    }
+  }
+  const rendererI2IsActive = normalizedRepositoryPaths.some((path) =>
+    expectedRendererI2Paths.has(path),
+  );
+  if (rendererI2IsActive) {
+    for (const expectedPath of expectedRendererI2Paths) {
+      if (!normalizedRepositoryPaths.includes(expectedPath)) {
+        issues.push({ code: "REQUIRED_RENDERER_I2_PATH_MISSING", detail: expectedPath });
       }
     }
   }
