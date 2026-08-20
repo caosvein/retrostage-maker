@@ -67,6 +67,17 @@ const expectedApplicationPaths = new Set([
   "apps/editor-electron/test/import-boundary.test.mjs",
 ]);
 
+const expectedRendererFoundationPaths = new Set([
+  "packages/renderer-babylon9/package.json",
+  "packages/renderer-babylon9/tsconfig.json",
+  "packages/renderer-babylon9/src/index.ts",
+  "packages/renderer-babylon9/src/editor.ts",
+  "packages/renderer-babylon9/src/headless.ts",
+  "packages/renderer-babylon9/src/contracts/public.ts",
+  "packages/renderer-babylon9/test/type-leak.test.ts",
+  "packages/renderer-babylon9/test/entry-isolation.test.ts",
+]);
+
 const forbiddenEarlyRoots = new Set(["scripts", "tools"]);
 
 function normalizePath(path: string): string {
@@ -100,6 +111,7 @@ function validateExactDependencies(
 
 export function validateRepositoryBootstrap(snapshot: BootstrapSnapshot): readonly PolicyIssue[] {
   const issues: PolicyIssue[] = [];
+  const normalizedRepositoryPaths = snapshot.repositoryPaths.map(normalizePath);
 
   for (const rawPath of snapshot.repositoryPaths) {
     const path = normalizePath(rawPath);
@@ -111,7 +123,14 @@ export function validateRepositoryBootstrap(snapshot: BootstrapSnapshot): readon
       issues.push({ code: "UNAUTHORIZED_APPLICATION_PATH", detail: path });
     }
     const productPackageMatch = /^(packages\/[^/]+)\/(.+)$/u.exec(path);
-    if (productPackageMatch !== null && productPackageMatch[2] !== "package.json") {
+    const isRendererFoundationPath =
+      productPackageMatch?.[1] === "packages/renderer-babylon9" &&
+      expectedRendererFoundationPaths.has(path);
+    if (
+      productPackageMatch !== null &&
+      productPackageMatch[2] !== "package.json" &&
+      !isRendererFoundationPath
+    ) {
       issues.push({ code: "PRODUCT_PACKAGE_NOT_EMPTY_FOUNDATION", detail: path });
     }
   }
@@ -119,6 +138,18 @@ export function validateRepositoryBootstrap(snapshot: BootstrapSnapshot): readon
   for (const expectedPath of expectedApplicationPaths) {
     if (!snapshot.repositoryPaths.some((candidate) => normalizePath(candidate) === expectedPath)) {
       issues.push({ code: "REQUIRED_APPLICATION_PATH_MISSING", detail: expectedPath });
+    }
+  }
+  const rendererFoundationIsActive = normalizedRepositoryPaths.some(
+    (path) =>
+      path.startsWith("packages/renderer-babylon9/") &&
+      path !== "packages/renderer-babylon9/package.json",
+  );
+  if (rendererFoundationIsActive) {
+    for (const expectedPath of expectedRendererFoundationPaths) {
+      if (!normalizedRepositoryPaths.includes(expectedPath)) {
+        issues.push({ code: "REQUIRED_RENDERER_FOUNDATION_PATH_MISSING", detail: expectedPath });
+      }
     }
   }
 

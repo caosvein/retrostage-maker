@@ -12,13 +12,25 @@ export default tseslint.config(
   },
   ...tseslint.configs.recommendedTypeChecked.map((config) => ({
     ...config,
-    files: ["tooling/**/*.ts", "apps/editor-electron/src/**/*.ts"],
+    files: [
+      "tooling/**/*.ts",
+      "packages/renderer-babylon9/**/*.ts",
+      "apps/editor-electron/src/**/*.ts",
+    ],
   })),
   {
-    files: ["tooling/**/*.ts", "apps/editor-electron/src/**/*.ts"],
+    files: [
+      "tooling/**/*.ts",
+      "packages/renderer-babylon9/**/*.ts",
+      "apps/editor-electron/src/**/*.ts",
+    ],
     languageOptions: {
       parserOptions: {
-        project: ["./tsconfig.json", "./apps/editor-electron/tsconfig.json"],
+        project: [
+          "./tsconfig.json",
+          "./packages/renderer-babylon9/tsconfig.json",
+          "./apps/editor-electron/tsconfig.json",
+        ],
         tsconfigRootDir: import.meta.dirname,
       },
     },

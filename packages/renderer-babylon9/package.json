@@ -2,6 +2,14 @@
   "name": "@retrostage/renderer-babylon9",
   "version": "0.0.0",
   "private": true,
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./editor": "./src/editor.ts",
+    "./headless": "./src/headless.ts"
+  },
   "dependencies": {
     "@babylonjs/core": "9.21.2",
     "@babylonjs/loaders": "9.21.2",

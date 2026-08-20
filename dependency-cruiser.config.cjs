@@ -21,6 +21,26 @@ module.exports = {
       to: { path: "^(tools|scripts|\\.github)(/|$)" },
     },
     {
+      name: "no-circular-renderer-dependencies",
+      severity: "error",
+      from: { path: "^packages/renderer-babylon9" },
+      to: { circular: true },
+    },
+    {
+      name: "renderer-default-must-not-reach-editor-or-headless",
+      severity: "error",
+      from: { path: "^packages/renderer-babylon9/src/index\\.ts$" },
+      to: { path: "^packages/renderer-babylon9/src/(?:editor|headless)\\.ts$" },
+    },
+    {
+      name: "renderer-source-must-remain-browser-safe-and-ui-independent",
+      severity: "error",
+      from: { path: "^packages/renderer-babylon9/src" },
+      to: {
+        path: "^(?:@babylonjs/|electron$|react(?:-dom)?$|node:|fs$|path$|child_process$|better-sqlite3$|sqlite)",
+      },
+    },
+    {
       name: "renderer-must-not-import-electron-or-node",
       severity: "error",
       from: { path: "^apps/editor-electron/src/renderer" },
@@ -45,6 +65,6 @@ module.exports = {
   ],
   options: {
     doNotFollow: { path: "node_modules" },
-    includeOnly: "^(tooling|apps/editor-electron/src)",
+    includeOnly: "^(tooling|packages/renderer-babylon9|apps/editor-electron/src)",
   },
 };
