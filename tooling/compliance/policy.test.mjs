@@ -1153,6 +1153,27 @@ describe("validateWorkflowText", () => {
     expectIssueCode(mutated, "REQUIRED_FRAGMENT_MISSING");
   });
 
+  it("requires active Node command enumeration in execution precedence order", () => {
+    const mutated = mutateCanonical(
+      "$nodeCommands = @(Get-Command node -All -ErrorAction Stop)",
+      "$nodeCommands = @(Get-Command node -ErrorAction Stop)",
+    );
+    expectIssueCode(mutated, "REQUIRED_FRAGMENT_MISSING");
+  });
+
+  it("requires the first active Node command candidate", () => {
+    const mutated = mutateCanonical("$nodeCmd = $nodeCommands[0]", "$nodeCmd = $nodeCommands[-1]");
+    expectIssueCode(mutated, "REQUIRED_FRAGMENT_MISSING");
+  });
+
+  it("requires the active Node command to be an application", () => {
+    const mutated = mutateCanonical(
+      "if ($nodeCmd.CommandType -ne [System.Management.Automation.CommandTypes]::Application) {",
+      'if ($nodeCmd.CommandType -ne "Alias") {',
+    );
+    expectIssueCode(mutated, "REQUIRED_FRAGMENT_MISSING");
+  });
+
   it("detects a wrong pnpm version proof", () => {
     const mutated = mutateCanonical('$pnpmVersion -ne "11.17.0"', '$pnpmVersion -ne "11.16.0"');
     expectIssueCode(mutated, "REQUIRED_FRAGMENT_MISSING");

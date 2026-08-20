@@ -62,7 +62,14 @@ jobs:
           $nodeRoot = Join-Path $env:RUNNER_TEMP "node-v24.19.0-win-x64"
           $expectedNodeExe = Join-Path $nodeRoot "node.exe"
           $resolvedExpected = (Resolve-Path $expectedNodeExe).Path
-          $nodeCmd = Get-Command node -CommandType Application -ErrorAction Stop
+          $nodeCommands = @(Get-Command node -All -ErrorAction Stop)
+          if ($nodeCommands.Count -lt 1) {
+            throw "No active node command was found."
+          }
+          $nodeCmd = $nodeCommands[0]
+          if ($nodeCmd.CommandType -ne [System.Management.Automation.CommandTypes]::Application) {
+            throw "Active node command is not an application. commandType=$($nodeCmd.CommandType)"
+          }
           $resolvedCommand = (Resolve-Path $nodeCmd.Source).Path
           if ($resolvedCommand -ne $resolvedExpected) {
             throw "Active node command does not resolve to extracted binary. expected=$resolvedExpected actual=$resolvedCommand"
