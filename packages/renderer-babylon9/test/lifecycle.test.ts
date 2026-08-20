@@ -51,6 +51,7 @@ class FakeEngine {
 }
 
 class FakeScene {
+  readonly nativeHandle = {};
   disposeCalls = 0;
   renderCalls = 0;
 
@@ -97,6 +98,7 @@ describe("RSM-6-I2 adapter lifecycle", () => {
     let sceneCreations = 0;
     const states: string[] = [];
     const adapter = createRendererAdapterForTests({
+      cameraFactory: () => ({ dispose: () => undefined, setProjection: () => undefined }),
       engineFactory: () => {
         engineCreations += 1;
         return engine;
@@ -142,6 +144,7 @@ describe("RSM-6-I2 adapter lifecycle", () => {
   it("rejects illegal operations and cleans partial initialization", async () => {
     const engine = new FakeEngine();
     const adapter = createRendererAdapterForTests({
+      cameraFactory: () => ({ dispose: () => undefined, setProjection: () => undefined }),
       engineFactory: () => engine,
       sceneFactory: () => {
         throw new Error("scene construction failed");
@@ -166,6 +169,7 @@ describe("RSM-6-I2 adapter lifecycle", () => {
   it("rejects unavailable and forged host capabilities without creating resources", async () => {
     let engineCreations = 0;
     const adapter = createRendererAdapterForTests({
+      cameraFactory: () => ({ dispose: () => undefined, setProjection: () => undefined }),
       engineFactory: () => {
         engineCreations += 1;
         return new FakeEngine();

@@ -65,9 +65,14 @@ describe("RSM-6-I2 disposal ownership", () => {
         events.push("scene-dispose");
         throw new Error("scene cleanup failed");
       },
+      nativeHandle: {},
       render: () => undefined,
     };
     const adapter = createRendererAdapterForTests({
+      cameraFactory: () => ({
+        dispose: () => events.push("camera-dispose"),
+        setProjection: () => undefined,
+      }),
       engineFactory: () => engine,
       sceneFactory: () => scene,
     });
@@ -93,6 +98,7 @@ describe("RSM-6-I2 disposal ownership", () => {
       "stop-loop",
       "resize-unsubscribe",
       "context-unsubscribe",
+      "camera-dispose",
       "scene-dispose",
       "engine-dispose",
     ]);
@@ -110,7 +116,7 @@ describe("RSM-6-I2 disposal ownership", () => {
     expect(failureListenerCalls).toBe(disposedFailureListenerCalls);
 
     expect(await adapter.dispose()).toEqual([]);
-    expect(events.length).toBe(5);
+    expect(events.length).toBe(6);
   });
 
   it("revokes callback authority before a failing stop and continues disposal cleanup", async () => {
@@ -160,11 +166,16 @@ describe("RSM-6-I2 disposal ownership", () => {
     };
     const scene = {
       dispose: () => events.push("scene-dispose"),
+      nativeHandle: {},
       render: () => {
         renderCalls += 1;
       },
     };
     const adapter = createRendererAdapterForTests({
+      cameraFactory: () => ({
+        dispose: () => events.push("camera-dispose"),
+        setProjection: () => undefined,
+      }),
       engineFactory: () => engine,
       sceneFactory: () => scene,
     });
@@ -191,6 +202,7 @@ describe("RSM-6-I2 disposal ownership", () => {
       "stop-loop",
       "resize-unsubscribe",
       "context-unsubscribe",
+      "camera-dispose",
       "scene-dispose",
       "engine-dispose",
     ]);

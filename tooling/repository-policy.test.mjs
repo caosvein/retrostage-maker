@@ -68,6 +68,12 @@ function snapshot(overrides = {}) {
       "packages/renderer-babylon9/src/surface/host-capability.ts",
       "packages/renderer-babylon9/src/surface/resize-controller.ts",
       "packages/renderer-babylon9/src/surface/context-controller.ts",
+      "packages/renderer-babylon9/src/camera/camera-port.ts",
+      "packages/renderer-babylon9/src/camera/babylon-camera-factory.ts",
+      "packages/renderer-babylon9/src/camera/camera-controller.ts",
+      "packages/renderer-babylon9/src/grid/grid-port.ts",
+      "packages/renderer-babylon9/src/grid/babylon-grid-factory.ts",
+      "packages/renderer-babylon9/src/grid/grid-controller.ts",
       "packages/renderer-babylon9/test/type-leak.test.ts",
       "packages/renderer-babylon9/test/entry-isolation.test.ts",
       "packages/renderer-babylon9/test/lifecycle.test.ts",
@@ -75,6 +81,9 @@ function snapshot(overrides = {}) {
       "packages/renderer-babylon9/test/context-loss.test.ts",
       "packages/renderer-babylon9/test/disposal-leak.test.ts",
       "packages/renderer-babylon9/test/runtime-import-policy.test.ts",
+      "packages/renderer-babylon9/test/camera.test.ts",
+      "packages/renderer-babylon9/test/grid.test.ts",
+      "packages/renderer-babylon9/test/controller.test.ts",
       "packages/test-fixtures/package.json",
     ],
     directDevDependencies: rootDependencies,
@@ -180,7 +189,7 @@ describe("RSM-6-ADMIT1 repository policy", () => {
     expect(validateRepositoryBootstrap(snapshot({ packageNames: unexpected }))).not.toEqual([]);
   });
 
-  it("accepts the exact complete I2 renderer path set", () => {
+  it("accepts the exact complete I3 renderer path set", () => {
     expect(validateRepositoryBootstrap(snapshot())).toEqual([]);
   });
 
@@ -193,6 +202,34 @@ describe("RSM-6-ADMIT1 repository policy", () => {
     expect(issues.map(({ code }) => code)).toContain("REQUIRED_RENDERER_I2_PATH_MISSING");
   });
 
+  it("rejects a missing required I3 path once I3 is active", () => {
+    const baseline = snapshot();
+    const withoutGridTest = baseline.repositoryPaths.filter(
+      (path) => path !== "packages/renderer-babylon9/test/grid.test.ts",
+    );
+    const issues = validateRepositoryBootstrap(snapshot({ repositoryPaths: withoutGridTest }));
+    expect(issues.map(({ code }) => code)).toContain("REQUIRED_RENDERER_I3_PATH_MISSING");
+  });
+
+  it("rejects unexpected camera/Grid paths and an I4 picking path", () => {
+    const baseline = snapshot();
+    const issues = validateRepositoryBootstrap(
+      snapshot({
+        repositoryPaths: [
+          ...baseline.repositoryPaths,
+          "packages/renderer-babylon9/src/camera/runtime.ts",
+          "packages/renderer-babylon9/src/grid/material.ts",
+          "packages/renderer-babylon9/src/picking/runtime.ts",
+        ],
+      }),
+    );
+    expect(issues.map(({ code }) => code)).toEqual([
+      "PRODUCT_PACKAGE_NOT_EMPTY_FOUNDATION",
+      "PRODUCT_PACKAGE_NOT_EMPTY_FOUNDATION",
+      "PRODUCT_PACKAGE_NOT_EMPTY_FOUNDATION",
+    ]);
+  });
+
   it("rejects a later-slice renderer path and a missing required I1 path", () => {
     const baseline = snapshot();
     const withoutHeadless = baseline.repositoryPaths.filter(
@@ -200,7 +237,7 @@ describe("RSM-6-ADMIT1 repository policy", () => {
     );
     const issues = validateRepositoryBootstrap(
       snapshot({
-        repositoryPaths: [...withoutHeadless, "packages/renderer-babylon9/src/camera/runtime.ts"],
+        repositoryPaths: [...withoutHeadless, "packages/renderer-babylon9/src/picking/runtime.ts"],
       }),
     );
     expect(issues.map(({ code }) => code)).toContain("PRODUCT_PACKAGE_NOT_EMPTY_FOUNDATION");

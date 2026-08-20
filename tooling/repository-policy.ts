@@ -94,6 +94,18 @@ const expectedRendererI2Paths = new Set([
   "packages/renderer-babylon9/test/runtime-import-policy.test.ts",
 ]);
 
+const expectedRendererI3Paths = new Set([
+  "packages/renderer-babylon9/src/camera/camera-port.ts",
+  "packages/renderer-babylon9/src/camera/babylon-camera-factory.ts",
+  "packages/renderer-babylon9/src/camera/camera-controller.ts",
+  "packages/renderer-babylon9/src/grid/grid-port.ts",
+  "packages/renderer-babylon9/src/grid/babylon-grid-factory.ts",
+  "packages/renderer-babylon9/src/grid/grid-controller.ts",
+  "packages/renderer-babylon9/test/camera.test.ts",
+  "packages/renderer-babylon9/test/grid.test.ts",
+  "packages/renderer-babylon9/test/controller.test.ts",
+]);
+
 const forbiddenEarlyRoots = new Set(["scripts", "tools"]);
 
 function normalizePath(path: string): string {
@@ -141,7 +153,9 @@ export function validateRepositoryBootstrap(snapshot: BootstrapSnapshot): readon
     const productPackageMatch = /^(packages\/[^/]+)\/(.+)$/u.exec(path);
     const isRendererFoundationPath =
       productPackageMatch?.[1] === "packages/renderer-babylon9" &&
-      (expectedRendererFoundationPaths.has(path) || expectedRendererI2Paths.has(path));
+      (expectedRendererFoundationPaths.has(path) ||
+        expectedRendererI2Paths.has(path) ||
+        expectedRendererI3Paths.has(path));
     if (
       productPackageMatch !== null &&
       productPackageMatch[2] !== "package.json" &&
@@ -175,6 +189,16 @@ export function validateRepositoryBootstrap(snapshot: BootstrapSnapshot): readon
     for (const expectedPath of expectedRendererI2Paths) {
       if (!normalizedRepositoryPaths.includes(expectedPath)) {
         issues.push({ code: "REQUIRED_RENDERER_I2_PATH_MISSING", detail: expectedPath });
+      }
+    }
+  }
+  const rendererI3IsActive = normalizedRepositoryPaths.some((path) =>
+    expectedRendererI3Paths.has(path),
+  );
+  if (rendererI3IsActive) {
+    for (const expectedPath of expectedRendererI3Paths) {
+      if (!normalizedRepositoryPaths.includes(expectedPath)) {
+        issues.push({ code: "REQUIRED_RENDERER_I3_PATH_MISSING", detail: expectedPath });
       }
     }
   }

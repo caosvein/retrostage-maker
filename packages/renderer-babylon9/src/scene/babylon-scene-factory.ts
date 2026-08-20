@@ -7,6 +7,7 @@ export function createBabylonScene(engine: RendererEnginePort): RendererScenePor
   const scene = new Scene(engine.nativeHandle as ConstructorParameters<typeof Scene>[0]);
 
   return {
+    nativeHandle: scene,
     dispose: () => {
       scene.dispose();
     },

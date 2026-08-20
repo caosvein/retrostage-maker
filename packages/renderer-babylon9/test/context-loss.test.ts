@@ -72,8 +72,9 @@ async function runningAdapter(
   render: () => void = () => undefined,
 ) {
   const adapter = createRendererAdapterForTests({
+    cameraFactory: () => ({ dispose: () => undefined, setProjection: () => undefined }),
     engineFactory: () => engine,
-    sceneFactory: () => ({ dispose: () => undefined, render }),
+    sceneFactory: () => ({ dispose: () => undefined, nativeHandle: {}, render }),
   });
   await adapter.initialize(contextHost(listeners));
   await adapter.project({

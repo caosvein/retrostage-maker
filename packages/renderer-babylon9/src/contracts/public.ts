@@ -17,6 +17,22 @@ export interface RendererExtent {
   readonly width: number;
 }
 
+export interface RendererVector3 {
+  readonly x: number;
+  readonly y: number;
+  readonly z: number;
+}
+
+export interface RendererCameraProjection {
+  readonly alphaRadians: number;
+  readonly betaRadians: number;
+  readonly radius: number;
+  readonly target: RendererVector3;
+  readonly verticalFieldOfViewRadians: number;
+  readonly nearClip: number;
+  readonly farClip: number;
+}
+
 export interface RendererHostSurfaceCapability {
   readonly [rendererHostSurfaceCapabilityBrand]: "RendererHostSurfaceCapability";
 }
@@ -108,6 +124,7 @@ export type RendererFailureCategory =
   | "UNSUPPORTED_DECODER"
   | "PICK_RESOLUTION_FAILED"
   | "RESOURCE_DISPOSAL_FAILED"
+  | "VIEW_CONTROL_REJECTED"
   | "RENDERER_INTERNAL_FAILURE";
 
 export interface RendererFailureCauseSummary {
@@ -175,5 +192,7 @@ export interface RendererAdapter {
   project(input: RendererProjectionInput): Promise<RendererProjectionResult>;
   render(): RendererOperationResult;
   resize(): RendererOperationResult;
+  resetView(): RendererOperationResult;
+  setCameraProjection(projection: RendererCameraProjection): RendererOperationResult;
   start(): Promise<RendererOperationResult>;
 }

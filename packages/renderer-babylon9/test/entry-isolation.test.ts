@@ -72,15 +72,37 @@ function physicalModules(): ReadonlyMap<string, string> {
   );
 }
 
-describe("RSM-6-I1 public entry isolation", () => {
-  it("keeps the physical default/player graph isolated from editor and headless entries", () => {
+const editorGridModules = new Set([
+  "editor.ts",
+  "grid/babylon-grid-factory.ts",
+  "grid/grid-controller.ts",
+  "grid/grid-port.ts",
+]);
+
+describe("RSM-6-I3 public entry isolation", () => {
+  it("keeps the physical default/player graph isolated from editor, headless, and Grid", () => {
     expect(
       scanForbiddenReachability(
         physicalModules(),
         "index.ts",
-        new Set(["editor.ts", "headless.ts"]),
+        new Set([...editorGridModules, "headless.ts"]),
       ),
     ).toEqual([]);
+  });
+
+  it("keeps headless isolated from editor Grid while editor intentionally reaches it", () => {
+    const modules = physicalModules();
+    expect(scanForbiddenReachability(modules, "headless.ts", editorGridModules)).toEqual([]);
+    expect(
+      scanForbiddenReachability(
+        modules,
+        "editor.ts",
+        new Set(["grid/grid-controller.ts", "grid/babylon-grid-factory.ts"]),
+      ),
+    ).toEqual([
+      "FORBIDDEN_ENTRY_REACHABLE:editor.ts:grid/grid-controller.ts",
+      "FORBIDDEN_ENTRY_REACHABLE:editor.ts:grid/babylon-grid-factory.ts",
+    ]);
   });
 
   it("publishes only the three intentional package entry surfaces", () => {

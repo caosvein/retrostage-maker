@@ -1,5 +1,6 @@
 import type {
   RendererAdapter,
+  RendererCameraProjection,
   RendererDiagnosticSnapshot,
   RendererFailure,
   RendererFailureCategory,
@@ -14,6 +15,9 @@ import type {
   RendererStateListener,
   RendererUnsubscribe,
 } from "../contracts/public.js";
+import { createBabylonCamera } from "../camera/babylon-camera-factory.js";
+import { RendererCameraController } from "../camera/camera-controller.js";
+import type { RendererCameraFactory } from "../camera/camera-port.js";
 import { createBabylonScene } from "../scene/babylon-scene-factory.js";
 import type { RendererSceneFactory, RendererScenePort } from "../scene/scene-port.js";
 import { RendererContextController } from "../surface/context-controller.js";
@@ -27,9 +31,24 @@ import { createBabylonEngine } from "./babylon-engine-factory.js";
 import type { RendererEngineFactory, RendererEnginePort } from "./engine-port.js";
 
 export interface RendererAdapterRuntimeOptions {
+  readonly cameraFactory: RendererCameraFactory;
   readonly engineFactory: RendererEngineFactory;
   readonly sceneFactory: RendererSceneFactory;
   readonly scheduleResize?: RendererResizeScheduler;
+}
+
+export interface RendererEditorBridge {
+  getLifecycleState(): RendererLifecycleState;
+  getScene(): RendererScenePort | null;
+  onLifecycleState(listener: RendererStateListener): RendererUnsubscribe;
+  reportDisposalFailure(detail: string, cause?: unknown): void;
+  reportViewControlFailure(detail: string, cause?: unknown): RendererOperationResult;
+}
+
+const editorBridges = new WeakMap<RendererAdapter, RendererEditorBridge>();
+
+export function resolveRendererEditorBridge(adapter: RendererAdapter): RendererEditorBridge | null {
+  return editorBridges.get(adapter) ?? null;
 }
 
 const emptyFailureCounts = (): Record<RendererFailureCategory, number> => ({
@@ -44,6 +63,7 @@ const emptyFailureCounts = (): Record<RendererFailureCategory, number> => ({
   RESOURCE_DISPOSAL_FAILED: 0,
   SCENE_PROJECTION_FAILED: 0,
   UNSUPPORTED_DECODER: 0,
+  VIEW_CONTROL_REJECTED: 0,
 });
 
 const allowedTransitions: Readonly<
@@ -89,6 +109,7 @@ function isUsableHost(host: RendererHostSurface): boolean {
 }
 
 class RendererAdapterRuntime implements RendererAdapter {
+  readonly #cameraController: RendererCameraController;
   readonly #contextController = new RendererContextController();
   readonly #engineFactory: RendererEngineFactory;
   readonly #failureCounts = emptyFailureCounts();
@@ -109,15 +130,26 @@ class RendererAdapterRuntime implements RendererAdapter {
   #framesRendered = 0;
   #hostGeneration: number | null = null;
   #latestProjection: RendererProjectionInput | null = null;
+  #pendingEditorDisposalFailures: RendererFailure[] = [];
   #renderLoopActive = false;
   #resizeController: RendererResizeController | null = null;
   #scene: RendererScenePort | null = null;
   #state: RendererLifecycleState = "NEW";
 
   constructor(options: RendererAdapterRuntimeOptions) {
+    this.#cameraController = new RendererCameraController(options.cameraFactory);
     this.#engineFactory = options.engineFactory;
     this.#sceneFactory = options.sceneFactory;
     this.#scheduleResize = options.scheduleResize ?? scheduleRendererResize;
+    editorBridges.set(this, {
+      getLifecycleState: () => this.#state,
+      getScene: () => this.#scene,
+      onLifecycleState: (listener) => this.onLifecycleState(listener),
+      reportDisposalFailure: (detail, cause) => {
+        this.#reportEditorDisposalFailure(detail, cause);
+      },
+      reportViewControlFailure: (detail, cause) => this.#viewControlFailure(detail, cause),
+    });
   }
 
   get lifecycleState(): RendererLifecycleState {
@@ -169,9 +201,13 @@ class RendererAdapterRuntime implements RendererAdapter {
     this.#hostGeneration = host.generation;
     this.#adapterGeneration += 1;
 
+    let initializationPhase: "camera" | "engine-scene" = "engine-scene";
     try {
       this.#engine = this.#engineFactory(nativeSurface);
       this.#scene = this.#sceneFactory(this.#engine);
+      initializationPhase = "camera";
+      this.#cameraController.initialize(this.#scene.nativeHandle);
+      initializationPhase = "engine-scene";
 
       this.#resizeController = new RendererResizeController(this.#scheduleResize, () => {
         this.#applyOwnedResize();
@@ -187,9 +223,11 @@ class RendererAdapterRuntime implements RendererAdapter {
     } catch (cause) {
       this.#transition("FAILED");
       const failure = this.#createFailure(
-        "ENGINE_INITIALIZATION_FAILED",
+        initializationPhase === "camera" ? "VIEW_CONTROL_REJECTED" : "ENGINE_INITIALIZATION_FAILED",
         "fatal",
-        "The private Engine/Scene runtime could not be initialized.",
+        initializationPhase === "camera"
+          ? "The private Camera runtime could not be initialized."
+          : "The private Engine/Scene runtime could not be initialized.",
         cause,
       );
       this.#recordFailure(failure);
@@ -304,6 +342,38 @@ class RendererAdapterRuntime implements RendererAdapter {
     return { accepted: true };
   }
 
+  resetView(): RendererOperationResult {
+    if (!this.#acceptsViewControl()) {
+      return this.#viewControlFailure(
+        "Camera reset requires READY, RUNNING, or SUSPENDED_CONTEXT_LOSS state.",
+      );
+    }
+    try {
+      this.#cameraController.reset(this.#state !== "SUSPENDED_CONTEXT_LOSS");
+      return { accepted: true };
+    } catch (cause) {
+      return this.#viewControlFailure("The private Camera reset operation failed.", cause);
+    }
+  }
+
+  setCameraProjection(projection: RendererCameraProjection): RendererOperationResult {
+    if (!this.#acceptsViewControl()) {
+      return this.#viewControlFailure(
+        "Camera projection requires READY, RUNNING, or SUSPENDED_CONTEXT_LOSS state.",
+      );
+    }
+    try {
+      if (
+        !this.#cameraController.setProjection(projection, this.#state !== "SUSPENDED_CONTEXT_LOSS")
+      ) {
+        return this.#viewControlFailure("The Camera projection is invalid.");
+      }
+      return { accepted: true };
+    } catch (cause) {
+      return this.#viewControlFailure("The private Camera projection operation failed.", cause);
+    }
+  }
+
   start(): Promise<RendererOperationResult> {
     if (this.#state === "RUNNING") return Promise.resolve({ accepted: true });
     if (
@@ -345,6 +415,10 @@ class RendererAdapterRuntime implements RendererAdapter {
     );
   }
 
+  #acceptsViewControl(): boolean {
+    return this.#acceptsProjection();
+  }
+
   #applyOwnedResize(): void {
     if ((this.#state !== "READY" && this.#state !== "RUNNING") || this.#engine === null) return;
     try {
@@ -378,6 +452,7 @@ class RendererAdapterRuntime implements RendererAdapter {
     for (const cleanup of [
       () => this.#resizeController?.dispose(),
       () => this.#contextController.dispose(),
+      () => this.#cameraController.dispose(),
       () => this.#scene?.dispose(),
       () => this.#engine?.dispose(),
     ]) {
@@ -485,6 +560,7 @@ class RendererAdapterRuntime implements RendererAdapter {
         throw new Error("Context restore continuity state is incomplete.");
       }
       this.#engine.resize();
+      this.#cameraController.reapply();
       this.#startOwnedLoop();
       this.#contextState = "available";
       this.#transition("RUNNING");
@@ -504,7 +580,7 @@ class RendererAdapterRuntime implements RendererAdapter {
 
   #performDisposal(): readonly RendererFailure[] {
     const failures: RendererFailure[] = [];
-    this.#transition("DISPOSING");
+    this.#transition("DISPOSING", false);
 
     const cleanup = (operation: () => void, detail: string): void => {
       try {
@@ -530,6 +606,10 @@ class RendererAdapterRuntime implements RendererAdapter {
       () => this.#contextController.dispose(),
       "The context observer could not be detached during disposal.",
     );
+    this.#notifyStateListeners("DISPOSING");
+    failures.push(...this.#pendingEditorDisposalFailures);
+    this.#pendingEditorDisposalFailures = [];
+    cleanup(() => this.#cameraController.dispose(), "The private Camera could not be disposed.");
     cleanup(() => this.#scene?.dispose(), "The private Scene could not be disposed.");
     cleanup(() => this.#engine?.dispose(), "The private Engine could not be disposed.");
 
@@ -553,6 +633,13 @@ class RendererAdapterRuntime implements RendererAdapter {
     }
   }
 
+  #reportEditorDisposalFailure(detail: string, cause?: unknown): void {
+    if (this.#state !== "DISPOSING") return;
+    const failure = this.#createFailure("RESOURCE_DISPOSAL_FAILED", "recoverable", detail, cause);
+    this.#pendingEditorDisposalFailures.push(failure);
+    this.#recordFailure(failure);
+  }
+
   #rejected(
     category: RendererFailureCategory,
     classification: RendererFailure["classification"],
@@ -562,6 +649,16 @@ class RendererAdapterRuntime implements RendererAdapter {
     const failure = this.#createFailure(category, classification, detail, cause);
     this.#recordFailure(failure);
     return { accepted: false, failure };
+  }
+
+  #viewControlFailure(detail: string, cause?: unknown): RendererOperationResult {
+    if (this.#state === "DISPOSED" || this.#state === "DISPOSING") {
+      return {
+        accepted: false,
+        failure: this.#createFailure("VIEW_CONTROL_REJECTED", "recoverable", detail, cause),
+      };
+    }
+    return this.#rejected("VIEW_CONTROL_REJECTED", "recoverable", detail, cause);
   }
 
   #renderOwnedScene(): RendererOperationResult {
@@ -630,11 +727,7 @@ class RendererAdapterRuntime implements RendererAdapter {
     };
   }
 
-  #transition(next: RendererLifecycleState): void {
-    if (!allowedTransitions[this.#state].includes(next)) {
-      throw new Error(`Forbidden renderer lifecycle transition: ${this.#state} -> ${next}`);
-    }
-    this.#state = next;
+  #notifyStateListeners(next: RendererLifecycleState): void {
     for (const listener of this.#stateListeners) {
       try {
         listener(next);
@@ -643,10 +736,19 @@ class RendererAdapterRuntime implements RendererAdapter {
       }
     }
   }
+
+  #transition(next: RendererLifecycleState, notify = true): void {
+    if (!allowedTransitions[this.#state].includes(next)) {
+      throw new Error(`Forbidden renderer lifecycle transition: ${this.#state} -> ${next}`);
+    }
+    this.#state = next;
+    if (notify) this.#notifyStateListeners(next);
+  }
 }
 
 export function createRendererAdapter(): RendererAdapter {
   return new RendererAdapterRuntime({
+    cameraFactory: createBabylonCamera,
     engineFactory: createBabylonEngine,
     sceneFactory: createBabylonScene,
   });

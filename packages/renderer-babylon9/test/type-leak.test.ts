@@ -17,7 +17,7 @@ const publicEntries = ["index.ts", "editor.ts", "headless.ts"] as const;
 const exportSpecifierPattern = /export\s+(?:type\s+)?[^;]*?from\s+["']([^"']+)["']/gu;
 const babylonSpecifierPattern = /(?:from\s+|import\s*\()\s*["'](@babylonjs\/[^"']+)["']/gu;
 const forbiddenTypePattern =
-  /\b(?:Engine|WebGPUEngine|Scene|Mesh|TransformNode|AssetContainer|PickingInfo|UtilityLayerRenderer|GizmoManager|NullEngine|SceneInstrumentation)\b/u;
+  /\b(?:Engine|WebGPUEngine|Scene|Mesh|TransformNode|AssetContainer|PickingInfo|UtilityLayerRenderer|GizmoManager|NullEngine|SceneInstrumentation|ArcRotateCamera|FreeCamera|UniversalCamera|Vector3|Matrix|LinesMesh|Color3|Color4)\b/u;
 const forbiddenDomTypePattern =
   /\b(?:HTMLCanvasElement|OffscreenCanvas|CanvasRenderingContext2D|WebGLRenderingContext|WebGL2RenderingContext)\b/u;
 
@@ -124,7 +124,7 @@ function physicalPublicModules(): ReadonlyMap<string, string> {
   );
 }
 
-describe("RSM-6-I2 public type isolation", () => {
+describe("RSM-6-I3 public type isolation", () => {
   it("accepts all three physical public entry declaration graphs", () => {
     expect(scanPublicDeclarationGraph(physicalPublicModules(), publicEntries)).toEqual([]);
   });
@@ -146,6 +146,17 @@ describe("RSM-6-I2 public type isolation", () => {
     expect(scanPublicDeclarationGraph(synthetic, ["index.ts"])).toEqual([
       "DOM_PUBLIC_TYPE_LEAK:index.ts",
     ]);
+  });
+
+  it("rejects synthetic Babylon Camera, vector, matrix, line, and color types", () => {
+    for (const name of ["ArcRotateCamera", "Vector3", "Matrix", "LinesMesh", "Color3"]) {
+      expect(
+        scanPublicDeclarationGraph(
+          new Map([["index.ts", `export interface Leak { readonly value: ${name}; }`]]),
+          ["index.ts"],
+        ),
+      ).toEqual(["BABYLON_PUBLIC_TYPE_LEAK:index.ts"]);
+    }
   });
 
   it("accepts a private Babylon implementation import behind an explicit public seam", () => {

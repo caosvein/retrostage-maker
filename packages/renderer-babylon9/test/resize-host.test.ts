@@ -59,8 +59,13 @@ describe("RSM-6-I2 resize host", () => {
     const listeners = new Set<(extent: RendererExtent) => void>();
     const engine = new ResizeEngine();
     const adapter = createRendererAdapterForTests({
+      cameraFactory: () => ({ dispose: () => undefined, setProjection: () => undefined }),
       engineFactory: () => engine,
-      sceneFactory: () => ({ dispose: () => undefined, render: () => undefined }),
+      sceneFactory: () => ({
+        dispose: () => undefined,
+        nativeHandle: {},
+        render: () => undefined,
+      }),
       scheduleResize: (task) => tasks.push(task),
     });
 
@@ -113,8 +118,13 @@ describe("RSM-6-I2 resize host", () => {
     const listeners = new Set<(extent: RendererExtent) => void>();
     const engine = new ResizeEngine();
     const adapter = createRendererAdapterForTests({
+      cameraFactory: () => ({ dispose: () => undefined, setProjection: () => undefined }),
       engineFactory: () => engine,
-      sceneFactory: () => ({ dispose: () => undefined, render: () => undefined }),
+      sceneFactory: () => ({
+        dispose: () => undefined,
+        nativeHandle: {},
+        render: () => undefined,
+      }),
       scheduleResize: (task) => tasks.push(task),
     });
     await adapter.initialize(hostFixture(listeners, 5));

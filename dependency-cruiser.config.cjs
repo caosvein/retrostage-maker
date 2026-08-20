@@ -38,7 +38,7 @@ module.exports = {
       from: {
         path: "^packages/renderer-babylon9/src",
         pathNot:
-          "^packages/renderer-babylon9/src/(?:engine/babylon-engine-factory|scene/babylon-scene-factory)\\.ts$",
+          "^packages/renderer-babylon9/src/(?:engine/babylon-engine-factory|scene/babylon-scene-factory|camera/babylon-camera-factory|grid/babylon-grid-factory)\\.ts$",
       },
       to: { path: "^@babylonjs/" },
     },
@@ -46,7 +46,7 @@ module.exports = {
       name: "renderer-private-factories-may-import-only-babylon-core-root",
       severity: "error",
       from: {
-        path: "^packages/renderer-babylon9/src/(?:engine/babylon-engine-factory|scene/babylon-scene-factory)\\.ts$",
+        path: "^packages/renderer-babylon9/src/(?:engine/babylon-engine-factory|scene/babylon-scene-factory|camera/babylon-camera-factory|grid/babylon-grid-factory)\\.ts$",
       },
       to: { path: "^@babylonjs/(?!core$)" },
     },

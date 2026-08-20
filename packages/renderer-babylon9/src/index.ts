@@ -3,6 +3,7 @@ export { createRendererHostSurfaceCapability } from "./surface/host-capability.j
 
 export type {
   RendererAdapter,
+  RendererCameraProjection,
   RendererContextObservation,
   RendererDiagnosticSnapshot,
   RendererExtent,
@@ -28,4 +29,5 @@ export type {
   RendererStateListener,
   RendererTimingSnapshot,
   RendererUnsubscribe,
+  RendererVector3,
 } from "./contracts/public.js";
