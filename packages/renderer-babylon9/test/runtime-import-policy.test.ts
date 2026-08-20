@@ -17,12 +17,14 @@ const allowedBabylonFactories = new Set([
   "camera/babylon-camera-factory.ts",
   "engine/babylon-engine-factory.ts",
   "grid/babylon-grid-factory.ts",
+  "picking/babylon-picking-factory.ts",
   "scene/babylon-scene-factory.ts",
 ]);
 const exactBabylonBindings = new Map<string, readonly string[]>([
   ["camera/babylon-camera-factory.ts", ["ArcRotateCamera", "Vector3"]],
   ["engine/babylon-engine-factory.ts", ["Engine"]],
   ["grid/babylon-grid-factory.ts", ["Color3", "MeshBuilder", "Vector3"]],
+  ["picking/babylon-picking-factory.ts", ["PickingInfo"]],
   ["scene/babylon-scene-factory.ts", ["Scene"]],
 ]);
 const importPattern =
@@ -43,9 +45,8 @@ function scanRuntimeImports(modules: ReadonlyMap<string, string>): readonly stri
         } else if (specifier !== "@babylonjs/core") {
           issues.push(`BABYLON_FACTORY_SPECIFIER_FORBIDDEN:${path}:${specifier}`);
         } else {
-          const namedImport = /import\s*\{([^}]+)\}\s*from\s*["']@babylonjs\/core["']/u.exec(
-            match[0],
-          );
+          const namedImport =
+            /import\s+(?:type\s+)?\{([^}]+)\}\s*from\s*["']@babylonjs\/core["']/u.exec(match[0]);
           const observed =
             namedImport?.[1]
               ?.split(",")
@@ -77,8 +78,8 @@ function physicalRuntimeModules(): ReadonlyMap<string, string> {
   );
 }
 
-describe("RSM-6-I3 runtime import policy", () => {
-  it("accepts the physical exact four-factory Babylon core import surface", () => {
+describe("RSM-6-I4 runtime import policy", () => {
+  it("accepts the physical exact five-factory Babylon core import surface", () => {
     expect(scanRuntimeImports(physicalRuntimeModules())).toEqual([]);
   });
 
@@ -89,6 +90,7 @@ describe("RSM-6-I3 runtime import policy", () => {
       ["scene/babylon-scene-factory.ts", 'import "@babylonjs/loaders";'],
       ["scene/babylon-scene-factory.ts#materials", 'import "@babylonjs/materials";'],
       ["camera/babylon-camera-factory.ts", 'import { FreeCamera } from "@babylonjs/core";'],
+      ["picking/picking-controller.ts", 'import type { PickingInfo } from "@babylonjs/core";'],
     ]);
     expect(scanRuntimeImports(synthetic)).toEqual([
       "BABYLON_IMPORT_OUTSIDE_FACTORY:engine/renderer-adapter.ts:@babylonjs/core",
@@ -96,6 +98,7 @@ describe("RSM-6-I3 runtime import policy", () => {
       "BABYLON_FACTORY_SPECIFIER_FORBIDDEN:scene/babylon-scene-factory.ts:@babylonjs/loaders",
       "BABYLON_IMPORT_OUTSIDE_FACTORY:scene/babylon-scene-factory.ts#materials:@babylonjs/materials",
       "BABYLON_FACTORY_BINDINGS_INEXACT:camera/babylon-camera-factory.ts:FreeCamera",
+      "BABYLON_IMPORT_OUTSIDE_FACTORY:picking/picking-controller.ts:@babylonjs/core",
     ]);
   });
 

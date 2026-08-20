@@ -7,17 +7,29 @@ import type {
   RendererFailureListener,
   RendererHostSurface,
   RendererIntentListener,
+  RendererJsonValue,
   RendererLifecycleState,
   RendererOperationResult,
   RendererPickIntent,
+  RendererPickRequest,
   RendererProjectionInput,
+  RendererProjectionRevision,
   RendererProjectionResult,
+  RendererSelectionState,
   RendererStateListener,
   RendererUnsubscribe,
 } from "../contracts/public.js";
 import { createBabylonCamera } from "../camera/babylon-camera-factory.js";
 import { RendererCameraController } from "../camera/camera-controller.js";
 import type { RendererCameraFactory } from "../camera/camera-port.js";
+import { createBabylonPickObservation } from "../picking/babylon-picking-factory.js";
+import { RendererPickingController } from "../picking/picking-controller.js";
+import type { RendererPickingFactory } from "../picking/picking-port.js";
+import { RendererHandleRegistry } from "../registry/handle-registry.js";
+import type {
+  RendererHandleRegistrationEpoch,
+  RendererHandleRegistryBridge,
+} from "../registry/handle-port.js";
 import { createBabylonScene } from "../scene/babylon-scene-factory.js";
 import type { RendererSceneFactory, RendererScenePort } from "../scene/scene-port.js";
 import { RendererContextController } from "../surface/context-controller.js";
@@ -33,8 +45,10 @@ import type { RendererEngineFactory, RendererEnginePort } from "./engine-port.js
 export interface RendererAdapterRuntimeOptions {
   readonly cameraFactory: RendererCameraFactory;
   readonly engineFactory: RendererEngineFactory;
+  readonly pickingFactory?: RendererPickingFactory;
   readonly sceneFactory: RendererSceneFactory;
   readonly scheduleResize?: RendererResizeScheduler;
+  readonly selectionSnapshotObserverForTests?: (selection: RendererSelectionState | null) => void;
 }
 
 export interface RendererEditorBridge {
@@ -46,9 +60,16 @@ export interface RendererEditorBridge {
 }
 
 const editorBridges = new WeakMap<RendererAdapter, RendererEditorBridge>();
+const handleBridges = new WeakMap<RendererAdapter, RendererHandleRegistryBridge>();
 
 export function resolveRendererEditorBridge(adapter: RendererAdapter): RendererEditorBridge | null {
   return editorBridges.get(adapter) ?? null;
+}
+
+export function resolveRendererHandleBridge(
+  adapter: RendererAdapter,
+): RendererHandleRegistryBridge | null {
+  return handleBridges.get(adapter) ?? null;
 }
 
 const emptyFailureCounts = (): Record<RendererFailureCategory, number> => ({
@@ -108,12 +129,95 @@ function isUsableHost(host: RendererHostSurface): boolean {
   );
 }
 
+type RendererJsonCopyResult =
+  | { readonly valid: true; readonly value: RendererJsonValue }
+  | { readonly valid: false };
+
+function copyRendererJsonValue(
+  value: unknown,
+  ancestors: Set<object> = new Set(),
+): RendererJsonCopyResult {
+  if (value === null || typeof value === "boolean" || typeof value === "string") {
+    return { valid: true, value };
+  }
+  if (typeof value === "number") {
+    return Number.isFinite(value) ? { valid: true, value } : { valid: false };
+  }
+  if (typeof value !== "object" || ancestors.has(value)) return { valid: false };
+
+  ancestors.add(value);
+  if (Array.isArray(value)) {
+    const copy: RendererJsonValue[] = [];
+    for (const item of value) {
+      const result = copyRendererJsonValue(item, ancestors);
+      if (!result.valid) {
+        ancestors.delete(value);
+        return result;
+      }
+      copy.push(result.value);
+    }
+    ancestors.delete(value);
+    return { valid: true, value: Object.freeze(copy) };
+  }
+
+  const prototype = Object.getPrototypeOf(value) as unknown;
+  if (prototype !== Object.prototype && prototype !== null) {
+    ancestors.delete(value);
+    return { valid: false };
+  }
+  const copy: Record<string, RendererJsonValue> = Object.create(null) as Record<
+    string,
+    RendererJsonValue
+  >;
+  for (const [key, item] of Object.entries(value)) {
+    const result = copyRendererJsonValue(item, ancestors);
+    if (!result.valid) {
+      ancestors.delete(value);
+      return result;
+    }
+    copy[key] = result.value;
+  }
+  ancestors.delete(value);
+  return { valid: true, value: Object.freeze(copy) };
+}
+
+function copyRendererSelectionState(value: unknown): RendererSelectionState | null {
+  if (typeof value !== "object" || value === null) return null;
+  const candidate = value as Partial<RendererSelectionState>;
+  if (!Array.isArray(candidate.selectedIds)) return null;
+
+  const selectedIds: string[] = [];
+  const seen = new Set<string>();
+  for (const stableId of candidate.selectedIds) {
+    if (typeof stableId !== "string" || stableId.length === 0 || seen.has(stableId)) return null;
+    seen.add(stableId);
+    selectedIds.push(stableId);
+  }
+  if (
+    candidate.primaryId !== null &&
+    (typeof candidate.primaryId !== "string" ||
+      candidate.primaryId.length === 0 ||
+      !seen.has(candidate.primaryId))
+  ) {
+    return null;
+  }
+  const toolIntent = copyRendererJsonValue(candidate.toolIntent);
+  if (!toolIntent.valid) return null;
+  return Object.freeze({
+    primaryId: candidate.primaryId,
+    selectedIds: Object.freeze(selectedIds),
+    toolIntent: toolIntent.value,
+  });
+}
+
 class RendererAdapterRuntime implements RendererAdapter {
   readonly #cameraController: RendererCameraController;
   readonly #contextController = new RendererContextController();
   readonly #engineFactory: RendererEngineFactory;
   readonly #failureCounts = emptyFailureCounts();
   readonly #failureListeners = new Set<RendererFailureListener>();
+  readonly #handleRegistry = new RendererHandleRegistry();
+  readonly #pickingController: RendererPickingController;
   readonly #pickListeners = new Set<RendererIntentListener<RendererPickIntent>>();
   readonly #renderLoop = (): void => {
     if (!this.#renderLoopActive || this.#state !== "RUNNING") return;
@@ -121,11 +225,15 @@ class RendererAdapterRuntime implements RendererAdapter {
   };
   readonly #sceneFactory: RendererSceneFactory;
   readonly #scheduleResize: RendererResizeScheduler;
+  readonly #selectionSnapshotObserverForTests:
+    | ((selection: RendererSelectionState | null) => void)
+    | null;
   readonly #stateListeners = new Set<RendererStateListener>();
   #adapterGeneration = 0;
   #contextState: RendererDiagnosticSnapshot["contextState"] = "unavailable";
   #correlationIds: string[] = [];
   #disposalStarted = false;
+  #derivedSelection: RendererSelectionState | null = null;
   #engine: RendererEnginePort | null = null;
   #framesRendered = 0;
   #hostGeneration: number | null = null;
@@ -139,8 +247,13 @@ class RendererAdapterRuntime implements RendererAdapter {
   constructor(options: RendererAdapterRuntimeOptions) {
     this.#cameraController = new RendererCameraController(options.cameraFactory);
     this.#engineFactory = options.engineFactory;
+    this.#pickingController = new RendererPickingController(
+      this.#handleRegistry,
+      options.pickingFactory,
+    );
     this.#sceneFactory = options.sceneFactory;
     this.#scheduleResize = options.scheduleResize ?? scheduleRendererResize;
+    this.#selectionSnapshotObserverForTests = options.selectionSnapshotObserverForTests ?? null;
     editorBridges.set(this, {
       getLifecycleState: () => this.#state,
       getScene: () => this.#scene,
@@ -149,6 +262,14 @@ class RendererAdapterRuntime implements RendererAdapter {
         this.#reportEditorDisposalFailure(detail, cause);
       },
       reportViewControlFailure: (detail, cause) => this.#viewControlFailure(detail, cause),
+    });
+    handleBridges.set(this, {
+      captureRegistrationEpoch: (revision) =>
+        this.#handleRegistry.captureRegistrationEpoch(revision),
+      registerHandle: (stableId, handle, epoch) => this.#registerHandle(stableId, handle, epoch),
+      unregisterHandle: (handle, epoch) => {
+        this.#handleRegistry.unregisterHandle(handle, epoch);
+      },
     });
   }
 
@@ -297,6 +418,53 @@ class RendererAdapterRuntime implements RendererAdapter {
     return this.#subscribe(this.#pickListeners, listener);
   }
 
+  pick(request: RendererPickRequest): RendererOperationResult {
+    const correlationId =
+      typeof request === "object" &&
+      request !== null &&
+      typeof request.correlationId === "string" &&
+      request.correlationId.length > 0
+        ? request.correlationId
+        : null;
+    if (this.#state === "DISPOSING" || this.#state === "DISPOSED") {
+      return {
+        accepted: false,
+        failure: this.#createFailure(
+          "PICK_RESOLUTION_FAILED",
+          "recoverable",
+          "Picking is unavailable after renderer disposal begins.",
+          undefined,
+          correlationId,
+        ),
+      };
+    }
+    if (this.#state !== "RUNNING" || this.#scene === null || this.#latestProjection === null) {
+      return this.#pickRejected(
+        "Picking requires a RUNNING adapter with a current Scene and projection.",
+        undefined,
+        correlationId,
+      );
+    }
+
+    const result = this.#pickingController.pick(
+      this.#scene.nativeHandle,
+      request,
+      this.#latestProjection.revision,
+      this.#adapterGeneration,
+    );
+    if (!result.accepted) {
+      return this.#pickRejected(result.detail, result.cause, correlationId);
+    }
+    for (const listener of this.#pickListeners) {
+      try {
+        listener(result.intent);
+      } catch {
+        // External listeners have no authority to break pick translation.
+      }
+    }
+    return { accepted: true };
+  }
+
   project(input: RendererProjectionInput): Promise<RendererProjectionResult> {
     if (!this.#acceptsProjection()) {
       const failure = this.#createFailure(
@@ -307,10 +475,30 @@ class RendererAdapterRuntime implements RendererAdapter {
       this.#recordFailure(failure);
       return Promise.resolve({ failure, status: "rejected" });
     }
-    if (this.#latestProjection?.revision === input.revision) {
+    let activated = false;
+    let revision: RendererProjectionRevision | null = null;
+    try {
+      revision = input.revision;
+      activated = this.#handleRegistry.activateRevision(
+        revision,
+        this.#adapterGeneration,
+        input.stableIds,
+      );
+    } catch {
+      activated = false;
+    }
+    if (!activated || revision === null) {
+      const failure = this.#createFailure(
+        "PROJECTION_REJECTED_OR_STALE",
+        "recoverable",
+        "The projection stable identities or registry epoch are invalid.",
+      );
+      this.#recordFailure(failure);
+      return Promise.resolve({ failure, status: "rejected" });
+    }
+    if (this.#latestProjection?.revision === revision) {
       return Promise.resolve({ status: "duplicate-no-op" });
     }
-
     this.#latestProjection = input;
     return Promise.resolve({ status: "accepted-current" });
   }
@@ -372,6 +560,37 @@ class RendererAdapterRuntime implements RendererAdapter {
     } catch (cause) {
       return this.#viewControlFailure("The private Camera projection operation failed.", cause);
     }
+  }
+
+  setSelection(selection: RendererSelectionState): RendererOperationResult {
+    if (this.#state === "DISPOSING" || this.#state === "DISPOSED") {
+      return {
+        accepted: false,
+        failure: this.#createFailure(
+          "RENDERER_INTERNAL_FAILURE",
+          "recoverable",
+          "Derived selection is unavailable after renderer disposal begins.",
+        ),
+      };
+    }
+    if (!this.#acceptsProjection()) {
+      return this.#rejected(
+        "RENDERER_INTERNAL_FAILURE",
+        "recoverable",
+        "Derived selection requires READY, RUNNING, or SUSPENDED_CONTEXT_LOSS state.",
+      );
+    }
+    const snapshot = copyRendererSelectionState(selection);
+    if (snapshot === null) {
+      return this.#rejected(
+        "RENDERER_INTERNAL_FAILURE",
+        "recoverable",
+        "The derived selection state is invalid or not JSON-safe.",
+      );
+    }
+    this.#derivedSelection = snapshot;
+    this.#observeSelectionSnapshot(snapshot);
+    return { accepted: true };
   }
 
   start(): Promise<RendererOperationResult> {
@@ -482,17 +701,41 @@ class RendererAdapterRuntime implements RendererAdapter {
     this.#contextState = "unavailable";
   }
 
+  #registerHandle(
+    stableId: string,
+    handle: object,
+    epoch: RendererHandleRegistrationEpoch,
+  ): boolean {
+    const accepted = this.#handleRegistry.registerHandle(stableId, handle, epoch);
+    if (
+      !accepted &&
+      this.#state !== "DISPOSING" &&
+      this.#state !== "DISPOSED" &&
+      !this.#disposalStarted
+    ) {
+      this.#recordFailure(
+        this.#createFailure(
+          "PICK_RESOLUTION_FAILED",
+          "recoverable",
+          "A private native handle registration was rejected by the current registry epoch.",
+        ),
+      );
+    }
+    return accepted;
+  }
+
   #createFailure(
     category: RendererFailureCategory,
     classification: RendererFailure["classification"],
     detail: string,
     cause?: unknown,
+    correlationId: string | null = null,
   ): RendererFailure {
     return {
       category,
       cause: causeSummary(cause),
       classification,
-      correlationId: null,
+      correlationId,
       detail,
       lifecycleState: this.#state,
       messageId: `renderer.${category.toLowerCase()}`,
@@ -515,6 +758,15 @@ class RendererAdapterRuntime implements RendererAdapter {
       case "NEW":
       case "DISPOSED":
         return "unavailable";
+    }
+  }
+
+  #observeSelectionSnapshot(selection: RendererSelectionState | null): void {
+    if (this.#selectionSnapshotObserverForTests === null) return;
+    try {
+      this.#selectionSnapshotObserverForTests(selection);
+    } catch {
+      // A test observer has no authority to change renderer-owned derived state.
     }
   }
 
@@ -581,6 +833,10 @@ class RendererAdapterRuntime implements RendererAdapter {
   #performDisposal(): readonly RendererFailure[] {
     const failures: RendererFailure[] = [];
     this.#transition("DISPOSING", false);
+    this.#pickingController.dispose();
+    this.#handleRegistry.dispose();
+    this.#derivedSelection = null;
+    this.#observeSelectionSnapshot(null);
 
     const cleanup = (operation: () => void, detail: string): void => {
       try {
@@ -647,6 +903,22 @@ class RendererAdapterRuntime implements RendererAdapter {
     cause?: unknown,
   ): RendererOperationResult {
     const failure = this.#createFailure(category, classification, detail, cause);
+    this.#recordFailure(failure);
+    return { accepted: false, failure };
+  }
+
+  #pickRejected(
+    detail: string,
+    cause?: unknown,
+    correlationId: string | null = null,
+  ): RendererOperationResult {
+    const failure = this.#createFailure(
+      "PICK_RESOLUTION_FAILED",
+      "recoverable",
+      detail,
+      cause,
+      correlationId,
+    );
     this.#recordFailure(failure);
     return { accepted: false, failure };
   }
@@ -750,6 +1022,7 @@ export function createRendererAdapter(): RendererAdapter {
   return new RendererAdapterRuntime({
     cameraFactory: createBabylonCamera,
     engineFactory: createBabylonEngine,
+    pickingFactory: createBabylonPickObservation,
     sceneFactory: createBabylonScene,
   });
 }

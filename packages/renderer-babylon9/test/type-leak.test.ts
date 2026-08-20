@@ -17,7 +17,7 @@ const publicEntries = ["index.ts", "editor.ts", "headless.ts"] as const;
 const exportSpecifierPattern = /export\s+(?:type\s+)?[^;]*?from\s+["']([^"']+)["']/gu;
 const babylonSpecifierPattern = /(?:from\s+|import\s*\()\s*["'](@babylonjs\/[^"']+)["']/gu;
 const forbiddenTypePattern =
-  /\b(?:Engine|WebGPUEngine|Scene|Mesh|TransformNode|AssetContainer|PickingInfo|UtilityLayerRenderer|GizmoManager|NullEngine|SceneInstrumentation|ArcRotateCamera|FreeCamera|UniversalCamera|Vector3|Matrix|LinesMesh|Color3|Color4)\b/u;
+  /\b(?:Engine|WebGPUEngine|Scene|Mesh|AbstractMesh|TransformNode|Ray|AssetContainer|PickingInfo|UtilityLayerRenderer|GizmoManager|NullEngine|SceneInstrumentation|ArcRotateCamera|FreeCamera|UniversalCamera|Vector3|Matrix|LinesMesh|Color3|Color4)\b/u;
 const forbiddenDomTypePattern =
   /\b(?:HTMLCanvasElement|OffscreenCanvas|CanvasRenderingContext2D|WebGLRenderingContext|WebGL2RenderingContext)\b/u;
 
@@ -124,7 +124,7 @@ function physicalPublicModules(): ReadonlyMap<string, string> {
   );
 }
 
-describe("RSM-6-I3 public type isolation", () => {
+describe("RSM-6-I4 public type isolation", () => {
   it("accepts all three physical public entry declaration graphs", () => {
     expect(scanPublicDeclarationGraph(physicalPublicModules(), publicEntries)).toEqual([]);
   });
@@ -156,6 +156,35 @@ describe("RSM-6-I3 public type isolation", () => {
           ["index.ts"],
         ),
       ).toEqual(["BABYLON_PUBLIC_TYPE_LEAK:index.ts"]);
+    }
+  });
+
+  it("rejects every I4 Babylon picking implementation type", () => {
+    for (const name of ["PickingInfo", "AbstractMesh", "TransformNode", "Ray"]) {
+      expect(
+        scanPublicDeclarationGraph(
+          new Map([["index.ts", `export interface Leak { readonly nativePickValue: ${name}; }`]]),
+          ["index.ts"],
+        ),
+      ).toEqual(["BABYLON_PUBLIC_TYPE_LEAK:index.ts"]);
+    }
+  });
+
+  it("keeps private registry, picking ports, and native-handle bridges out of entry sources", () => {
+    const modules = physicalPublicModules();
+    for (const entry of publicEntries) {
+      const source = modules.get(entry) ?? "";
+      for (const forbidden of [
+        "RendererHandleRegistry",
+        "RendererHandleRegistryBridge",
+        "RendererPickingFactory",
+        "RendererRawPickObservation",
+        "registerHandle",
+        "unregisterHandle",
+        "nativeHandle",
+      ]) {
+        expect(source.includes(forbidden)).toEqual(false);
+      }
     }
   });
 

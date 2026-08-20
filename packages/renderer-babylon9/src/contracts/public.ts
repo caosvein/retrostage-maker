@@ -81,6 +81,17 @@ export interface RendererInputModifiers {
   readonly shift: boolean;
 }
 
+export interface RendererViewportPoint {
+  readonly x: number;
+  readonly y: number;
+}
+
+export interface RendererPickRequest {
+  readonly correlationId: string;
+  readonly modifiers: RendererInputModifiers;
+  readonly normalizedPosition: RendererViewportPoint;
+}
+
 export interface RendererPickIntent {
   readonly classification: string;
   readonly correlationId: string;
@@ -189,10 +200,12 @@ export interface RendererAdapter {
   onFailure(listener: RendererFailureListener): RendererUnsubscribe;
   onLifecycleState(listener: RendererStateListener): RendererUnsubscribe;
   onPickIntent(listener: RendererIntentListener<RendererPickIntent>): RendererUnsubscribe;
+  pick(request: RendererPickRequest): RendererOperationResult;
   project(input: RendererProjectionInput): Promise<RendererProjectionResult>;
   render(): RendererOperationResult;
   resize(): RendererOperationResult;
   resetView(): RendererOperationResult;
   setCameraProjection(projection: RendererCameraProjection): RendererOperationResult;
+  setSelection(selection: RendererSelectionState): RendererOperationResult;
   start(): Promise<RendererOperationResult>;
 }

@@ -79,7 +79,15 @@ const editorGridModules = new Set([
   "grid/grid-port.ts",
 ]);
 
-describe("RSM-6-I3 public entry isolation", () => {
+const privateI4Modules = new Set([
+  "picking/babylon-picking-factory.ts",
+  "picking/picking-controller.ts",
+  "picking/picking-port.ts",
+  "registry/handle-port.ts",
+  "registry/handle-registry.ts",
+]);
+
+describe("RSM-6-I4 public entry isolation", () => {
   it("keeps the physical default/player graph isolated from editor, headless, and Grid", () => {
     expect(
       scanForbiddenReachability(
@@ -103,6 +111,22 @@ describe("RSM-6-I3 public entry isolation", () => {
       "FORBIDDEN_ENTRY_REACHABLE:editor.ts:grid/grid-controller.ts",
       "FORBIDDEN_ENTRY_REACHABLE:editor.ts:grid/babylon-grid-factory.ts",
     ]);
+  });
+
+  it("allows root reachability while editor/headless have no direct private I4 edge", () => {
+    const modules = physicalModules();
+    const rootReachability = scanForbiddenReachability(modules, "index.ts", privateI4Modules);
+    for (const modulePath of privateI4Modules) {
+      expect(rootReachability).toContain(`FORBIDDEN_ENTRY_REACHABLE:index.ts:${modulePath}`);
+    }
+    for (const entry of ["editor.ts", "headless.ts"]) {
+      const source = modules.get(entry) ?? "";
+      expect(source).not.toContain("./picking/");
+      expect(source).not.toContain("./registry/");
+      expect(source).not.toContain("registerHandle");
+      expect(source).not.toContain("unregisterHandle");
+      expect(source).not.toContain("nativeHandle");
+    }
   });
 
   it("publishes only the three intentional package entry surfaces", () => {
@@ -129,6 +153,20 @@ describe("RSM-6-I3 public entry isolation", () => {
     ]);
     expect(scanForbiddenReachability(synthetic, "index.ts", new Set(["editor.ts"]))).toEqual([
       "FORBIDDEN_ENTRY_REACHABLE:index.ts:editor.ts",
+    ]);
+  });
+
+  it("rejects synthetic editor/headless edges to private picking runtime", () => {
+    const synthetic = new Map([
+      ["editor.ts", 'export { pick } from "./picking/picking-controller.js";'],
+      ["headless.ts", 'export { pick } from "./picking/picking-controller.js";'],
+      ["picking/picking-controller.ts", "export const pick = true;"],
+    ]);
+    expect(scanForbiddenReachability(synthetic, "editor.ts", privateI4Modules)).toEqual([
+      "FORBIDDEN_ENTRY_REACHABLE:editor.ts:picking/picking-controller.ts",
+    ]);
+    expect(scanForbiddenReachability(synthetic, "headless.ts", privateI4Modules)).toEqual([
+      "FORBIDDEN_ENTRY_REACHABLE:headless.ts:picking/picking-controller.ts",
     ]);
   });
 });
