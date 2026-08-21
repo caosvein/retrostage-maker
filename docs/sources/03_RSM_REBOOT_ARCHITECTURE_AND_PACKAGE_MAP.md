@@ -5,8 +5,8 @@
 **Project:** RetroStage Maker  
 **Distribution intent:** Commercial proprietary desktop creator distributed through Steam and other approved Windows channels  
 **Source generation:** Reboot / clean-start  
-**Document date:** 2026-08-14  
-**Document state:** `APPROVED PLANNED ARCHITECTURE / RSM-5 CLOSURE-ALIGNED / PRE-RSM-6 RENDERER AND TOOLING BOUNDARIES CLARIFIED`  
+**Document date:** 2026-08-21  
+**Document state:** `APPROVED ARCHITECTURE / RSM-6 PHYSICAL IMPLEMENTATION ALIGNED / CLOSE1 SOURCE-CANDIDATE CURRENT CONTROL`  
 **Repository:** `PRESENT — C:\RetroStage\retrostage-maker`  
 **Primary branch:** `main`  
 **Governing charter:** `00_RSM_REBOOT_PROJECT_CHARTER.md`  
@@ -20,7 +20,7 @@
 
 ## 1. Purpose
 
-This document translates the approved reboot charter, technology contract, canonical roadmap, and durable product decisions into a planned application and package architecture.
+This document translates the approved reboot charter, technology contract, canonical roadmap, and durable product decisions into target application/package architecture and records the physically accepted RSM-6 subset where repository evidence now exists.
 
 It defines:
 
@@ -92,18 +92,18 @@ Current durable truth:
 
 ```text
 Repository foundation: ESTABLISHED BY CLOSED RSM-3
-Product architecture implementation: MILESTONE-GATED / NOT IMPLIED BY THIS SOURCE
+Product architecture implementation: MILESTONE-GATED; ONLY PHYSICALLY ACCEPTED SUBSETS ARE CURRENT
 Current implementation truth: repository inspection + Source 02/08
-Implemented reboot product applications: NONE
-Implemented reboot product packages: NONE
+Implemented reboot product application subset: apps/editor-electron secure shell + real renderer viewport
+Implemented reboot product package subset: @retrostage/renderer-babylon9 plus its admitted supporting contracts
 Approved application direction: Electron editor + separate Electron player
 Approved renderer direction: Babylon.js 9 adapter
 Approved language direction: TypeScript
 Approved canonical authority: RetroStage-owned documents and typed commands
-Package topology status: PLANNED, NOT IMPLEMENTED
+Package topology status: TARGET MAP WITH RSM-6 PHYSICAL SUBSET PROVEN
 ```
 
-Every package name in this document is a planned ownership boundary.
+Package names outside the physical subset remain planned ownership boundaries. The accepted RSM-6 repository, public entrypoints, tests, lockfile, and V1 evidence prove `@retrostage/renderer-babylon9` as a real package; they do not make later target packages or capabilities real.
 
 A package becomes real only when all of the following exist:
 
@@ -1162,21 +1162,28 @@ Concrete adapters are injected by the application composition root.
 
 **Class:** `ADAPTER / BROWSER_SAFE / PLAYER_RUNTIME_SAFE / DERIVED_VIEW`
 
-**Owns:**
+**Physically accepted through RSM-6:**
 
 - Babylon engine and scene lifecycle,
-- Preview and runtime scene projections,
+- public default, editor-only, and headless entrypoints,
+- one-way renderer projection revisions and lifecycle-safe resource epochs,
 - stable-ID ↔ transient Babylon-handle registries,
 - selection/picking adapters that translate Babylon hits into RetroStage identity/intents,
-- camera/controller, light, material, texture, animation, and particle projection,
+- camera/controller projection and editor-only XZ grid ownership,
 - `AssetContainer`-based derived asset/resource ownership,
-- `UtilityLayerRenderer` and render-classification mapping for world/editor-overlay/gizmo/selection/debug/capture surfaces,
-- `GizmoManager` integration seams without command or canonical-mutation authority,
+- `UtilityLayerRenderer` and `GizmoManager` integration without command or canonical-mutation authority,
 - explicit renderer resource lifetime and disposal,
-- `NullEngine` headless adapter-conformance support,
-- `SceneInstrumentation` capture behind RetroStage diagnostics contracts,
-- Frame Graph/presentation backend seams and later implementations,
-- development-only Babylon Inspector UI/CLI diagnostic adapters.
+- real `NullEngine` headless adapter-conformance support,
+- `SceneInstrumentation` and `EngineInstrumentation` capture behind frozen JSON-safe RetroStage diagnostics contracts,
+- the plain-TypeScript Electron `ViewportView` host seam through `apps/editor-electron`.
+
+**Later ownership reserved by this map, not implemented by RSM-6:**
+
+- canonical scene/project projection driven by RSM-7+ documents,
+- lights, materials, textures, animation, particles, selection visualization, capture, and presentation backends,
+- Frame Graph and advanced post-processing,
+- development-only Inspector adapters if separately admitted,
+- player/export integration and later runtime/content milestones.
 
 **May depend on:**
 
@@ -1609,10 +1616,10 @@ Babylon.js 9 is the sole approved renderer/runtime adapter, but it is not the pr
 
 ### Babylon adapter responsibilities
 
-- initialize Engine/WebGPUEngine according to approved compatibility policy,
+- initialize the admitted Babylon Engine or real headless `NullEngine` according to the public entrypoint,
 - own Babylon Scene lifecycle,
-- project RetroStage transforms and renderable components,
-- load approved cooked assets,
+- accept derived projection contracts without owning canonical documents,
+- load only self-contained supported glTF 2.0/GLB sources through the admitted loader seam,
 - manage Babylon resource creation and disposal,
 - map stable RetroStage IDs to transient Babylon objects,
 - route Babylon picking through RetroStage identity/selection adapters,
@@ -1621,8 +1628,8 @@ Babylon.js 9 is the sole approved renderer/runtime adapter, but it is not the pr
 - integrate `GizmoManager` only behind RetroStage selection/command/validation authority,
 - provide a `NullEngine`-based headless conformance backend for projection/lifecycle tests,
 - expose `SceneInstrumentation` only through RetroStage diagnostics snapshots,
-- implement camera, lighting, fog, materials, animation, particles, and presentation adapters,
-- keep Inspector UI/headless CLI connectivity development-only and removable from production bundles,
+- implement the accepted camera/editor-grid foundation while later lighting, fog, materials, animation, particles, and presentation work remains milestone-owned,
+- keep Inspector absent unless a later development-only admission explicitly authorizes it,
 - prefer narrow ESM imports and tree-shakable Babylon entrypoints,
 - reserve Frame Graph/presentation seams without making Babylon graph structure canonical,
 - support Preview, PIE, and player runtime modes without sharing forbidden state.
@@ -1638,14 +1645,13 @@ RetroStage canonical/render contracts
         ├─ picking adapter
         ├─ AssetContainer lifecycle
         ├─ UtilityLayerRenderer / render-classification seam
-        ├─ GizmoManager seam
+        ├─ GizmoManager intent seam
         ├─ NullEngine conformance backend
-        ├─ SceneInstrumentation → RetroStage diagnostics
-        ├─ InspectorDevBridge (DEVELOPMENT_ONLY)
-        └─ FrameGraphBackend seam
+        ├─ Scene/Engine instrumentation → RetroStage diagnostics
+        └─ real Electron ViewportView host seam
 ```
 
-The implementation may use Babylon facilities heavily inside the adapter as long as the public/canonical side of the boundary remains RetroStage-owned.
+This map is physically implemented for the listed RSM-6 foundation primitives. Inspector and Frame Graph are not part of the accepted RSM-6 implementation. The adapter may use admitted Babylon facilities internally as long as its public/canonical side remains RetroStage-owned.
 
 ### Babylon adapter prohibitions
 
@@ -2743,27 +2749,18 @@ Deferred future topology
 
 ## 44. Immediate Handoff
 
-The next source to prepare is:
+Current architecture handoff:
 
 ```text
-04_RSM_REBOOT_ENGINEERING_AND_REVIEW_WORKFLOW.md
+RSM-6 I1-I8 = CLOSED / ACCEPTED
+RSM-6-V1 = CLOSED / PASS
+implementation baseline = dbd3f2be31d89ca36a17ccb4914e21623df424a2
+current control = RSM-6-CLOSE1-SOURCE1 source candidate
+terminal RSM-6 closure = not yet claimed
+RSM-7 = next milestone / not authorized
 ```
 
-That source must define:
-
-- source-reading order,
-- one-active-task discipline,
-- milestone subphase model,
-- audit/contract/readiness/implementation/validation/closure flow,
-- baseline and repository-cleanliness requirements,
-- coding-agent prompt and evidence expectations,
-- review classifications,
-- commit and post-commit verification,
-- dependency and architecture review gates,
-- restore and reproducibility checks,
-- how partial work, blockers, corrections, and handoffs are recorded.
-
-After the workflow source, the current-state and active-milestone sources can be created without pretending that a repository already exists.
+The accepted physical implementation includes the renderer contract/public entries, lifecycle/context safety, camera/editor grid, stable handle epochs and picking, derived asset containers, headless diagnostics, editor gizmo intents, and real Electron viewport. Independent review and publication of the source candidate must precede any terminal RSM-6 closure statement. This alignment does not authorize canonical RSM-7 document work.
 
 ---
 

@@ -5,8 +5,8 @@
 **Project:** RetroStage Maker  
 **Distribution intent:** Commercial proprietary desktop creator distributed through Steam and other approved Windows channels  
 **Source generation:** Reboot / clean-start  
-**Document date:** 2026-08-14  
-**Document state:** `ACTIVE DECISION REGISTRY / RSM-5 CLOSURE-ALIGNED / PRE-RSM-6 RENDERER AND ENGINEERING-ACCELERATION DECISIONS CLARIFIED`  
+**Document date:** 2026-08-21  
+**Document state:** `ACTIVE DECISION REGISTRY / RSM-6 ACCEPTED OUTCOMES ALIGNED / CLOSE1 SOURCE-CANDIDATE CURRENT CONTROL`  
 **Repository:** `ESTABLISHED — current physical truth belongs to repository inspection and Source 02/07`  
 **Primary branch:** `main`  
 **Governing charter:** `00_RSM_REBOOT_PROJECT_CHARTER.md`  
@@ -70,7 +70,7 @@ Approved technology direction: Babylon.js 9 + Electron
 Historical pre-loss sources: AVAILABLE FOR DESIGN EVIDENCE ONLY
 ```
 
-Current lifecycle truth is `RSM-3 CLOSED / POST-RSM-3 PRODUCT STRATEGY ALIGNMENT PASS`. The repository foundation is established on `main`; repository inspection and Source 02/07 govern physical truth. No decision in this registry implies that milestone-gated product implementation exists.
+Current lifecycle truth is `RSM-6 I1-I8 CLOSED / RSM-6-V1 CLOSED-PASS / CLOSE1 SOURCE-CANDIDATE CURRENT CONTROL`. The accepted implementation baseline is `dbd3f2be31d89ca36a17ccb4914e21623df424a2`; repository inspection and Source 02/08 govern physical truth. Only the specifically accepted RSM-6 outcomes recorded below are implementation facts. No other decision in this registry implies that milestone-gated product implementation exists.
 
 No decision in this document proves that corresponding code, UI, tests, assets, packages, build artifacts, or exported games currently exist.
 
@@ -804,6 +804,12 @@ RetroStage canonical truth
 → validated renderer projection
 → Babylon derived runtime state
 ```
+
+### Accepted RSM-6 outcome
+
+The physical `@retrostage/renderer-babylon9` implementation now establishes the contract/public-entry foundation; one Engine/Scene/render-loop lifecycle with context safety; camera and editor-only grid controls; adapter-scoped handle epochs and pick intents; self-contained glTF 2.0/GLB `AssetContainer` ownership; real `NullEngine` headless conformance with frozen diagnostics; editor-only UtilityLayer/Gizmo intent ownership; and a real Electron `ViewportView`.
+
+These are derived renderer capabilities. Picks do not mutate canonical selection; gizmos emit intent sequences and restore native baselines rather than committing canonical transforms; loaded handles share caller-supplied stable IDs; assets and Babylon objects remain disposable; diagnostics expose JSON-safe values rather than native objects. Canonical documents, commands, persistence, undo/redo, gameplay, player/export, product hierarchy/Inspector UI, advanced materials, and Frame Graph runtime remain deferred to their owning milestones.
 
 ### Consequence
 
@@ -2407,7 +2413,7 @@ The following directions are approved but must wait for their owning milestones.
 |---|---|---:|---|
 | Undo/redo and command history | Deferred implementation | RSM-31 | Requires stable canonical commands |
 | Workspace index and SQLite cache | Deferred implementation | RSM-33 | Requires stable storage and reference contracts |
-| Camera authoring toolkit | Deferred implementation | RSM-42 | Requires runtime camera profiles and transform conventions |
+| Camera authoring toolkit and user navigation | Deferred implementation | RSM-42 | RSM-6 provides only renderer projection/reset foundations; canonical camera profiles and navigation remain future work |
 | Retro presentation profiles | Deferred implementation | RSM-44 | Requires renderer adapter and profile documents |
 | Audio foundation | Deferred implementation | RSM-45 | Requires PIE lifecycle and asset direction |
 | Liminal scene-flow systems | Deferred implementation | RSM-40 / 57 / 64 | Requires scene, event, transform, and runtime contracts |
@@ -2415,7 +2421,7 @@ The following directions are approved but must wait for their owning milestones.
 | AI, stealth, combat | Deferred implementation | RSM-60–62 | Requires navigation, runtime lifecycle, and diagnostics |
 | Runtime save and profiles | Deferred implementation | RSM-65–66 | Requires serializable-state policy |
 | Asset registry and Content Browser | Deferred implementation | RSM-73–74 | Requires stable project/storage/index foundations |
-| glTF pipeline | Deferred implementation | RSM-75 | Requires asset identity and job system |
+| Full glTF import/cook/reimport pipeline | Deferred implementation | RSM-75 | RSM-6 admits only self-contained derived runtime loading; canonical asset identity, jobs, cooking, source management, and reimport remain future work |
 | Texture and sprite pipeline | Deferred implementation | RSM-76 | Requires content semantics and conditional-tool audit |
 | Material/LookDev | Deferred implementation | RSM-83 | Requires assets and presentation runtime |
 | Animation and VFX | Deferred implementation | RSM-84–86 | Requires resource and authoring foundations |
@@ -2501,11 +2507,13 @@ Rationale:
 - Zod is not selected because RetroStage already owns the TypeBox/Ajv runtime-schema direction; parallel schema authorities would increase drift risk.
 - Storybook itself is only a conditional workbench. Addons are not inherited wholesale; each addon may introduce separate dependencies, telemetry, browser binaries, or licenses.
 
-### 85.4 Pre-RSM-6 dependency-surface freeze
+### 85.4 Dependency-surface freeze and accepted RSM-6 graph
 
 After this clarification, no new third-party library should be added to canonical planning merely because it is popular or convenient. New additions require an owning milestone, a concrete reduction in code/error/maintenance cost, license/transitive evidence, and an explicit authority boundary.
 
 This freeze does not prevent future admissions; it prevents speculative dependency accumulation.
+
+RSM-6 admits exactly `@babylonjs/core@9.21.2` and `@babylonjs/loaders@9.21.2` as renderer runtime dependencies, plus `babylonjs-gltf2interface@9.21.2` only as a declaration-only package-local development/build strict-peer provider. Inspector, materials, serializers, addons, decoder helpers, Havok, legacy `babylonjs`, unexpected native code, and unexpected WASM are not part of the accepted graph.
 
 ---
 
@@ -2674,24 +2682,13 @@ Duplicate or overlapping decisions should be merged rather than allowed to creat
 
 ## 95. Next Source
 
-The next source to prepare is:
+Current control is:
 
 ```text
-03_RSM_REBOOT_ARCHITECTURE_AND_PACKAGE_MAP.md
+RSM-6-CLOSE1-SOURCE1 source candidate
 ```
 
-That source must translate the adopted decisions into:
-
-- application boundaries,
-- package ownership,
-- dependency direction,
-- planned versus implemented topology,
-- editor/player separation,
-- canonical-document packages,
-- Babylon adapter boundaries,
-- storage, validation, commands, asset pipeline, runtime, UI, and sequencing package families.
-
-It must not claim that planned packages physically exist before repository inspection proves them.
+RSM-6 I1-I8 and V1 are accepted at implementation baseline `dbd3f2be31d89ca36a17ccb4914e21623df424a2`, but terminal RSM-6 closure is not claimed by this source candidate. Independent review and publication must precede that terminal statement. RSM-7 is next in roadmap order and remains unauthorized; this alignment adds no RSM-7 decision or implementation scope.
 
 ---
 

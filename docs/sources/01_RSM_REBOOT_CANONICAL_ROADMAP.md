@@ -4,8 +4,8 @@
 **Role:** Canonical long-range product, architecture, dependency-order, and product-gate roadmap  
 **Project:** RetroStage Maker  
 **Roadmap namespace:** `RSM-0` → `RSM-120`  
-**Document date:** 2026-08-14  
-**Document state:** `ACTIVE CANONICAL ROADMAP / RSM-5 CLOSURE-ALIGNED / PRE-RSM-6 CAPABILITY AND TOOLING CLARIFIED`  
+**Document date:** 2026-08-21  
+**Document state:** `ACTIVE CANONICAL ROADMAP / RSM-6 I1-I8 CLOSED / V1 CLOSED-PASS / CLOSE1 SOURCE-CANDIDATE CURRENT CONTROL`  
 **Repository:** `ESTABLISHED — live physical truth belongs to Source 02/07 and repository inspection`  
 **Primary branch:** `main`  
 **Primary product target:** `RSM-120 — First Playable Public Alpha / Investor Demo Candidate`  
@@ -315,7 +315,8 @@ Unless a milestone explicitly narrows the requirement, closure requires:
 
 ## RSM-6 — Babylon.js 9 Viewport / Renderer Adapter Bootstrap
 **Purpose:** Create the sole 3D viewport and renderer-adapter foundation while using Babylon's proven derived-runtime primitives aggressively enough to reduce boilerplate, without making Babylon canonical.  
-**Third-party placement:** `@babylonjs/core` and `@babylonjs/loaders` are the primary RSM-6 family; `@babylonjs/inspector` is `DEVELOPMENT_ONLY`; selected materials/serializers enter only when an exact RSM-6 need proves them; broad addon packages remain feature-gated rather than baseline.  
+**Accepted implementation status:** `I1-I8 CLOSED`; the independently validated implementation baseline is `dbd3f2be31d89ca36a17ccb4914e21623df424a2` with tree `5a3186fa70a5215fe1aaf770a1b845c5d1ff4107`. RSM-6-V1 is `CLOSED / PASS`; terminal RSM-6 closure is not claimed while CLOSE1 source reconciliation remains the current candidate/control.  
+**Third-party placement:** Exact `@babylonjs/core@9.21.2` and `@babylonjs/loaders@9.21.2` are admitted renderer runtime dependencies. Exact `babylonjs-gltf2interface@9.21.2` is admitted only as the renderer package's declaration-only development/build strict-peer provider. Inspector, materials, serializers, addons, decoder helpers, Havok, and other Babylon families remain outside the admitted RSM-6 graph.  
 **Key deliverables:**
 - Create the viewport, camera/controller seam, grid, render loop, resize handling, and device/context-loss direction.
 - Define adapter-owned stable-ID ↔ transient Babylon-handle registries.
@@ -329,9 +330,10 @@ Unless a milestone explicitly narrows the requirement, closure requires:
 - Prefer narrow ESM imports/tree-shaking; legacy monolithic imports are not the baseline.
 - Keep Babylon scene objects replaceable and disposable.
 - Reserve a Frame Graph/backend seam without moving advanced post-processing or presentation authoring into RSM-6.
-**Exit:** A derived scene renders through the real editor viewport, the same adapter foundation can be exercised headlessly through deterministic conformance tests, resource teardown is proven, and canonical documents remain Babylon-independent.
+**Accepted exit evidence:** A derived scene renders through the real Electron editor viewport; the same adapter foundation is exercised through a real `NullEngine` headless path and RetroStage-owned diagnostics; stable-handle picking, derived asset-container ownership, editor grid/camera/gizmo intent seams, context-loss recovery, and ordered resource teardown are proven while canonical documents remain Babylon-independent. Natural push CI run `32496829684`, job `96817113858`, attempt `1`, on `main` completed with `success`; fresh-clone automated validation and owner manual acceptance independently passed.
 
 ## RSM-7 — Canonical Project / Scene Document Foundation
+**Current control:** Next roadmap milestone after RSM-6 closure, but implementation is not authorized by this CLOSE1 source-candidate alignment.  
 **Purpose:** Define the first versioned project, scene, entity, component-envelope, and asset-reference documents.  
 **Third-party placement:** RetroStage-owned TypeScript packages own persistence; `fast-check` may enter `DEVELOPMENT_ONLY` after exact admission when property-based tests materially reduce schema/round-trip risk.  
 **Key deliverables:**

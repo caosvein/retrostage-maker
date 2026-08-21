@@ -4,12 +4,12 @@
 **Role:** Authoritative technology baseline, dependency-admission policy, licensing contract, and third-party integration boundary  
 **Project:** RetroStage Maker  
 **Distribution intent:** Commercial proprietary desktop creator distributed through Steam and other approved Windows channels  
-**Document date:** 2026-08-14  
-**Document state:** `ACTIVE TECHNOLOGY/DEPENDENCY CONTRACT / RSM-5 CLOSED / PRE-RSM-6 BABYLON AND ENGINEERING-ACCELERATION CONTRACT CLARIFIED / PRODUCTION DEPENDENCIES MILESTONE-GATED`  
+**Document date:** 2026-08-21  
+**Document state:** `ACTIVE TECHNOLOGY/DEPENDENCY CONTRACT / RSM-6 EXACT GRAPH ADMITTED AND VALIDATED / CLOSE1 SOURCE-CANDIDATE CURRENT CONTROL`  
 **Repository:** `PRESENT — C:\RetroStage\retrostage-maker`  
 **Primary branch:** `main`  
 **Governing source:** `00_RSM_REBOOT_PROJECT_CHARTER.md`  
-**Verification scope:** RSM-3 established and verified the repository, lockfile, development-tool dependency baseline, compliance evidence, SBOM/notices, and audit gates; later production dependency admission remains milestone-owned and final packaged-artifact approval remains repository- and lockfile-dependent  
+**Verification scope:** RSM-3 established the repository/tooling/compliance baseline; RSM-5 admitted the secure Electron shell; RSM-6 admitted and independently validated its exact Babylon graph, renderer package, headless path, and real Electron viewport; later production dependencies remain milestone-owned  
 **Supersedes:** Pre-loss live dependency manifests, package-version assumptions, and technology-state claims  
 **Preserves:** Approved Babylon.js/Electron direction, RetroStage-owned canonical data, evidence-driven dependency review, commercial license discipline, and source-of-truth separation
 
@@ -82,10 +82,12 @@ Live repository: PRESENT — C:\RetroStage\retrostage-maker
 RSM-3 repository and lockfile baseline: ESTABLISHED / VERIFIED
 RSM-3 development-tool dependencies: ESTABLISHED / VERIFIED
 RSM-3 compliance, SBOM/notices, and audit gates: ESTABLISHED / VERIFIED
-Later production dependencies: MILESTONE-GATED / NOT ADMITTED BY THIS SOURCE UPDATE
+RSM-6 Babylon dependency graph: PHYSICALLY ADMITTED / EXACT / VALIDATED
+Later production dependencies: MILESTONE-GATED
 Approved technology direction: YES
 Exact lockfile authority: CURRENT REPOSITORY
 Packaged product artifact: NONE
+RSM-6 development and packaged Electron smoke artifacts: VALIDATED / NON-RELEASE
 Final production transitive license audit: MILESTONE-GATED
 Final production native/WASM inventory: MILESTONE-GATED
 Final Steam release approval: NOT YET POSSIBLE
@@ -360,11 +362,11 @@ The following versions were verification candidates on 2026-08-05. They are not 
 | Vite | Latest supported `8.2.x` | Exact patch selected at RSM-5 |
 | pnpm | Current supported stable compatible with Node 24 | Exact release selected and recorded at bootstrap |
 
-### 7.4.1 Current Babylon registry observation — discovery evidence only
+### 7.4.1 Historical 2026-08-14 Babylon registry observation — pre-admission discovery evidence / superseded
 
 A 2026-08-14 review of official npm/Babylon publication surfaces observed the Babylon 9 package family around the `9.18.1` line, including `@babylonjs/core` and official scope entries for loaders/materials/serializers/inspector. The previously recorded `9.19.1` value is therefore not admissible evidence and must not be copied into the lockfile.
 
-This observation is intentionally **not** an RSM-6 admission. When RSM-6 opens, the dependency gate must query the registry again, prove the exact versions available at that time, inspect package metadata/transitives/notices, and commit only the selected compatible set.
+This observation is **historical pre-admission discovery evidence** and is superseded for live RSM-6 admission truth. The required registry re-query, exact-version proof, package-metadata/transitive/notice inspection, and admission step later completed; §10.1 and §31.8 record the accepted exact `9.21.2` RSM-6 graph.
 
 ### 7.5 Upgrade control
 
@@ -526,28 +528,28 @@ Removing bundled notice files to reduce package size is prohibited.
 
 ### 10.1 Approved package families and RSM-6 admission shape
 
-Primary RSM-6 package families:
+Exact admitted RSM-6 renderer runtime packages:
 
 ```text
-@babylonjs/core
-@babylonjs/loaders
+@babylonjs/core@9.21.2
+@babylonjs/loaders@9.21.2
 ```
 
-Exact RSM-6 narrow unscoped exception candidate:
+Exact admitted narrow unscoped development/build exception:
 
 ```text
 babylonjs-gltf2interface@9.21.2
 ```
 
-This exact identity is not a runtime package family and is not admitted by this contract alone. Independently accepted RSM-6 admission-closure evidence classifies it as an official Babylon-owned, Apache-2.0, declaration-only strict-peer provider with no runtime JavaScript payload, no native/WASM payload, no runtime bundle module presence, and no dependency/peer/optional/script/bin surface of its own. It may be considered only as a package-local development/build-time dependency of the planned `@retrostage/renderer-babylon9` package when paired with exact `@babylonjs/loaders@9.21.2`. This exception creates no authority for the legacy `babylonjs` package or for any other unscoped Babylon package.
+This exact identity is not a runtime package family. Independently accepted RSM-6 evidence classifies and admits it solely as an official Babylon-owned, Apache-2.0, declaration-only strict-peer provider with no runtime JavaScript payload, no native/WASM payload, no runtime bundle module presence, and no dependency/peer/optional/script/bin surface of its own. It is a package-local development/build dependency of `@retrostage/renderer-babylon9` paired with exact `@babylonjs/loaders@9.21.2`. This exception creates no authority for legacy `babylonjs` or any other unscoped Babylon package.
 
-Development-only RSM-6 candidate:
+Development-only package considered but not admitted by RSM-6:
 
 ```text
 @babylonjs/inspector
 ```
 
-Feature-gated official families that are approved in principle but are not automatically required by RSM-6:
+Feature-gated official families not admitted by RSM-6:
 
 ```text
 @babylonjs/materials
@@ -564,8 +566,8 @@ The official Babylon.js repository and modular packages are governed by Apache-2
 ### 10.3 Package and import policy
 
 - Use official scoped modular packages as the Babylon production/runtime baseline.
-- The only RSM-6 unscoped exception candidate is exact `babylonjs-gltf2interface@9.21.2`, and only as a package-local development/build-time strict-peer provider for exact `@babylonjs/loaders@9.21.2` inside the planned `@retrostage/renderer-babylon9` package.
-- `babylonjs-gltf2interface` must remain declaration-only in the admitted candidate: no runtime import seam, no runtime bundle presence, no production runtime authority, and no canonical data authority.
+- The only RSM-6 unscoped exception is exact `babylonjs-gltf2interface@9.21.2`, admitted only as a package-local development/build-time strict-peer provider for exact `@babylonjs/loaders@9.21.2` inside `@retrostage/renderer-babylon9`.
+- `babylonjs-gltf2interface` must remain declaration-only in the admitted RSM-6 graph: no runtime import seam, no runtime bundle presence, no production runtime authority, and no canonical data authority.
 - Peer auto-install is forbidden for the Babylon admission shape; every required peer identity must be explicit and physically reviewable.
 - The narrow `babylonjs-gltf2interface@9.21.2` exception grants no precedent for the legacy monolithic `babylonjs` package or any other unscoped Babylon package.
 - Prefer narrow ESM imports/tree-shakable entrypoints from `@babylonjs/core`; broad `Legacy/legacy` imports are not the production baseline.
@@ -623,7 +625,9 @@ Babylon may provide:
 - loading of supported cooked assets,
 - debug rendering in development.
 
-RSM-6 must establish explicit disposal/lifetime rules for scene, asset containers, overlays, temporary resources, diagnostics hooks, and adapter teardown.
+RSM-6 establishes and tests explicit disposal/lifetime rules for Scene, asset instances and containers, editor grid/gizmos, camera, instrumentation hooks, Engine, and adapter teardown. Publication authority is revoked before best-effort cleanup; context loss and stale async work fail closed.
+
+The accepted RSM-6 physical implementation includes the default/editor/headless renderer entries; Engine/Scene lifecycle; camera and editor grid; stable-handle registry epochs and picking; self-contained glTF 2.0/GLB `AssetContainer` loading; real `NullEngine`; `SceneInstrumentation` and `EngineInstrumentation` behind frozen JSON-safe diagnostics; UtilityLayer/Gizmo intent ownership; and a real plain-TypeScript Electron viewport. The secure preload remains unchanged, the Electron Renderer imports only the public renderer package, and Babylon never owns canonical selection, transform mutation, documents, commands, persistence, or network/file loading authority.
 
 RetroStage remains responsible for:
 
@@ -1799,7 +1803,7 @@ The approved production families enter only when their roadmap milestone opens a
 | Milestone | Dependency families |
 |---|---|
 | RSM-5 | Electron, Electron Forge core, Forge Vite plugin, Vite |
-| RSM-6 | `@babylonjs/core`, `@babylonjs/loaders`; `@babylonjs/inspector` development-only if the diagnostic gate is accepted; materials/serializers only when the exact RSM-6 slice requires them; addons remain feature-gated |
+| RSM-6 | Admitted exact `@babylonjs/core@9.21.2`, `@babylonjs/loaders@9.21.2`, and package-local dev/build-only `babylonjs-gltf2interface@9.21.2`; Inspector/materials/serializers/addons remain absent/deferred |
 | RSM-7 / RSM-8 | `fast-check` development-only if exact admission proves value for schema/round-trip/stable-ID/migration invariants |
 | RSM-9 | React, React DOM, selected Radix packages, Golden Layout, react-window; Testing Library family development-only; Storybook only if its conditional component-workbench gate is accepted |
 | RSM-10 | Zustand, XState |
@@ -1967,9 +1971,9 @@ Defer until distribution requirements are known. Audit Squirrel, WiX, ZIP, or ot
 
 Defer until the navigation milestone. Upstream Recast approval does not select a JavaScript wrapper.
 
-### 31.8 Exact Babylon.js 9 modular package set
+### 31.8 Exact Babylon.js 9 modular package set — resolved by RSM-6
 
-Independently accepted RSM-6-A, FOLLOWUP1/FIX1, B, and C evidence currently supports this exact **pre-admission candidate** set:
+The accepted manifest, lockfile, package, compliance, bundle, and V1 evidence proves this exact admitted set:
 
 ```text
 @babylonjs/core@9.21.2
@@ -1977,13 +1981,11 @@ Independently accepted RSM-6-A, FOLLOWUP1/FIX1, B, and C evidence currently supp
 babylonjs-gltf2interface@9.21.2
 ```
 
-The first two identities are production/runtime adapter admission candidates. `babylonjs-gltf2interface@9.21.2` is only the narrow, non-precedential, declaration-only development/build-time strict-peer exception candidate defined by §10.1 and §10.3. It has no runtime import/bundle authority and does not authorize the legacy `babylonjs` package or any other unscoped Babylon package.
+The first two identities are production/runtime dependencies of `@retrostage/renderer-babylon9`. `babylonjs-gltf2interface@9.21.2` is the narrow, non-precedential, declaration-only development/build-time strict-peer exception defined by §10.1 and §10.3; it has no runtime import or bundle authority. The Electron app has exactly the internal runtime edge `@retrostage/renderer-babylon9 = workspace:*`; the repository root runtime dependency set remains empty.
 
-These exact identities are **not admitted or installed by this Source alignment**. Immediately before any future canonical dependency mutation/admission, RSM-6 must re-query the official registry and re-prove exact availability, integrity, upstream/license identity, peer/dependency metadata, transitive graph, bundle impact, runtime-network/offline behavior, and lockfile determinism. A moved registry `latest` does not authorize automatic upgrade or substitution. Exact `9.21.2` may be retained only while its previously accepted evidence remains materially valid; otherwise dependency audit/change control must reopen.
+The exact graph contains no legacy `babylonjs`, Inspector, materials, serializers, addons, decoder helpers, Havok, unexpected native payload, or unexpected WASM payload. `@babylonjs/loaders/glTF/2.0` is the sole loader registration import, and rejected external/decoder-dependent content receives no loader or network authority.
 
-`@babylonjs/inspector` remains deferred from the RSM-6 baseline. `@babylonjs/materials`, `@babylonjs/serializers`, and `@babylonjs/addons` remain feature-gated and are not admitted by this alignment. Draco, KTX2/Basis, Havok, and other decoder/helper/runtime capability families remain outside the RSM-6 baseline until separately owned and admitted.
-
-These open admission steps do not reopen the Babylon/Electron architecture decision.
+Any future upgrade or package-family expansion must reopen dependency change control and repeat availability, integrity, license, peer/transitive, bundle, offline/network, compliance, native/WASM, and lockfile proofs. A moved registry `latest` grants no substitution authority.
 
 ---
 
@@ -2071,7 +2073,7 @@ This ledger records the authoritative upstream source family used for the histor
 
 | Technology | Upstream reference | License/status used for this contract |
 |---|---|---|
-| Electron | `https://github.com/electron/electron` and `https://releases.electronjs.org/` | MIT; 43.3.0 current verification candidate |
+| Electron | `https://github.com/electron/electron` and `https://releases.electronjs.org/` | MIT; 43.3.0 historical 2026-08-05 verification candidate; not current installation truth |
 | Electron Forge | `https://github.com/electron/forge` | MIT |
 | Node.js | `https://nodejs.org/` and `https://github.com/nodejs/node` | MIT; Node 24 LTS |
 | Babylon.js | `https://github.com/BabylonJS/Babylon.js` | Apache-2.0; Babylon 9 line |
@@ -2194,22 +2196,18 @@ RetroStage-owned canonical documents
 
 ## 36. Immediate Handoff
 
-With this technology contract approved, the next authoritative source should be:
+Current technology/dependency handoff:
 
 ```text
-01_RSM_REBOOT_CANONICAL_ROADMAP.md
+RSM-6 I1-I8 = CLOSED / ACCEPTED
+RSM-6-V1 = CLOSED / PASS
+accepted baseline = dbd3f2be31d89ca36a17ccb4914e21623df424a2
+accepted natural CI = 32496829684 / 96817113858 / attempt 1 / push / main / success
+current control = RSM-6-CLOSE1-SOURCE1 source candidate
+RSM-7 = next milestone / not authorized
 ```
 
-The roadmap must:
-
-1. preserve the product objectives and invariants from the reboot charter,
-2. place the approved foundation stack in the earliest relevant milestones,
-3. delay milestone-gated dependencies until their responsibilities open,
-4. require a dependency/license/adapter audit before every major new subsystem,
-5. move backup, restore, Electron security, testing, SBOM, and early export proof into the opening phase,
-6. remove Mnemos Studio completely,
-7. define native sequencing as core and generic cinematic interchange as optional,
-8. treat this document's open bootstrap decisions as tasks, not silent assumptions.
+This source candidate aligns the contract to accepted repository truth but does not itself claim terminal RSM-6 closure. Independent review and publication must complete first. No RSM-7 dependency or implementation is admitted here.
 
 ---
 
