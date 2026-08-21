@@ -80,6 +80,12 @@ const editorGridModules = new Set([
   "grid/grid-port.ts",
 ]);
 
+const editorGizmoModules = new Set([
+  "gizmos/babylon-gizmo-factory.ts",
+  "gizmos/gizmo-controller.ts",
+  "gizmos/gizmo-port.ts",
+]);
+
 const privateI4Modules = new Set([
   "picking/babylon-picking-factory.ts",
   "picking/picking-controller.ts",
@@ -107,15 +113,34 @@ const privateI6HeadlessModules = new Set([
   "headless/null-engine-factory.ts",
 ]);
 
-describe("RSM-6-I6 public entry isolation", () => {
+describe("RSM-6-I7 public entry isolation", () => {
   it("keeps the physical default/player graph isolated from editor, headless, and Grid", () => {
     expect(
       scanForbiddenReachability(
         physicalModules(),
         "index.ts",
-        new Set([...editorGridModules, "headless.ts", ...privateI6HeadlessModules]),
+        new Set([
+          ...editorGridModules,
+          ...editorGizmoModules,
+          "headless.ts",
+          ...privateI6HeadlessModules,
+        ]),
       ),
     ).toEqual([]);
+  });
+
+  it("keeps default/headless out of Gizmos while editor intentionally reaches them", () => {
+    const modules = physicalModules();
+    expect(scanForbiddenReachability(modules, "index.ts", editorGizmoModules)).toEqual([]);
+    expect(scanForbiddenReachability(modules, "headless.ts", editorGizmoModules)).toEqual([]);
+    const editorReachability = scanForbiddenReachability(modules, "editor.ts", editorGizmoModules);
+    for (const modulePath of editorGizmoModules) {
+      expect(editorReachability).toContain(`FORBIDDEN_ENTRY_REACHABLE:editor.ts:${modulePath}`);
+    }
+    const editorSource = modules.get("editor.ts") ?? "";
+    expect(editorSource).not.toContain("nativeHandle");
+    expect(editorSource).not.toContain("GizmoManager");
+    expect(editorSource).not.toContain("UtilityLayerRenderer");
   });
 
   it("keeps headless isolated from editor Grid while editor intentionally reaches it", () => {
@@ -253,6 +278,20 @@ describe("RSM-6-I6 public entry isolation", () => {
     ]);
     expect(scanForbiddenReachability(synthetic, "headless.ts", privateI4Modules)).toEqual([
       "FORBIDDEN_ENTRY_REACHABLE:headless.ts:picking/picking-controller.ts",
+    ]);
+  });
+
+  it("rejects synthetic default/headless reachability to private Gizmo runtime", () => {
+    const synthetic = new Map([
+      ["index.ts", 'export { gizmo } from "./gizmos/gizmo-controller.js";'],
+      ["headless.ts", 'export { gizmo } from "./gizmos/gizmo-controller.js";'],
+      ["gizmos/gizmo-controller.ts", "export const gizmo = true;"],
+    ]);
+    expect(scanForbiddenReachability(synthetic, "index.ts", editorGizmoModules)).toEqual([
+      "FORBIDDEN_ENTRY_REACHABLE:index.ts:gizmos/gizmo-controller.ts",
+    ]);
+    expect(scanForbiddenReachability(synthetic, "headless.ts", editorGizmoModules)).toEqual([
+      "FORBIDDEN_ENTRY_REACHABLE:headless.ts:gizmos/gizmo-controller.ts",
     ]);
   });
 });

@@ -144,6 +144,26 @@ export class RendererHandleRegistry {
     return this.#forward.get(stableId)?.has(handle) === true ? stableId : null;
   }
 
+  resolveStableIdHandles(
+    stableId: string,
+    registrationEpoch: RendererHandleRegistrationEpoch,
+  ): readonly object[] {
+    const epoch = this.#activeEpoch;
+    if (
+      this.#terminal ||
+      epoch === null ||
+      registrationEpoch !== epoch.registrationEpoch ||
+      !isExactStableId(stableId) ||
+      !epoch.stableIds.has(stableId)
+    ) {
+      return Object.freeze([]);
+    }
+    const handles = this.#forward.get(stableId);
+    if (handles === undefined) return Object.freeze([]);
+    const current = [...handles].filter((handle) => this.#reverse.get(handle) === stableId);
+    return Object.freeze(current);
+  }
+
   unregisterHandle(handle: object, registrationEpoch: RendererHandleRegistrationEpoch): void {
     if (this.#terminal || registrationEpoch !== this.#activeEpoch?.registrationEpoch) return;
     const stableId = this.#reverse.get(handle);

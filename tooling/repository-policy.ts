@@ -137,6 +137,13 @@ const expectedRendererI6Paths = new Set([
   "packages/renderer-babylon9/test/diagnostics.test.ts",
 ]);
 
+const expectedRendererI7Paths = new Set([
+  "packages/renderer-babylon9/src/gizmos/gizmo-port.ts",
+  "packages/renderer-babylon9/src/gizmos/gizmo-controller.ts",
+  "packages/renderer-babylon9/src/gizmos/babylon-gizmo-factory.ts",
+  "packages/renderer-babylon9/test/gizmo-intent.test.ts",
+]);
+
 const forbiddenEarlyRoots = new Set(["scripts", "tools"]);
 
 function normalizePath(path: string): string {
@@ -189,7 +196,8 @@ export function validateRepositoryBootstrap(snapshot: BootstrapSnapshot): readon
         expectedRendererI3Paths.has(path) ||
         expectedRendererI4Paths.has(path) ||
         expectedRendererI5Paths.has(path) ||
-        expectedRendererI6Paths.has(path));
+        expectedRendererI6Paths.has(path) ||
+        expectedRendererI7Paths.has(path));
     if (
       productPackageMatch !== null &&
       productPackageMatch[2] !== "package.json" &&
@@ -263,6 +271,16 @@ export function validateRepositoryBootstrap(snapshot: BootstrapSnapshot): readon
     for (const expectedPath of expectedRendererI6Paths) {
       if (!normalizedRepositoryPaths.includes(expectedPath)) {
         issues.push({ code: "REQUIRED_RENDERER_I6_PATH_MISSING", detail: expectedPath });
+      }
+    }
+  }
+  const rendererI7IsActive = normalizedRepositoryPaths.some((path) =>
+    expectedRendererI7Paths.has(path),
+  );
+  if (rendererI7IsActive) {
+    for (const expectedPath of expectedRendererI7Paths) {
+      if (!normalizedRepositoryPaths.includes(expectedPath)) {
+        issues.push({ code: "REQUIRED_RENDERER_I7_PATH_MISSING", detail: expectedPath });
       }
     }
   }

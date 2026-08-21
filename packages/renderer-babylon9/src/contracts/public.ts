@@ -123,11 +123,13 @@ export interface RendererPickIntent {
 
 export type RendererGizmoPhase = "begin" | "cancel" | "commit" | "update";
 
+export type RendererGizmoMode = "position" | "rotation" | "scale";
+
 export interface RendererGizmoIntent {
   readonly candidate: RendererJsonValue | null;
   readonly correlationId: string;
   readonly delta: RendererJsonValue | null;
-  readonly kind: string;
+  readonly kind: RendererGizmoMode;
   readonly phase: RendererGizmoPhase;
   readonly revision: RendererProjectionRevision;
   readonly targetId: string;

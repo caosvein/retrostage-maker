@@ -19,6 +19,7 @@ const allowedBabylonFactories = new Set([
   "diagnostics/babylon-instrumentation-factory.ts",
   "engine/babylon-engine-factory.ts",
   "grid/babylon-grid-factory.ts",
+  "gizmos/babylon-gizmo-factory.ts",
   "headless/null-engine-factory.ts",
   "picking/babylon-picking-factory.ts",
   "scene/babylon-scene-factory.ts",
@@ -32,6 +33,7 @@ const exactBabylonBindings = new Map<string, readonly string[]>([
   ],
   ["engine/babylon-engine-factory.ts", ["Engine"]],
   ["grid/babylon-grid-factory.ts", ["Color3", "MeshBuilder", "Vector3"]],
+  ["gizmos/babylon-gizmo-factory.ts", ["GizmoManager", "UtilityLayerRenderer"]],
   ["headless/null-engine-factory.ts", ["NullEngine"]],
   ["picking/babylon-picking-factory.ts", ["PickingInfo"]],
   ["scene/babylon-scene-factory.ts", ["Scene"]],
@@ -50,6 +52,12 @@ function scanRuntimeImports(modules: ReadonlyMap<string, string>): readonly stri
   for (const [path, source] of modules) {
     if (path.startsWith("headless/") && forbiddenHeadlessAuthorityPattern.test(source)) {
       issues.push("HEADLESS_RUNTIME_AUTHORITY_FORBIDDEN:" + path);
+    }
+    if (
+      path === "gizmos/babylon-gizmo-factory.ts" &&
+      !/usePointerToAttachGizmos\s*=\s*false/u.test(source)
+    ) {
+      issues.push("GIZMO_AUTOMATIC_POINTER_ATTACHMENT_NOT_DISABLED:" + path);
     }
     importPattern.lastIndex = 0;
     for (const match of source.matchAll(importPattern)) {
@@ -101,8 +109,8 @@ function physicalRuntimeModules(): ReadonlyMap<string, string> {
   );
 }
 
-describe("RSM-6-I6 runtime import policy", () => {
-  it("accepts the physical exact eight-factory core and sole glTF2 registration surface", () => {
+describe("RSM-6-I7 runtime import policy", () => {
+  it("accepts the physical exact nine-factory core and sole glTF2 registration surface", () => {
     expect(scanRuntimeImports(physicalRuntimeModules())).toEqual([]);
   });
 
@@ -122,6 +130,7 @@ describe("RSM-6-I6 runtime import policy", () => {
         "diagnostics/babylon-instrumentation-factory.ts",
         'import { SceneInstrumentation } from "@babylonjs/core/Instrumentation";',
       ],
+      ["gizmos/babylon-gizmo-factory.ts", 'import { GizmoManager } from "@babylonjs/core";'],
     ]);
     expect(scanRuntimeImports(synthetic)).toEqual([
       "BABYLON_IMPORT_OUTSIDE_FACTORY:engine/renderer-adapter.ts:@babylonjs/core",
@@ -135,7 +144,22 @@ describe("RSM-6-I6 runtime import policy", () => {
       "GLTF_INTERFACE_RUNTIME_IMPORT_FORBIDDEN:assets/runtime.ts:babylonjs-gltf2interface",
       "BABYLON_FACTORY_BINDINGS_INEXACT:headless/null-engine-factory.ts:Engine",
       "BABYLON_FACTORY_SPECIFIER_FORBIDDEN:diagnostics/babylon-instrumentation-factory.ts:@babylonjs/core/Instrumentation",
+      "GIZMO_AUTOMATIC_POINTER_ATTACHMENT_NOT_DISABLED:gizmos/babylon-gizmo-factory.ts",
+      "BABYLON_FACTORY_BINDINGS_INEXACT:gizmos/babylon-gizmo-factory.ts:GizmoManager",
     ]);
+  });
+
+  it("rejects automatic Gizmo pointer attachment even with exact imports", () => {
+    expect(
+      scanRuntimeImports(
+        new Map([
+          [
+            "gizmos/babylon-gizmo-factory.ts",
+            'import { GizmoManager, UtilityLayerRenderer } from "@babylonjs/core";\nmanager.usePointerToAttachGizmos = true;',
+          ],
+        ]),
+      ),
+    ).toEqual(["GIZMO_AUTOMATIC_POINTER_ATTACHMENT_NOT_DISABLED:gizmos/babylon-gizmo-factory.ts"]);
   });
 
   it("rejects DOM, graphics-device, and background-scheduler authority in headless source", () => {

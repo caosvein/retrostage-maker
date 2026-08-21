@@ -47,12 +47,20 @@ module.exports = {
       to: { path: "^packages/renderer-babylon9/src/(?:editor\\.ts|grid/)" },
     },
     {
+      name: "renderer-default-headless-and-product-must-not-reach-editor-gizmos",
+      severity: "error",
+      from: {
+        path: "^(?:packages/renderer-babylon9/src/(?:index|headless)\\.ts|packages/renderer-babylon9/src/headless/|apps/editor-electron/src)",
+      },
+      to: { path: "^packages/renderer-babylon9/src/gizmos/" },
+    },
+    {
       name: "renderer-babylon-imports-only-in-exact-private-factories",
       severity: "error",
       from: {
         path: "^packages/renderer-babylon9/src",
         pathNot:
-          "^packages/renderer-babylon9/src/(?:engine/babylon-engine-factory|scene/babylon-scene-factory|camera/babylon-camera-factory|grid/babylon-grid-factory|picking/babylon-picking-factory|assets/babylon-asset-container-factory|headless/null-engine-factory|diagnostics/babylon-instrumentation-factory|loaders/gltf2-loader-registration)\\.ts$",
+          "^packages/renderer-babylon9/src/(?:engine/babylon-engine-factory|scene/babylon-scene-factory|camera/babylon-camera-factory|grid/babylon-grid-factory|picking/babylon-picking-factory|assets/babylon-asset-container-factory|headless/null-engine-factory|diagnostics/babylon-instrumentation-factory|gizmos/babylon-gizmo-factory|loaders/gltf2-loader-registration)\\.ts$",
       },
       to: { path: "^@babylonjs/" },
     },
@@ -60,7 +68,7 @@ module.exports = {
       name: "renderer-private-factories-may-import-only-babylon-core-root",
       severity: "error",
       from: {
-        path: "^packages/renderer-babylon9/src/(?:engine/babylon-engine-factory|scene/babylon-scene-factory|camera/babylon-camera-factory|grid/babylon-grid-factory|picking/babylon-picking-factory|assets/babylon-asset-container-factory|headless/null-engine-factory|diagnostics/babylon-instrumentation-factory)\\.ts$",
+        path: "^packages/renderer-babylon9/src/(?:engine/babylon-engine-factory|scene/babylon-scene-factory|camera/babylon-camera-factory|grid/babylon-grid-factory|picking/babylon-picking-factory|assets/babylon-asset-container-factory|headless/null-engine-factory|diagnostics/babylon-instrumentation-factory|gizmos/babylon-gizmo-factory)\\.ts$",
       },
       to: { path: "^@babylonjs/(?!core$)" },
     },

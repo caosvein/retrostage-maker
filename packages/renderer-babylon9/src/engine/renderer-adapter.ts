@@ -68,10 +68,29 @@ export interface RendererAdapterRuntimeOptions {
 
 export interface RendererEditorBridge {
   getLifecycleState(): RendererLifecycleState;
+  getProjectionRevision(): RendererProjectionRevision | null;
   getScene(): RendererScenePort | null;
+  getSelectionSnapshot(): RendererSelectionState | null;
+  onBeforeGridDisposal(listener: () => void): RendererUnsubscribe;
+  onHandleRegistryChange(listener: () => void): RendererUnsubscribe;
   onLifecycleState(listener: RendererStateListener): RendererUnsubscribe;
+  onProjectionRevision(
+    listener: (revision: RendererProjectionRevision) => void,
+  ): RendererUnsubscribe;
+  onSelectionSnapshot(
+    listener: (selection: RendererSelectionState | null) => void,
+  ): RendererUnsubscribe;
   reportDisposalFailure(detail: string, cause?: unknown): void;
   reportViewControlFailure(detail: string, cause?: unknown): RendererOperationResult;
+  resolveCurrentHandles(
+    stableId: string,
+    revision: RendererProjectionRevision,
+  ): RendererEditorHandleResolution | null;
+}
+
+interface RendererEditorHandleResolution {
+  readonly handles: readonly object[];
+  readonly registrationEpoch: RendererHandleRegistrationEpoch;
 }
 
 const editorBridges = new WeakMap<RendererAdapter, RendererEditorBridge>();
@@ -246,6 +265,12 @@ class RendererAdapterRuntime implements RendererAdapter {
     | ((selection: RendererSelectionState | null) => void)
     | null;
   readonly #stateListeners = new Set<RendererStateListener>();
+  readonly #beforeGridDisposalListeners = new Set<() => void>();
+  readonly #handleRegistryListeners = new Set<() => void>();
+  readonly #projectionRevisionListeners = new Set<(revision: RendererProjectionRevision) => void>();
+  readonly #selectionSnapshotListeners = new Set<
+    (selection: RendererSelectionState | null) => void
+  >();
   #adapterGeneration = 0;
   #contextState: RendererDiagnosticSnapshot["contextState"] = "unavailable";
   #correlationIds: string[] = [];
@@ -268,10 +293,8 @@ class RendererAdapterRuntime implements RendererAdapter {
         captureRegistrationEpoch: (revision) =>
           this.#handleRegistry.captureRegistrationEpoch(revision),
         registerHandle: (stableId, handle, epoch) =>
-          this.#handleRegistry.registerHandle(stableId, handle, epoch),
-        unregisterHandle: (handle, epoch) => {
-          this.#handleRegistry.unregisterHandle(handle, epoch);
-        },
+          this.#registerAssetHandle(stableId, handle, epoch),
+        unregisterHandle: (handle, epoch) => this.#unregisterHandle(handle, epoch),
       },
     );
     this.#cameraController = new RendererCameraController(options.cameraFactory);
@@ -286,20 +309,36 @@ class RendererAdapterRuntime implements RendererAdapter {
     this.#selectionSnapshotObserverForTests = options.selectionSnapshotObserverForTests ?? null;
     editorBridges.set(this, {
       getLifecycleState: () => this.#state,
+      getProjectionRevision: () => this.#latestProjection?.revision ?? null,
       getScene: () => this.#scene,
+      getSelectionSnapshot: () => this.#derivedSelection,
+      onBeforeGridDisposal: (listener) =>
+        this.#subscribe(this.#beforeGridDisposalListeners, listener),
+      onHandleRegistryChange: (listener) =>
+        this.#subscribe(this.#handleRegistryListeners, listener),
       onLifecycleState: (listener) => this.onLifecycleState(listener),
+      onProjectionRevision: (listener) =>
+        this.#subscribe(this.#projectionRevisionListeners, listener),
+      onSelectionSnapshot: (listener) =>
+        this.#subscribe(this.#selectionSnapshotListeners, listener),
       reportDisposalFailure: (detail, cause) => {
         this.#reportEditorDisposalFailure(detail, cause);
       },
       reportViewControlFailure: (detail, cause) => this.#viewControlFailure(detail, cause),
+      resolveCurrentHandles: (stableId, revision) => {
+        const registrationEpoch = this.#handleRegistry.captureRegistrationEpoch(revision);
+        if (registrationEpoch === null) return null;
+        return Object.freeze({
+          handles: this.#handleRegistry.resolveStableIdHandles(stableId, registrationEpoch),
+          registrationEpoch,
+        });
+      },
     });
     handleBridges.set(this, {
       captureRegistrationEpoch: (revision) =>
         this.#handleRegistry.captureRegistrationEpoch(revision),
       registerHandle: (stableId, handle, epoch) => this.#registerHandle(stableId, handle, epoch),
-      unregisterHandle: (handle, epoch) => {
-        this.#handleRegistry.unregisterHandle(handle, epoch);
-      },
+      unregisterHandle: (handle, epoch) => this.#unregisterHandle(handle, epoch),
     });
   }
 
@@ -597,6 +636,7 @@ class RendererAdapterRuntime implements RendererAdapter {
     }
     this.#recordAssetDisposalIssues(this.#assetController.invalidateProjection());
     this.#latestProjection = input;
+    this.#notifyProjectionRevision(revision);
     return Promise.resolve({ status: "accepted-current" });
   }
 
@@ -811,6 +851,7 @@ class RendererAdapterRuntime implements RendererAdapter {
     epoch: RendererHandleRegistrationEpoch,
   ): boolean {
     const accepted = this.#handleRegistry.registerHandle(stableId, handle, epoch);
+    if (accepted) this.#notifyHandleRegistryChange();
     if (
       !accepted &&
       this.#state !== "DISPOSING" &&
@@ -826,6 +867,21 @@ class RendererAdapterRuntime implements RendererAdapter {
       );
     }
     return accepted;
+  }
+
+  #registerAssetHandle(
+    stableId: string,
+    handle: object,
+    epoch: RendererHandleRegistrationEpoch,
+  ): boolean {
+    const accepted = this.#handleRegistry.registerHandle(stableId, handle, epoch);
+    if (accepted) this.#notifyHandleRegistryChange();
+    return accepted;
+  }
+
+  #unregisterHandle(handle: object, epoch: RendererHandleRegistrationEpoch): void {
+    this.#handleRegistry.unregisterHandle(handle, epoch);
+    this.#notifyHandleRegistryChange();
   }
 
   #assetRequestTarget(request: unknown): string | null {
@@ -908,12 +964,54 @@ class RendererAdapterRuntime implements RendererAdapter {
   }
 
   #observeSelectionSnapshot(selection: RendererSelectionState | null): void {
-    if (this.#selectionSnapshotObserverForTests === null) return;
-    try {
-      this.#selectionSnapshotObserverForTests(selection);
-    } catch {
-      // A test observer has no authority to change renderer-owned derived state.
+    if (this.#selectionSnapshotObserverForTests !== null) {
+      try {
+        this.#selectionSnapshotObserverForTests(selection);
+      } catch {
+        // A test observer has no authority to change renderer-owned derived state.
+      }
     }
+    for (const listener of this.#selectionSnapshotListeners) {
+      try {
+        listener(selection);
+      } catch {
+        // Private editor observers have no authority to change renderer state.
+      }
+    }
+  }
+
+  #notifyHandleRegistryChange(): void {
+    for (const listener of this.#handleRegistryListeners) {
+      try {
+        listener();
+      } catch {
+        // Private editor observers have no authority to change registry state.
+      }
+    }
+  }
+
+  #notifyProjectionRevision(revision: RendererProjectionRevision): void {
+    for (const listener of this.#projectionRevisionListeners) {
+      try {
+        listener(revision);
+      } catch {
+        // Private editor observers have no authority to change projection state.
+      }
+    }
+  }
+
+  #notifyBeforeGridDisposal(): void {
+    for (const listener of this.#beforeGridDisposalListeners) {
+      try {
+        listener();
+      } catch (cause) {
+        this.#reportEditorDisposalFailure(
+          "An editor resource could not be disposed before the Grid.",
+          cause,
+        );
+      }
+    }
+    this.#beforeGridDisposalListeners.clear();
   }
 
   #observeContext(state: "lost" | "restored", generation: number): void {
@@ -1024,6 +1122,7 @@ class RendererAdapterRuntime implements RendererAdapter {
       failures.push(failure);
       this.#recordFailure(failure);
     }
+    this.#notifyBeforeGridDisposal();
     this.#notifyStateListeners("DISPOSING");
     failures.push(...this.#pendingEditorDisposalFailures);
     this.#pendingEditorDisposalFailures = [];
@@ -1034,7 +1133,10 @@ class RendererAdapterRuntime implements RendererAdapter {
     this.#clearOwnedState();
     this.#transition("DISPOSED");
     this.#failureListeners.clear();
+    this.#handleRegistryListeners.clear();
     this.#pickListeners.clear();
+    this.#projectionRevisionListeners.clear();
+    this.#selectionSnapshotListeners.clear();
     this.#stateListeners.clear();
     return failures;
   }

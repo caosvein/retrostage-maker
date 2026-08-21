@@ -17,7 +17,7 @@ const publicEntries = ["index.ts", "editor.ts", "headless.ts"] as const;
 const exportSpecifierPattern = /export\s+(?:type\s+)?[^;]*?from\s+["']([^"']+)["']/gu;
 const babylonSpecifierPattern = /(?:from\s+|import\s*\()\s*["'](@babylonjs\/[^"']+)["']/gu;
 const forbiddenTypePattern =
-  /\b(?:Engine|WebGPUEngine|Scene|Mesh|AbstractMesh|TransformNode|Ray|AssetContainer|Texture|SceneLoader|PickingInfo|UtilityLayerRenderer|GizmoManager|NullEngine|SceneInstrumentation|EngineInstrumentation|PerfCounter|Observable|ArcRotateCamera|FreeCamera|UniversalCamera|Vector3|Matrix|LinesMesh|Color3|Color4)\b/u;
+  /\b(?:Engine|WebGPUEngine|Scene|Mesh|AbstractMesh|TransformNode|Ray|AssetContainer|Texture|SceneLoader|PickingInfo|UtilityLayerRenderer|GizmoManager|PositionGizmo|RotationGizmo|ScaleGizmo|NullEngine|SceneInstrumentation|EngineInstrumentation|PerfCounter|Observable|ArcRotateCamera|FreeCamera|UniversalCamera|Vector3|Matrix|LinesMesh|Color3|Color4)\b/u;
 const forbiddenDomTypePattern =
   /\b(?:HTMLCanvasElement|OffscreenCanvas|CanvasRenderingContext2D|WebGLRenderingContext|WebGL2RenderingContext)\b/u;
 
@@ -124,7 +124,7 @@ function physicalPublicModules(): ReadonlyMap<string, string> {
   );
 }
 
-describe("RSM-6-I6 public type isolation", () => {
+describe("RSM-6-I7 public type isolation", () => {
   it("accepts all three physical public entry declaration graphs", () => {
     expect(scanPublicDeclarationGraph(physicalPublicModules(), publicEntries)).toEqual([]);
   });
@@ -201,6 +201,24 @@ describe("RSM-6-I6 public type isolation", () => {
           ["headless.ts"],
         ),
       ).toEqual(["BABYLON_PUBLIC_TYPE_LEAK:headless.ts"]);
+    }
+  });
+
+  it("rejects every I7 Babylon Gizmo and UtilityLayer implementation type", () => {
+    for (const name of [
+      "UtilityLayerRenderer",
+      "GizmoManager",
+      "PositionGizmo",
+      "RotationGizmo",
+      "ScaleGizmo",
+      "TransformNode",
+    ]) {
+      expect(
+        scanPublicDeclarationGraph(
+          new Map([["editor.ts", `export interface Leak { readonly value: ${name}; }`]]),
+          ["editor.ts"],
+        ),
+      ).toEqual(["BABYLON_PUBLIC_TYPE_LEAK:editor.ts"]);
     }
   });
 
