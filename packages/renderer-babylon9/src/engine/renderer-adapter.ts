@@ -1,5 +1,8 @@
 import type {
   RendererAdapter,
+  RendererAssetDisposeRequest,
+  RendererAssetInstantiateRequest,
+  RendererAssetLoadRequest,
   RendererCameraProjection,
   RendererDiagnosticSnapshot,
   RendererFailure,
@@ -19,6 +22,13 @@ import type {
   RendererStateListener,
   RendererUnsubscribe,
 } from "../contracts/public.js";
+import { createBabylonAssetContainer } from "../assets/babylon-asset-container-factory.js";
+import {
+  RendererAssetContainerController,
+  type RendererAssetControllerResult,
+  type RendererAssetDisposalIssue,
+} from "../assets/asset-container-controller.js";
+import type { RendererAssetContainerFactory } from "../assets/asset-port.js";
 import { createBabylonCamera } from "../camera/babylon-camera-factory.js";
 import { RendererCameraController } from "../camera/camera-controller.js";
 import type { RendererCameraFactory } from "../camera/camera-port.js";
@@ -43,6 +53,7 @@ import { createBabylonEngine } from "./babylon-engine-factory.js";
 import type { RendererEngineFactory, RendererEnginePort } from "./engine-port.js";
 
 export interface RendererAdapterRuntimeOptions {
+  readonly assetFactory?: RendererAssetContainerFactory;
   readonly cameraFactory: RendererCameraFactory;
   readonly engineFactory: RendererEngineFactory;
   readonly pickingFactory?: RendererPickingFactory;
@@ -211,6 +222,7 @@ function copyRendererSelectionState(value: unknown): RendererSelectionState | nu
 }
 
 class RendererAdapterRuntime implements RendererAdapter {
+  readonly #assetController: RendererAssetContainerController;
   readonly #cameraController: RendererCameraController;
   readonly #contextController = new RendererContextController();
   readonly #engineFactory: RendererEngineFactory;
@@ -245,6 +257,18 @@ class RendererAdapterRuntime implements RendererAdapter {
   #state: RendererLifecycleState = "NEW";
 
   constructor(options: RendererAdapterRuntimeOptions) {
+    this.#assetController = new RendererAssetContainerController(
+      options.assetFactory ?? createBabylonAssetContainer,
+      {
+        captureRegistrationEpoch: (revision) =>
+          this.#handleRegistry.captureRegistrationEpoch(revision),
+        registerHandle: (stableId, handle, epoch) =>
+          this.#handleRegistry.registerHandle(stableId, handle, epoch),
+        unregisterHandle: (handle, epoch) => {
+          this.#handleRegistry.unregisterHandle(handle, epoch);
+        },
+      },
+    );
     this.#cameraController = new RendererCameraController(options.cameraFactory);
     this.#engineFactory = options.engineFactory;
     this.#pickingController = new RendererPickingController(
@@ -373,6 +397,7 @@ class RendererAdapterRuntime implements RendererAdapter {
 
     return {
       adapterGeneration: this.#adapterGeneration,
+      assets: this.#assetController.captureDiagnosticSnapshot(),
       contextState: this.#contextState,
       correlationIds: [...this.#correlationIds],
       failureCounts: { ...this.#failureCounts },
@@ -396,6 +421,24 @@ class RendererAdapterRuntime implements RendererAdapter {
     return this.dispose();
   }
 
+  disposeAssetContainer(request: RendererAssetDisposeRequest): RendererOperationResult {
+    const targetId = this.#assetRequestTarget(request);
+    if (
+      this.#state !== "READY" &&
+      this.#state !== "RUNNING" &&
+      this.#state !== "SUSPENDED_CONTEXT_LOSS" &&
+      this.#state !== "FAILED"
+    ) {
+      return this.#assetRejected(
+        "ASSET_LOAD_FAILED",
+        "AssetContainer disposal is unavailable in the current lifecycle state.",
+        undefined,
+        targetId,
+      );
+    }
+    return this.#assetControllerResult(this.#assetController.disposeAsset(request), targetId);
+  }
+
   dispose(): Promise<readonly RendererFailure[]> {
     if (this.#state === "DISPOSED" || this.#disposalStarted) return Promise.resolve([]);
     this.#disposalStarted = true;
@@ -416,6 +459,46 @@ class RendererAdapterRuntime implements RendererAdapter {
 
   onPickIntent(listener: RendererIntentListener<RendererPickIntent>): RendererUnsubscribe {
     return this.#subscribe(this.#pickListeners, listener);
+  }
+
+  instantiateAsset(request: RendererAssetInstantiateRequest): RendererOperationResult {
+    const targetId = this.#assetRequestTarget(request);
+    if (!this.#acceptsAssetMutation() || this.#latestProjection === null || this.#scene === null) {
+      return this.#assetRejected(
+        "ASSET_LOAD_FAILED",
+        "Asset instantiation requires a current READY or RUNNING renderer projection.",
+        undefined,
+        targetId,
+      );
+    }
+    return this.#assetControllerResult(
+      this.#assetController.instantiate(request, this.#latestProjection.revision),
+      targetId,
+    );
+  }
+
+  async loadAssetContainer(request: RendererAssetLoadRequest): Promise<RendererOperationResult> {
+    const targetId = this.#assetRequestTarget(request);
+    if (!this.#acceptsAssetMutation() || this.#latestProjection === null || this.#scene === null) {
+      return this.#assetRejected(
+        "ASSET_LOAD_FAILED",
+        "Asset loading requires a current READY or RUNNING renderer projection.",
+        undefined,
+        targetId,
+      );
+    }
+    const scene = this.#scene;
+    const revision = this.#latestProjection.revision;
+    const result = await this.#assetController.load(
+      request,
+      scene.nativeHandle,
+      revision,
+      () =>
+        this.#acceptsAssetMutation() &&
+        this.#scene === scene &&
+        this.#latestProjection?.revision === revision,
+    );
+    return this.#assetControllerResult(result, targetId);
   }
 
   pick(request: RendererPickRequest): RendererOperationResult {
@@ -499,6 +582,7 @@ class RendererAdapterRuntime implements RendererAdapter {
     if (this.#latestProjection?.revision === revision) {
       return Promise.resolve({ status: "duplicate-no-op" });
     }
+    this.#recordAssetDisposalIssues(this.#assetController.invalidateProjection());
     this.#latestProjection = input;
     return Promise.resolve({ status: "accepted-current" });
   }
@@ -634,6 +718,12 @@ class RendererAdapterRuntime implements RendererAdapter {
     );
   }
 
+  #acceptsAssetMutation(): boolean {
+    return (
+      (this.#state === "READY" || this.#state === "RUNNING") && this.#contextState === "available"
+    );
+  }
+
   #acceptsViewControl(): boolean {
     return this.#acceptsProjection();
   }
@@ -724,12 +814,54 @@ class RendererAdapterRuntime implements RendererAdapter {
     return accepted;
   }
 
+  #assetRequestTarget(request: unknown): string | null {
+    if (typeof request !== "object" || request === null) return null;
+    try {
+      const assetId = (request as { readonly assetId?: unknown }).assetId;
+      return typeof assetId === "string" && assetId.length > 0 ? assetId : null;
+    } catch {
+      return null;
+    }
+  }
+
+  #assetControllerResult(
+    result: RendererAssetControllerResult,
+    targetId: string | null,
+  ): RendererOperationResult {
+    this.#recordAssetDisposalIssues(result.disposalIssues);
+    if (result.accepted) return { accepted: true };
+    return this.#assetRejected(result.category, result.detail, result.cause, targetId);
+  }
+
+  #assetRejected(
+    category: "ASSET_LOAD_FAILED" | "UNSUPPORTED_DECODER",
+    detail: string,
+    cause: unknown,
+    targetId: string | null,
+  ): RendererOperationResult {
+    const failure = this.#createFailure(category, "recoverable", detail, cause, null, targetId);
+    if (this.#state !== "DISPOSING" && this.#state !== "DISPOSED") {
+      this.#recordFailure(failure);
+    }
+    return { accepted: false, failure };
+  }
+
+  #recordAssetDisposalIssues(issues: readonly RendererAssetDisposalIssue[]): void {
+    if (this.#state === "DISPOSING" || this.#state === "DISPOSED") return;
+    for (const issue of issues) {
+      this.#recordFailure(
+        this.#createFailure("RESOURCE_DISPOSAL_FAILED", "recoverable", issue.detail, issue.cause),
+      );
+    }
+  }
+
   #createFailure(
     category: RendererFailureCategory,
     classification: RendererFailure["classification"],
     detail: string,
     cause?: unknown,
     correlationId: string | null = null,
+    targetId: string | null = null,
   ): RendererFailure {
     return {
       category,
@@ -740,7 +872,7 @@ class RendererAdapterRuntime implements RendererAdapter {
       lifecycleState: this.#state,
       messageId: `renderer.${category.toLowerCase()}`,
       revision: this.#latestProjection?.revision ?? null,
-      targetId: null,
+      targetId,
     };
   }
 
@@ -775,6 +907,7 @@ class RendererAdapterRuntime implements RendererAdapter {
 
     if (state === "lost") {
       this.#contextState = "lost";
+      this.#assetController.observeContextLoss();
       if (this.#state !== "RUNNING") return;
 
       try {
@@ -833,6 +966,7 @@ class RendererAdapterRuntime implements RendererAdapter {
   #performDisposal(): readonly RendererFailure[] {
     const failures: RendererFailure[] = [];
     this.#transition("DISPOSING", false);
+    this.#assetController.terminalize();
     this.#pickingController.dispose();
     this.#handleRegistry.dispose();
     this.#derivedSelection = null;
@@ -862,6 +996,16 @@ class RendererAdapterRuntime implements RendererAdapter {
       () => this.#contextController.dispose(),
       "The context observer could not be detached during disposal.",
     );
+    for (const issue of this.#assetController.disposeAll()) {
+      const failure = this.#createFailure(
+        "RESOURCE_DISPOSAL_FAILED",
+        "recoverable",
+        issue.detail,
+        issue.cause,
+      );
+      failures.push(failure);
+      this.#recordFailure(failure);
+    }
     this.#notifyStateListeners("DISPOSING");
     failures.push(...this.#pendingEditorDisposalFailures);
     this.#pendingEditorDisposalFailures = [];

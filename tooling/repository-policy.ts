@@ -116,6 +116,17 @@ const expectedRendererI4Paths = new Set([
   "packages/renderer-babylon9/test/picking.test.ts",
 ]);
 
+const expectedRendererI5Paths = new Set([
+  "packages/renderer-babylon9/src/assets/asset-port.ts",
+  "packages/renderer-babylon9/src/assets/asset-container-controller.ts",
+  "packages/renderer-babylon9/src/assets/babylon-asset-container-factory.ts",
+  "packages/renderer-babylon9/src/loaders/gltf2-loader-registration.ts",
+  "packages/renderer-babylon9/src/loaders/gltf2-source-policy.ts",
+  "packages/renderer-babylon9/test/asset-container.test.ts",
+  "packages/renderer-babylon9/test/asset-stale-epoch.test.ts",
+  "packages/renderer-babylon9/test/gltf-loader-policy.test.ts",
+]);
+
 const forbiddenEarlyRoots = new Set(["scripts", "tools"]);
 
 function normalizePath(path: string): string {
@@ -166,7 +177,8 @@ export function validateRepositoryBootstrap(snapshot: BootstrapSnapshot): readon
       (expectedRendererFoundationPaths.has(path) ||
         expectedRendererI2Paths.has(path) ||
         expectedRendererI3Paths.has(path) ||
-        expectedRendererI4Paths.has(path));
+        expectedRendererI4Paths.has(path) ||
+        expectedRendererI5Paths.has(path));
     if (
       productPackageMatch !== null &&
       productPackageMatch[2] !== "package.json" &&
@@ -220,6 +232,16 @@ export function validateRepositoryBootstrap(snapshot: BootstrapSnapshot): readon
     for (const expectedPath of expectedRendererI4Paths) {
       if (!normalizedRepositoryPaths.includes(expectedPath)) {
         issues.push({ code: "REQUIRED_RENDERER_I4_PATH_MISSING", detail: expectedPath });
+      }
+    }
+  }
+  const rendererI5IsActive = normalizedRepositoryPaths.some((path) =>
+    expectedRendererI5Paths.has(path),
+  );
+  if (rendererI5IsActive) {
+    for (const expectedPath of expectedRendererI5Paths) {
+      if (!normalizedRepositoryPaths.includes(expectedPath)) {
+        issues.push({ code: "REQUIRED_RENDERER_I5_PATH_MISSING", detail: expectedPath });
       }
     }
   }

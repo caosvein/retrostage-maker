@@ -3,6 +3,10 @@ export { createRendererHostSurfaceCapability } from "./surface/host-capability.j
 
 export type {
   RendererAdapter,
+  RendererAssetDisposeRequest,
+  RendererAssetFormat,
+  RendererAssetInstantiateRequest,
+  RendererAssetLoadRequest,
   RendererCameraProjection,
   RendererContextObservation,
   RendererDiagnosticSnapshot,

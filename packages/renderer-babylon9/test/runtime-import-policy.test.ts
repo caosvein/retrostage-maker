@@ -14,6 +14,7 @@ interface ImportMetaWithGlob {
 }
 
 const allowedBabylonFactories = new Set([
+  "assets/babylon-asset-container-factory.ts",
   "camera/babylon-camera-factory.ts",
   "engine/babylon-engine-factory.ts",
   "grid/babylon-grid-factory.ts",
@@ -21,12 +22,15 @@ const allowedBabylonFactories = new Set([
   "scene/babylon-scene-factory.ts",
 ]);
 const exactBabylonBindings = new Map<string, readonly string[]>([
+  ["assets/babylon-asset-container-factory.ts", ["SceneLoader"]],
   ["camera/babylon-camera-factory.ts", ["ArcRotateCamera", "Vector3"]],
   ["engine/babylon-engine-factory.ts", ["Engine"]],
   ["grid/babylon-grid-factory.ts", ["Color3", "MeshBuilder", "Vector3"]],
   ["picking/babylon-picking-factory.ts", ["PickingInfo"]],
   ["scene/babylon-scene-factory.ts", ["Scene"]],
 ]);
+const exactLoaderRegistrationModule = "loaders/gltf2-loader-registration.ts";
+const exactLoaderRegistrationSpecifier = "@babylonjs/loaders/glTF/2.0";
 const importPattern =
   /(?:import|export)\s+(?:type\s+)?[^;]*?from\s+["']([^"']+)["']|import\s*["']([^"']+)["']/gu;
 const forbiddenRuntimePattern =
@@ -40,7 +44,11 @@ function scanRuntimeImports(modules: ReadonlyMap<string, string>): readonly stri
       const specifier = match[1] ?? match[2];
       if (specifier === undefined) continue;
       if (specifier.startsWith("@babylonjs/")) {
-        if (!allowedBabylonFactories.has(path)) {
+        if (path === exactLoaderRegistrationModule) {
+          if (specifier !== exactLoaderRegistrationSpecifier) {
+            issues.push(`BABYLON_LOADER_SPECIFIER_FORBIDDEN:${path}:${specifier}`);
+          }
+        } else if (!allowedBabylonFactories.has(path)) {
           issues.push(`BABYLON_IMPORT_OUTSIDE_FACTORY:${path}:${specifier}`);
         } else if (specifier !== "@babylonjs/core") {
           issues.push(`BABYLON_FACTORY_SPECIFIER_FORBIDDEN:${path}:${specifier}`);
@@ -58,6 +66,9 @@ function scanRuntimeImports(modules: ReadonlyMap<string, string>): readonly stri
             issues.push(`BABYLON_FACTORY_BINDINGS_INEXACT:${path}:${observed.join(",")}`);
           }
         }
+      }
+      if (specifier === "babylonjs-gltf2interface") {
+        issues.push(`GLTF_INTERFACE_RUNTIME_IMPORT_FORBIDDEN:${path}:${specifier}`);
       }
       if (forbiddenRuntimePattern.test(specifier)) {
         issues.push(`FORBIDDEN_RENDERER_RUNTIME_IMPORT:${path}:${specifier}`);
@@ -78,8 +89,8 @@ function physicalRuntimeModules(): ReadonlyMap<string, string> {
   );
 }
 
-describe("RSM-6-I4 runtime import policy", () => {
-  it("accepts the physical exact five-factory Babylon core import surface", () => {
+describe("RSM-6-I5 runtime import policy", () => {
+  it("accepts the physical exact six-factory core and sole glTF2 registration surface", () => {
     expect(scanRuntimeImports(physicalRuntimeModules())).toEqual([]);
   });
 
@@ -91,6 +102,9 @@ describe("RSM-6-I4 runtime import policy", () => {
       ["scene/babylon-scene-factory.ts#materials", 'import "@babylonjs/materials";'],
       ["camera/babylon-camera-factory.ts", 'import { FreeCamera } from "@babylonjs/core";'],
       ["picking/picking-controller.ts", 'import type { PickingInfo } from "@babylonjs/core";'],
+      ["loaders/other.ts", 'import "@babylonjs/loaders/glTF/2.0";'],
+      ["loaders/gltf2-loader-registration.ts", 'import "@babylonjs/loaders";'],
+      ["assets/runtime.ts", 'import "babylonjs-gltf2interface";'],
     ]);
     expect(scanRuntimeImports(synthetic)).toEqual([
       "BABYLON_IMPORT_OUTSIDE_FACTORY:engine/renderer-adapter.ts:@babylonjs/core",
@@ -99,6 +113,9 @@ describe("RSM-6-I4 runtime import policy", () => {
       "BABYLON_IMPORT_OUTSIDE_FACTORY:scene/babylon-scene-factory.ts#materials:@babylonjs/materials",
       "BABYLON_FACTORY_BINDINGS_INEXACT:camera/babylon-camera-factory.ts:FreeCamera",
       "BABYLON_IMPORT_OUTSIDE_FACTORY:picking/picking-controller.ts:@babylonjs/core",
+      "BABYLON_IMPORT_OUTSIDE_FACTORY:loaders/other.ts:@babylonjs/loaders/glTF/2.0",
+      "BABYLON_LOADER_SPECIFIER_FORBIDDEN:loaders/gltf2-loader-registration.ts:@babylonjs/loaders",
+      "GLTF_INTERFACE_RUNTIME_IMPORT_FORBIDDEN:assets/runtime.ts:babylonjs-gltf2interface",
     ]);
   });
 

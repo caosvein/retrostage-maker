@@ -38,7 +38,7 @@ module.exports = {
       from: {
         path: "^packages/renderer-babylon9/src",
         pathNot:
-          "^packages/renderer-babylon9/src/(?:engine/babylon-engine-factory|scene/babylon-scene-factory|camera/babylon-camera-factory|grid/babylon-grid-factory|picking/babylon-picking-factory)\\.ts$",
+          "^packages/renderer-babylon9/src/(?:engine/babylon-engine-factory|scene/babylon-scene-factory|camera/babylon-camera-factory|grid/babylon-grid-factory|picking/babylon-picking-factory|assets/babylon-asset-container-factory|loaders/gltf2-loader-registration)\\.ts$",
       },
       to: { path: "^@babylonjs/" },
     },
@@ -46,9 +46,17 @@ module.exports = {
       name: "renderer-private-factories-may-import-only-babylon-core-root",
       severity: "error",
       from: {
-        path: "^packages/renderer-babylon9/src/(?:engine/babylon-engine-factory|scene/babylon-scene-factory|camera/babylon-camera-factory|grid/babylon-grid-factory|picking/babylon-picking-factory)\\.ts$",
+        path: "^packages/renderer-babylon9/src/(?:engine/babylon-engine-factory|scene/babylon-scene-factory|camera/babylon-camera-factory|grid/babylon-grid-factory|picking/babylon-picking-factory|assets/babylon-asset-container-factory)\\.ts$",
       },
       to: { path: "^@babylonjs/(?!core$)" },
+    },
+    {
+      name: "renderer-loader-registration-may-import-only-exact-gltf2-subpath",
+      severity: "error",
+      from: {
+        path: "^packages/renderer-babylon9/src/loaders/gltf2-loader-registration\\.ts$",
+      },
+      to: { path: "^@babylonjs/(?!loaders/glTF/2\\.0$)" },
     },
     {
       name: "renderer-tests-must-not-import-babylon-runtime",

@@ -16,7 +16,8 @@ interface ImportMetaWithGlob {
   ): Readonly<Record<string, T>>;
 }
 
-const moduleSpecifierPattern = /(?:import|export)\s+(?:type\s+)?[^;]*?from\s+["']([^"']+)["']/gu;
+const moduleSpecifierPattern =
+  /(?:import|export)\s+(?:type\s+)?[^;]*?from\s+["']([^"']+)["']|import\s*["']([^"']+)["']/gu;
 
 function resolveLocalModule(from: string, specifier: string): string | null {
   if (!specifier.startsWith(".")) return null;
@@ -51,7 +52,7 @@ function scanForbiddenReachability(
     }
     moduleSpecifierPattern.lastIndex = 0;
     for (const match of source.matchAll(moduleSpecifierPattern)) {
-      const specifier = match[1];
+      const specifier = match[1] ?? match[2];
       if (specifier === undefined) continue;
       const local = resolveLocalModule(modulePath, specifier);
       if (local !== null) pending.push(local);
@@ -87,7 +88,15 @@ const privateI4Modules = new Set([
   "registry/handle-registry.ts",
 ]);
 
-describe("RSM-6-I4 public entry isolation", () => {
+const privateI5Modules = new Set([
+  "assets/asset-port.ts",
+  "assets/asset-container-controller.ts",
+  "assets/babylon-asset-container-factory.ts",
+  "loaders/gltf2-loader-registration.ts",
+  "loaders/gltf2-source-policy.ts",
+]);
+
+describe("RSM-6-I5 public entry isolation", () => {
   it("keeps the physical default/player graph isolated from editor, headless, and Grid", () => {
     expect(
       scanForbiddenReachability(
@@ -127,6 +136,32 @@ describe("RSM-6-I4 public entry isolation", () => {
       expect(source).not.toContain("unregisterHandle");
       expect(source).not.toContain("nativeHandle");
     }
+  });
+
+  it("allows root I5 reachability while headless stays isolated and editor owns no loader edge", () => {
+    const modules = physicalModules();
+    const rootReachability = scanForbiddenReachability(modules, "index.ts", privateI5Modules);
+    for (const modulePath of privateI5Modules) {
+      expect(rootReachability).toContain(`FORBIDDEN_ENTRY_REACHABLE:index.ts:${modulePath}`);
+    }
+    expect(scanForbiddenReachability(modules, "headless.ts", privateI5Modules)).toEqual([]);
+    for (const entry of ["editor.ts", "headless.ts"]) {
+      const source = modules.get(entry) ?? "";
+      expect(source).not.toContain("./assets/");
+      expect(source).not.toContain("./loaders/");
+      expect(source).not.toContain("gltf2-loader-registration");
+      expect(source).not.toContain("registerLoader");
+    }
+  });
+
+  it("rejects synthetic consumer-driven glTF loader registration", () => {
+    const synthetic = new Map([
+      ["headless.ts", 'import "./loaders/gltf2-loader-registration.js";'],
+      ["loaders/gltf2-loader-registration.ts", 'import "@babylonjs/loaders/glTF/2.0";'],
+    ]);
+    expect(scanForbiddenReachability(synthetic, "headless.ts", privateI5Modules)).toEqual([
+      "FORBIDDEN_ENTRY_REACHABLE:headless.ts:loaders/gltf2-loader-registration.ts",
+    ]);
   });
 
   it("publishes only the three intentional package entry surfaces", () => {

@@ -17,7 +17,7 @@ const publicEntries = ["index.ts", "editor.ts", "headless.ts"] as const;
 const exportSpecifierPattern = /export\s+(?:type\s+)?[^;]*?from\s+["']([^"']+)["']/gu;
 const babylonSpecifierPattern = /(?:from\s+|import\s*\()\s*["'](@babylonjs\/[^"']+)["']/gu;
 const forbiddenTypePattern =
-  /\b(?:Engine|WebGPUEngine|Scene|Mesh|AbstractMesh|TransformNode|Ray|AssetContainer|PickingInfo|UtilityLayerRenderer|GizmoManager|NullEngine|SceneInstrumentation|ArcRotateCamera|FreeCamera|UniversalCamera|Vector3|Matrix|LinesMesh|Color3|Color4)\b/u;
+  /\b(?:Engine|WebGPUEngine|Scene|Mesh|AbstractMesh|TransformNode|Ray|AssetContainer|Texture|SceneLoader|PickingInfo|UtilityLayerRenderer|GizmoManager|NullEngine|SceneInstrumentation|ArcRotateCamera|FreeCamera|UniversalCamera|Vector3|Matrix|LinesMesh|Color3|Color4)\b/u;
 const forbiddenDomTypePattern =
   /\b(?:HTMLCanvasElement|OffscreenCanvas|CanvasRenderingContext2D|WebGLRenderingContext|WebGL2RenderingContext)\b/u;
 
@@ -124,7 +124,7 @@ function physicalPublicModules(): ReadonlyMap<string, string> {
   );
 }
 
-describe("RSM-6-I4 public type isolation", () => {
+describe("RSM-6-I5 public type isolation", () => {
   it("accepts all three physical public entry declaration graphs", () => {
     expect(scanPublicDeclarationGraph(physicalPublicModules(), publicEntries)).toEqual([]);
   });
@@ -167,6 +167,37 @@ describe("RSM-6-I4 public type isolation", () => {
           ["index.ts"],
         ),
       ).toEqual(["BABYLON_PUBLIC_TYPE_LEAK:index.ts"]);
+    }
+  });
+
+  it("rejects every I5 Babylon asset and loader implementation type", () => {
+    for (const name of [
+      "AssetContainer",
+      "AbstractMesh",
+      "TransformNode",
+      "Texture",
+      "SceneLoader",
+    ]) {
+      expect(
+        scanPublicDeclarationGraph(
+          new Map([["index.ts", `export interface Leak { readonly nativeAssetValue: ${name}; }`]]),
+          ["index.ts"],
+        ),
+      ).toEqual(["BABYLON_PUBLIC_TYPE_LEAK:index.ts"]);
+    }
+  });
+
+  it("exposes only the approved Uint8Array source seam and no URL, path, File, or loader owner", () => {
+    const contracts = physicalPublicModules().get("contracts/public.ts") ?? "";
+    expect(contracts.includes("readonly bytes: Uint8Array")).toEqual(true);
+    for (const forbidden of [
+      "readonly url:",
+      "readonly path:",
+      "readonly file: File",
+      "registerLoader",
+      "AssetContainerPort",
+    ]) {
+      expect(contracts.includes(forbidden)).toEqual(false);
     }
   });
 

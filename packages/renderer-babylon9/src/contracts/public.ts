@@ -68,6 +68,25 @@ export interface RendererProjectionInput {
   readonly stableIds: readonly string[];
 }
 
+export type RendererAssetFormat = "glb-2.0" | "gltf-2.0";
+
+export interface RendererAssetLoadRequest {
+  readonly assetId: string;
+  readonly bytes: Uint8Array;
+  readonly format: RendererAssetFormat;
+  readonly sourceRevision: string;
+}
+
+export interface RendererAssetInstantiateRequest {
+  readonly assetId: string;
+  readonly sourceRevision: string;
+  readonly stableId: string;
+}
+
+export interface RendererAssetDisposeRequest {
+  readonly assetId: string;
+}
+
 export interface RendererSelectionState {
   readonly primaryId: string | null;
   readonly selectedIds: readonly string[];
@@ -165,6 +184,13 @@ export interface RendererTimingSnapshot {
 
 export interface RendererDiagnosticSnapshot {
   readonly adapterGeneration: number;
+  readonly assets: {
+    readonly estimatedTextureRgba8EquivalentBytes: number;
+    readonly inFlightLoadCount: number;
+    readonly liveContainerCount: number;
+    readonly liveInstanceCount: number;
+    readonly loadedMeshCount: number;
+  };
   readonly contextState: "available" | "lost" | "unavailable" | "unsupported";
   readonly correlationIds: readonly string[];
   readonly failureCounts: Readonly<Record<RendererFailureCategory, number>>;
@@ -195,11 +221,14 @@ export interface RendererAdapter {
   attachSurface(host: RendererHostSurface): Promise<RendererOperationResult>;
   captureDiagnosticSnapshot(): RendererDiagnosticSnapshot;
   detachSurface(): Promise<readonly RendererFailure[]>;
+  disposeAssetContainer(request: RendererAssetDisposeRequest): RendererOperationResult;
   dispose(): Promise<readonly RendererFailure[]>;
   initialize(host: RendererHostSurface): Promise<RendererOperationResult>;
   onFailure(listener: RendererFailureListener): RendererUnsubscribe;
   onLifecycleState(listener: RendererStateListener): RendererUnsubscribe;
   onPickIntent(listener: RendererIntentListener<RendererPickIntent>): RendererUnsubscribe;
+  instantiateAsset(request: RendererAssetInstantiateRequest): RendererOperationResult;
+  loadAssetContainer(request: RendererAssetLoadRequest): Promise<RendererOperationResult>;
   pick(request: RendererPickRequest): RendererOperationResult;
   project(input: RendererProjectionInput): Promise<RendererProjectionResult>;
   render(): RendererOperationResult;

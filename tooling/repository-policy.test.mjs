@@ -79,6 +79,11 @@ function snapshot(overrides = {}) {
       "packages/renderer-babylon9/src/picking/picking-port.ts",
       "packages/renderer-babylon9/src/picking/babylon-picking-factory.ts",
       "packages/renderer-babylon9/src/picking/picking-controller.ts",
+      "packages/renderer-babylon9/src/assets/asset-port.ts",
+      "packages/renderer-babylon9/src/assets/asset-container-controller.ts",
+      "packages/renderer-babylon9/src/assets/babylon-asset-container-factory.ts",
+      "packages/renderer-babylon9/src/loaders/gltf2-loader-registration.ts",
+      "packages/renderer-babylon9/src/loaders/gltf2-source-policy.ts",
       "packages/renderer-babylon9/test/type-leak.test.ts",
       "packages/renderer-babylon9/test/entry-isolation.test.ts",
       "packages/renderer-babylon9/test/lifecycle.test.ts",
@@ -91,6 +96,9 @@ function snapshot(overrides = {}) {
       "packages/renderer-babylon9/test/controller.test.ts",
       "packages/renderer-babylon9/test/handle-registry.test.ts",
       "packages/renderer-babylon9/test/picking.test.ts",
+      "packages/renderer-babylon9/test/asset-container.test.ts",
+      "packages/renderer-babylon9/test/asset-stale-epoch.test.ts",
+      "packages/renderer-babylon9/test/gltf-loader-policy.test.ts",
       "packages/test-fixtures/package.json",
     ],
     directDevDependencies: rootDependencies,
@@ -196,7 +204,7 @@ describe("RSM-6-ADMIT1 repository policy", () => {
     expect(validateRepositoryBootstrap(snapshot({ packageNames: unexpected }))).not.toEqual([]);
   });
 
-  it("accepts the exact complete I4 renderer path set", () => {
+  it("accepts the exact complete I1 through I5 renderer path set", () => {
     expect(validateRepositoryBootstrap(snapshot())).toEqual([]);
   });
 
@@ -227,7 +235,18 @@ describe("RSM-6-ADMIT1 repository policy", () => {
     expect(issues.map(({ code }) => code)).toContain("REQUIRED_RENDERER_I4_PATH_MISSING");
   });
 
-  it("rejects unexpected camera/Grid/registry paths and an I5 asset path", () => {
+  it("rejects a missing required I5 path once I5 is active", () => {
+    const baseline = snapshot();
+    const withoutStaleEpochTest = baseline.repositoryPaths.filter(
+      (path) => path !== "packages/renderer-babylon9/test/asset-stale-epoch.test.ts",
+    );
+    const issues = validateRepositoryBootstrap(
+      snapshot({ repositoryPaths: withoutStaleEpochTest }),
+    );
+    expect(issues.map(({ code }) => code)).toContain("REQUIRED_RENDERER_I5_PATH_MISSING");
+  });
+
+  it("rejects unexpected camera, Grid, registry, assets, and loaders paths", () => {
     const baseline = snapshot();
     const issues = validateRepositoryBootstrap(
       snapshot({
@@ -237,6 +256,7 @@ describe("RSM-6-ADMIT1 repository policy", () => {
           "packages/renderer-babylon9/src/grid/material.ts",
           "packages/renderer-babylon9/src/registry/runtime.ts",
           "packages/renderer-babylon9/src/assets/runtime.ts",
+          "packages/renderer-babylon9/src/loaders/runtime.ts",
         ],
       }),
     );
@@ -245,17 +265,21 @@ describe("RSM-6-ADMIT1 repository policy", () => {
       "PRODUCT_PACKAGE_NOT_EMPTY_FOUNDATION",
       "PRODUCT_PACKAGE_NOT_EMPTY_FOUNDATION",
       "PRODUCT_PACKAGE_NOT_EMPTY_FOUNDATION",
+      "PRODUCT_PACKAGE_NOT_EMPTY_FOUNDATION",
     ]);
   });
 
-  it("rejects a later-slice renderer path and a missing required I1 path", () => {
+  it("rejects an I6 path and a missing required I1 path", () => {
     const baseline = snapshot();
     const withoutHeadless = baseline.repositoryPaths.filter(
       (path) => path !== "packages/renderer-babylon9/src/headless.ts",
     );
     const issues = validateRepositoryBootstrap(
       snapshot({
-        repositoryPaths: [...withoutHeadless, "packages/renderer-babylon9/src/assets/runtime.ts"],
+        repositoryPaths: [
+          ...withoutHeadless,
+          "packages/renderer-babylon9/src/diagnostics/runtime.ts",
+        ],
       }),
     );
     expect(issues.map(({ code }) => code)).toContain("PRODUCT_PACKAGE_NOT_EMPTY_FOUNDATION");
