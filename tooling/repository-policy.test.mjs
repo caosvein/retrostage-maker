@@ -12,6 +12,9 @@ const rootDependencies = {
   vitest: "3.2.6",
 };
 const applicationDependencies = {
+  "@retrostage/renderer-babylon9": "workspace:*",
+};
+const applicationDevDependencies = {
   "@electron-forge/core": "7.11.2",
   electron: "43.4.0",
   vite: "8.2.1",
@@ -48,10 +51,16 @@ function snapshot(overrides = {}) {
       "apps/editor-electron/src/renderer/renderer.ts",
       "apps/editor-electron/src/renderer/styles.css",
       "apps/editor-electron/src/renderer/global.d.ts",
+      "apps/editor-electron/src/renderer/viewport-view.ts",
       "apps/editor-electron/scripts/forge.mjs",
       "apps/editor-electron/scripts/smoke.mjs",
       "apps/editor-electron/test/security-contract.test.mjs",
       "apps/editor-electron/test/import-boundary.test.mjs",
+      "apps/editor-electron/test/viewport-integration.test.mjs",
+      "tooling/compliance/generate.mjs",
+      "tooling/compliance/policy.test.mjs",
+      "compliance/license-review.json",
+      "compliance/THIRD_PARTY_NOTICES.html",
       "packages/core/package.json",
       "packages/diagnostics/package.json",
       "packages/renderer-babylon9/package.json",
@@ -115,7 +124,8 @@ function snapshot(overrides = {}) {
     directDevDependencies: rootDependencies,
     packageNames,
     applicationPackageName: "@retrostage/editor-electron",
-    applicationDevDependencies: applicationDependencies,
+    applicationDependencies,
+    applicationDevDependencies,
     rendererDependencies,
     rendererDevDependencies,
     ...overrides,
@@ -123,7 +133,7 @@ function snapshot(overrides = {}) {
 }
 
 describe("RSM-6-ADMIT1 repository policy", () => {
-  it("accepts the exact secure-shell topology and dependency sets", () => {
+  it("accepts the exact I8 Electron viewport topology and dependency sets", () => {
     expect(validateRepositoryBootstrap(snapshot())).toEqual([]);
   });
 
@@ -151,20 +161,45 @@ describe("RSM-6-ADMIT1 repository policy", () => {
     expect(issues.map(({ code }) => code)).toContain("REQUIRED_APPLICATION_PATH_MISSING");
   });
 
-  it("rejects a fourth app dependency, plugin-vite, Forge CLI and a prerelease", () => {
-    for (const applicationDevDependencies of [
-      { ...applicationDependencies, react: "19.0.0" },
-      { ...applicationDependencies, "@electron-forge/plugin-vite": "7.11.2" },
-      { ...applicationDependencies, "@electron-forge/cli": "7.11.2" },
-      { ...applicationDependencies, "@electron-forge/core": "8.0.0-alpha.10" },
+  it("rejects a fourth app development dependency, plugin-vite, Forge CLI and a prerelease", () => {
+    for (const candidateApplicationDevDependencies of [
+      { ...applicationDevDependencies, react: "19.0.0" },
+      { ...applicationDevDependencies, "@electron-forge/plugin-vite": "7.11.2" },
+      { ...applicationDevDependencies, "@electron-forge/cli": "7.11.2" },
+      { ...applicationDevDependencies, "@electron-forge/core": "8.0.0-alpha.10" },
     ]) {
-      expect(validateRepositoryBootstrap(snapshot({ applicationDevDependencies }))).not.toEqual([]);
+      expect(
+        validateRepositoryBootstrap({
+          ...snapshot(),
+          applicationDevDependencies: candidateApplicationDevDependencies,
+        }),
+      ).not.toEqual([]);
+    }
+  });
+
+  it("rejects missing, externalized, or additional application runtime dependencies", () => {
+    for (const candidateApplicationDependencies of [
+      {},
+      { "@retrostage/renderer-babylon9": "^0.0.0" },
+      { ...applicationDependencies, react: "19.0.0" },
+    ]) {
+      const issues = validateRepositoryBootstrap({
+        ...snapshot(),
+        applicationDependencies: candidateApplicationDependencies,
+      });
+      expect(issues.map(({ code }) => code)).toContain(
+        candidateApplicationDependencies["@retrostage/renderer-babylon9"] === "workspace:*"
+          ? "APPLICATION_RUNTIME_UNAUTHORIZED_DEPENDENCY"
+          : "APPLICATION_RUNTIME_DEPENDENCY_MISSING_OR_INEXACT",
+      );
     }
   });
 
   it("rejects Vite downgrade and inexact tar-independent app versions", () => {
     const issues = validateRepositoryBootstrap(
-      snapshot({ applicationDevDependencies: { ...applicationDependencies, vite: "7.3.6" } }),
+      snapshot({
+        applicationDevDependencies: { ...applicationDevDependencies, vite: "7.3.6" },
+      }),
     );
     expect(issues.map(({ code }) => code)).toContain(
       "APPLICATION_DIRECT_DEPENDENCY_MISSING_OR_INEXACT",
@@ -215,8 +250,49 @@ describe("RSM-6-ADMIT1 repository policy", () => {
     expect(validateRepositoryBootstrap(snapshot({ packageNames: unexpected }))).not.toEqual([]);
   });
 
-  it("accepts the exact complete I1 through I7 renderer path set", () => {
+  it("accepts the exact complete I1 through I8 path set", () => {
     expect(validateRepositoryBootstrap(snapshot())).toEqual([]);
+  });
+
+  it("rejects a missing exact I8/FIX1 path or an unexpected I8 application path", () => {
+    const baseline = snapshot();
+    const withoutViewportTest = baseline.repositoryPaths.filter(
+      (path) => path !== "apps/editor-electron/test/viewport-integration.test.mjs",
+    );
+    expect(
+      validateRepositoryBootstrap(snapshot({ repositoryPaths: withoutViewportTest })).map(
+        ({ code }) => code,
+      ),
+    ).toContain("REQUIRED_I8_FIX2_PATH_MISSING");
+    const withoutCompliancePolicyTest = baseline.repositoryPaths.filter(
+      (path) => path !== "tooling/compliance/policy.test.mjs",
+    );
+    expect(
+      validateRepositoryBootstrap(snapshot({ repositoryPaths: withoutCompliancePolicyTest })).map(
+        ({ code }) => code,
+      ),
+    ).toContain("REQUIRED_I8_FIX2_PATH_MISSING");
+    for (const artifactPath of [
+      "compliance/license-review.json",
+      "compliance/THIRD_PARTY_NOTICES.html",
+    ]) {
+      const withoutArtifact = baseline.repositoryPaths.filter((path) => path !== artifactPath);
+      expect(
+        validateRepositoryBootstrap(snapshot({ repositoryPaths: withoutArtifact })).map(
+          ({ code }) => code,
+        ),
+      ).toContain("REQUIRED_I8_FIX2_PATH_MISSING");
+    }
+    expect(
+      validateRepositoryBootstrap(
+        snapshot({
+          repositoryPaths: [
+            ...baseline.repositoryPaths,
+            "apps/editor-electron/src/renderer/viewport-private.ts",
+          ],
+        }),
+      ).map(({ code }) => code),
+    ).toContain("UNAUTHORIZED_APPLICATION_PATH");
   });
 
   it("rejects a missing required I2 path once I2 is active", () => {
@@ -302,7 +378,7 @@ describe("RSM-6-ADMIT1 repository policy", () => {
     ]);
   });
 
-  it("rejects unexpected headless/diagnostics/gizmos paths and an I8 path", () => {
+  it("rejects unexpected headless/diagnostics/gizmos paths and a post-I8 path", () => {
     const baseline = snapshot();
     const issues = validateRepositoryBootstrap(
       snapshot({

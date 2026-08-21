@@ -17,6 +17,9 @@
     "package": "node scripts/forge.mjs",
     "smoke": "node scripts/smoke.mjs"
   },
+  "dependencies": {
+    "@retrostage/renderer-babylon9": "workspace:*"
+  },
   "devDependencies": {
     "@electron-forge/core": "7.11.2",
     "electron": "43.4.0",

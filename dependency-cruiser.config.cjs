@@ -50,9 +50,30 @@ module.exports = {
       name: "renderer-default-headless-and-product-must-not-reach-editor-gizmos",
       severity: "error",
       from: {
-        path: "^(?:packages/renderer-babylon9/src/(?:index|headless)\\.ts|packages/renderer-babylon9/src/headless/|apps/editor-electron/src)",
+        path: "^(?:packages/renderer-babylon9/src/(?:index|headless)\\.ts|packages/renderer-babylon9/src/headless/)",
       },
       to: { path: "^packages/renderer-babylon9/src/gizmos/" },
+    },
+    {
+      name: "electron-viewport-may-import-only-renderer-public-entries",
+      severity: "error",
+      from: { path: "^apps/editor-electron/src/renderer/viewport-view\\.ts$" },
+      to: {
+        path: "^packages/renderer-babylon9/src/",
+        pathNot: "^packages/renderer-babylon9/src/(?:index|editor)\\.ts$",
+      },
+    },
+    {
+      name: "electron-main-and-preload-must-not-own-renderer",
+      severity: "error",
+      from: { path: "^apps/editor-electron/src/(?:main|preload)" },
+      to: { path: "^packages/renderer-babylon9" },
+    },
+    {
+      name: "electron-renderer-must-not-import-babylon-directly",
+      severity: "error",
+      from: { path: "^apps/editor-electron/src/renderer" },
+      to: { path: "^@babylonjs/" },
     },
     {
       name: "renderer-babylon-imports-only-in-exact-private-factories",
@@ -99,7 +120,7 @@ module.exports = {
       severity: "error",
       from: { path: "^apps/editor-electron/src/renderer" },
       to: {
-        path: "^(?:electron|node:|fs$|child_process$|apps/editor-electron/src/(?:main|preload))",
+        path: "^(?:electron|node:|fs$|path$|child_process$|apps/editor-electron/src/(?:main|preload))",
       },
     },
     {

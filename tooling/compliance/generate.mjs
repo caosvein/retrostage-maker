@@ -142,6 +142,25 @@ function runPnpm(args, acceptedStatuses = [0]) {
   return { status: result.status ?? -1, stdout: result.stdout, stderr: result.stderr };
 }
 
+export function assertRuntimeDependencyBaseline(
+  rootRuntimeDependencies,
+  applicationRuntimeDependencies,
+) {
+  if (Object.keys(rootRuntimeDependencies ?? {}).length !== 0) {
+    throw new Error("Root production npm runtime direct dependencies are not authorized.");
+  }
+  const applicationEntries = Object.entries(applicationRuntimeDependencies ?? {});
+  if (
+    applicationEntries.length !== 1 ||
+    applicationEntries[0]?.[0] !== "@retrostage/renderer-babylon9" ||
+    applicationEntries[0]?.[1] !== "workspace:*"
+  ) {
+    throw new Error(
+      "Electron app runtime dependencies must be exactly @retrostage/renderer-babylon9=workspace:*.",
+    );
+  }
+}
+
 function assertDependencyBaseline() {
   const rootPackageJson = JSON.parse(
     readFileSync(path.join(REPOSITORY_ROOT, "package.json"), "utf8"),
@@ -163,12 +182,10 @@ function assertDependencyBaseline() {
       "Electron app direct dependency baseline differs from the accepted three identities.",
     );
   }
-  if (
-    Object.keys(rootPackageJson.dependencies ?? {}).length !== 0 ||
-    Object.keys(applicationPackageJson.dependencies ?? {}).length !== 0
-  ) {
-    throw new Error("Production npm runtime direct dependencies are not authorized in RSM-5-I1.");
-  }
+  assertRuntimeDependencyBaseline(
+    rootPackageJson.dependencies,
+    applicationPackageJson.dependencies,
+  );
 
   const workspace = readFileSync(path.join(REPOSITORY_ROOT, "pnpm-workspace.yaml"), "utf8");
   for (const fragment of [

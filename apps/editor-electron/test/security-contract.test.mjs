@@ -14,7 +14,7 @@ import {
 const applicationRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const read = (relativePath) => readFileSync(path.join(applicationRoot, relativePath), "utf8");
 const productionCsp =
-  "default-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'; object-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'none'; worker-src 'none'";
+  "default-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'none'; worker-src 'none'";
 
 function securityIssues(snapshot) {
   const issues = [];
@@ -28,6 +28,7 @@ function securityIssues(snapshot) {
     "navigateOnDragDrop: false",
     "webviewTag: false",
     'window.webContents.on("will-navigate"',
+    "allowedSmokeUrls.has(targetUrl)",
     "event.preventDefault()",
     "window.webContents.setWindowOpenHandler",
     'return { action: "deny" }',
@@ -40,6 +41,13 @@ function securityIssues(snapshot) {
   }
   if ((snapshot.main.match(/new BrowserWindow\(/gu) ?? []).length !== 1) {
     issues.push("MAIN_WINDOW_OWNER_COUNT");
+  }
+  if (
+    !snapshot.main.includes("#rsm6-i8-smoke-1") ||
+    !snapshot.main.includes("#rsm6-i8-smoke-2") ||
+    snapshot.main.includes("startsWith(`${allowedInitialUrl}#rsm6-i8-smoke-`)")
+  ) {
+    issues.push("MAIN_SMOKE_SELECTOR_NOT_EXACT");
   }
   if (!snapshot.preload.includes('contextBridge.exposeInMainWorld("retrostageShell", shell)')) {
     issues.push("PRELOAD_BRIDGE_MISSING");
@@ -56,6 +64,9 @@ function securityIssues(snapshot) {
   }
   if (!snapshot.html.includes(`content="${productionCsp}"`)) issues.push("PRODUCTION_CSP_MISMATCH");
   if (/unsafe-eval|https?:\/\/|\*\s*;/gu.test(snapshot.html)) issues.push("PRODUCTION_CSP_UNSAFE");
+  if (!snapshot.html.includes("Chromium ignores that directive when meta-delivered")) {
+    issues.push("META_CSP_LIMITATION_UNDOCUMENTED");
+  }
   return issues;
 }
 
@@ -94,6 +105,12 @@ function smokeHarnessIssues(smoke) {
     "launchTimeMilliseconds",
     "closeTimeMilliseconds",
     "relatedWindowsProcesses",
+    "viewportSmokeIssues",
+    "VIEWPORT_GENERATION_COUNT",
+    "VIEWPORT_CONSOLE_WARNING",
+    "VIEWPORT_CONSOLE_ERROR",
+    "VIEWPORT_RENDERER_CRASH",
+    "VIEWPORT_WEBGL_FAILURE",
   ];
   for (const fragment of requiredFragments) {
     if (!smoke.includes(fragment)) issues.push(`SMOKE_SUID_FRAGMENT_MISSING:${fragment}`);
@@ -193,6 +210,31 @@ describe("RSM-5-I1 secure Electron contract", () => {
     const snapshot = physicalSnapshot();
     expect(smokeHarnessIssues(snapshot.smoke)).toEqual([]);
     expect(snapshot.main).toContain("sandbox: true");
+  });
+
+  it("keeps Main smoke-only and proves exact I8 reload/console/crash observation", () => {
+    const snapshot = physicalSnapshot();
+    for (const fragment of [
+      "rendererReloadCount",
+      "rendererConsoleErrors",
+      "rendererConsoleWarnings",
+      "rendererCrashCount",
+      "webglInitializationFailures",
+      'window.webContents.on("console-message"',
+      'window.webContents.on("render-process-gone"',
+      "observeViewportGeneration(window, 1)",
+      "reloadForSecondViewportGeneration(window)",
+      "observeViewportGeneration(window, 2)",
+      "rendererReloadCount === 1",
+      "window.showInactive()",
+      "30_000",
+      "60_000",
+    ]) {
+      expect(snapshot.main).toContain(fragment);
+    }
+    expect(snapshot.main).not.toMatch(/@retrostage\/renderer-babylon9|@babylonjs\//u);
+    expect(snapshot.preload).not.toMatch(/viewport|renderer-babylon9|ipcRenderer/u);
+    expect(snapshot.smoke).toContain("const timeoutMilliseconds = 90_000");
   });
 
   it("rejects missing SUID preparation evidence and sandbox-disable bypasses", () => {

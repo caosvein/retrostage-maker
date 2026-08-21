@@ -10,7 +10,7 @@ import { fileURLToPath } from "node:url";
 
 const require = createRequire(import.meta.url);
 const applicationRoot = path.resolve(import.meta.dirname, "..");
-const timeoutMilliseconds = 45_000;
+const timeoutMilliseconds = 90_000;
 const processClockToleranceMilliseconds = 1_500;
 const windowsInventoryCommand = String.raw`
 $ErrorActionPreference = 'Stop'
@@ -259,6 +259,51 @@ export function assertNoRelatedWindowsProcesses(mode, relatedProcesses) {
   }
 }
 
+export function viewportSmokeIssues(result) {
+  const issues = [];
+  if (result.rendererReloadCount !== 1) issues.push("VIEWPORT_RELOAD_COUNT");
+  if (result.rendererConsoleWarnings?.length !== 0) issues.push("VIEWPORT_CONSOLE_WARNING");
+  if (result.rendererConsoleErrors?.length !== 0) issues.push("VIEWPORT_CONSOLE_ERROR");
+  if (result.rendererCrashCount !== 0) issues.push("VIEWPORT_RENDERER_CRASH");
+  if (result.webglInitializationFailures?.length !== 0) issues.push("VIEWPORT_WEBGL_FAILURE");
+  if (result.viewportCanvasCount !== 0) issues.push("VIEWPORT_CANVAS_RETAINED");
+  const generations = result.viewportGenerations ?? [];
+  if (generations.length !== 2) issues.push("VIEWPORT_GENERATION_COUNT");
+  for (const [index, generation] of generations.entries()) {
+    const expected = index + 1;
+    const failureSummary = generation.rendererFailureSummary ?? [];
+    if (
+      generation.rendererDocumentGeneration !== expected ||
+      generation.generation !== 1 ||
+      generation.status !== "succeeded" ||
+      generation.mounted !== true ||
+      generation.frameSampleCount < 60 ||
+      generation.resizeObserved !== true ||
+      generation.contextLostObserved !== true ||
+      generation.contextRestoredObserved !== true ||
+      generation.assetLoaded !== true ||
+      generation.assetInstantiated !== true ||
+      generation.gizmoAttached !== true ||
+      generation.gizmoModesAccepted !== true ||
+      generation.pickIntentCount < 1 ||
+      generation.disposed !== true ||
+      generation.terminalLifecycle !== "DISPOSED" ||
+      generation.terminalEngineCount !== 0 ||
+      generation.terminalSceneCount !== 0 ||
+      generation.terminalAssetContainerCount !== 0 ||
+      generation.terminalAssetInstanceCount !== 0 ||
+      generation.canvasRemoved !== true ||
+      generation.unhandledRendererRejectionCount !== 0 ||
+      failureSummary.length !== 1 ||
+      failureSummary[0]?.category !== "CONTEXT_OR_DEVICE_LOST" ||
+      failureSummary[0]?.classification !== "recoverable"
+    ) {
+      issues.push(`VIEWPORT_GENERATION_${expected}_FAILED`);
+    }
+  }
+  return issues;
+}
+
 async function runMode(mode, temporaryRoot) {
   const resultPath = path.join(temporaryRoot, `${mode}.json`);
   const packaged = mode === "packaged";
@@ -318,6 +363,10 @@ async function runMode(mode, temporaryRoot) {
   const result = JSON.parse(readFileSync(resultPath, "utf8"));
   if (result.result !== "PASS" || result.packaged !== packaged) {
     throw new Error(`RSM5_SMOKE_RESULT_FAILURE:${mode}:${JSON.stringify(result)}`);
+  }
+  const viewportIssues = viewportSmokeIssues(result);
+  if (viewportIssues.length !== 0) {
+    throw new Error(`RSM6_I8_SMOKE_RESULT_FAILURE:${mode}:${viewportIssues.join(",")}`);
   }
   await delay(250);
   const postCloseInventory = process.platform === "win32" ? readWindowsProcessInventory() : [];

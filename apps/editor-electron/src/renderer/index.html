@@ -4,18 +4,20 @@
     <meta charset="UTF-8" />
     <meta
       http-equiv="Content-Security-Policy"
-      content="default-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'; object-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'none'; worker-src 'none'"
+      content="default-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'none'; worker-src 'none'"
     />
+    <!-- frame-ancestors 'none' is intentionally absent from the meta policy because Chromium ignores that directive when meta-delivered. -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>RetroStage Maker</title>
     <link rel="stylesheet" href="./styles.css" />
   </head>
   <body>
-    <main>
-      <p class="eyebrow">SECURE DESKTOP FOUNDATION</p>
+    <header>
+      <p class="eyebrow">SECURE DESKTOP VIEWPORT</p>
       <h1 data-retrostage-brand>RetroStage Maker</h1>
       <p id="status">Loading secure shell metadata...</p>
-    </main>
+    </header>
+    <main id="retrostage-viewport-root" aria-label="RetroStage editor viewport"></main>
     <script type="module" src="./renderer.ts"></script>
   </body>
 </html>

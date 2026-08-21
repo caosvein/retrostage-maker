@@ -34,7 +34,7 @@
     "packagedNativeHashMatches": [],
     "packagedNodeModulesPresent": false,
     "packagedPathIdentityMatches": [],
-    "packagedResourceFileCount": 22,
+    "packagedResourceFileCount": 971,
     "packagedTextIdentityMatches": [],
     "sourceAvailabilityFulfillment": "NOT TRIGGERED FOR THIS CANDIDATE ARTIFACT; RE-EVALUATE AND PROVIDE MPL-COVERED SOURCE IF A FUTURE RELEASE ARTIFACT PHYSICALLY DISTRIBUTES THE COMPONENT"
   },
@@ -8259,7 +8259,7 @@
         "packagedNativeHashMatches": [],
         "packagedNodeModulesPresent": false,
         "packagedPathIdentityMatches": [],
-        "packagedResourceFileCount": 22,
+        "packagedResourceFileCount": 971,
         "packagedTextIdentityMatches": [],
         "sourceAvailabilityFulfillment": "NOT TRIGGERED FOR THIS CANDIDATE ARTIFACT; RE-EVALUATE AND PROVIDE MPL-COVERED SOURCE IF A FUTURE RELEASE ARTIFACT PHYSICALLY DISTRIBUTES THE COMPONENT"
       },
@@ -8301,7 +8301,7 @@
         "packagedNativeHashMatches": [],
         "packagedNodeModulesPresent": false,
         "packagedPathIdentityMatches": [],
-        "packagedResourceFileCount": 22,
+        "packagedResourceFileCount": 971,
         "packagedTextIdentityMatches": [],
         "sourceAvailabilityFulfillment": "NOT TRIGGERED FOR THIS CANDIDATE ARTIFACT; RE-EVALUATE AND PROVIDE MPL-COVERED SOURCE IF A FUTURE RELEASE ARTIFACT PHYSICALLY DISTRIBUTES THE COMPONENT"
       },

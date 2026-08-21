@@ -32,11 +32,38 @@ import {
   validateWorkflowText,
   vulnerabilityDisposition,
 } from "./policy.mjs";
-import { readFirstPartyWorkspacePackagePaths } from "./generate.mjs";
+import {
+  assertRuntimeDependencyBaseline,
+  readFirstPartyWorkspacePackagePaths,
+} from "./generate.mjs";
 
 const approvedActions = new Map([["actions/checkout", "3d3c42e5aac5ba805825da76410c181273ba90b1"]]);
 
 describe("RSM-3-I3 compliance policy", () => {
+  it("admits only the exact I8 application runtime workspace edge", () => {
+    expect(() =>
+      assertRuntimeDependencyBaseline({}, { "@retrostage/renderer-babylon9": "workspace:*" }),
+    ).not.toThrow();
+
+    for (const applicationDependencies of [
+      {},
+      { "@retrostage/renderer-babylon9": "^0.0.0" },
+      { "@retrostage/renderer-babylon9": "workspace:*", react: "19.0.0" },
+      { "@retrostage/renderer-other": "workspace:*" },
+    ]) {
+      expect(() => assertRuntimeDependencyBaseline({}, applicationDependencies)).toThrow(
+        "Electron app runtime dependencies must be exactly",
+      );
+    }
+
+    expect(() =>
+      assertRuntimeDependencyBaseline(
+        { "@retrostage/renderer-babylon9": "workspace:*" },
+        { "@retrostage/renderer-babylon9": "workspace:*" },
+      ),
+    ).toThrow("Root production npm runtime direct dependencies are not authorized.");
+  });
+
   it("rejects a prohibited license", () => {
     expect(
       classifyLicenseIdentity({ name: "x", version: "1.0.0", license: "GPL-3.0" }).prohibited,

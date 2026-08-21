@@ -3,6 +3,7 @@ interface BootstrapSnapshot {
   readonly directDevDependencies: Readonly<Record<string, string>>;
   readonly packageNames: Readonly<Record<string, string>>;
   readonly applicationPackageName: string;
+  readonly applicationDependencies?: Readonly<Record<string, string>>;
   readonly applicationDevDependencies: Readonly<Record<string, string>>;
   readonly rendererDependencies?: Readonly<Record<string, string>>;
   readonly rendererDevDependencies?: Readonly<Record<string, string>>;
@@ -27,6 +28,10 @@ const expectedApplicationDevDependencies = new Map<string, string>([
   ["@electron-forge/core", "7.11.2"],
   ["electron", "43.4.0"],
   ["vite", "8.2.1"],
+]);
+
+const expectedApplicationDependencies = new Map<string, string>([
+  ["@retrostage/renderer-babylon9", "workspace:*"],
 ]);
 
 const expectedRendererDependencies = new Map<string, string>([
@@ -65,6 +70,19 @@ const expectedApplicationPaths = new Set([
   "apps/editor-electron/scripts/smoke.mjs",
   "apps/editor-electron/test/security-contract.test.mjs",
   "apps/editor-electron/test/import-boundary.test.mjs",
+]);
+
+const expectedApplicationI8Paths = new Set([
+  "apps/editor-electron/src/renderer/viewport-view.ts",
+  "apps/editor-electron/test/viewport-integration.test.mjs",
+]);
+
+const expectedI8Fix2Paths = new Set([
+  ...expectedApplicationI8Paths,
+  "compliance/THIRD_PARTY_NOTICES.html",
+  "compliance/license-review.json",
+  "tooling/compliance/generate.mjs",
+  "tooling/compliance/policy.test.mjs",
 ]);
 
 const expectedRendererFoundationPaths = new Set([
@@ -185,7 +203,11 @@ export function validateRepositoryBootstrap(snapshot: BootstrapSnapshot): readon
     if (root !== undefined && forbiddenEarlyRoots.has(root)) {
       issues.push({ code: "FORBIDDEN_EARLY_ROOT", detail: path });
     }
-    if (path.startsWith("apps/") && !expectedApplicationPaths.has(path)) {
+    if (
+      path.startsWith("apps/") &&
+      !expectedApplicationPaths.has(path) &&
+      !expectedApplicationI8Paths.has(path)
+    ) {
       issues.push({ code: "UNAUTHORIZED_APPLICATION_PATH", detail: path });
     }
     const productPackageMatch = /^(packages\/[^/]+)\/(.+)$/u.exec(path);
@@ -210,6 +232,16 @@ export function validateRepositoryBootstrap(snapshot: BootstrapSnapshot): readon
   for (const expectedPath of expectedApplicationPaths) {
     if (!snapshot.repositoryPaths.some((candidate) => normalizePath(candidate) === expectedPath)) {
       issues.push({ code: "REQUIRED_APPLICATION_PATH_MISSING", detail: expectedPath });
+    }
+  }
+  const applicationI8IsActive = normalizedRepositoryPaths.some((path) =>
+    expectedApplicationI8Paths.has(path),
+  );
+  if (applicationI8IsActive) {
+    for (const expectedPath of expectedI8Fix2Paths) {
+      if (!normalizedRepositoryPaths.includes(expectedPath)) {
+        issues.push({ code: "REQUIRED_I8_FIX2_PATH_MISSING", detail: expectedPath });
+      }
     }
   }
   const rendererFoundationIsActive = normalizedRepositoryPaths.some(
@@ -291,6 +323,14 @@ export function validateRepositoryBootstrap(snapshot: BootstrapSnapshot): readon
     issues,
     "ROOT_DIRECT",
   );
+  if (snapshot.applicationDependencies !== undefined) {
+    validateExactDependencies(
+      snapshot.applicationDependencies,
+      expectedApplicationDependencies,
+      issues,
+      "APPLICATION_RUNTIME",
+    );
+  }
   validateExactDependencies(
     snapshot.applicationDevDependencies,
     expectedApplicationDevDependencies,
