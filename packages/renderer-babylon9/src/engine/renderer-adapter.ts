@@ -32,6 +32,9 @@ import type { RendererAssetContainerFactory } from "../assets/asset-port.js";
 import { createBabylonCamera } from "../camera/babylon-camera-factory.js";
 import { RendererCameraController } from "../camera/camera-controller.js";
 import type { RendererCameraFactory } from "../camera/camera-port.js";
+import { createBabylonRendererDiagnostics } from "../diagnostics/babylon-instrumentation-factory.js";
+import { RendererDiagnosticsController } from "../diagnostics/diagnostics-controller.js";
+import type { RendererDiagnosticsFactory } from "../diagnostics/diagnostics-port.js";
 import { createBabylonPickObservation } from "../picking/babylon-picking-factory.js";
 import { RendererPickingController } from "../picking/picking-controller.js";
 import type { RendererPickingFactory } from "../picking/picking-port.js";
@@ -55,6 +58,7 @@ import type { RendererEngineFactory, RendererEnginePort } from "./engine-port.js
 export interface RendererAdapterRuntimeOptions {
   readonly assetFactory?: RendererAssetContainerFactory;
   readonly cameraFactory: RendererCameraFactory;
+  readonly diagnosticsFactory?: RendererDiagnosticsFactory;
   readonly engineFactory: RendererEngineFactory;
   readonly pickingFactory?: RendererPickingFactory;
   readonly sceneFactory: RendererSceneFactory;
@@ -225,6 +229,7 @@ class RendererAdapterRuntime implements RendererAdapter {
   readonly #assetController: RendererAssetContainerController;
   readonly #cameraController: RendererCameraController;
   readonly #contextController = new RendererContextController();
+  readonly #diagnosticsController: RendererDiagnosticsController;
   readonly #engineFactory: RendererEngineFactory;
   readonly #failureCounts = emptyFailureCounts();
   readonly #failureListeners = new Set<RendererFailureListener>();
@@ -270,6 +275,7 @@ class RendererAdapterRuntime implements RendererAdapter {
       },
     );
     this.#cameraController = new RendererCameraController(options.cameraFactory);
+    this.#diagnosticsController = new RendererDiagnosticsController(options.diagnosticsFactory);
     this.#engineFactory = options.engineFactory;
     this.#pickingController = new RendererPickingController(
       this.#handleRegistry,
@@ -350,6 +356,7 @@ class RendererAdapterRuntime implements RendererAdapter {
     try {
       this.#engine = this.#engineFactory(nativeSurface);
       this.#scene = this.#sceneFactory(this.#engine);
+      this.#diagnosticsController.attach(this.#engine.nativeHandle, this.#scene.nativeHandle);
       initializationPhase = "camera";
       this.#cameraController.initialize(this.#scene.nativeHandle);
       initializationPhase = "engine-scene";
@@ -392,29 +399,35 @@ class RendererAdapterRuntime implements RendererAdapter {
       }
     }
 
+    const instrumentation = this.#diagnosticsController.capture();
     const unavailableMetrics = ["drawCalls"];
     if (fps === null) unavailableMetrics.push("framesPerSecond", "frameMilliseconds");
+    for (const [name, value] of Object.entries(instrumentation)) {
+      if (value === null) unavailableMetrics.push(`instrumentation.${name}`);
+    }
 
-    return {
+    const snapshot: RendererDiagnosticSnapshot = {
       adapterGeneration: this.#adapterGeneration,
       assets: this.#assetController.captureDiagnosticSnapshot(),
       contextState: this.#contextState,
-      correlationIds: [...this.#correlationIds],
-      failureCounts: { ...this.#failureCounts },
+      correlationIds: Object.freeze([...this.#correlationIds]),
+      failureCounts: Object.freeze({ ...this.#failureCounts }),
       health: this.#health(),
+      instrumentation,
       lifecycleState: this.#state,
       projectionRevision: this.#latestProjection?.revision ?? null,
-      resourceCounts: {
+      resourceCounts: Object.freeze({
         engine: this.#engine === null ? 0 : 1,
         scene: this.#scene === null ? 0 : 1,
-      },
-      timing: {
+      }),
+      timing: Object.freeze({
         frameMilliseconds: fps === null ? null : 1000 / fps,
         framesPerSecond: fps,
         sampleCount: this.#framesRendered,
-      },
-      unavailableMetrics,
+      }),
+      unavailableMetrics: Object.freeze([...new Set(unavailableMetrics)].sort()),
     };
+    return Object.freeze(snapshot);
   }
 
   detachSurface(): Promise<readonly RendererFailure[]> {
@@ -761,6 +774,7 @@ class RendererAdapterRuntime implements RendererAdapter {
     for (const cleanup of [
       () => this.#resizeController?.dispose(),
       () => this.#contextController.dispose(),
+      () => this.#diagnosticsController.dispose(),
       () => this.#cameraController.dispose(),
       () => this.#scene?.dispose(),
       () => this.#engine?.dispose(),
@@ -996,6 +1010,10 @@ class RendererAdapterRuntime implements RendererAdapter {
       () => this.#contextController.dispose(),
       "The context observer could not be detached during disposal.",
     );
+    cleanup(
+      () => this.#diagnosticsController.dispose(),
+      "The private diagnostics instrumentation could not be detached during disposal.",
+    );
     for (const issue of this.#assetController.disposeAll()) {
       const failure = this.#createFailure(
         "RESOURCE_DISPOSAL_FAILED",
@@ -1165,7 +1183,20 @@ class RendererAdapterRuntime implements RendererAdapter {
 export function createRendererAdapter(): RendererAdapter {
   return new RendererAdapterRuntime({
     cameraFactory: createBabylonCamera,
+    diagnosticsFactory: createBabylonRendererDiagnostics,
     engineFactory: createBabylonEngine,
+    pickingFactory: createBabylonPickObservation,
+    sceneFactory: createBabylonScene,
+  });
+}
+
+export function createRendererAdapterForHeadlessRuntime(
+  engineFactory: RendererEngineFactory,
+): RendererAdapter {
+  return new RendererAdapterRuntime({
+    cameraFactory: createBabylonCamera,
+    diagnosticsFactory: createBabylonRendererDiagnostics,
+    engineFactory,
     pickingFactory: createBabylonPickObservation,
     sceneFactory: createBabylonScene,
   });

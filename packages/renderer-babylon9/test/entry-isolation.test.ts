@@ -96,13 +96,24 @@ const privateI5Modules = new Set([
   "loaders/gltf2-source-policy.ts",
 ]);
 
-describe("RSM-6-I5 public entry isolation", () => {
+const privateI6DiagnosticsModules = new Set([
+  "diagnostics/babylon-instrumentation-factory.ts",
+  "diagnostics/diagnostics-controller.ts",
+  "diagnostics/diagnostics-port.ts",
+]);
+
+const privateI6HeadlessModules = new Set([
+  "headless/headless-renderer-adapter.ts",
+  "headless/null-engine-factory.ts",
+]);
+
+describe("RSM-6-I6 public entry isolation", () => {
   it("keeps the physical default/player graph isolated from editor, headless, and Grid", () => {
     expect(
       scanForbiddenReachability(
         physicalModules(),
         "index.ts",
-        new Set([...editorGridModules, "headless.ts"]),
+        new Set([...editorGridModules, "headless.ts", ...privateI6HeadlessModules]),
       ),
     ).toEqual([]);
   });
@@ -138,19 +149,59 @@ describe("RSM-6-I5 public entry isolation", () => {
     }
   });
 
-  it("allows root I5 reachability while headless stays isolated and editor owns no loader edge", () => {
+  it("allows root and headless I5 reachability only through the private adapter composition", () => {
     const modules = physicalModules();
     const rootReachability = scanForbiddenReachability(modules, "index.ts", privateI5Modules);
     for (const modulePath of privateI5Modules) {
       expect(rootReachability).toContain(`FORBIDDEN_ENTRY_REACHABLE:index.ts:${modulePath}`);
     }
-    expect(scanForbiddenReachability(modules, "headless.ts", privateI5Modules)).toEqual([]);
+    const headlessReachability = scanForbiddenReachability(
+      modules,
+      "headless.ts",
+      privateI5Modules,
+    );
+    for (const modulePath of privateI5Modules) {
+      expect(headlessReachability).toContain("FORBIDDEN_ENTRY_REACHABLE:headless.ts:" + modulePath);
+    }
     for (const entry of ["editor.ts", "headless.ts"]) {
       const source = modules.get(entry) ?? "";
       expect(source).not.toContain("./assets/");
       expect(source).not.toContain("./loaders/");
       expect(source).not.toContain("gltf2-loader-registration");
       expect(source).not.toContain("registerLoader");
+    }
+  });
+
+  it("allows diagnostics only through reviewed adapter composition and keeps editor out of headless", () => {
+    const modules = physicalModules();
+    for (const entry of ["index.ts", "headless.ts"]) {
+      const reachability = scanForbiddenReachability(modules, entry, privateI6DiagnosticsModules);
+      for (const modulePath of privateI6DiagnosticsModules) {
+        expect(reachability).toContain("FORBIDDEN_ENTRY_REACHABLE:" + entry + ":" + modulePath);
+      }
+    }
+    const editorDiagnostics = scanForbiddenReachability(
+      modules,
+      "editor.ts",
+      privateI6DiagnosticsModules,
+    );
+    for (const modulePath of privateI6DiagnosticsModules) {
+      expect(editorDiagnostics).toContain("FORBIDDEN_ENTRY_REACHABLE:editor.ts:" + modulePath);
+    }
+    expect(scanForbiddenReachability(modules, "editor.ts", privateI6HeadlessModules)).toEqual([]);
+    const editorSource = modules.get("editor.ts") ?? "";
+    expect(editorSource).not.toContain("./diagnostics/");
+    expect(editorSource).not.toContain("./headless/");
+  });
+
+  it("keeps the headless entry free of direct loader-registration and asset imports", () => {
+    const modules = physicalModules();
+    for (const path of ["headless.ts", "headless/headless-renderer-adapter.ts"]) {
+      const source = modules.get(path) ?? "";
+      expect(source).not.toContain("./assets/");
+      expect(source).not.toContain("./loaders/");
+      expect(source).not.toContain("gltf2-loader-registration");
+      expect(source).not.toContain("@babylonjs/loaders");
     }
   });
 

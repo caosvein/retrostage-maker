@@ -195,6 +195,12 @@ export interface RendererDiagnosticSnapshot {
   readonly correlationIds: readonly string[];
   readonly failureCounts: Readonly<Record<RendererFailureCategory, number>>;
   readonly health: RendererHealth;
+  readonly instrumentation: {
+    readonly engineGpuFrameMilliseconds: number | null;
+    readonly sceneActiveMeshesEvaluationMilliseconds: number | null;
+    readonly sceneFrameMilliseconds: number | null;
+    readonly sceneRenderMilliseconds: number | null;
+  };
   readonly lifecycleState: RendererLifecycleState;
   readonly projectionRevision: RendererProjectionRevision | null;
   readonly resourceCounts: Readonly<Record<string, number>>;

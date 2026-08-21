@@ -1,3 +1,5 @@
+export { createHeadlessRendererAdapter } from "./headless/headless-renderer-adapter.js";
+
 export type {
   RendererAdapter,
   RendererDiagnosticSnapshot,

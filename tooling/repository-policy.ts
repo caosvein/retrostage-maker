@@ -127,6 +127,16 @@ const expectedRendererI5Paths = new Set([
   "packages/renderer-babylon9/test/gltf-loader-policy.test.ts",
 ]);
 
+const expectedRendererI6Paths = new Set([
+  "packages/renderer-babylon9/src/headless/null-engine-factory.ts",
+  "packages/renderer-babylon9/src/headless/headless-renderer-adapter.ts",
+  "packages/renderer-babylon9/src/diagnostics/diagnostics-port.ts",
+  "packages/renderer-babylon9/src/diagnostics/diagnostics-controller.ts",
+  "packages/renderer-babylon9/src/diagnostics/babylon-instrumentation-factory.ts",
+  "packages/renderer-babylon9/test/headless.test.ts",
+  "packages/renderer-babylon9/test/diagnostics.test.ts",
+]);
+
 const forbiddenEarlyRoots = new Set(["scripts", "tools"]);
 
 function normalizePath(path: string): string {
@@ -178,7 +188,8 @@ export function validateRepositoryBootstrap(snapshot: BootstrapSnapshot): readon
         expectedRendererI2Paths.has(path) ||
         expectedRendererI3Paths.has(path) ||
         expectedRendererI4Paths.has(path) ||
-        expectedRendererI5Paths.has(path));
+        expectedRendererI5Paths.has(path) ||
+        expectedRendererI6Paths.has(path));
     if (
       productPackageMatch !== null &&
       productPackageMatch[2] !== "package.json" &&
@@ -242,6 +253,16 @@ export function validateRepositoryBootstrap(snapshot: BootstrapSnapshot): readon
     for (const expectedPath of expectedRendererI5Paths) {
       if (!normalizedRepositoryPaths.includes(expectedPath)) {
         issues.push({ code: "REQUIRED_RENDERER_I5_PATH_MISSING", detail: expectedPath });
+      }
+    }
+  }
+  const rendererI6IsActive = normalizedRepositoryPaths.some((path) =>
+    expectedRendererI6Paths.has(path),
+  );
+  if (rendererI6IsActive) {
+    for (const expectedPath of expectedRendererI6Paths) {
+      if (!normalizedRepositoryPaths.includes(expectedPath)) {
+        issues.push({ code: "REQUIRED_RENDERER_I6_PATH_MISSING", detail: expectedPath });
       }
     }
   }

@@ -16,16 +16,23 @@ interface ImportMetaWithGlob {
 const allowedBabylonFactories = new Set([
   "assets/babylon-asset-container-factory.ts",
   "camera/babylon-camera-factory.ts",
+  "diagnostics/babylon-instrumentation-factory.ts",
   "engine/babylon-engine-factory.ts",
   "grid/babylon-grid-factory.ts",
+  "headless/null-engine-factory.ts",
   "picking/babylon-picking-factory.ts",
   "scene/babylon-scene-factory.ts",
 ]);
 const exactBabylonBindings = new Map<string, readonly string[]>([
   ["assets/babylon-asset-container-factory.ts", ["SceneLoader"]],
   ["camera/babylon-camera-factory.ts", ["ArcRotateCamera", "Vector3"]],
+  [
+    "diagnostics/babylon-instrumentation-factory.ts",
+    ["EngineInstrumentation", "SceneInstrumentation"],
+  ],
   ["engine/babylon-engine-factory.ts", ["Engine"]],
   ["grid/babylon-grid-factory.ts", ["Color3", "MeshBuilder", "Vector3"]],
+  ["headless/null-engine-factory.ts", ["NullEngine"]],
   ["picking/babylon-picking-factory.ts", ["PickingInfo"]],
   ["scene/babylon-scene-factory.ts", ["Scene"]],
 ]);
@@ -35,10 +42,15 @@ const importPattern =
   /(?:import|export)\s+(?:type\s+)?[^;]*?from\s+["']([^"']+)["']|import\s*["']([^"']+)["']/gu;
 const forbiddenRuntimePattern =
   /^(?:electron$|react(?:-dom)?$|@retrostage\/editor-ui-react$|node:|fs$|path$|child_process$|better-sqlite3$|sqlite)/u;
+const forbiddenHeadlessAuthorityPattern =
+  /\b(?:window|document|HTMLCanvasElement|WebGLRenderingContext|WebGL2RenderingContext|GPUCanvasContext|setTimeout|setInterval|requestAnimationFrame)\b/u;
 
 function scanRuntimeImports(modules: ReadonlyMap<string, string>): readonly string[] {
   const issues: string[] = [];
   for (const [path, source] of modules) {
+    if (path.startsWith("headless/") && forbiddenHeadlessAuthorityPattern.test(source)) {
+      issues.push("HEADLESS_RUNTIME_AUTHORITY_FORBIDDEN:" + path);
+    }
     importPattern.lastIndex = 0;
     for (const match of source.matchAll(importPattern)) {
       const specifier = match[1] ?? match[2];
@@ -89,8 +101,8 @@ function physicalRuntimeModules(): ReadonlyMap<string, string> {
   );
 }
 
-describe("RSM-6-I5 runtime import policy", () => {
-  it("accepts the physical exact six-factory core and sole glTF2 registration surface", () => {
+describe("RSM-6-I6 runtime import policy", () => {
+  it("accepts the physical exact eight-factory core and sole glTF2 registration surface", () => {
     expect(scanRuntimeImports(physicalRuntimeModules())).toEqual([]);
   });
 
@@ -105,6 +117,11 @@ describe("RSM-6-I5 runtime import policy", () => {
       ["loaders/other.ts", 'import "@babylonjs/loaders/glTF/2.0";'],
       ["loaders/gltf2-loader-registration.ts", 'import "@babylonjs/loaders";'],
       ["assets/runtime.ts", 'import "babylonjs-gltf2interface";'],
+      ["headless/null-engine-factory.ts", 'import { Engine } from "@babylonjs/core";'],
+      [
+        "diagnostics/babylon-instrumentation-factory.ts",
+        'import { SceneInstrumentation } from "@babylonjs/core/Instrumentation";',
+      ],
     ]);
     expect(scanRuntimeImports(synthetic)).toEqual([
       "BABYLON_IMPORT_OUTSIDE_FACTORY:engine/renderer-adapter.ts:@babylonjs/core",
@@ -116,7 +133,23 @@ describe("RSM-6-I5 runtime import policy", () => {
       "BABYLON_IMPORT_OUTSIDE_FACTORY:loaders/other.ts:@babylonjs/loaders/glTF/2.0",
       "BABYLON_LOADER_SPECIFIER_FORBIDDEN:loaders/gltf2-loader-registration.ts:@babylonjs/loaders",
       "GLTF_INTERFACE_RUNTIME_IMPORT_FORBIDDEN:assets/runtime.ts:babylonjs-gltf2interface",
+      "BABYLON_FACTORY_BINDINGS_INEXACT:headless/null-engine-factory.ts:Engine",
+      "BABYLON_FACTORY_SPECIFIER_FORBIDDEN:diagnostics/babylon-instrumentation-factory.ts:@babylonjs/core/Instrumentation",
     ]);
+  });
+
+  it("rejects DOM, graphics-device, and background-scheduler authority in headless source", () => {
+    for (const source of [
+      "window.devicePixelRatio",
+      "document.createElement('canvas')",
+      "new WebGLRenderingContext()",
+      "setTimeout(render, 0)",
+      "requestAnimationFrame(render)",
+    ]) {
+      expect(scanRuntimeImports(new Map([["headless/runtime.ts", source]]))).toEqual([
+        "HEADLESS_RUNTIME_AUTHORITY_FORBIDDEN:headless/runtime.ts",
+      ]);
+    }
   });
 
   it("rejects Electron, React, Node, filesystem, child-process, and SQLite imports", () => {
