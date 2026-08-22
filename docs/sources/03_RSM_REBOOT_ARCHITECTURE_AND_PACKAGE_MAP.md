@@ -405,6 +405,7 @@ It owns:
 - Babylon runtime canvas hosting,
 - game identity and window metadata,
 - packaged-game lifecycle.
+- composition of optional store/platform services through bounded RetroStage platform adapters when explicitly enabled and admitted; the store-neutral player remains the base runtime.
 
 It must not include:
 
@@ -525,6 +526,9 @@ The architecture distinguishes persisted authoring truth, active authoring-sessi
 | State | Planned authority | Persisted? | Notes |
 |---|---|---:|---|
 | Project metadata and project-level settings | canonical document package | Yes | RetroStage-owned, versioned |
+| Game-wide composition intent | `GameDefinitionDocument` in canonical document authority | Yes | Stable references/default intent only; not a giant settings object |
+| Effective game-wide configuration | shared headless resolver | No | Derived `ResolvedGameConfiguration`; never canonical authoring truth |
+| Resolution dependency/fingerprint evidence | shared resolver/diagnostics | Derived | Cache/provenance/regression evidence only; not authority |
 | Scene/entity/component authoring data | canonical document package | Yes | Stable-ID based |
 | Asset source identity and import settings | asset authoring document package | Yes | Source and cooked forms separated |
 | Component definitions and policies | component registry | Code/config authority | Does not own component instances |
@@ -532,7 +536,13 @@ The architecture distinguishes persisted authoring truth, active authoring-sessi
 | Active authoring revision/session authenticity | authoring session | No | Never serialized into project documents |
 | Command history | authoring session/history subsystem | Usually local/session | Later durable local history may be separate |
 | Editor selection, hover, open panels | editor UI state | Local preference/session | Not project truth |
-| Workspace layout | editor preference storage | Local | Not project content |
+| Workspace layout | editor preference storage | Local | Dock/tab/resize state may persist/reset locally; never project content or dirty-state authority |
+| Creator Profile / Studio preferences | Studio experience authority | Local | Editor-only; not account identity, project truth, or exported-game metadata |
+| Recent Projects / Continue metadata | Studio experience authority | Local | Navigation convenience only; project open still uses the normal trusted application use case |
+| Project Memory / Session Ritual state | Studio experience authority | Local | Passive history/presentation only; not productivity scoring or project content |
+| Project Gallery / Recent Captures | Studio experience local-media authority | Local | Creator-history media; not canonical assets unless explicitly imported later |
+| Studio Player library/playback preferences | Studio experience authority | Local | Explicitly selected local media; no game-audio authority |
+| Studio Radio / Studio Preset preferences | Studio experience authority | Local | Offline creator-comfort/editor-presentation state; not runtime/game presentation authority |
 | Babylon objects | renderer adapter | No | Derived and disposable |
 | PIE world | runtime session | No | Derived from authoring snapshot |
 | Exported runtime content | export pipeline | Generated | Cooked derivative, reproducible |
@@ -546,6 +556,254 @@ The architecture distinguishes persisted authoring truth, active authoring-sessi
 
 No adapter may elevate its derived state into canonical truth merely because it is convenient to serialize.
 
+### 9.1 Studio Identity / Creator Experience Authority
+
+POST-RSM-18 Studio Identity is a RetroStage-owned **editor-local/application-local experience layer**. It improves creator continuity and product identity but owns no game semantics.
+
+**Owns:** Startup Welcome / Studio Launcher state, local Creator Profile/Studio display preferences, Recent Projects/Continue metadata, passive Project Memory and Session Ritual preferences, local Recent Captures/Gallery metadata, Studio Player local-media references/playback preferences, Studio Radio/Studio Preset preferences, PIE Studio-audio interlock state, and Studio Experience visibility/disable preferences.
+
+**Does not own:** canonical project/scene/entity/component/asset/gameplay meaning, exported-game legal identity, runtime-save/checkpoint data, game `PresentationProfile`, game audio semantics, Steam/store entitlement, cloud/account/social state, or project dirty state merely because a Studio preference changes.
+
+**Persistence/security boundary:**
+- Studio data lives under application/user-data authority, outside canonical project documents.
+- Project-associated Studio records may use stable project identity and safe last-known-location metadata, but stale/missing records cannot mutate, recreate, or repair projects silently.
+- Gallery captures become project content only through an explicit normal asset-import action.
+- User-local Studio media access is initiated explicitly and mediated by Electron Main/secure Preload narrow operations; Renderer code receives no arbitrary filesystem authority and no silent broad filesystem scan is allowed.
+- Golden Layout remains an adapter for local layout state; reset-to-default changes only local preferences.
+- Studio Player/Radio are creator-comfort playback, not game audio authoring/runtime.
+- PIE interlock owns only Studio playback behavior and restores the exact pre-PIE Studio state.
+- Cooking/export treats all Studio Identity state/media as editor-only unless a file separately entered project authority through explicit import.
+
+### 9.2 Gameplay / Storytelling / Player-Experience Semantic Ownership
+
+RetroStage uses one shared typed gameplay meaning layer across specialized authoring surfaces, PIE, player runtime, diagnostics, save, and later Flow Graph/Sequencer integration.
+
+```text
+Supported Game Profile
+= project capability envelope / tool-availability contract
+
+MovementProfile / CameraProfile / InteractionProfile /
+EnemyProfile / PerceptionProfile / AttackProfile /
+WeaponProfile / FeedbackProfile / SaveExperienceProfile / similar
+= typed gameplay authoring/tuning semantics
+
+Component
+= canonical entity-attached state/behavior configuration
+
+Recipe
+= validated composition of existing capabilities/components/profiles
+
+Specialized Editor
+= creator-facing view/workflow over canonical contracts
+```
+
+A specialized editor must not invent a private runtime format or second authority.
+
+Required semantic families include bounded player movement/camera/interaction, items/inventory/puzzles, story state/clues/NPC/dialogue/objectives, enemy/perception/combat, save/death/retry, player UI/text/frontend, input/accessibility, feedback, sequencing/media integration, and gameplay diagnostics according to Source 01 milestone ownership.
+
+**Authority rules:**
+- Common gameplay does not require Flow Graph; Flow Graph later orchestrates and extends the shared Event/Action and gameplay semantics.
+- Story state, clue/knowledge, dialogue/objective state, item state, enemy state, and save-eligible progress use stable RetroStage identities/contracts rather than Babylon/Havok/Recast/React object identity.
+- Runtime Save stores approved semantic progress and reconstructs transient engine objects.
+- Player UI binds/presents gameplay meaning; React/Zustand/widget state is not gameplay authority.
+- Transient UI navigation/focus/animation state remains separate from persistent gameplay/save state unless explicitly declared otherwise.
+- Player accessibility/readability settings are typed runtime/profile state and do not overwrite creator-authored project defaults.
+- Diagnostics/traces refer back to stable authored identities and explain runtime ownership.
+
+### 9.3 Presentation / Atmosphere / Visual Character Authority
+
+`PresentationProfileDocument` remains the canonical game-presentation authority. `Visual Rawness` is an authorable presentation dimension within that authority/model, not a separate competing profile document.
+
+The presentation vocabulary may include Geometry Character, Texture Character, Material Character, Raster Character, Temporal Character, Atmosphere Volume, Atmosphere Director, Surface Dressing/Storytelling, Ambient Motion, Environmental FX Recipes, Atmosphere Analysis, and Look Snapshot/A-B tooling.
+
+Canonical separation:
+
+```text
+canonical project presentation/atmosphere intent
+≠ transient Babylon renderer/audio/VFX objects
+≠ local player quality/accessibility settings
+≠ editor-local Studio Identity/workspace comfort state
+```
+
+Effective runtime presentation is derived from canonical authored intent plus active scene/volume/event/sequence state plus validated quality/hardware fallback plus validated accessibility/comfort override. Runtime overrides never silently write back into canonical project documents.
+
+`AtmosphereVolume` is canonical spatial intent projected through RetroStage adapters; Babylon fog/light/post-process state is derived. `AtmosphereDirector` coordinates typed atmosphere semantics and does not become a private renderer-control language.
+
+Deterministic variation that affects authored meaning or QA must be reproducible. Creator-locked identity versus player-adjustable quality/accessibility must be explicit. Unsupported fallback combinations become supported fallback, warning/blocker, or declared unsupported-target states rather than silent substitution.
+
+### 9.4 Runtime Capability / Export Disposition and Semantic Closure
+
+Every supported creator capability that can affect a standalone game must expose stable owning semantics and one declared export disposition:
+
+```text
+EDITOR_ONLY
+COOKED
+RUNTIME
+HYBRID
+```
+
+The required chain is:
+
+```text
+used capability
+→ stable capability identity
+→ export disposition
+→ runtime/cooked projection
+→ semantic + asset + module dependency closure
+→ cooked manifest
+→ deterministic package inclusion
+→ physical artifact evidence
+→ standalone execution/parity proof
+```
+
+Static asset references are insufficient as the complete closure model. Semantic reachability may include story flags, dialogue/objective transitions, recipes, scene transitions, dynamic resources, UI bindings, presentation/atmosphere state, audio/VFX triggers, save participation, and optional store-enabled capabilities.
+
+Missing a required link is an Export blocker.
+
+Store-specific packaging composes over a complete store-neutral runtime; a store adapter cannot repair a semantically incomplete base export.
+
+### 9.5 Game-Wide Composition Authority
+
+RetroStage has one explicit game-wide composition root: `GameDefinitionDocument`.
+
+`ProjectDocument` may bind it through a stable `gameDefinitionId`. GameDefinition owns game-wide runtime/export composition **intent through typed references and defaults**. It must not inline every Scene, entity, dialogue line, enemy, UI widget, asset, gameplay object, or subsystem document.
+
+```text
+ProjectDocument
+≠ GameDefinitionDocument
+≠ RuntimeGameSession
+≠ ResolvedGameConfiguration
+```
+
+`GameDefinitionDocument` is canonical authoring data. `ResolvedGameConfiguration` is derived. `RuntimeGameSession` is transient runtime authority.
+
+No giant GameMode object, runtime service locator, UI-state configuration authority, raw file-path composition, hidden plugin override, or resolved-cache-as-truth shortcut may replace this contract.
+
+### 9.6 Deterministic Game Configuration Resolution
+
+One RetroStage-owned headless `GameConfigurationResolver` resolves effective game configuration for Preview, PIE, runtime, cook, and export.
+
+```text
+accepted immutable authoring snapshot
+→ coherent project-resolution view
+→ GameDefinition + referenced semantic owners
+→ canonical Capability Matrix support truth
+→ ResolutionContext
+→ GameConfigurationResolver
+→ ResolutionDependencySet
+→ ResolvedConfigurationFingerprint
+→ ResolvedGameConfiguration
+```
+
+`CanonicalProjectSnapshot`, if used as implementation terminology, means the **coherent resolution view of one accepted immutable authoring snapshot**. It does not create a second persisted snapshot/session authority.
+
+A resolver invocation must never combine torn live revisions that never coexisted. `ResolutionDependencySet` identifies material canonical inputs/revisions/versions that affected a result. `ResolvedConfigurationFingerprint` deterministically identifies that material resolution basis. Both are derived evidence/cache/provenance artifacts and may be discarded/rebuilt.
+
+Required behavior:
+- deterministic output for equivalent material inputs/context;
+- explicit provenance for effective values and overrides;
+- fail-closed diagnostics for unresolved required meaning;
+- no runtime write-back into canonical defaults;
+- no editor workspace/Zustand/React/Babylon state as shipped configuration authority;
+- one resolution semantics shared by PIE and Export;
+- cache invalidation keyed by material dependency identity, never hidden ambient state.
+
+Exact physical module/package placement is deferred to owning implementation. This alignment does **not** require creation of `@retrostage/game-definition`, `@retrostage/config-resolver`, or another new package.
+
+### 9.7 Capability and Settings/State Authority Separation
+
+```text
+RequestedCapabilities
+≠ SupportedCapabilities
+≠ EffectiveCapabilities
+```
+
+- GameDefinition/project intent may request/select capabilities.
+- The canonical Capability Matrix or accepted successor owns support/unsupported truth.
+- The resolver derives EffectiveCapabilities for the current composition/context.
+- UI visibility is derived consumer state and never capability truth.
+
+Also distinct:
+
+```text
+GameDefinition defaults
+Project Variables
+Runtime Settings
+Player Settings
+Runtime Save state
+Target/Build settings
+Editor/Studio state
+Secrets
+```
+
+No universal untyped global-settings bag may mix these authorities.
+
+### 9.8 Runtime Temporal / Entity / Effect / RNG Stability
+
+`@retrostage/runtime-core` is governed by these semantic contracts:
+
+**Clock/update.** Gameplay timing uses explicit clock domains and ordered update phases. Fixed-step semantics are explicit where required. Render-frame cadence is not gameplay authority. Pause/time-scale/hit-stop behavior is defined per clock/domain.
+
+**Runtime entity identity.** Authored stable identity, runtime-spawned entity identity, persistence/save identity, renderer handles, physics bodies, navigation objects, worker objects, and UI objects are not interchangeable. Spawn provenance and despawn reason are explicit.
+
+**Save-safe boundary.** Runtime Save captures approved semantic state only at an allowed stable/quiescent boundary. It does not persist Babylon/Havok/Recast/worker/timer object identity.
+
+**Effect idempotency.** Event/Action effects declare repeatability semantics. One-shot/once-per-scope effects use stable semantic commit/idempotency keys and explicit reset scope. Repeated event delivery does not automatically imply repeated committed effect.
+
+**Randomness.** RetroStage owns RNG domains, stream identity, seed provenance, save participation, trace, and regression meaning. Streams are domain-separated so unrelated systems do not perturb one another. Third-party PRNG/noise code, if admitted, only produces numbers behind this authority.
+
+### 9.9 Scene / Section / Level Lifecycle, Residency and Traversability
+
+Scene/Section transitions are transactional semantic operations, not immediate renderer destruction.
+
+```text
+requested
+→ preparing
+→ validated/prepared
+→ committing
+→ active
+→ deactivating
+→ unloaded
+```
+
+Cancellation/failure must leave an explainable prior/next state rather than a half-applied world.
+
+Required distinctions:
+- semantic residency vs resource residency;
+- authored Scene/Section identity vs transient Babylon scene/resource identity;
+- cross-Scene stable references vs raw object pointers;
+- entry/spawn identity vs camera/listener state;
+- gameplay passability truth vs derived navigation topology.
+
+Shared traversal metrics such as agent radius/height/step/slope or accepted equivalents are product semantics reused by blockout, collision, navigation, AI, diagnostics, and export validation.
+
+Dynamic doors/blockers/section substitutions/teleports project gameplay truth into navigation links/topology. Recast/navigation backend state never becomes authority for whether a door or route is semantically passable.
+
+### 9.10 Audio, Input, Async and Scheduled-Work Lifetime Boundaries
+
+**Audio.** Audible sound and `GameplayNoise` are separate semantics. AI hearing consumes typed gameplay-noise events, not speaker gain. Audio ownership/lifetime scopes include project/session/Scene/Section/entity/sequence/UI/cue as applicable. Scene teardown/transition continuity is explicit. One runtime listener authority is selected independently of camera count. Runtime Save reconstructs transient audio from semantic state.
+
+**Input/focus/device.** Focus loss/regain, device disconnect/reconnect/switching, pointer-lock/capture loss, held-action release, and pause policy are explicit runtime lifecycle events. Physical device state never becomes canonical gameplay configuration.
+
+**Async generation lease.** Long-running derived work captures owner identity plus relevant snapshot/session generation. Completion is accepted only if the lease still matches current authority. Stale work is rejected/cancelled; completion alone grants no mutation authority.
+
+**Worker mutation barrier.** Workers may compute derived results but may not directly commit canonical documents or authoritative runtime state. The owning application/command/runtime authority validates and commits accepted results.
+
+**Scheduled work.** Delayed/repeating work has stable semantic identity, clock/domain, owner lifetime, repeat policy, cancellation semantics, save disposition, and teardown behavior. Raw `setTimeout`/`setInterval` handles are implementation details, not gameplay or save authority.
+
+**Event causal budget.** Event/Action dispatch carries causal identity and bounded depth/work/event budgets. Overflow fails in a diagnosable deterministic way instead of allowing unbounded legal cycles. Later Flow Graph orchestration inherits the same safety floor.
+
+### 9.11 Unknown Extension Data and Runtime Authority
+
+Structurally safe unknown extension data may be preserved for forward/plugin compatibility without being executed.
+
+```text
+required runtime/export meaning unknown or owner unavailable
+→ Play blocker and/or Export blocker
+```
+
+Optional/unreachable unknown data may be preserved only when the requested operation proves it is not required. RetroStage must not guess semantics, silently drop required data, or elevate unknown values into executable authority.
+
 ---
 
 ## 10. Canonical Document Direction
@@ -554,6 +812,7 @@ The planned canonical document family includes:
 
 ```text
 ProjectDocument
+GameDefinitionDocument
 SceneDocument
 EntityDocument
 ComponentEnvelope
@@ -578,6 +837,8 @@ FlowGraphDocument
 ContentPackManifest
 PluginManifest
 ```
+
+The word `Profile` is intentionally namespaced by authority. A project `Supported Game Profile` is a capability envelope; gameplay tuning profiles are typed authoring semantics; `PresentationProfileDocument` is game-presentation intent; local Creator Profile/Studio preferences are editor-local. They are not one registry and cannot substitute for one another.
 
 All persisted documents must support:
 
@@ -860,9 +1121,9 @@ The following package names define the planned early architecture.
 
 **Owns:**
 
-- project and scene document schemas,
+- project, GameDefinition, and scene document schemas,
 - entity and component envelopes,
-- stable persisted references,
+- stable persisted references, including the Project→GameDefinition composition binding,
 - serialization envelopes,
 - schema-version fields,
 - migration input/output contracts,
@@ -969,7 +1230,8 @@ The actual Electron handler and bridge implementations remain in application/ada
 - severity and blocker classes,
 - document validation composition,
 - reference validation,
-- capability validation,
+- GameDefinition/composition/resolution validation and provenance diagnostics,
+- capability validation across requested/supported/effective capability separation,
 - Play and Export gate evaluation,
 - repair-guidance contracts when introduced.
 
@@ -1067,6 +1329,7 @@ The actual Electron handler and bridge implementations remain in application/ada
 - scene lifecycle use cases,
 - command dispatch use cases,
 - Preview/PIE/export orchestration contracts,
+- shared GameConfigurationResolver invocation/composition ports without owning canonical meaning,
 - job orchestration interfaces,
 - storage/index/renderer ports,
 - application-level result and progress semantics.
@@ -1133,12 +1396,15 @@ Concrete adapters are injected by the application composition root.
 **Owns:**
 
 - `RuntimeGameSession`,
-- runtime clock and pause policy,
+- runtime clock domains, ordered update phases, fixed/variable-step policy, pause/time-scale/hit-stop semantics,
 - runtime system registration and dispatch,
-- transient runtime entities/components,
-- runtime events and actions,
+- transient runtime entities/components plus stable runtime identity/provenance contracts,
+- runtime events/actions, effect-commit/idempotency semantics, and causal-budget enforcement,
+- domain-separated RNG stream/seed/save/trace contracts,
+- owner-scoped scheduled work semantics,
 - runtime lifecycle and disposal,
-- approved serializable runtime-state registry contracts.
+- Scene/Section transition participation and quiescence contracts,
+- approved serializable runtime-state registry and save-safe-boundary contracts.
 
 **May depend on:**
 
@@ -1310,10 +1576,14 @@ The headless diagnostic-contract package must not import Pino directly. Concrete
 
 - export plan construction,
 - full project validation invocation,
-- dependency graph resolution,
+- dependency graph resolution across static references **and declared semantic/dynamic reachability**,
+- consumption of the same GameDefinition/shared resolver semantics used by PIE/runtime; no export-only resolver,
+- stable capability/export-disposition reconciliation,
+- complete used-capability runtime semantic closure rooted in resolved game composition,
+- resolution-dependency/fingerprint evidence where useful to explain reproducibility,
 - cooked-content manifest generation,
-- deterministic output layout,
-- editor-only/source exclusion,
+- deterministic hierarchical store-neutral output layout,
+- editor-only/Studio-local/source exclusion,
 - build report inputs,
 - player package assembly orchestration.
 
@@ -1323,6 +1593,14 @@ The headless diagnostic-contract package must not import Pino directly. Concrete
 - arbitrary filesystem writes outside approved output scope,
 - installer or Steam credentials,
 - gameplay runtime semantics.
+
+### 15.15.1 Export closure contract
+
+`@retrostage/export-pipeline` must be able to explain why each packaged runtime item exists and which supported capability requires it.
+
+It coordinates, but does not own, canonical gameplay/presentation meaning. Owning domain systems expose stable capability identity, export disposition, dependencies, runtime/cooked projection, and validation hooks. The export pipeline composes those contracts into the manifest/package closure.
+
+Build stripping may remove only content proven unreachable under the supported runtime semantics. Dynamic/semantic references must be declared or discoverable through typed product contracts rather than hidden strings or third-party object graphs.
 
 ## 15.16 `@retrostage/test-fixtures`
 
@@ -1396,6 +1674,27 @@ Durable boundaries:
 - Storybook does not become the production editor shell, a hosted service requirement, or the canonical source of design tokens/behavior.
 - DnD toolkit object IDs, collision results, sensors, and sortable state are transient UI implementation details; canonical hierarchy/asset moves remain RetroStage commands with validation.
 - No accessibility or visual-testing addon is inherited automatically through a workbench; each addon/dependency family remains subject to its own license/transitive review.
+
+## 15.19 Store / Distribution Adapter Boundary
+
+Storefronts are optional distribution targets, not canonical project/game authority.
+
+A future platform adapter may own only target-specific integration such as admitted SDK/API calls, overlay/store lifecycle glue, achievements/cloud/controller features when explicitly enabled, depot/upload/build metadata integration, or other selected target services.
+
+It must not own:
+- canonical project data;
+- core gameplay semantics;
+- base save meaning;
+- store-neutral export layout;
+- creator entitlement/business policy;
+- generic player startup;
+- secrets in source control.
+
+The store-neutral standalone package must remain complete on its own for all non-store-dependent advertised capabilities. Target packaging may layer additional files/services over that base.
+
+Electron/Babylon player hosting remains subject to representative hardware/process/GPU/lifecycle qualification for claimed commercial targets. Qualification is evidence-driven and does not imply a benchmark program or pre-admit any vendor SDK.
+
+A new package is not required merely because a store target exists; ordinary package-creation rules still apply.
 
 ---
 
@@ -2392,6 +2691,17 @@ Removal requires dependency, migration, build, license, and artifact review.
 | Preview objects | renderer adapter | viewport | canonical documents |
 | Runtime session | runtime-core | PIE/player | authoring session |
 | Runtime save state | runtime-save subsystem | player/profile UI | project save |
+| Game-wide composition intent | GameDefinitionDocument / canonical documents | shared resolver, Preview/PIE/export | UI state, RuntimeGameSession, third-party object graphs |
+| Resolved game configuration | shared headless GameConfigurationResolver | RuntimeGameSession, cook/export, diagnostics | canonical persistence |
+| Resolution dependency/fingerprint | shared resolver/diagnostics | cache, regression, evidence | authoring authority |
+| Requested/Supported/Effective capabilities | GameDefinition intent / Capability Matrix / resolver respectively | UI, validation, runtime/export consumers | visible UI alone |
+| Gameplay profile/component/recipe meaning | canonical gameplay documents/registries | specialized editors, PIE/player, Flow Graph/Sequencer adapters | React/Babylon/Havok/Recast object state |
+| Story/dialogue/objective/clue meaning | canonical narrative/gameplay authorities | editors, runtime, save, diagnostics | UI widget state |
+| Player UI authored meaning | canonical UI/text/runtime-settings contracts | player UI runtime | React/Zustand transient state |
+| Presentation/Atmosphere authored meaning | PresentationProfile/owned project contracts | renderer/audio adapters, player | Babylon runtime objects or Studio preferences |
+| Studio Identity / Creator Experience | local editor/app preferences | editor shell | project/runtime/export authority |
+| Export capability closure | owning semantic systems + export pipeline orchestration | manifest, package, Project Doctor | static asset graph alone |
+| Store target integration | optional platform adapter | packaging/player integration | canonical project/gameplay authority |
 | Asset source identity | asset documents | import/index/export | glTF object identity |
 | Cooked derivatives | asset/export pipeline | player/runtime | source authority |
 | Local search index | SQLite adapter | Content Browser/search | canonical project files |
@@ -2762,7 +3072,7 @@ Gate B = ACTIVE / CURRENT
 RSM-7 = next roadmap milestone / not implemented / not started / not authorized
 ```
 
-The accepted closed-milestone foundation includes the renderer contract/public entries, lifecycle/context safety, camera/editor grid, stable handle epochs and picking, derived asset containers, headless diagnostics, editor gizmo intents, and real Electron viewport. The owner-directed post-RSM-6 source-alignment review is a separate checkpoint; no waiting proposal is accepted here, and canonical RSM-7 document work remains unimplemented and unauthorized.
+The accepted closed-milestone foundation includes the renderer contract/public entries, lifecycle/context safety, camera/editor grid, stable handle epochs and picking, derived asset containers, headless diagnostics, editor gizmo intents, and real Electron viewport. This architecture alignment records future accepted direction only; canonical RSM-7 document work remains unimplemented, not started, and unauthorized until Source 02/08 lifecycle truth and separate owner authority allow it.
 
 ---
 

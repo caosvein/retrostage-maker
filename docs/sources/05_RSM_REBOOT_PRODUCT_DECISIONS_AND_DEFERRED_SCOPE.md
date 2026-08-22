@@ -340,7 +340,7 @@ Installable templates, genre kits, presentation presets, sample projects, and co
 The north star is:
 
 ```text
-RSM-120 — First Playable Public Alpha / Investor Demo Candidate
+RSM-120 — Public Alpha / Investor Demo Maturity Gate
 ```
 
 RSM-120 is an end-to-end product-quality gate.
@@ -357,6 +357,8 @@ It is not satisfied by:
 ### Consequence
 
 Roadmap progress must be judged by product gates and representative workflows, not milestone count alone.
+
+A separately accepted earlier paid Early Access release may provide commercial/customer evidence, but it does not satisfy, replace, or pre-close the RSM-120 maturity gate.
 
 ---
 
@@ -2403,9 +2405,217 @@ Localization-safe contracts precede translation without prematurely selecting la
 
 ---
 
+# Post-RSM-6 / Pre-RSM-7 Alignment Amendments and Durable Decisions
+
+## 84. Binding Extensions to Existing Decisions
+
+The following are semantic extensions to already-adopted decisions; they do not create duplicate authorities.
+
+### D-012 extension — runtime save stores semantic progress
+
+Runtime Save participation for story state, objectives, inventory/item state, enemy/encounter state, dynamic atmosphere state, and similar systems must be explicit. Runtime Save persists approved semantic state through stable RetroStage identities/contracts, not Babylon/Havok/Recast/UI object graphs. Transient runtime implementation state is reconstructed.
+
+### D-024 extension — persistent/resettable workspace remains local
+
+Supported dock/tab/resize workspace layout may persist locally between editor sessions and may be reset to an approved default. These changes remain editor preference state, do not mark projects dirty, and do not mutate canonical documents, command history, PIE/runtime state, or exported content. Detached native-window/multi-monitor layout is not implied.
+
+### D-048 / D-071 / D-072 extension — creator intent, quality, accessibility and comfort stay separate
+
+Shared typed runtime settings are the authority for supported player-facing display/audio/input/presentation quality and accessibility/comfort overrides. Creator defaults/bounds remain project-owned where applicable. Hardware/quality fallback must be declared and diagnosable; it may not silently disable creator-locked semantic requirements while claiming parity. Atmosphere/presentation systems must participate in reduced-motion/flicker/comfort policy where relevant.
+
+### D-049 / D-050 / D-052 / D-053 extension — one coordinated presentation system
+
+`PresentationProfile` is the single canonical game-presentation authority. Visual Rawness is a controlled dimension of that model, not a second profile authority. Geometry/texture/material/raster/temporal character, atmosphere volumes/director, surface storytelling, ambient motion, VFX and audio remain coordinated authored semantics with non-destructive source/derivative separation and explicit Preview/PIE/Export responsibilities.
+
+### D-054 extension — Player UI presents meaning, it does not own gameplay
+
+Player UI may bind project-specific typography/layout/tokens/HUD/menus/prompts/subtitles/dialogue/frontend/accessibility, but UI widget/React/Zustand state does not become gameplay authority. Dialogue content/text identity and dialogue presentation remain separate contracts. Creator style is the default; bounded player readability/accessibility overrides may take precedence where the owning runtime-settings policy allows.
+
+### D-056 extension — common gameplay does not require Flow Graph
+
+First-class gameplay profiles, components, recipes and specialized editors own common no-code authoring. Flow Graph later orchestrates and extends the shared Event/Action/gameplay vocabulary; it does not replace bounded first-class gameplay authoring or create a second semantics layer.
+
+### D-067 extension — store platforms are optional distribution adapters
+
+Generalize the existing Steam boundary: Steam, Epic, and other approved storefronts are optional distribution targets/adapters. Core project data, store-neutral player behavior, and exported games do not require a storefront unless the creator explicitly enables a supported store-dependent feature. Vendor SDKs remain conditional and adapter-isolated.
+
+### D-068 extension — Studio/presentation media remains separately licensed
+
+Bundled Studio Radio media, hero art, fonts, images, LUTs, palettes, noise textures, decals, sky/backdrop images, VFX cards, ambience/audio, sample materials, and other reusable presentation/creator-comfort media require provenance, usage-term, attribution, and redistribution evidence. A software-library license never grants unrelated media rights.
+
+### D-069 extension — release evidence includes capability/export closure
+
+Reproducible release evidence must also explain the used-capability runtime/export closure, physical packaged contents, store-target additions where applicable, and exclusion of editor-only/Studio-local/source content.
+
+### D-076 / D-077 extension — Early Access continuity without architectural commercial constants
+
+Paid Early Access for the same RetroStage Maker product/SKU retains the existing entitlement-continuity direction. Exact launch timing, prices, discounts, regions, store procedures, EA duration, and similar mutable values remain contemporaneous release evidence.
+
+### D-009 / D-013 / D-015 / D-016 / D-017 extension — composition identity, migration and unknown extensions
+
+`GameDefinitionDocument` is canonical RetroStage authoring data and may be referenced from `ProjectDocument` through stable identity. It composes by reference and must not become a monolithic container for every subsystem.
+
+Stable identity/remap/migration rules extend to GameDefinition bindings and authored/runtime/save reference mappings. Renderer, physics, navigation, worker and UI object identities remain transient.
+
+Structurally safe unknown extension data may be preserved for compatibility, but unknown executable/runtime meaning receives no authority. Required unavailable/unknown meaning becomes a Play and/or Export blocker rather than silent fallback/deletion.
+
+### D-018 extension — worker completion is not mutation authority
+
+Async workers/jobs may compute derived results but cannot directly mutate canonical documents. Results return to the owning application/command authority with owner/snapshot/session-generation evidence; only a still-valid accepted result may be committed through normal mutation authority.
+
+### D-019 extension — clocks, scheduled work and causal execution are owned runtime semantics
+
+Runtime systems use explicit clock domains, ordered update phases, fixed/variable-step contracts, pause/time-scale/hit-stop semantics, owner-scoped scheduled work, and bounded Event/Action causal chains.
+
+Raw render-frame cadence, `setTimeout`/`setInterval` handles, unowned callbacks, or unbounded event recursion are not gameplay authority. Owner teardown cancels/rejects work that can no longer legally execute. Timer handles are not Runtime Save truth.
+
+### D-032 extension — standalone export reuses the same composition/resolution semantics
+
+PIE/player/export may differ in process topology and derived objects, but one GameDefinition/composition meaning and one deterministic resolution contract govern effective game configuration. An export-only resolver or hidden package-time gameplay defaults are prohibited.
+
+### D-037 / D-038 extension — resolution/capability truth is explicit and diagnosable
+
+GameDefinition requested capability intent, canonical supported capability truth, and resolver-derived effective capability truth are distinct. Visible UI does not prove support.
+
+Validation/Project Doctor must diagnose missing composition references, unresolved required extensions, invalid overrides, capability mismatches, torn/incompatible revision inputs, stale async results where material, and missing semantic export closure.
+
+### D-047 extension — runtime diagnostics include causal, resolution and lifetime provenance
+
+Diagnostics may explain effective resolved values, resolution dependency/fingerprint basis, Scene/Section transitions, runtime entity provenance, effect commit keys, RNG stream/seed provenance, async generation leases, focus/device transitions, scheduled work ownership, causal-chain budget overflow, audio lifetime/listener policy, and dynamic navigation projection.
+
+Diagnostic state remains derived and does not become product authority.
+
+### D-053 extension — audible sound, gameplay noise, listener and lifetime are separate semantics
+
+`GameplayNoise` for AI perception is typed gameplay meaning and must not be inferred from speaker gain/volume. Audio cues/voices remain audio runtime semantics.
+
+Audio ownership/lifetime and Scene/Section transition continuity are explicit. One runtime listener authority is selected independently of camera count. Runtime Save reconstructs transient audio from semantic state.
+
+### D-056 extension — Event/Action orchestration obeys idempotency and causal budgets
+
+Shared Event/Action semantics include repeatability class, stable semantic commit/idempotency keys where required, and bounded causal-chain work/depth/event budgets. Flow Graph later inherits the same safety floor rather than bypassing it.
+
+### D-064 extension — deterministic resolution, RNG and lifetime contracts require golden regression evidence
+
+Golden fixtures must cover GameDefinition round-trip/migration, coherent resolution snapshots, requested/supported/effective capability separation, deterministic resolution fingerprints, domain-separated RNG behavior, effect replay/idempotency, stale async result rejection, scheduled-work teardown, causal-budget overflow, Scene/Section transitions, input focus/device lifecycle, and save/load reconstruction where those systems become active.
+
+### D-065 extension — public project compatibility includes composition/resolver compatibility
+
+Compatibility policy must account for GameDefinition schema/reference evolution, resolver/default evolution, capability changes, unknown extension preservation, deterministic/provenance-sensitive behavior, and public customer projects after Early Access. A change in a third-party PRNG/noise/backend algorithm may be compatibility-sensitive when saved or golden behavior depends on it.
+
+### D-070 extension — subprocess and worker acceleration cannot bypass security/authority
+
+External-process wrappers, worker pools, media/asset tools and graph helpers remain behind approved Node/Main/worker/application boundaries. No project-provided shell command, arbitrary Renderer process execution, secret-bearing canonical configuration, or worker direct authority mutation is permitted.
+
+## 85. D-080 — Studio Identity Is an Optional Editor-Local Creator Experience Layer
+
+**Status:** `ADOPTED PRODUCT/ARCHITECTURE DIRECTION; IMPLEMENTATION DEFERRED TO POST-RSM-18`
+
+After RSM-18 closes and before RSM-19 may start, RetroStage Maker should provide the bounded POST-RSM-18 Studio Identity & Creator Experience control.
+
+The planned layer includes Startup Welcome/Studio Launcher, local Creator Profile, Continue/Recent Projects, passive Project Memory, optional non-blocking Session Rituals, Recent Captures/Project Gallery, Studio Player for explicitly selected local media, offline rights-cleared Studio Radio, Studio Presets, PIE Studio-audio interlock, persistent/resettable local workspace behavior, and full per-surface/master disable.
+
+Studio Identity is editor-local/application-local and non-canonical. It is not project/gameplay/runtime-save/exported-player truth, not game `PresentationProfile`, not game audio authority, not exported-game legal identity, and not an account/social/cloud/commerce system.
+
+Recent/Continue must use normal trusted project-open authority. Local media access is explicit and Main/secure-Preload-mediated; arbitrary renderer filesystem authority and silent broad scanning are forbidden. Studio media enters a project only through a later explicit normal asset import.
+
+**Explicitly excluded inside SICE:** cloud/social/public profiles, achievements/streaks/XP/productivity scoring, Spotify/music-service integration, streaming radio, marketplace/payment/seller/entitlement systems, mandatory telemetry, Steamworks/Steam achievements, premature game-audio systems, and detached multi-window/multi-monitor as a closure requirement.
+
+**Roadmap ownership:** `POST-RSM-18 SICE`.
+
+## 86. D-081 — Controlled Imperfection Is an Authorable Presentation Dimension, Not Accidental Degradation
+
+**Status:** `ADOPTED PRODUCT/PRESENTATION DIRECTION; IMPLEMENTATION MILESTONE-OWNED`
+
+RetroStage may intentionally reduce precision, smoothness, visibility, sampling cleanliness, and information density to create project-specific visual character.
+
+Controlled imperfection must be explicit, bounded, creator-controlled, reversible/non-destructive where applicable, diagnosable, profile-aware, deterministic where authored meaning/QA depends on it, and compatible with supported export/fallback contracts.
+
+It must not rely on accidental renderer bugs, corrupted assets, random z-fighting, mandatory vertex wobble, mandatory CRT/VHS, mandatory low resolution, or one mandatory RetroStage house style.
+
+`Visual Rawness` is a dimension of the canonical `PresentationProfile`/presentation model, not a separate competing profile authority.
+
+**Roadmap ownership:** RSM-43–45, RSM-56–58, RSM-75–78, RSM-83–90, RSM-94–103, RSM-108–119 as applicable.
+
+## 87. D-082 — Used Runtime Capabilities Require Complete Semantic Export Closure
+
+**Status:** `ADOPTED ARCHITECTURE / PRODUCT QUALITY INVARIANT`
+
+A creator-facing capability classified as `RUNTIME`, `COOKED`, or `HYBRID` is not complete merely because it works in Preview or PIE.
+
+For every used supported non-editor-only capability, RetroStage must prove a continuous chain from stable authored meaning through declared export disposition, runtime/cooked projection, complete semantic/asset/module dependency closure, cooked manifest representation, deterministic package inclusion, physical artifact evidence, standalone execution, and required parity/clean-machine proof.
+
+Static asset references alone are not sufficient. Missing any required link is an Export blocker.
+
+`EDITOR_ONLY` capability state must be excluded from player artifacts unless an explicit supported conversion/import creates runtime-owned project content.
+
+**Roadmap ownership:** RSM-55, RSM-94–103, RSM-111–120.
+
+## 88. D-083 — Early Access Is a Commercial Checkpoint, Not Roadmap Completion
+
+**Status:** `ADOPTED COMMERCIAL / ROADMAP DIRECTION`
+
+RetroStage Maker may enter paid Early Access after the non-numbered `POST-RSM-78 EA-RC` control closes without requiring RSM-79→RSM-120 to be complete.
+
+EA-RC pulls forward only the release-critical obligations necessary to sell, support, update, secure, license, package, and truthfully represent the actual Early Access product and its advertised standalone-export capability.
+
+Later numbered milestones remain open and retain complete mature ownership. Narrow EA proof does not pre-close them, Gate G, RSM-119, RSM-119-ADD1, or RSM-120.
+
+After release, roadmap development continues normally. Current development state is not automatically public-release state; the live EA channel receives validated release-candidate updates. Supported public customer projects are compatibility-sensitive data and require applicable migration/backup/regression/reopen/export evidence and release notes for affected updates.
+
+Exact store procedures, prices, promotions, regions, and EA duration remain contemporaneous release evidence.
+
+**Roadmap ownership:** POST-RSM-78 EA-RC, RSM-79→RSM-120 continuation, RSM-119/119-ADD1, RSM-120.
+
+## 89. D-084 — Export Uses a Deterministic Hierarchical Store-Neutral Runtime Layout
+
+**Status:** `ADOPTED EXPORT / DISTRIBUTION ARCHITECTURE DIRECTION`
+
+RetroStage export should produce a deterministic, inspectable hierarchical runtime layout rather than forcing one opaque monolithic file.
+
+The base standalone package is store-neutral and complete for all advertised non-store-dependent capabilities. Optional store targets compose bounded target-specific files/services over that base through platform adapters.
+
+Store-target packaging must not contaminate canonical project/gameplay meaning, require a vendor SDK for projects that do not use it, or hide release obligations inside an opaque package.
+
+Build stripping may remove only content proven unreachable under declared runtime semantics. The artifact report must explain retained/removed content and target-specific additions.
+
+**Roadmap ownership:** RSM-18, RSM-92–103, POST-RSM-78 EA-RC when activated, RSM-119.
+
+## 90. D-085 — Game-Wide Composition Has One Canonical Root and One Deterministic Resolution Contract
+
+**Status:** `ADOPTED ARCHITECTURE DIRECTION; FOUNDATION SHAPE BEGINS RSM-7 / RESOLVER ACTIVATION RSM-16`
+
+RetroStage has one explicit game-wide canonical composition root, `GameDefinitionDocument`, referenced through stable project identity. It composes runtime/export intent by referencing subsystem-owned documents/profiles/defaults; it does not own or inline every Scene, entity, item, enemy, dialogue, UI widget, asset or engine object.
+
+One RetroStage-owned headless `GameConfigurationResolver` resolves effective configuration from one coherent accepted authoring snapshot/context. The same semantic resolution contract is reused across Preview, PIE, player runtime, cooking and export.
+
+```text
+ProjectDocument ≠ GameDefinitionDocument
+GameDefinitionDocument ≠ RuntimeGameSession
+GameDefinitionDocument ≠ ResolvedGameConfiguration
+
+RequestedCapabilities ≠ SupportedCapabilities ≠ EffectiveCapabilities
+
+accepted immutable authoring snapshot
+→ coherent resolution view
+→ shared resolver
+→ derived resolution provenance/fingerprint
+→ derived ResolvedGameConfiguration
+```
+
+`ResolutionDependencySet` and `ResolvedConfigurationFingerprint` are derived provenance/cache/regression evidence, not canonical authoring truth.
+
+GameDefinition defaults, Project Variables, Runtime Settings, Player Settings, Runtime Save state, target/build settings, editor/Studio state and secrets remain separate authorities.
+
+The resolver must be deterministic, explain effective-value provenance, reject torn/incompatible inputs, fail closed on unresolved required meaning, never depend on React/Zustand/Babylon/transient UI state for shipped semantics, and never write resolved runtime state back into canonical authoring documents.
+
+No new package is mandated. Exact physical placement follows Source 03 package-creation and environment-boundary rules.
+
+**Roadmap ownership:** RSM-7–8 foundation shape/identity, RSM-16 runtime resolution, RSM-18 minimal standalone parity, later gameplay/presentation/save/Scene/audio owners, RSM-94–103 mature cook/export, RSM-112–116 regression/migration.
+
 # Deferred Scope Registry
 
-## 84. Deferred but Approved Product Directions
+## 91. Deferred but Approved Product Directions
 
 The following directions are approved but must wait for their owning milestones.
 
@@ -2434,16 +2644,28 @@ The following directions are approved but must wait for their owning milestones.
 | Plugin SDK | Deferred | RSM-117 | Requires permissions, security, compatibility, and recovery |
 | AI/MCP integration | Deferred | RSM-118 | Requires typed commands, approval, undo, provenance, and trust |
 | Hosted telemetry/crash reporting | Conditional | RSM-115 | Requires explicit privacy and vendor decision |
+| Behavior-tree IDE / GOAP / utility-planning AI | Deferred / not core requirement | Post-first-product unless separately justified | Alpha uses bounded enemy profiles, perception, states, attacks, encounters and diagnostics |
+| Life-simulation NPC schedules / deep relationship simulation | Deferred | Post-first-product | Story-driven bounded relocation/memory is sufficient for first product |
+| Full detective-deduction simulator | Deferred | Post-first-product | Clue/knowledge + story/objective semantics cover bounded mystery workflows |
+| Full dialogue scripting language | Deferred | Post-first-product | Typed dialogue/story semantics and bounded actions come first |
+| Spatial case inventory | Conditional / defer unless proved necessary | RSM-50 / RSM-87 owner decision | Not required for every first-product profile |
+| Full ragdoll/gore/dismemberment | Deferred | Post-first-product | Bounded damage/feedback remains sufficient |
+| Full climbing/ledge traversal | Deferred | Post-first-product | Not required for supported first-product profiles |
+| Advanced lip-sync/facial animation | Deferred | Post-first-product | Dialogue presentation does not require it |
+| Cloud-save synchronization | Deferred | Post-first-product/store-specific decision | Local runtime save remains baseline |
+| Complex radial-menu framework | Deferred | Post-first-product | Bounded UI/menu patterns remain sufficient |
+| Bitmap-font authoring suite | Conditional/deferred | Presentation/UI owner if proven | Import/use may be supported without a full authoring suite |
+| Advanced diegetic/3D UI framework | Deferred | Post-first-product | Bounded world-space UI may be supported without a general framework |
 
 No table entry authorizes implementation before the canonical roadmap reaches its owner.
 
 ---
 
-## 85. Conditional Third-Party and Tooling Registry
+## 92. Conditional Third-Party and Tooling Registry
 
 The following are not automatically installed merely because their direction is approved. Exact dependency admission remains milestone-owned.
 
-### 85.1 Adopted internal engineering-acceleration direction
+### 92.1 Adopted internal engineering-acceleration direction
 
 RetroStage should deliberately automate repetitive engineering evidence where automation reduces human transcription error without weakening owner/reviewer gates.
 
@@ -2459,7 +2681,7 @@ A future RetroStage-owned Governance/Evidence CLI may collect:
 
 It must remain read-only/evidence-first by default and must not silently authorize, stage, commit, push, rerun CI, repair drift, or replace independent review. No command name is canonical until it physically exists and passes its owning review.
 
-### 85.2 Third-party candidates
+### 92.2 Third-party candidates
 
 | Candidate | Status | Owning work | Required proof |
 |---|---|---:|---|
@@ -2483,11 +2705,23 @@ It must remain read-only/evidence-first by default and must not silently authori
 | Basis Universal tools | Conditional audit | RSM-76 / RSM-95 | License, patents, output quality, source preservation |
 | Draco | Conditional audit | RSM-75 / RSM-95 | Binary/WASM identity, license, performance value |
 | FFmpeg and codecs | Conditional audit | RSM-79 / RSM-95 | Codec/patent/license review and distribution plan |
-| Steamworks SDK | Conditional audit | RSM-119 | Exact feature, SDK terms, redistributables, secrets, opt-in behavior |
+| Steamworks SDK | Conditional audit | POST-RSM-78 EA-RC if actually required, otherwise RSM-119 | Exact feature, SDK terms, redistributables, secrets, opt-in behavior, packaged-player qualification |
+| Epic/EOS or other store-specific SDK/service | Conditional audit | Owning store/distribution control only when a real requirement exists | Exact feature, terms/license, build-only vs runtime role, secrets, packaging and clean-machine proof |
 | Installer/signing tools | Conditional audit | RSM-102 / RSM-119 | Exact maker, native tools, license, signing and secret handling |
 | External cinematic formats/libraries | Open until audit | RSM-107 | Mapping, round-trip, license, provenance, unsupported-data policy |
+| `@microsoft/api-extractor` | Development-only candidate | First package-boundary/API-review milestone where several public TypeScript APIs justify it | Exact package/license/transitives, config fit, generated-report workflow, player/build exclusion |
+| `pure-rand` | Milestone-gated runtime-adapter candidate | RSM-16+ RNG contract; later RSM-57/RSM-86 consumers only through RetroStage RNG authority | Exact version/license, deterministic fixtures, algorithm-upgrade compatibility, save-state policy |
+| `music-metadata` | Milestone-gated import-inspection candidate | RSM-79 | Exact package/license/transitives, Node/ESM compatibility, malformed-input tests, source-inspection-only boundary |
+| `execa` | Conditional audit | First real audited external-process need | Exact graph/license, Node/Main/worker placement, cancellation/security, external executable separately admitted |
+| `@dagrejs/graphlib` | Milestone-gated derived-graph candidate | RSM-94/100/101 or earlier only when repeated graph algorithms justify it | Exact algorithms, determinism/order, performance/memory, derived-graph-only boundary |
+| `@dagrejs/dagre` | Milestone-gated deferred candidate | Real World/Level/Flow/dependency visual graph layout need only | Exact package/license, Graphlib relation, layout-only boundary; no semantic graph authority |
+| `jimp` | Milestone-gated secondary image-processing candidate | RSM-76 | Exact package/transitives, pure-JS claim verification, performance/memory, narrow resize/basic-pixel adapter |
+| `maxrects-packer` | Milestone-gated narrow atlas-packing candidate | RSM-76 | Exact package/license, deterministic packing fixtures, stable ordering/rotation policy |
+| `simplex-noise` | Milestone-gated procedural/presentation candidate | RSM-43/RSM-83/RSM-86 as proven | Exact version/license, RetroStage RNG injection, version/output-regression policy, no ambient Math.random authority |
+| `image-q` | Optional milestone-gated quantization candidate | RSM-76 | Exact license/transitive/provenance, maintenance review, deterministic palette/dither fixtures |
+| `poisson-disk-sampling` | Optional/deferred milestone-gated scatter candidate | RSM-57 | Exact package/license/transitive, maintenance review, RetroStage RNG injection, deterministic ordering/performance proof |
 
-### 85.3 Deliberate non-selections / friction controls
+### 92.3 Deliberate non-selections / friction controls
 
 The following were reviewed during the pre-RSM-6 technology freeze and are intentionally **not** baseline selections:
 
@@ -2497,6 +2731,7 @@ Comlink
 MSW
 Zod
 broad Storybook addon bundles
+ts-morph as a core/default architecture dependency
 ```
 
 Rationale:
@@ -2506,8 +2741,9 @@ Rationale:
 - MSW is not selected because the current product is not network/API-centric; add only if a real service-mocking need emerges.
 - Zod is not selected because RetroStage already owns the TypeBox/Ajv runtime-schema direction; parallel schema authorities would increase drift risk.
 - Storybook itself is only a conditional workbench. Addons are not inherited wholesale; each addon may introduce separate dependencies, telemetry, browser binaries, or licenses.
+- `ts-morph` is not part of the core acceleration candidate set. Reconsider only after repeated TypeScript Compiler API boilerplate proves a concrete need that API Extractor or native compiler APIs do not already solve.
 
-### 85.4 Dependency-surface freeze and accepted RSM-6 graph
+### 92.4 Dependency-surface freeze and accepted RSM-6 graph
 
 After this clarification, no new third-party library should be added to canonical planning merely because it is popular or convenient. New additions require an owning milestone, a concrete reduction in code/error/maintenance cost, license/transitive evidence, and an explicit authority boundary.
 
@@ -2519,7 +2755,7 @@ RSM-6 admits exactly `@babylonjs/core@9.21.2` and `@babylonjs/loaders@9.21.2` as
 
 # Explicit Rejections and Out-of-Scope Directions
 
-## 86. Rejected Architecture Directions
+## 93. Rejected Architecture Directions
 
 The following are rejected for the reboot baseline:
 
@@ -2538,7 +2774,7 @@ The following are rejected for the reboot baseline:
 
 ---
 
-## 87. Rejected Dependency and Licensing Directions
+## 94. Rejected Dependency and Licensing Directions
 
 The following are rejected by default:
 
@@ -2555,7 +2791,7 @@ The following are rejected by default:
 
 ---
 
-## 88. Out-of-Scope Product Directions
+## 95. Out-of-Scope Product Directions
 
 The following remain outside v0:
 
@@ -2570,13 +2806,27 @@ The following remain outside v0:
 - general-purpose DAW,
 - arbitrary scripting platform with unrestricted host access,
 - external companion product required for core authoring,
-- general non-Euclidean or procedural world engine.
+- general non-Euclidean or procedural world engine,
+- MMO/large-scale online world or live-service progression framework,
+- colony/resource-management/RTS multi-unit command framework,
+- general-purpose RPG framework, deep stat/equipment/encumbrance system, random loot/rarity/affix system, or complex crafting/economy/vendor framework,
+- unrestricted procedural world generation,
+- full destruction-heavy or unrestricted physics-sandbox gameplay framework,
+- Soulslike/character-action combo framework, competitive shooter framework, advanced tactical-cover shooter framework, complex ballistics, or huge weapon/attachment framework,
+- platformer/parkour framework, vehicles, or full traversal/climbing system as a first-product requirement,
+- general app/UI builder, arbitrary executable custom widgets, remote-web UI runtime, dynamic open-world map/navigation UI, MMO-style quest HUD, full visual-novel engine, VR/spatial UI framework, procedural UI generator, UI marketplace/theme store, or full motion-graphics suite,
+- full localization-management product or custom text-shaping/font engine from scratch,
+- full non-linear video editor or runtime video-streaming platform,
+- account/login infrastructure as a first-product requirement,
+- emulator-style full-memory save states or arbitrary mid-frame save,
+- arbitrary code as the no-code foundation,
+- unrestricted Flow Graph as a substitute for first-class gameplay authoring,
 
 ---
 
 # Superseded Historical Decisions
 
-## 89. Superseded Live-Status Claims
+## 96. Superseded Live-Status Claims
 
 All pre-loss claims that a milestone is currently implemented, active, next, passed, or closed are superseded for reboot live status.
 
@@ -2584,7 +2834,7 @@ They remain historical evidence only.
 
 ---
 
-## 90. Superseded Technology Alternatives
+## 97. Superseded Technology Alternatives
 
 Previous discussions of switching the baseline to Godot, Stride, Wicked Engine, or a custom native renderer are superseded by the approved reboot technology contract unless future evidence triggers formal replacement review.
 
@@ -2592,7 +2842,7 @@ This does not claim those technologies are commercially unusable. It records tha
 
 ---
 
-## 91. Superseded Named Companion-Product Assumption
+## 98. Superseded Named Companion-Product Assumption
 
 The named Mnemos Studio assumption is superseded and removed.
 
@@ -2609,7 +2859,7 @@ No package, bridge, roadmap dependency, or product promise may use the removed n
 
 # Open Decisions Owned by Future Milestones
 
-## 92. Open Questions
+## 99. Open Questions
 
 The following questions remain intentionally open.
 
@@ -2642,7 +2892,7 @@ Open questions must not be answered implicitly by whichever package a coding age
 
 # Change Control
 
-## 93. Decision Change Rule
+## 100. Decision Change Rule
 
 A binding decision may be changed only when a proposed replacement includes:
 
@@ -2661,7 +2911,7 @@ A dependency upgrade, package experiment, or implementation convenience does not
 
 ---
 
-## 94. New Decision Admission Rule
+## 101. New Decision Admission Rule
 
 A new durable decision must state:
 
@@ -2680,22 +2930,23 @@ Duplicate or overlapping decisions should be merged rather than allowed to creat
 
 # Immediate Handoff
 
-## 95. Next Source
+## 102. Next Source
 
-Current post-close control is:
+Current lifecycle authority remains external to this durable decision registry:
 
 ```text
 Gate B = ACTIVE / CURRENT
-owner-directed post-RSM-6 source-alignment review checkpoint / separate authority required
+RSM-7 = NEXT ROADMAP MILESTONE / NOT STARTED / NOT AUTHORIZED
+live activation = Source 02/08 + separate owner authority
 ```
 
-RSM-6 is `MILESTONE CLOSED / PASS`: I1-I8 and V1 remain accepted at implementation baseline `dbd3f2be31d89ca36a17ccb4914e21623df424a2`, and closure publication is `34b1148e1c7be12e30f1e962148d40b5027a7b07` with natural CI `32526483832 / 96909482744 / attempt 1 / success`. RSM-7 is next in roadmap order, has not started, and remains unauthorized; all RSM-7+ decisions remain deferred unless separately accepted. No waiting broader alignment proposal is accepted or integrated here.
+RSM-6 is `MILESTONE CLOSED / PASS`: I1-I8 and V1 remain accepted at implementation baseline `dbd3f2be31d89ca36a17ccb4914e21623df424a2`, and closure publication is `34b1148e1c7be12e30f1e962148d40b5027a7b07` with natural CI `32526483832 / 96909482744 / attempt 1 / success`. The post-RSM-6 alignment decisions recorded here are durable future direction only; they do not start RSM-7 or any later implementation.
 
 ---
 
 # Approval Statement
 
-## 96. Decision Registry Approval
+## 103. Decision Registry Approval
 
 This decision registry adopts the following reboot direction:
 

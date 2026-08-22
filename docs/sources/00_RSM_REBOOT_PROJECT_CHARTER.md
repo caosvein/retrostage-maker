@@ -300,9 +300,11 @@ No excluded area may enter the product silently through a third-party dependency
 
 The retained long-term target is:
 
-**RSM-120 — First Playable Public Alpha / Investor Demo Candidate**
+**RSM-120 — Public Alpha / Investor Demo Maturity Gate**
 
 The reboot roadmap may refine milestone order and intermediate gates, but it should preserve this end-to-end product target unless formal change control explicitly supersedes it.
+
+A separately accepted earlier Early Access release may occur under the roadmap without satisfying, replacing, or pre-closing this north-star maturity gate.
 
 RSM-120 is not a feature-count checkpoint.
 

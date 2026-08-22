@@ -1426,6 +1426,39 @@ Steam-specific integration must be isolated behind a RetroStage platform adapter
 
 Exported user games must not require Steam unless the creator explicitly enables a supported Steam integration and satisfies applicable distribution terms.
 
+### 20.4 Optional Store / Platform Adapter Policy
+
+Steam, Epic Games Store, and other approved storefronts are distribution targets, not canonical project/game authority.
+
+Store SDKs/services are not foundation dependencies. Any SDK, redistributable, upload tool, cloud/achievement service, native helper, overlay integration, signing utility, or target-specific package is `CONDITIONAL_AUDIT` unless separately admitted by its owning milestone/control.
+
+A store integration must:
+- sit behind a RetroStage-owned platform/distribution adapter;
+- define the exact creator/runtime feature requiring it;
+- distinguish build/upload tooling from player runtime dependencies;
+- inventory redistributables/native/WASM/helper binaries;
+- prove license/terms/secrets/packaging behavior;
+- preserve the store-neutral runtime for projects that do not enable a store-dependent feature.
+
+Store-target packaging may add target-specific files/services over the deterministic store-neutral export, but it cannot repair an incomplete base runtime/export closure.
+
+### 20.5 Electron/Babylon Heavy-3D Commercial Qualification Policy
+
+Electron and Babylon remain the approved baseline player host/render foundations, but commercial/store suitability is evidence-driven rather than assumed from framework compatibility.
+
+When a claimed release target requires it, the owning gate must qualify representative packaged-player behavior including:
+- hardware-accelerated graphics initialization and supported fallback/error behavior;
+- process/GPU/renderer lifecycle and crash supervision;
+- overlay/store interaction where actually selected;
+- long-session/resource-churn behavior;
+- clean-machine launch and shutdown;
+- representative supported hardware tiers;
+- artifact/redistributable inventory.
+
+This is a bounded qualification requirement, not a general benchmark program and not authorization for a native player rewrite.
+
+Volatile vendor requirements must be re-verified from current official vendor documentation at the owning admission/release gate rather than encoded here as timeless architecture constants.
+
 ---
 
 ## 21. License Classification Policy
@@ -1769,7 +1802,7 @@ This table maps third-party components to the roadmap responsibilities they acce
 | Advanced text surfaces | Monaco | RetroStage language/diagnostic semantics |
 | Testing | Vitest, Playwright | Fixtures, acceptance criteria, product truth |
 | Logging/tracing | Pino, later OpenTelemetry | Event taxonomy, privacy, Project Doctor and recovery UX |
-| Packaging | Electron Forge | Player separation, cooking, validation, Steam-ready artifacts |
+| Packaging | Electron Forge | Player separation, cooking, validation, deterministic store-neutral artifacts, optional audited store-target adapters |
 | Compliance | CycloneDX, dependency review | License decisions, notices, release approval |
 
 ---
@@ -1798,7 +1831,7 @@ GitHub Actions and dependency-review configuration may also enter as pinned CI c
 
 ### 29.2 Gate B production dependency schedule
 
-The approved production families enter only when their roadmap milestone opens and their exact compatibility/license checks pass:
+The approved production families enter only when their roadmap milestone opens and their exact compatibility/license checks pass. A non-numbered control such as POST-RSM-78 EA-RC may authorize a narrowly required conditional audit, but it never pre-admits a dependency merely because the future control exists:
 
 | Milestone | Dependency families |
 |---|---|
@@ -1872,8 +1905,54 @@ Basis encoder tools
 Draco binaries
 FFmpeg
 Steamworks SDK
+Epic/EOS or other store-specific SDK/service integration
 installer-specific makers not yet selected
 ```
+
+
+### 29.4 Post-RSM-6 Acceleration Candidate Families — Candidate Classification Only
+
+This section records **candidate boundaries**, not dependency admission. It merges the product/presentation acceleration family and the game-wide composition/runtime acceleration family.
+
+```text
+candidate
+≠ installed
+≠ admitted
+≠ pinned
+≠ bundled
+≠ release-approved
+```
+
+No version in an exploratory observation is canonical. At the owning admission milestone, the exact package/release must be re-queried and maintenance, license/copyright, transitive dependency, vulnerability, binary/native/WASM, Node/browser/Electron, bundle-placement, notices/SBOM, determinism/compatibility, and replacement/removal review repeated.
+
+Existing milestone-gated asset foundations remain preserved and are **not** re-admitted by this alignment:
+
+```text
+@gltf-transform/core
+@gltf-transform/functions
+@gltf-transform/extensions
+meshoptimizer
+```
+
+| Candidate | Source-06 class | Earliest/narrow owner | Authority boundary / admission condition |
+|---|---|---|---|
+| `@microsoft/api-extractor` | `DEVELOPMENT_ONLY` | First milestone where multiple meaningful public TypeScript package APIs justify report/diff enforcement | Evidence/tooling only; package API authority remains Source 03 + physical public entrypoints + review; player excluded |
+| `pure-rand` | `MILESTONE_GATED` | RSM-16+ RNG semantics; later RSM-57/RSM-86 consumers | RetroStage owns stream identity, seed provenance, domain separation, save/trace/regression policy; backend numbers only |
+| `music-metadata` | `MILESTONE_GATED` | RSM-79 | Source-file/container/duration/tag inspection only; no decode/runtime/cue/gameplay-noise/codec authority |
+| `execa` | `CONDITIONAL_AUDIT` | First real audited external executable/process need | Node/Main/worker process adapter only; approval of Execa never approves an executable; no Renderer/direct project shell authority |
+| `@dagrejs/graphlib` | `MILESTONE_GATED` | RSM-94/100/101 or earlier only after repeated derived-graph algorithm need | Derived graph projections for reachability/cycles/topology; graph object is never canonical project/runtime truth |
+| `@dagrejs/dagre` | `MILESTONE_GATED` with `DEFERRED_CANDIDATE` status | Only when a real visual graph layout surface exists | Layout coordinates only; no semantic graph authority; may remain absent even if React Flow is later used |
+| `jimp` | `MILESTONE_GATED` secondary candidate | RSM-76 | Narrow pure-JS resize/basic pixel-processing adapter; exact transitive/performance/memory review required; not image-authority truth |
+| `maxrects-packer` | `MILESTONE_GATED` | RSM-76 | Deterministic sprite/atlas packing only; RetroStage owns stable slice IDs, ordering/rotation policy, import/reimport semantics |
+| `simplex-noise` | `MILESTONE_GATED` | RSM-43/RSM-83/RSM-86 when proven | Controlled noise generation behind RetroStage RNG/seed semantics; no ambient `Math.random()` authority; version/output regression tested |
+| `image-q` | `MILESTONE_GATED` with `OPTIONAL_CANDIDATE` status | RSM-76 | Palette quantization/dithering only; exact algorithm/provenance/maintenance/transitive review; RetroStage owns presentation/import semantics |
+| `poisson-disk-sampling` | `MILESTONE_GATED` with `OPTIONAL_DEFERRED_CANDIDATE` status | RSM-57 | Bounded scatter distribution only; inject RetroStage RNG, test deterministic ordering/performance; compare against small owned implementation before admission |
+
+Additional boundary:
+- Existing conditional Piscina direction, if ever admitted, remains only a worker-orchestration adapter and must obey the owner/snapshot/session-generation lease and worker mutation-authority barrier.
+- `ts-morph` is not elevated into this candidate set; reconsider only after repeated Compiler API boilerplate proves a concrete need.
+- No new state manager, ECS, serializer, scripting VM, game framework, audio/physics/navigation engine, renderer, canonical graph framework, DI container, scene framework, or mandatory package is admitted by this alignment.
+- A permissive software license is never by itself admission evidence.
 
 ---
 
@@ -2118,6 +2197,17 @@ This ledger records the authoritative upstream source family used for the histor
 | ts-pattern | `https://github.com/gvergnaud/ts-pattern` | MIT; conditional convenience dependency |
 | msgpackr | `https://github.com/kriszyp/msgpackr` | MIT |
 | KTX-Software | `https://github.com/KhronosGroup/KTX-Software` | Mixed; conditional audit only |
+| API Extractor | `https://github.com/microsoft/rushstack` / `https://api-extractor.com/` | MIT observed; `DEVELOPMENT_ONLY` candidate only; exact release not frozen |
+| pure-rand | `https://github.com/dubzzz/pure-rand` | MIT observed; `MILESTONE_GATED` RNG-backend candidate only; exact release not frozen |
+| music-metadata | `https://github.com/Borewit/music-metadata` | MIT observed; `MILESTONE_GATED` source-inspection candidate only; exact release not frozen |
+| Execa | `https://github.com/sindresorhus/execa` | MIT observed; `CONDITIONAL_AUDIT` process-adapter candidate only; exact release not frozen |
+| DagreJS Graphlib | `https://github.com/dagrejs/graphlib` | MIT observed; `MILESTONE_GATED` derived-graph candidate only; exact release not frozen |
+| DagreJS Dagre | `https://github.com/dagrejs/dagre` | MIT observed; deferred `MILESTONE_GATED` visual-layout candidate only; exact release not frozen |
+| Jimp | `https://github.com/jimp-dev/jimp` | MIT observed; RSM-76 secondary image-processing candidate only; exact release not frozen |
+| maxrects-packer | `https://github.com/soimy/maxrects-packer` | MIT observed; RSM-76 atlas-packing candidate only; exact release not frozen |
+| simplex-noise | `https://github.com/jwagner/simplex-noise.js` | MIT observed; milestone-gated noise-adapter candidate only; exact release not frozen |
+| image-q | `https://github.com/ibezkrovnyi/image-quantization` | MIT observed; optional RSM-76 quantization candidate only; exact release not frozen |
+| poisson-disk-sampling | `https://github.com/kchapelier/poisson-disk-sampling` | MIT observed; optional/deferred RSM-57 scatter candidate only; exact release not frozen |
 
 ---
 
@@ -2210,7 +2300,7 @@ Gate B = ACTIVE / CURRENT
 RSM-7 dependency admission = NONE / NOT STARTED / NOT AUTHORIZED
 ```
 
-The exact admitted Babylon `9.21.2` graph and all historical dependency evidence remain unchanged. The owner-directed post-RSM-6 source-alignment review is a separate checkpoint; no waiting proposal, RSM-7 dependency, or RSM-7 implementation is admitted here.
+The exact admitted Babylon `9.21.2` graph and all historical dependency evidence remain unchanged. This alignment records conditional future technology/store boundaries only; it admits no RSM-7 dependency, starts no RSM-7 implementation, and admits no store SDK merely because a future control is planned.
 
 ---
 

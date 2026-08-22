@@ -8,7 +8,7 @@
 **Document state:** `ACTIVE CANONICAL ROADMAP / RSM-6 MILESTONE CLOSED-PASS / Gate B ACTIVE / CURRENT`  
 **Repository:** `ESTABLISHED — live physical truth belongs to Source 02/07 and repository inspection`  
 **Primary branch:** `main`  
-**Primary product target:** `RSM-120 — First Playable Public Alpha / Investor Demo Candidate`  
+**Primary product target:** `RSM-120 — Public Alpha / Investor Demo Maturity Gate`  
 **Governed by:** `00_RSM_REBOOT_PROJECT_CHARTER.md`  
 **Technology authority:** `06_RSM_REBOOT_TECHNOLOGY_DEPENDENCY_AND_LICENSE_CONTRACT.md`  
 **Historical basis:** 2026-07 pre-loss roadmap, charter, decisions, architecture, milestone, and workflow sources  
@@ -333,7 +333,7 @@ Unless a milestone explicitly narrows the requirement, closure requires:
 **Accepted exit evidence:** A derived scene renders through the real Electron editor viewport; the same adapter foundation is exercised through a real `NullEngine` headless path and RetroStage-owned diagnostics; stable-handle picking, derived asset-container ownership, editor grid/camera/gizmo intent seams, context-loss recovery, and ordered resource teardown are proven while canonical documents remain Babylon-independent. Natural push CI run `32496829684`, job `96817113858`, attempt `1`, on `main` completed with `success`; fresh-clone automated validation and owner manual acceptance independently passed.
 
 ## RSM-7 — Canonical Project / Scene Document Foundation
-**Current control:** `RSM-7 = NEXT ROADMAP MILESTONE / NOT STARTED / NOT AUTHORIZED`; the owner-directed post-RSM-6 source-alignment review is a separate checkpoint and does not activate RSM-7 implementation.  
+**Current control boundary:** `RSM-7 = NEXT ROADMAP MILESTONE / NOT STARTED / NOT AUTHORIZED`; live activation belongs to Source 02/08 and separate owner authority. Roadmap/source alignment by itself never activates RSM-7 implementation.  
 **Purpose:** Define the first versioned project, scene, entity, component-envelope, and asset-reference documents.  
 **Third-party placement:** RetroStage-owned TypeScript packages own persistence; `fast-check` may enter `DEVELOPMENT_ONLY` after exact admission when property-based tests materially reduce schema/round-trip risk.  
 **Key deliverables:**
@@ -343,6 +343,13 @@ Unless a milestone explicitly narrows the requirement, closure requires:
 - Establish the first Golden Fixture Corpus with known-valid, known-invalid, corrupt, compatibility, and round-trip fixtures.
 - Establish a deterministic `load → parse → canonical model → save → reload → compare` round-trip harness.
 - Create headless fixtures independent of Electron, React, and Babylon.
+**V2 game-wide composition foundation additions:**
+- Define the minimal `GameDefinitionDocument` envelope and stable `ProjectDocument.gameDefinitionId` binding for one game-wide composition root without turning ProjectDocument into a giant settings object.
+- Keep RSM-7 GameDefinition content intentionally narrow: identity, schema/version, typed stable references/default slots, requested-capability intent envelope, validation ownership, deterministic serialization, unknown-data policy, and headless round-trip fixture shape only.
+- Distinguish requested capability intent from later canonical Capability Matrix supported-capability truth; do not implement full effective-capability resolution in RSM-7.
+- Extend Golden Fixture and round-trip coverage to Project/Scene/GameDefinition reference integrity.
+- Do not implement gameplay profiles, Scene Director, full runtime resolver, RNG runtime, audio runtime, navigation runtime, or later subsystem semantics in this milestone.
+
 **Exit:** Projects and scenes can be created, parsed, serialized, round-tripped, and compared without renderer or UI ownership.
 
 ## RSM-8 — Stable Identity / Schema Migration / Reference Foundation
@@ -354,7 +361,62 @@ Unless a milestone explicitly narrows the requirement, closure requires:
 - Create explicit migration functions and future-version rejection.
 - Create deterministic fixtures for ID preservation and remapping.
 - Add property-based invariants where generated edge cases provide more value than hand-written examples alone.
+**V2 game-wide identity/migration additions:**
+- Extend stable identity, reference remapping, migration, compatibility, and revision rules to `GameDefinitionDocument` and the Project→GameDefinition binding.
+- Define coherent accepted authoring revision/snapshot identity so later resolution cannot combine mutually inconsistent live revisions.
+- Preserve structurally safe unknown extension data without executing it; required unknown runtime meaning fails closed instead of silently disappearing or guessing semantics.
+- Add fixtures for GameDefinition identity preservation/remap, unknown-extension preservation, and coherent revision identity.
+
 **Exit:** A supported old fixture migrates to the current schema without silent identity or unknown-data loss, and generated/reference edge cases cannot silently break stable-identity guarantees.
+
+## Cross-Milestone Architecture Alignment — Game-Wide Composition & Deterministic Resolution
+
+**Type:** `CROSS-CUTTING ROADMAP CONTRACT / NOT A NUMBERED MILESTONE / NOT CURRENT IMPLEMENTATION AUTHORITY`
+
+RetroStage requires one explicit game-wide composition root without creating a giant GameMode object or collapsing subsystem ownership.
+
+```text
+ProjectDocument
+      ↓ stable gameDefinitionId
+GameDefinitionDocument
+      ↓ typed references/default intent
+accepted immutable authoring snapshot
+      ↓ coherent resolution view
+GameConfigurationResolver
+      ↓
+ResolvedGameConfiguration
+      ↓
+RuntimeGameSession / Preview / Cook / Export consumers
+```
+
+**Binding semantics:**
+- `GameDefinitionDocument` composes game-wide intent through stable references; it does not inline every Scene, enemy, UI widget, dialogue line, asset, or subsystem document.
+- `GameConfigurationResolver` is one RetroStage-owned, headless, deterministic resolution contract reused by Preview/PIE/runtime/cook/export rather than separate hidden resolvers.
+- `CanonicalProjectSnapshot` terminology, where used by future implementation/evidence, means a coherent resolver view of one accepted immutable authoring snapshot; it is not a second persisted snapshot/session authority.
+- `ResolvedGameConfiguration`, `ResolutionDependencySet`, and `ResolvedConfigurationFingerprint` are derived runtime/cache/provenance/regression evidence, never canonical authoring truth.
+- Capability authority is separated as `RequestedCapabilities ≠ SupportedCapabilities ≠ EffectiveCapabilities`: GameDefinition may request intent, the canonical Capability Matrix owns support truth, and the resolver derives effective capability truth for a resolution context.
+- GameDefinition defaults, Project Variables, Runtime Settings, Player Settings, Runtime Save state, target/build settings, editor/Studio state, and secrets remain separate authorities.
+- Resolution fails closed on missing required semantic meaning, exposes provenance/explainability, and never writes resolved runtime state back into canonical documents.
+- RSM-7 creates only the extensible document shape; RSM-8 owns stable identity/remap/migration; RSM-16 owns first shared resolver/runtime integration. Later subsystem milestones populate their own typed meaning.
+- No new `game-definition` or `config-resolver` package is mandated by this roadmap alignment; Source 03 package-creation rules remain controlling.
+
+**Runtime hardening owner map:**
+
+| Contract | Primary roadmap owners |
+|---|---|
+| Runtime clock domains, ordered update phases, fixed/variable semantics | RSM-16–17 |
+| Runtime entity identity, spawn/despawn provenance, save-safe boundary | RSM-23–24 |
+| Async generation leases and worker mutation barrier | RSM-27 |
+| Event/Action effect idempotency, semantic commit keys, causal-chain budgets | RSM-37+ |
+| Transactional Scene/Section lifecycle and residency | RSM-39, RSM-63–64 |
+| Camera/input arbitration and focus/device lifecycle | RSM-42, RSM-67 |
+| Shared traversal metrics and dynamic navigation projection | RSM-56–64 |
+| Domain-separated deterministic randomness | RSM-16+, RSM-57, RSM-86 |
+| Audio semantic/lifetime/listener/transition ownership | RSM-79, RSM-88–89 |
+| Animation marker/event semantic identity | RSM-84–85 |
+| Same composition/resolution contract in cook/export | RSM-18, RSM-94–103 |
+
+This contract is future-direction source truth only. It does not start or authorize RSM-7 implementation.
 
 ## RSM-9 — Editor Shell / Hierarchy / Inspector Vertical Slice
 **Purpose:** Create the first product-owned editor workspace around the Babylon viewport.  
@@ -362,6 +424,9 @@ Unless a milestone explicitly narrows the requirement, closure requires:
 **Key deliverables:**
 - Create viewport, hierarchy, inspector, problems placeholder, and project navigation surfaces.
 - Keep panel layout local and non-canonical.
+- Support product-owned dock/tab/resize workspace behavior through the approved Golden Layout adapter while keeping layout state editor-local and non-canonical.
+- Persist supported workspace layouts locally between application sessions without marking project content dirty.
+- Provide a safe reset-to-default path for the current workspace layout; reset changes editor preference state only and must not mutate project content, undo history, runtime state, or exported content.
 - Create RetroStage design tokens, component states, terminology, focus rules, and interaction semantics.
 - Exercise UI behavior with semantic/user-oriented tests rather than component-instance or implementation-detail assertions.
 - If Storybook is admitted, use it only to develop/document/test RetroStage-owned UI components and states in isolation; it must not become the editor shell, canonical design authority, hosted dependency, or required production runtime.
@@ -438,6 +503,12 @@ Unless a milestone explicitly narrows the requirement, closure requires:
 - Construct PIE from a canonical snapshot.
 - Prevent PIE mutations from changing authoring documents.
 - Restore editor input, selection, and preview state after Stop.
+**V2 composition/runtime hardening additions:**
+- Implement the first headless `GameConfigurationResolver` contract over one coherent accepted authoring snapshot and produce derived `ResolvedGameConfiguration` plus dependency/fingerprint evidence without making derived data canonical.
+- Use the same composition/resolution semantics later consumed by standalone runtime/export; do not read mutable UI/live-document state as shipped configuration authority.
+- Define explicit runtime clock domains, ordered update phases, fixed/variable-step semantics, pause/time-scale/hit-stop behavior, and teardown/quiescence contracts.
+- Establish RetroStage-owned domain-separated RNG stream/seed provenance hooks; any later PRNG library is a replaceable adapter beneath RetroStage save/test/trace semantics.
+
 **Exit:** PIE starts and stops repeatedly without canonical mutation, leaked runtime ownership, or duplicate loops.
 
 ## RSM-17 — Collision / Grounding / Playable Sandbox / Vertical-Slice Tests
@@ -448,6 +519,11 @@ Unless a milestone explicitly narrows the requirement, closure requires:
 - Define physics adapter ownership and teardown.
 - Add Vitest contract tests and Playwright Electron smoke tests.
 - Record native/WASM artifacts when Havok ships.
+**V2 runtime stability additions:**
+- Run gameplay-sensitive collision/grounding from the approved runtime clock/fixed-update semantics rather than renderer-frame timing.
+- Keep authored entity identity, runtime entity identity, renderer handles, physics bodies, and persistence/save identity distinct.
+- Prove a stable runtime entity mapping/provenance boundary and an allowed save-safe/quiescent point for the vertical slice where applicable.
+
 **Exit:** The minimal scene is playable in PIE and the editor passes headless, integration, and Electron smoke validation.
 
 ## RSM-18 — Minimal Standalone Player / Early Cooking / Clean-Restore Gate
@@ -459,6 +535,46 @@ Unless a milestone explicitly narrows the requirement, closure requires:
 - Export a standalone Windows test build without editor UI or source-project authority.
 - Verify clean clone, clean build, clean target execution, notices, SBOM, and packaged-file inventory.
 **Exit:** One minimal project can be created, saved, reopened, played, exported, and run on a clean supported machine; Gate B closes only with recorded restore and artifact evidence.
+
+### POST-RSM-18 — Studio Identity & Creator Experience Pass
+
+**Type:** `NON-NUMBERED INTER-MILESTONE PRODUCT EXPERIENCE CONTROL`  
+**Activation precondition:** `RSM-18 MILESTONE CLOSED / PASS AND GATE B CLOSED`  
+**Sequencing rule:** `RSM-19 MAY NOT START UNTIL THIS CONTROL IS CLOSED / PASS`  
+**Purpose:** Convert the proven Gate-B product spine into a personal, polished, creator-owned working environment before Gate-C authoring breadth expands, without adding gameplay capability or changing canonical project/runtime authority.  
+**Third-party placement:** Existing approved Electron/React/Golden Layout/browser-platform capabilities only unless a separate Source-06 dependency-admission gate approves an additional production dependency. Bundled artwork/audio remains subject to asset/content provenance and redistribution-rights evidence.
+
+**Required direction:**
+- Startup Welcome / Studio Launcher shown before a project is active, with local Creator Profile identity, optional hero artwork, Continue, New Project, Open Project, Recent Projects, passive Project Memory, and Recent Captures/Project Gallery surfaces.
+- Successful New/Open/Continue leaves the launcher and enters the normal active workbench through the same trusted application-layer project-open/create authority.
+- Local Creator Profile remains an editor/app preference identity, not an account and not exported-game developer/publisher/legal metadata.
+- Recent Projects / Continue may not bypass workspace trust, path validation, schema/version handling, migration, recovery, or diagnostics.
+- Project Memory and Session Rituals are passive local history/presentation only; no streaks, XP, goals, productivity scores, achievements, daily quests, or shutdown blockers.
+- Recent Captures / Project Gallery is local creator-history media, not canonical project assets unless a later explicit normal asset-import action imports a copy.
+- Studio Player uses only explicitly user-selected local media through secure Electron Main/Preload-mediated operations.
+- Studio Radio uses only bundled first-party or otherwise redistribution-cleared offline media; it is not network/streaming radio.
+- Studio Presets affect editor experience only and remain separate from canonical game `PresentationProfile` data.
+- PIE Studio-audio interlock defaults to Pause, may optionally Dim or Do Nothing, and must restore the exact pre-PIE Studio playback state.
+- Studio Experience is fully disableable and its surfaces individually hideable; the RSM-18 create/edit/save/reopen/PIE/export spine must remain functional with Studio Identity disabled.
+- Workspace dock/tab/resize persistence and reset remain editor-local and project-clean.
+
+**Authority/security boundary:**
+- Studio state must not enter `ProjectDocument`, `SceneDocument`, gameplay documents, runtime-save schemas, cooked runtime manifests, or exported-player artifacts.
+- Studio Player/Radio are creator-comfort systems, not game-audio authoring/runtime authority.
+- Renderer code receives no arbitrary filesystem authority and Studio media discovery performs no silent broad filesystem scan.
+- Stale Project Memory / recent-project references cannot silently mutate, recreate, or repair canonical projects.
+- Bundled media requires explicit provenance, usage-rights, attribution, and redistribution evidence.
+
+**Explicit non-goals:**
+- cloud account, social graph/feed, public online profile, gamified productivity, Spotify/music-service integration, streaming radio, marketplace/payment/entitlement infrastructure, mandatory telemetry, Steamworks/Steam achievements, detached multi-window/multi-monitor closure requirements, or any gameplay/renderer/physics/AI/Flow-Graph/content-pack/plugin scope not required by the narrow Studio experience.
+
+**Control slices:** `SICE-A → SICE-B → SICE-I1…I6 → SICE-V1 → SICE-CLOSE1 → SICE-ALIGN1`.
+
+**V2 composition/export additions:**
+- Build the minimal standalone sample from the same `GameDefinitionDocument` and shared resolver semantics used by PIE; a separate export-only resolver or hidden player defaults are forbidden.
+- Prove minimal GameDefinition→resolved runtime→player parity while excluding editor/Studio-local/source authority from the player.
+
+**Exit:** Studio Identity closes only when its local persistence, secure media access, launcher/project-open path, workspace persistence/reset, PIE audio interlock, master-disable behavior, provenance, export exclusion, and no-canonical-authority guarantees are independently proven. On closure, RSM-19 may be separately authorized.
 
 # Gate C — Controlled Authoring Foundation
 
@@ -510,6 +626,10 @@ Unless a milestone explicitly narrows the requirement, closure requires:
 - Define spawn provenance and stable runtime handles.
 - Define activation, deactivation, despawn, scene-unload, and session-stop cleanup.
 - Prevent runtime instances from becoming canonical without an explicit authoring command.
+**V2 entity/lifetime additions:**
+- Define authored stable identity, runtime-spawned identity, persistence/save identity, spawn provenance, despawn reason, and explicit mapping without serializing renderer/physics/navigation object identity.
+- Tie owner-scoped scheduled work and async results to runtime entity/session lifetime so teardown cannot leave stale work with mutation authority.
+
 **Exit:** Runtime entities can be spawned and removed without identity collision, leaks, or project mutation.
 
 ## RSM-24 — Runtime Settings / Project Variables / Serializable-State Registry
@@ -520,6 +640,10 @@ Unless a milestone explicitly narrows the requirement, closure requires:
 - Define serializable runtime state registration and versioning.
 - Separate secret/editor-only values from exported runtime settings.
 - Define unsupported or non-serializable state diagnostics.
+**V2 state/save additions:**
+- Keep GameDefinition defaults, Project Variables, Runtime Settings, Player Settings, Runtime Save state, target/build settings, editor/Studio state, and secrets as distinct authorities with explicit precedence.
+- Define a stable/quiescent save-safe boundary and explicit save participation for RNG stream state, effect commit state, and owner-scoped scheduled work where those semantics later become active; do not persist opaque timer/backend handles.
+
 **Exit:** Runtime systems cannot enter save/checkpoint scope without explicit registration, schema, migration, and ownership.
 
 ## RSM-25 — Central Validation Framework / Problems Panel
@@ -550,6 +674,11 @@ Unless a milestone explicitly narrows the requirement, closure requires:
 - Define project and asset locks.
 - Prevent overlapping save/import/export races.
 - Surface actionable creator feedback and failure evidence.
+**V2 async/worker additions:**
+- Every material long-running derived job captures an owner plus relevant accepted snapshot/session generation lease; completion is accepted only if the lease still matches current authority.
+- Workers compute derived results only. Canonical mutation is validated/committed by the owning application/command authority; worker completion alone grants no mutation authority.
+- Reject/cancel stale import, validation, navigation-bake, thumbnail, cooking, export, and related results deterministically when their lease is obsolete.
+
 **Exit:** Long operations remain responsive, cancellable where safe, and unable to silently race canonical writes.
 
 ## RSM-28 — Collision Queries / Trigger Layers / Physics Adapter Contract
@@ -642,6 +771,57 @@ Unless a milestone explicitly narrows the requirement, closure requires:
 - Close or explicitly carry every finding.
 **Exit:** Gate C closes only when the foundation is controlled, reproducible, diagnosable, and ready for gameplay authoring.
 
+## Cross-Milestone Public Alpha Gameplay / Storytelling / Player-Experience Alignment
+
+This roadmap adopts one bounded first-product gameplay model without creating a milestone per mechanic.
+
+**Core composition model:**
+
+```text
+Supported Game Profile / capability envelope
++ first-class gameplay profiles
++ canonical components
++ validated recipes
++ specialized creator editors
++ shared Event/Action contracts
++ runtime systems
++ diagnostics
++ explicit save/export participation
+```
+
+`Supported Game Profile` is the project capability envelope owned by RSM-19. `MovementProfile`, `CameraProfile`, `InteractionProfile`, `EnemyProfile`, `PerceptionProfile`, `AttackProfile`, `WeaponProfile`, `FeedbackProfile`, `SaveExperienceProfile`, and similar gameplay authoring profiles are typed tuning/authoring semantics; they are not a second capability registry.
+
+**Binding product direction:**
+- Common gameplay must not require Flow Graph. First-class profiles/components/recipes/specialized editors author common behavior; Flow Graph later orchestrates and extends the same shared semantics.
+- Gameplay feel is coordinated across movement, camera, animation, audio, VFX, UI, haptics where supported, and timing.
+- Narrative authoring expresses story meaning directly through story state, NPCs, dialogue, clues/knowledge, objectives/tasks, readables, and bounded narrative recipes before falling back to generic graph logic.
+- Enemy authoring begins from bounded archetypes/profiles, state vocabulary, perception, attacks, activation, encounter recipes, and diagnostics rather than requiring a general behavior-tree/GOAP IDE.
+- Runtime Save persists approved semantic progress, not engine object graphs.
+- Player UI presents gameplay meaning; UI widgets/React state do not become gameplay authority.
+- Creator-facing style defaults may be distinctive, while bounded player accessibility/readability overrides may take precedence through typed runtime settings.
+- Every supported gameplay capability must declare Preview/PIE/runtime/cook/export/save/diagnostic responsibilities where applicable.
+
+**Existing milestone ownership map:**
+
+| Capability family | Primary roadmap owners |
+|---|---|
+| Capability envelopes, components, recipes | RSM-19, RSM-37, RSM-69 |
+| Player movement, camera, interaction, physical props | RSM-17, RSM-28, RSM-41–46, RSM-51, RSM-67 |
+| Items, inventory, puzzles, containers, utility equipment | RSM-50, RSM-69, RSM-87 |
+| Story state, clues/knowledge, NPCs, dialogue, objectives | RSM-24, RSM-39, RSM-47–49, RSM-60, RSM-69, RSM-87, RSM-104–106 |
+| Enemy, stealth, perception, bounded combat | RSM-59–62, RSM-68–70 |
+| Runtime save, continue, death/retry | RSM-24, RSM-65–66, RSM-70 |
+| Player UI, typography, frontend, dialogue presentation | RSM-48, RSM-67, RSM-87, RSM-119 |
+| Input, controller, accessibility/readability overrides | RSM-67, RSM-87, RSM-119 |
+| Feedback, audio/VFX/UI gameplay language | RSM-37, RSM-45, RSM-70, RSM-87–89 |
+| Native sequencing and conditional media tracks | RSM-106 plus Source-06 admission where media technology is required |
+| Gameplay/narrative/AI/save diagnostics | RSM-70, RSM-98–99, RSM-101, RSM-112 |
+| Integrated proof and exported parity | RSM-55, RSM-72, RSM-91, RSM-111, RSM-120 plus RSM-94–103 |
+
+**Representative first-product composition target:** fixed-camera survival horror, modern chase horror, mystery/narrative horror, liminal/anomaly horror, and action-horror-lite must be achievable by composition of the same bounded systems rather than separate engine architectures.
+
+The Deferred Scope Registry in Source 05 remains binding: this direction does not authorize multiplayer/live-service, open-world/RTS/general-RPG scope, unrestricted procedural/physics systems, broad RPG loot/economy/crafting frameworks, general-purpose UI/application builders, unrestricted scripting/Flow Graph, or other excluded first-product systems.
+
 # Gate D — First Playable Creator
 
 ## RSM-37 — Event / Action Contract Registry
@@ -652,6 +832,11 @@ Unless a milestone explicitly narrows the requirement, closure requires:
 - Define capability and export support metadata.
 - Create validation and creator descriptors.
 - Prevent subsystem-specific string conventions from becoming hidden contracts.
+**V2 Event/Action safety additions:**
+- Add stable causal identity and effect repeatability semantics.
+- One-shot/once-per-scope effects use semantic commit/idempotency keys and explicit reset/save scope where applicable; repeated delivery does not automatically repeat the committed effect.
+- Bound causal-chain depth/event/work budgets so individually legal Event/Action cycles fail in a diagnosable deterministic way instead of running forever.
+
 **Exit:** A supported event/action can be authored, validated, dispatched, traced, and later exposed to Flow Graph without duplicate definitions.
 
 ## RSM-38 — Scene Registry / Validated Scene Transition Contract
@@ -672,6 +857,11 @@ Unless a milestone explicitly narrows the requirement, closure requires:
 - Coordinate scene, objective, camera, audio, and presentation actions.
 - Define authoring descriptors and trace identity.
 - Keep authored flow separate from renderer visibility state.
+**V2 Scene/Section lifecycle additions:**
+- Make Scene/Section transitions transactional (`requested → preparing → validated/prepared → committing → active → deactivating → unloaded`) with explicit cancellation/failure behavior.
+- Separate semantic residency from resource residency and define transition/quiescence points safe for save/restore.
+- Coordinate navigation, runtime entities, scheduled work, async generation leases, audio, camera, objectives and presentation without making renderer visibility state the lifecycle authority.
+
 **Exit:** A small narrative sequence can progress deterministically and be inspected through typed events and state.
 
 ## RSM-40 — Spatial Loop / Anomaly / Liminal Flow Contract
@@ -702,6 +892,10 @@ Unless a milestone explicitly narrows the requirement, closure requires:
 - Provide Fixed Camera and shoulder-composition workflows.
 - Add camera preview and diagnostics.
 - Preserve Preview/PIE/Export behavior.
+**V2 camera/input arbitration additions:**
+- Define one explicit camera-ownership/arbitration contract across gameplay, sequence, Scene/Section, UI, and temporary overrides; hidden competing flags are forbidden.
+- Keep input ownership/capture lifecycle explicit when camera authority changes.
+
 **Exit:** A creator can author and diagnose representative camera setups without low-level engine scripting.
 
 ## RSM-43 — Lighting / Atmosphere Runtime
@@ -862,6 +1056,9 @@ Unless a milestone explicitly narrows the requirement, closure requires:
 - Preserve stable identities and explicit authored variants.
 - Provide repetition and transition preview.
 - Diagnose excessive or invalid generation.
+**V2 deterministic-variation addition:**
+- Route controlled authored variation through RetroStage-owned domain-separated RNG/seed semantics rather than ambient `Math.random()` or renderer randomness; backend algorithm changes that alter golden/saved meaning are compatibility-sensitive.
+
 **Exit:** A creator can author a constrained liminal space with editable repetitions and variations.
 
 ## RSM-58 — Prefab / Variant System
@@ -882,6 +1079,11 @@ Unless a milestone explicitly narrows the requirement, closure requires:
 - Create asynchronous bake jobs and cache invalidation.
 - Create patrol-path authoring and runtime queries.
 - Provide debug visualization and Project Doctor findings.
+**V2 traversal/navigation additions:**
+- Define shared typed traversal metrics reused by blockout/collision/navigation/AI/diagnostics.
+- Keep door/passability/gameplay truth in canonical/runtime gameplay semantics; navigation receives a derived traversability/topology projection and never becomes passability authority.
+- Apply generation-lease acceptance/cancellation and the worker mutation barrier to asynchronous navigation bakes.
+
 **Exit:** A representative NPC can navigate and patrol an authored level in PIE and player.
 
 ## RSM-60 — Enemy AI / NPC Runtime
@@ -922,6 +1124,10 @@ Unless a milestone explicitly narrows the requirement, closure requires:
 - Coordinate camera, navigation, audio, lighting, and runtime entities.
 - Create memory and transition diagnostics.
 - Preserve canonical scene references.
+**V2 residency/lifetime additions:**
+- Separate semantic residency from resource residency and tie Scene/Section generation, async leases, runtime entities, audio, navigation and scheduled work to the lifecycle.
+- Require stale owner-scoped work to be cancelled/rejected and teardown to reach a defined quiescent state before unload is complete.
+
 **Exit:** A small multi-section project transitions predictably without leaking resources or runtime entities.
 
 ## RSM-64 — Looping Space / Section Substitution / Impossible Transition Runtime
@@ -932,6 +1138,10 @@ Unless a milestone explicitly narrows the requirement, closure requires:
 - Maintain explicit state, references, and reset policy.
 - Integrate camera, audio, lighting, objectives, and save direction.
 - Provide trace and debug visualization.
+**V2 transition consistency additions:**
+- Carry transition generation identity, save-safe boundaries, deterministic RNG participation and dynamic navigation projection through looping/substitution/teleport behavior.
+- Navigation topology is derived from gameplay truth; it does not own whether a route/door is semantically open.
+
 **Exit:** A representative looping-space recipe works deterministically and is diagnosable without unrestricted world-generation claims.
 
 ## RSM-65 — Runtime Save / Checkpoint
@@ -962,6 +1172,10 @@ Unless a milestone explicitly narrows the requirement, closure requires:
 - Support editor and player contexts separately.
 - Integrate UI navigation and accessibility.
 - Validate required actions.
+**V2 focus/device lifecycle additions:**
+- Define focus loss/regain, device disconnect/reconnect/switching, pointer-lock/capture loss, held-action release and pause-policy behavior.
+- Keep physical device/focus state transient and separate from canonical input/gameplay configuration.
+
 **Exit:** A player can rebind supported controls and see correct device-aware prompts.
 
 ## RSM-68 — Patrol / AI Authoring and Live Diagnostics
@@ -1013,6 +1227,39 @@ Unless a milestone explicitly narrows the requirement, closure requires:
 - Run performance, recovery, and diagnostics checks.
 - Close or explicitly defer every critical finding.
 **Exit:** Gate E closes when creators can assemble a small genre-capable game without unsupported code paths.
+
+## Cross-Milestone Presentation / Visual Character / Atmosphere Alignment
+
+RetroStage presentation is a coordinated authored system, not a mandatory filter stack.
+
+**Canonical vocabulary/direction:**
+- `PresentationProfile` is the single canonical game-presentation authority.
+- `Visual Rawness` is an authorable dimension of that profile/presentation model, not a separate competing profile authority.
+- Geometry Character, Texture Character, Material Character, Raster Character, and Temporal Character describe bounded, reversible/non-destructive presentation intent where applicable.
+- `AtmosphereVolume` is canonical spatial presentation intent; `AtmosphereDirector` coordinates typed atmosphere changes over existing scene/event/sequence semantics.
+- Babylon materials/lights/fog/post-processes/VFX resources remain derived runtime projection, never canonical presentation truth.
+- Creator-authored presentation defaults are distinct from player quality/accessibility/comfort overrides and from editor-local Studio Identity preferences.
+- Deterministic variation that affects authored meaning or QA must be reproducible.
+- Presentation capabilities require explicit `RUNTIME`, `COOKED`, `HYBRID`, or `EDITOR_ONLY` disposition and export parity.
+
+**Existing milestone ownership map:**
+
+| Presentation responsibility | Primary roadmap owners |
+|---|---|
+| Typed actions, scene flow, camera composition | RSM-37, RSM-39, RSM-42 |
+| Lighting, atmosphere volumes/director, exposure/fog/sky direction | RSM-43 |
+| Presentation profiles / Visual Rawness / render architecture | RSM-44, RSM-83, RSM-89 |
+| Atmosphere audio and preview/PIE integration | RSM-45, RSM-79, RSM-88 |
+| Blockout, repetition, surface storytelling | RSM-56–58, RSM-86 |
+| Source/cooked geometry, texture, material and reimport semantics | RSM-75–78, RSM-83 |
+| Animation/VFX presentation | RSM-84–86, RSM-89 |
+| Hardware/quality/fallback/output compatibility | RSM-90, RSM-92, RSM-97, RSM-101, RSM-103 |
+| Preset/content-pack lifecycle | RSM-108–110 |
+| Golden regression, reproducibility and migration | RSM-112–116 |
+| Accessibility/comfort validation | RSM-119 |
+| Cook/export/package parity | RSM-94–103 |
+
+This alignment does not admit new rendering/media dependencies and does not authorize implementation before the owning milestone.
 
 # Gate F — Production Content Creator
 
@@ -1076,6 +1323,34 @@ Unless a milestone explicitly narrows the requirement, closure requires:
 - Provide rollback and failed-reimport recovery.
 **Exit:** A changed source can be reimported without silently breaking valid scene references or losing previous good derivatives.
 
+### POST-RSM-78 — Early Access Release Candidate
+
+**Type:** `NON-NUMBERED COMMERCIAL RELEASE CONTROL`  
+**Activation precondition:** `RSM-78 MILESTONE CLOSED / PASS`  
+**Purpose:** Permit a paid Steam Early Access release before RSM-120 by pulling forward only the release-critical export, packaging, clean-machine, compatibility, security, compliance, onboarding, support, migration, and store obligations required by the actually advertised product, while preserving the complete RSM-79→RSM-120 roadmap.
+
+**Required direction:**
+- Freeze a truthful Early Access feature/support boundary from capabilities actually accepted at or before RSM-78 plus explicitly approved EA-RC release infrastructure.
+- Prove the universal runtime-capability/export-completeness contract for every advertised exported-game capability.
+- Prove deterministic standalone creator export with no unexplained semantic loss from supported authored meaning through PIE, cook, manifest, package, and standalone player.
+- Prove supported Windows clean-machine editor and exported-player operation.
+- Prove representative Electron/Babylon heavy-3D player stability and selected store-target behavior without creating a benchmark program.
+- Prove physical artifact inventories, stripping, notices, SBOM, native/WASM inventory, dependency/media licensing, and zero secret leakage.
+- Provide minimum truthful onboarding/help, known limitations, repair guidance, installer/update behavior, and support diagnostics required for paying EA users.
+- Establish minimum project migration/regression/backup protection for public customer projects.
+- Produce current store/commercial evidence, Early Access disclosure, pricing/region/promotion/SKU/entitlement/EULA consistency as release evidence rather than architecture constants.
+- Keep RSM-79→RSM-120 open and unchanged as the continuing development roadmap.
+- Keep the live EA release channel controlled; current development state is not automatically public-release state.
+
+**Explicit non-claims:**
+- EA-RC does not close Gate F, Gate G, RSM-92–103, RSM-112–119, RSM-119-ADD1, or RSM-120.
+- Early Access does not imply every future roadmap capability exists.
+- Store publication does not make a storefront or SDK canonical product/runtime authority.
+
+**Live-EA continuation rule:** paid customer projects become compatibility-sensitive data. Roadmap work may continue through RSM-79→120, but public updates require validated release-candidate promotion, applicable migration/backup/reopen/export evidence, release notes, and bounded urgent-maintenance authorization for critical security/data-loss/export/crash/store-compliance issues.
+
+**Exit:** `POST-RSM-78 EA-RC CLOSED / PASS` requires independently accepted evidence that the advertised Early Access build is installable, usable, supportable, secure enough for its declared surface, legally distributable, capable of complete supported standalone export, clean-machine verified, migration/update protected to the defined baseline, and truthfully represented. After closure, RSM-79 may be separately authorized; storefront launch remains subject to then-current external requirements.
+
 ## RSM-79 — Audio Import / Transcode / Loop Metadata
 **Purpose:** Create audio source metadata, waveform, streaming, loop, loudness, and derivative policy.  
 **Third-party placement:** No FFmpeg or codec-enabled binary enters without the conditional audit defined in the technology contract.  
@@ -1084,6 +1359,9 @@ Unless a milestone explicitly narrows the requirement, closure requires:
 - Record loop points, channels, sample rate, streaming, and loudness metadata.
 - Generate approved previews and waveforms.
 - Diagnose unsupported codecs and licensing risk.
+**V2 source-inspection boundary:**
+- Audio source inspection may later use `music-metadata` only if RSM-79 separately admits it under Source 06; it may inspect container/duration/tag/source metadata but does not own decode/runtime cue/gameplay-noise/codec semantics.
+
 **Exit:** A supported audio source imports and loops predictably while unapproved codecs fail safely.
 
 ## RSM-80 — Runtime Asset Loading / Resource Manager
@@ -1134,6 +1412,9 @@ Unless a milestone explicitly narrows the requirement, closure requires:
 - Support skeletal and sprite/flipbook presentation paths.
 - Create editor preview and runtime playback.
 - Validate missing bones, frames, clips, and incompatible assets.
+**V2 animation-event addition:**
+- Gameplay meaning binds to typed animation marker/event identity and repeat policy, not raw frame numbers or transient engine callback object identity.
+
 **Exit:** Representative skeletal and flipbook assets author and play consistently across Preview, PIE, and player.
 
 ## RSM-85 — Animation State Machine / Locomotion / Retargeting
@@ -1154,6 +1435,9 @@ Unless a milestone explicitly narrows the requirement, closure requires:
 - Integrate Event/Action, animation, audio, materials, camera, and sequencing.
 - Create preview and runtime debug tools.
 - Enforce performance and transparency budgets.
+**V2 deterministic VFX addition:**
+- Use domain-separated RetroStage RNG streams/seed provenance where deterministic authored meaning or regression depends on variation; PRNG/noise libraries remain replaceable algorithms.
+
 **Exit:** Creators can author representative fog, dust, spark, blood, flash, and screen effects without raw engine authoring.
 
 ## RSM-87 — Player UI / HUD / Menu Runtime and Authoring
@@ -1174,6 +1458,11 @@ Unless a milestone explicitly narrows the requirement, closure requires:
 - Integrate perception, scene director, camera, UI, sequencing, and presentation.
 - Create mixer and spatial authoring tools.
 - Provide budgets, meters, and diagnostics.
+**V2 audio-authority additions:**
+- Keep audible audio events distinct from typed AI `GameplayNoise`; AI hearing is not inferred from speaker gain/volume.
+- Define audio ownership/lifetime scopes, preload/streaming latency classes, Scene/Section transition continuity, and one runtime listener authority independent of active camera count.
+- Runtime Save reconstructs transient audio voices from semantic state; engine voice/player handles are not save truth.
+
 **Exit:** A representative game has creator-authored ambience, effects, music, UI audio, spatial behavior, and mixer control.
 
 ## RSM-89 — Advanced Retro Presentation / Animation / VFX / UI / Audio Parity
@@ -1208,6 +1497,37 @@ Unless a milestone explicitly narrows the requirement, closure requires:
 
 # Gate G — Standalone Build Product
 
+## Gate-G Cross-Cutting Runtime Capability / Export Completeness Contract
+
+A supported creator-facing capability classified as `RUNTIME`, `COOKED`, or `HYBRID` is not export-complete merely because it works in Editor Preview or PIE.
+
+For every used supported non-editor-only capability, Gate G must prove:
+
+```text
+used supported capability
+→ stable capability identity / owning semantic
+→ declared export disposition
+→ runtime and/or cooked projection
+→ complete semantic + asset + module dependency closure
+→ cooked manifest representation
+→ deterministic package inclusion
+→ physical artifact evidence
+→ standalone-player execution
+→ required parity / clean-machine proof
+```
+
+Missing any required link is an `EXPORT BLOCKER`.
+
+`RUNTIME` means player behavior/code/data is required; `COOKED` means deterministic generated runtime artifacts are required; `HYBRID` requires both; `EDITOR_ONLY` must be proven absent from player artifacts unless an explicit normal project import/conversion creates runtime-owned content.
+
+Dependency closure is semantic, not merely a static asset-reference graph. Story flags, dialogue/objective transitions, recipes, scene transitions, dynamic resource references, UI bindings, presentation/atmosphere state, audio/VFX triggers, save participation, and store-enabled capabilities must remain explainably reachable where required.
+
+Store-target packaging composes over a store-neutral complete export. Store adapters may add target-specific files/services, but cannot repair a semantically incomplete base runtime package.
+
+### Heavy-3D / store qualification boundary
+
+The initial Electron player remains valid only through evidence, not assumption. When a commercial/store target is claimed, the owning gate must prove representative hardware-accelerated Babylon/Electron packaged-player startup, graphics/process lifecycle, long-session/resource churn, crash/error supervision, clean-machine behavior, and selected store integration behavior. This is qualification, not a benchmark program, and it does not pre-admit any vendor SDK.
+
 ## RSM-92 — Runtime Platform Environment / Target Contract
 **Purpose:** Define supported Windows runtime environment, filesystem, graphics, input, audio, and process behavior.  
 **Third-party placement:** Electron and Babylon target capabilities; Steam remains a distribution layer rather than canonical authority.  
@@ -1215,6 +1535,8 @@ Unless a milestone explicitly narrows the requirement, closure requires:
 - Define supported OS versions and architecture.
 - Define writable paths, display modes, device behavior, and offline expectations.
 - Define clean-machine prerequisites and error handling.
+- Define representative packaged Electron/Babylon graphics/process/lifecycle qualification expectations for supported hardware and selected store targets without creating a benchmark program.
+- Keep store-specific requirements behind optional platform adapters; store SDK admission remains Source-06-controlled.
 - Create target validation fixtures.
 **Exit:** Editor and player have explicit supported environment contracts and fail explainably outside them.
 
@@ -1246,9 +1568,13 @@ Unless a milestone explicitly narrows the requirement, closure requires:
 **Third-party placement:** RetroStage compiler; approved asset tools and Babylon runtime loader.  
 **Key deliverables:**
 - Resolve stable identities to cooked artifacts.
-- Record hashes, versions, capabilities, dependencies, and optional content.
-- Separate editor-only and runtime content.
-- Validate manifest integrity before packaging.
+- Record hashes, versions, stable capability identities, export dispositions, semantic dependencies, asset/module dependencies, and optional content.
+- Represent the complete used-capability closure required by the player, including dynamic/semantic reachability that cannot be inferred from static asset references alone.
+- Separate editor-only and runtime content and explain why retained dynamic content remains reachable.
+- Validate manifest integrity and capability closure before packaging.
+**V2 manifest/composition addition:**
+- Root cooked capability/dependency closure in the same GameDefinition/shared resolution semantics used by PIE/runtime and record resolution provenance/fingerprint evidence where useful for reproducibility.
+
 **Exit:** The player can load a project solely through an approved deterministic cooked manifest.
 
 ## RSM-95 — Export Compiler / Deterministic Runtime Layout
@@ -1256,9 +1582,13 @@ Unless a milestone explicitly narrows the requirement, closure requires:
 **Third-party placement:** glTF-Transform, meshoptimizer, optional audited texture/audio tools, Electron packaging, and RetroStage compiler services.  
 **Key deliverables:**
 - Cook assets and documents into deterministic runtime forms.
+- Project canonical gameplay, presentation, UI, save, and runtime semantics into the required runtime/cooked representations without making generated forms canonical.
 - Prepare shader/material/presentation variants.
-- Create reproducible output layout and cache invalidation.
+- Create reproducible hierarchical runtime layout and cache invalidation; optional store-target layers compose over the store-neutral base output.
 - Support cancellation, logs, and failure recovery.
+**V2 compiler/composition addition:**
+- Cook from one coherent accepted snapshot through the shared resolver semantics; generated runtime layout must not introduce package-time gameplay defaults or a second resolver authority.
+
 **Exit:** Equivalent approved inputs produce equivalent runtime content and explainable artifact differences.
 
 ## RSM-96 — Standalone Runtime App Flow
@@ -1268,7 +1598,8 @@ Unless a milestone explicitly narrows the requirement, closure requires:
 - Remove editor and development-only code.
 - Define bootstrap, loading, first scene, suspend/resume direction, and shutdown.
 - Integrate settings, input, saves, and error boundary.
-- Prove editor independence.
+- Compose optional store services only through bounded platform adapters when enabled.
+- Prove editor independence and representative packaged Electron/Babylon lifecycle stability.
 **Exit:** The exported game starts, runs, saves, and exits without the editor application or authoring services.
 
 ## RSM-97 — Runtime Error Boundary / Fallback Policy
@@ -1305,29 +1636,34 @@ Unless a milestone explicitly narrows the requirement, closure requires:
 **Purpose:** Remove unused, editor-only, duplicate, or unreachable runtime content.  
 **Third-party placement:** Asset index, manifest compiler, meshoptimizer, and packaged-file inspection.  
 **Key deliverables:**
-- Build dependency graph from authoritative references.
-- Strip development packages, source assets, and unused variants.
-- Explain retained and removed content.
-- Protect dynamically referenced approved content.
+- Build dependency closure from authoritative references plus declared semantic/dynamic capability reachability.
+- Strip development packages, source assets, unused variants, and only content proven unreachable under the supported runtime semantics.
+- Explain retained and removed content, including why dynamically/semantically referenced content is retained.
+- Protect approved dynamic references, story/gameplay transitions, UI/presentation bindings, and other declared runtime reachability.
 **Exit:** The player package contains only required approved runtime files and notices.
 
 ## RSM-101 — Project Doctor / Export Validation Gate
 **Purpose:** Converge validation into creator-facing readiness and repair guidance before build.  
 **Third-party placement:** Validation framework, asset/index services, runtime capability matrix, and packaging checks.  
 **Key deliverables:**
-- Check references, gameplay, scenes, saves, assets, shaders, textures, audio, UI, performance, licensing metadata, and target support.
+- Check references, gameplay, scenes, saves, assets, shaders, textures, audio, UI, presentation, capability export dispositions, semantic dependency closure, performance, licensing metadata, and target support.
 - Separate warning, Play blocker, Export blocker, and release blocker.
+- Treat any missing required capability→projection→dependency→manifest→package link as an Export blocker.
 - Offer safe repair actions where possible.
 - Generate machine-readable validation evidence.
+**V2 Project Doctor additions:**
+- Diagnose GameDefinition binding/resolution provenance, torn/incompatible revision inputs, requested/supported/effective capability mismatch, stale async results, required unknown-extension meaning, and missing resolution→export closure links where applicable.
+
 **Exit:** No release build proceeds with unresolved critical blockers, and creators can understand the reason.
 
 ## RSM-102 — Game Packaging / Artifact Report / Release Notes
 **Purpose:** Produce final Windows package artifacts and complete evidence.  
 **Third-party placement:** Electron Forge and a separately audited Windows installer maker when selected; Steam tools remain conditional.  
 **Key deliverables:**
-- Package player, content, licenses, notices, and required runtime files.
-- Generate build contents, versions, warnings, hashes, SBOM, native/WASM inventory, and release notes.
-- Inspect the physical artifact rather than manifests alone.
+- Package player, content, licenses, notices, and required runtime files from the validated store-neutral runtime layout.
+- Add optional store-target files/services only through the selected distribution adapter and only when admitted/required.
+- Generate build contents, versions, warnings, hashes, SBOM, native/WASM inventory, capability/export-closure evidence, and release notes.
+- Inspect the physical artifact rather than manifests alone and prove editor-only/Studio-local/source content exclusion.
 - Define signing hooks without committing secrets.
 **Exit:** A release candidate has reproducible artifact evidence and can be installed or launched on a clean supported target.
 
@@ -1336,9 +1672,10 @@ Unless a milestone explicitly narrows the requirement, closure requires:
 **Third-party placement:** All approved runtime and profiling tools; no new dependency added only to mask architectural problems.  
 **Key deliverables:**
 - Profile representative hardware tiers.
-- Close critical performance and compatibility findings.
+- Close critical performance and compatibility findings, including packaged Electron/Babylon graphics/process/lifecycle issues for the supported player host.
 - Verify clean install/run/uninstall or portable behavior as selected.
-- Run final Preview/PIE/player parity and packaged-file audit.
+- Verify used-capability closure and final Preview/PIE/player parity, long-session/resource-churn stability, and packaged-file audit.
+- For selected store targets, verify the target adapter/overlay/runtime behavior required by current release evidence without treating vendor behavior as canonical game authority.
 **Exit:** Gate G closes when RetroStage reliably produces diagnosed, optimized, standalone Windows games.
 
 # Gate H — No-Code Narrative Production
@@ -1522,15 +1859,15 @@ Unless a milestone explicitly narrows the requirement, closure requires:
 - Verify consistency with final EULA/store text and third-party rights.
 **Exit:** Commercial launch/Alpha policy is evidence-backed, legally and operationally consistent with product architecture, and exact mutable values are recorded as release evidence rather than permanent technical invariants.
 
-## RSM-120 — First Playable Public Alpha / Investor Demo Candidate
-**Purpose:** Prove RetroStage Maker as a coherent commercial creator product.  
+## RSM-120 — Public Alpha / Investor Demo Maturity Gate
+**Purpose:** Prove the complete canonical Public Alpha maturity target as a coherent commercial creator product, including all still-open roadmap obligations after any earlier paid Early Access release.  
 **Third-party placement:** No new dependency may enter solely to force closure; all shipped components require final artifact-level approval.  
 **Key deliverables:**
 - Produce at least one representative PS1/early-PS2-inspired horror, mystery, narrative, or liminal game through supported creator workflows.
 - Demonstrate create/open/save/migrate/recover, scene and asset authoring, gameplay, camera, presentation, animation, VFX, audio, UI, no-code logic, sequencing, PIE, debugging, validation, cooking, and standalone export.
 - Run the editor and exported game on clean supported machines and verify performance, compatibility, security, licenses, notices, and recovery.
 - Close all release-critical findings and publish truthful limitations.
-**Exit:** RetroStage Maker is credible as a public Alpha and investor-demo candidate: a focused, independent Steam creator rather than a themed wrapper around a third-party engine editor.
+**Exit:** RetroStage Maker satisfies the complete Public Alpha / investor-demo maturity gate: a focused, independent creator product whose full RSM-0→120 obligations are proven. Any earlier Early Access release is commercial evidence and customer history, not a substitute for this maturity closure.
 
 
 ---
@@ -1704,4 +2041,4 @@ Approval of this roadmap means:
 - milestone-gated and conditional third-party components enter only when their owning work begins,
 - native sequencing remains core,
 - external cinematic interchange remains optional and generic,
-- RSM-120 remains the first public-quality Alpha and investor-demo product gate.
+- RSM-120 remains the complete public-quality Alpha maturity and investor-demo product gate; an earlier POST-RSM-78 Early Access release does not pre-close it.
