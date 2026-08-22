@@ -5,8 +5,8 @@
 **Project:** RetroStage Maker  
 **Distribution intent:** Commercial proprietary desktop creator distributed through Steam and other approved Windows channels  
 **Source generation:** Reboot / clean-start  
-**Document date:** 2026-08-21  
-**Document state:** `APPROVED ARCHITECTURE / RSM-6 PHYSICAL IMPLEMENTATION ALIGNED / CLOSE1 SOURCE-CANDIDATE CURRENT CONTROL`  
+**Document date:** 2026-08-22  
+**Document state:** `APPROVED ARCHITECTURE / RSM-6 CLOSED MILESTONE FOUNDATION / GATE B ACTIVE-CURRENT`  
 **Repository:** `PRESENT — C:\RetroStage\retrostage-maker`  
 **Primary branch:** `main`  
 **Governing charter:** `00_RSM_REBOOT_PROJECT_CHARTER.md`  
@@ -2754,13 +2754,15 @@ Current architecture handoff:
 ```text
 RSM-6 I1-I8 = CLOSED / ACCEPTED
 RSM-6-V1 = CLOSED / PASS
+RSM-6 = MILESTONE CLOSED / PASS
 implementation baseline = dbd3f2be31d89ca36a17ccb4914e21623df424a2
-current control = RSM-6-CLOSE1-SOURCE1 source candidate
-terminal RSM-6 closure = not yet claimed
-RSM-7 = next milestone / not authorized
+closure/publication baseline = 34b1148e1c7be12e30f1e962148d40b5027a7b07
+closure natural CI = 32526483832 / 96909482744 / attempt 1 / success
+Gate B = ACTIVE / CURRENT
+RSM-7 = next roadmap milestone / not implemented / not started / not authorized
 ```
 
-The accepted physical implementation includes the renderer contract/public entries, lifecycle/context safety, camera/editor grid, stable handle epochs and picking, derived asset containers, headless diagnostics, editor gizmo intents, and real Electron viewport. Independent review and publication of the source candidate must precede any terminal RSM-6 closure statement. This alignment does not authorize canonical RSM-7 document work.
+The accepted closed-milestone foundation includes the renderer contract/public entries, lifecycle/context safety, camera/editor grid, stable handle epochs and picking, derived asset containers, headless diagnostics, editor gizmo intents, and real Electron viewport. The owner-directed post-RSM-6 source-alignment review is a separate checkpoint; no waiting proposal is accepted here, and canonical RSM-7 document work remains unimplemented and unauthorized.
 
 ---
 

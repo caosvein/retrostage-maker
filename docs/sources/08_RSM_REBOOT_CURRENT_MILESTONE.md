@@ -4,26 +4,26 @@
 **Role:** Authoritative milestone-handoff and next-control source  
 **Project:** RetroStage Maker  
 **Current gate:** `Gate B — ACTIVE / CURRENT`  
-**Last fully closed milestone:** `RSM-5 — MILESTONE CLOSED / PASS`  
-**Next milestone boundary:** `RSM-7 — Canonical Project / Scene Document Foundation — NOT AUTHORIZED`  
-**Current task:** `RSM-6-CLOSE1-SOURCE1`  
-**Milestone/control state:** `RSM-6 I1-I8 CLOSED / V1 CLOSED-PASS / CLOSE1 SOURCE-CANDIDATE CURRENT CONTROL`  
-**Task state:** `SOURCE TRUTH ALIGNMENT CANDIDATE / TERMINAL RSM-6 CLOSURE NOT YET CLAIMED`  
-**Snapshot date:** 2026-08-21  
+**Last fully closed milestone:** `RSM-6 — MILESTONE CLOSED / PASS`  
+**Next milestone boundary:** `RSM-7 — Canonical Project / Scene Document Foundation — NOT STARTED / NOT AUTHORIZED`  
+**Current task:** `Owner-directed post-RSM-6 source-alignment review checkpoint — separate authority required`  
+**Milestone/control state:** `RSM-6 MILESTONE CLOSED-PASS / GATE B ACTIVE-CURRENT / RSM-7 NEXT-NOT STARTED-NOT AUTHORIZED`  
+**Task state:** `WAITING BROADER ALIGNMENT PROPOSALS NOT ACCEPTED / NOT INTEGRATED`  
+**Snapshot date:** 2026-08-22  
 **Timezone:** Europe/Istanbul  
 **Repository:** `PRESENT — C:\RetroStage\retrostage-maker`  
 **RSM-2:** `CLOSED / SOURCE PASS`  
 **RSM-4:** `CLOSED`  
 **RSM-5:** `MILESTONE CLOSED / PASS`
-**RSM-6:** `I1-I8 CLOSED / V1 CLOSED-PASS / CLOSE1 CURRENT`
+**RSM-6:** `MILESTONE CLOSED / PASS`
 
 ---
 
 ## 1. Purpose
 
-This document records the durable RSM-6 closure-candidate handoff after I1-I8, their publication chains, fresh-clone automated validation, and owner manual acceptance passed, while retaining accepted RSM-3/RSM-4/RSM-5 evidence as historical baseline context.
+This document records the durable post-close RSM-6 handoff after I1-I8, their publication chains, fresh-clone automated validation, owner manual acceptance, final independent closure, source publication, and closure natural CI passed, while retaining accepted RSM-3/RSM-4/RSM-5 evidence as historical baseline context.
 
-RSM-6 I1-I8 are `CLOSED / ACCEPTED`; RSM-6-V1 is `CLOSED / PASS`. Gate B remains `ACTIVE / CURRENT` because it spans RSM-5 through RSM-18. Terminal RSM-6 closure is not claimed until this CLOSE1 source candidate passes independent review and publication. RSM-7 is next in roadmap order but is not authorized.
+RSM-6 is `MILESTONE CLOSED / PASS`; I1-I8 are `CLOSED / ACCEPTED`; RSM-6-V1 is `CLOSED / PASS`; RSM-6-CLOSE1 is `FINAL INDEPENDENT PASS`. Gate B remains `ACTIVE / CURRENT` because it spans RSM-5 through RSM-18. RSM-7 is next in roadmap order, has not started, and is not authorized.
 
 ---
 
@@ -59,8 +59,8 @@ RSM-6 I1-I8 are `CLOSED / ACCEPTED`; RSM-6-V1 is `CLOSED / PASS`. Gate B remains
 | RSM-5-CLOSE1 | `INDEPENDENT PASS` |
 | RSM-6-I1-I8 | `CLOSED / ACCEPTED` |
 | RSM-6-V1 | `CLOSED / PASS` |
-| RSM-6-CLOSE1-SOURCE1 | `SOURCE-CANDIDATE CURRENT CONTROL` |
-| RSM-7 | `NEXT MILESTONE / NOT AUTHORIZED` |
+| RSM-6-CLOSE1 | `FINAL INDEPENDENT PASS` |
+| RSM-7 | `NEXT MILESTONE / NOT STARTED / NOT AUTHORIZED` |
 
 Historical FIX/failure artifacts remain evidence history. The original failed clone remains preserved and is not promoted as current success evidence.
 
@@ -281,29 +281,33 @@ RSM-6 I1-I8 = CLOSED / ACCEPTED
 → fresh-clone automated validation = PASS
 → owner manual acceptance = PASS
 → RSM-6-V1 = CLOSED / PASS
-→ RSM-6-CLOSE1-SOURCE1 = SOURCE-CANDIDATE CURRENT CONTROL
-→ independent review and publication required before terminal RSM-6 closure
-→ RSM-7 = NEXT MILESTONE / NOT AUTHORIZED
+→ RSM-6 = MILESTONE CLOSED / PASS
+→ closure/publication baseline 34b1148e1c7be12e30f1e962148d40b5027a7b07
+→ closure natural CI 32526483832 / 96909482744 / attempt 1 / push / main / success
+→ current control = owner-directed post-RSM-6 source-alignment review checkpoint / separate authority required
+→ RSM-7 = NEXT ROADMAP MILESTONE / NOT STARTED / NOT AUTHORIZED
 ```
 
-Gate B remains active across RSM-5 through RSM-18. This source alignment neither executes terminal closure nor authorizes RSM-7.
+Gate B remains active across RSM-5 through RSM-18. This post-close alignment synchronizes the accepted RSM-6 closure truth, accepts none of the waiting broader alignment proposals, and does not authorize RSM-7.
 
 ---
 
 ## 11. Current Milestone Statement
 
 ```text
-snapshot date = 2026-08-21
+snapshot date = 2026-08-22
 current gate = Gate B — ACTIVE / CURRENT
-last fully closed milestone = RSM-5 — MILESTONE CLOSED / PASS
+last fully closed milestone = RSM-6 — MILESTONE CLOSED / PASS
 RSM-6 I1-I8 = CLOSED / ACCEPTED
 RSM-6-V1 = CLOSED / PASS
+RSM-6-CLOSE1 = FINAL INDEPENDENT PASS
 accepted implementation baseline = dbd3f2be31d89ca36a17ccb4914e21623df424a2
 accepted implementation tree = 5a3186fa70a5215fe1aaf770a1b845c5d1ff4107
-accepted natural CI = 32496829684 / 96817113858 / attempt 1 / push / main / success
-current task = RSM-6-CLOSE1-SOURCE1
-terminal RSM-6 closure = NOT YET CLAIMED
+accepted implementation validation CI = 32496829684 / 96817113858 / attempt 1 / push / main / success
+accepted closure/publication baseline = 34b1148e1c7be12e30f1e962148d40b5027a7b07
+accepted closure natural CI = 32526483832 / 96909482744 / attempt 1 / push / main / success
+current control = owner-directed post-RSM-6 source-alignment review checkpoint / separate authority required
 next milestone boundary = RSM-7 — Canonical Project / Scene Document Foundation
-RSM-7 = NOT AUTHORIZED
-next handoff = independent review and publication of this CLOSE1 source candidate
+RSM-7 = NEXT / NOT STARTED / NOT AUTHORIZED
+waiting broader alignment proposals = NOT ACCEPTED / NOT INTEGRATED
 ```

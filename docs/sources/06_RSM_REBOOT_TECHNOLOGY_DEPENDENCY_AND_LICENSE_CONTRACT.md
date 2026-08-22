@@ -4,8 +4,8 @@
 **Role:** Authoritative technology baseline, dependency-admission policy, licensing contract, and third-party integration boundary  
 **Project:** RetroStage Maker  
 **Distribution intent:** Commercial proprietary desktop creator distributed through Steam and other approved Windows channels  
-**Document date:** 2026-08-21  
-**Document state:** `ACTIVE TECHNOLOGY/DEPENDENCY CONTRACT / RSM-6 EXACT GRAPH ADMITTED AND VALIDATED / CLOSE1 SOURCE-CANDIDATE CURRENT CONTROL`  
+**Document date:** 2026-08-22  
+**Document state:** `ACTIVE TECHNOLOGY/DEPENDENCY CONTRACT / RSM-6 MILESTONE CLOSED-PASS / EXACT GRAPH ADMITTED AND VALIDATED`  
 **Repository:** `PRESENT — C:\RetroStage\retrostage-maker`  
 **Primary branch:** `main`  
 **Governing source:** `00_RSM_REBOOT_PROJECT_CHARTER.md`  
@@ -2201,13 +2201,16 @@ Current technology/dependency handoff:
 ```text
 RSM-6 I1-I8 = CLOSED / ACCEPTED
 RSM-6-V1 = CLOSED / PASS
-accepted baseline = dbd3f2be31d89ca36a17ccb4914e21623df424a2
-accepted natural CI = 32496829684 / 96817113858 / attempt 1 / push / main / success
-current control = RSM-6-CLOSE1-SOURCE1 source candidate
-RSM-7 = next milestone / not authorized
+RSM-6 = MILESTONE CLOSED / PASS
+accepted implementation baseline = dbd3f2be31d89ca36a17ccb4914e21623df424a2
+accepted implementation validation CI = 32496829684 / 96817113858 / attempt 1 / push / main / success
+accepted closure/publication baseline = 34b1148e1c7be12e30f1e962148d40b5027a7b07
+accepted closure natural CI = 32526483832 / 96909482744 / attempt 1 / push / main / success
+Gate B = ACTIVE / CURRENT
+RSM-7 dependency admission = NONE / NOT STARTED / NOT AUTHORIZED
 ```
 
-This source candidate aligns the contract to accepted repository truth but does not itself claim terminal RSM-6 closure. Independent review and publication must complete first. No RSM-7 dependency or implementation is admitted here.
+The exact admitted Babylon `9.21.2` graph and all historical dependency evidence remain unchanged. The owner-directed post-RSM-6 source-alignment review is a separate checkpoint; no waiting proposal, RSM-7 dependency, or RSM-7 implementation is admitted here.
 
 ---
 

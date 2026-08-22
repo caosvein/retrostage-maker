@@ -4,28 +4,30 @@
 **Role:** Authoritative current-state snapshot for the RetroStage Maker reboot  
 **Project:** RetroStage Maker  
 **Source generation:** Reboot / clean-start  
-**Snapshot date:** 2026-08-21  
+**Snapshot date:** 2026-08-22  
 **Snapshot timezone:** Europe/Istanbul  
-**Document state:** `LIVE SNAPSHOT / RSM-6 I1-I8 CLOSED / V1 CLOSED-PASS / CLOSE1 SOURCE-CANDIDATE CURRENT CONTROL`  
+**Document state:** `LIVE SNAPSHOT / RSM-6 MILESTONE CLOSED-PASS / GATE B ACTIVE-CURRENT`  
 **Current product gate:** `Gate B — ACTIVE / CURRENT`  
-**Current milestone/control:** `RSM-6-CLOSE1-SOURCE1 — SOURCE-CANDIDATE CURRENT CONTROL`  
-**Current task:** `RSM-6-CLOSE1 source-truth alignment candidate; no terminal closure claim`  
+**Current milestone/control:** `RSM-6 — MILESTONE CLOSED / PASS; RSM-7 — NEXT / NOT STARTED / NOT AUTHORIZED`  
+**Current task:** `Owner-directed post-RSM-6 source-alignment review checkpoint against the latest Source 00-09; separate authority required`  
 **Repository:** `PRESENT — C:\RetroStage\retrostage-maker`  
 **Remote origin:** `https://github.com/caosvein/retrostage-maker.git`  
 **Primary branch:** `main`  
 **Accepted implementation baseline:** `dbd3f2be31d89ca36a17ccb4914e21623df424a2`  
 **Accepted implementation tree:** `5a3186fa70a5215fe1aaf770a1b845c5d1ff4107`  
+**Accepted closure/publication baseline:** `34b1148e1c7be12e30f1e962148d40b5027a7b07`  
+**Accepted closure natural CI:** `32526483832 / 96909482744 / attempt 1 / success`  
 **RSM-3 decision:** `CLOSED`  
 **Independently accepted/closed reboot product capabilities:** `RSM-5 secure Electron shell; RSM-6 I1-I8 renderer foundation and V1 validation`  
-**Immediate next control step:** `Independent review and publication of this RSM-6 CLOSE1 source candidate; RSM-7 remains unauthorized`
+**Immediate next control step:** `Owner-directed post-RSM-6 source-alignment review against latest Source 00-09; no waiting proposal is accepted or integrated; RSM-7 remains not started and unauthorized`
 
 ---
 
 ## 1. Purpose and Current Truth
 
-This document records the durable current truth after all eight RSM-6 implementation slices, their publication chains, natural hosted CI, fresh-clone automated validation, and owner manual acceptance passed. RSM-6 I1-I8 are `CLOSED`; RSM-6-V1 is `CLOSED / PASS`.
+This document records the durable current truth after all eight RSM-6 implementation slices, their publication chains, natural hosted CI, fresh-clone automated validation, owner manual acceptance, final independent closure, and source publication passed. RSM-6 is `MILESTONE CLOSED / PASS`; RSM-6 I1-I8 are `CLOSED / ACCEPTED`; RSM-6-V1 is `CLOSED / PASS`.
 
-Gate A remains `PASS / CLOSED`. Gate B remains `ACTIVE / CURRENT` because the canonical roadmap spans RSM-5 through RSM-18. RSM-6 is not yet described as terminally closed: `RSM-6-CLOSE1-SOURCE1` is the current source-candidate control pending independent review and publication. RSM-7 is next in roadmap order but is not authorized.
+Gate A remains `PASS / CLOSED`. Gate B remains `ACTIVE / CURRENT` because the canonical roadmap spans RSM-5 through RSM-18. RSM-6 is `MILESTONE CLOSED / PASS` at closure/publication baseline `34b1148e1c7be12e30f1e962148d40b5027a7b07`. RSM-7 is the next roadmap milestone, has not started, and is not authorized.
 
 ---
 
@@ -61,8 +63,8 @@ Gate A remains `PASS / CLOSED`. Gate B remains `ACTIVE / CURRENT` because the ca
 | RSM-5-CLOSE1 | `INDEPENDENT PASS` | RSM-5 closure and truthful next handoff accepted |
 | RSM-6-I1-I8 | `CLOSED / ACCEPTED` | Contract foundation, lifecycle, camera/grid, picking/registry, assets, headless diagnostics, gizmos, and Electron viewport publication chains passed |
 | RSM-6-V1 | `CLOSED / PASS` | Fresh-clone automated validation and owner manual acceptance independently passed |
-| RSM-6-CLOSE1-SOURCE1 | `SOURCE-CANDIDATE CURRENT CONTROL` | Aligns accepted closure truth; terminal RSM-6 closure is not claimed before review/publication |
-| RSM-7 | `NEXT MILESTONE / NOT AUTHORIZED` | Canonical project/scene document implementation has not begun |
+| RSM-6-CLOSE1 | `FINAL INDEPENDENT PASS` | RSM-6 terminal closure accepted; exact source publication and natural Windows CI passed |
+| RSM-7 | `NEXT MILESTONE / NOT STARTED / NOT AUTHORIZED` | Canonical project/scene document implementation has not begun |
 
 ---
 
@@ -303,18 +305,20 @@ The exact admitted renderer dependency graph is `@babylonjs/core@9.21.2` and `@b
 ## 10. Current Handoff
 
 ```text
-snapshot date = 2026-08-21
+snapshot date = 2026-08-22
 Gate A = PASS / CLOSED
 Gate B = ACTIVE / CURRENT
 RSM-4 = CLOSED
 RSM-5 = MILESTONE CLOSED / PASS
 RSM-6 I1-I8 = CLOSED / ACCEPTED
 RSM-6-V1 = CLOSED / PASS
+RSM-6 = MILESTONE CLOSED / PASS
 accepted implementation baseline = dbd3f2be31d89ca36a17ccb4914e21623df424a2
 accepted implementation tree = 5a3186fa70a5215fe1aaf770a1b845c5d1ff4107
-accepted natural CI = 32496829684 / 96817113858 / attempt 1 / push / main / success
-current control = RSM-6-CLOSE1-SOURCE1 source candidate
-terminal RSM-6 closure = NOT YET CLAIMED
-RSM-7 = NEXT MILESTONE / NOT AUTHORIZED
-next handoff = independent review and publication of the CLOSE1 source candidate
+accepted implementation validation CI = 32496829684 / 96817113858 / attempt 1 / push / main / success
+accepted closure/publication baseline = 34b1148e1c7be12e30f1e962148d40b5027a7b07
+accepted closure natural CI = 32526483832 / 96909482744 / attempt 1 / push / main / success
+current control = owner-directed post-RSM-6 source-alignment review checkpoint / separate authority required
+waiting broader alignment proposals = NOT ACCEPTED / NOT INTEGRATED
+RSM-7 = NEXT MILESTONE / NOT STARTED / NOT AUTHORIZED
 ```

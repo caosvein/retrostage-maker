@@ -5,8 +5,8 @@
 **Project:** RetroStage Maker  
 **Distribution intent:** Commercial proprietary desktop creator distributed through Steam and other approved Windows channels  
 **Source generation:** Reboot / clean-start  
-**Document date:** 2026-08-21  
-**Document state:** `ACTIVE DECISION REGISTRY / RSM-6 ACCEPTED OUTCOMES ALIGNED / CLOSE1 SOURCE-CANDIDATE CURRENT CONTROL`  
+**Document date:** 2026-08-22  
+**Document state:** `ACTIVE DECISION REGISTRY / RSM-6 MILESTONE CLOSED-PASS OUTCOMES / GATE B ACTIVE-CURRENT`  
 **Repository:** `ESTABLISHED — current physical truth belongs to repository inspection and Source 02/07`  
 **Primary branch:** `main`  
 **Governing charter:** `00_RSM_REBOOT_PROJECT_CHARTER.md`  
@@ -70,7 +70,7 @@ Approved technology direction: Babylon.js 9 + Electron
 Historical pre-loss sources: AVAILABLE FOR DESIGN EVIDENCE ONLY
 ```
 
-Current lifecycle truth is `RSM-6 I1-I8 CLOSED / RSM-6-V1 CLOSED-PASS / CLOSE1 SOURCE-CANDIDATE CURRENT CONTROL`. The accepted implementation baseline is `dbd3f2be31d89ca36a17ccb4914e21623df424a2`; repository inspection and Source 02/08 govern physical truth. Only the specifically accepted RSM-6 outcomes recorded below are implementation facts. No other decision in this registry implies that milestone-gated product implementation exists.
+Current lifecycle truth is `RSM-6 MILESTONE CLOSED / PASS`, with I1-I8 `CLOSED / ACCEPTED` and RSM-6-V1 `CLOSED / PASS`. The accepted implementation baseline is `dbd3f2be31d89ca36a17ccb4914e21623df424a2`; closure publication is `34b1148e1c7be12e30f1e962148d40b5027a7b07`; repository inspection and Source 02/08 govern physical truth. Only the specifically accepted RSM-6 outcomes recorded below are implementation facts. No other decision in this registry implies that milestone-gated product implementation exists.
 
 No decision in this document proves that corresponding code, UI, tests, assets, packages, build artifacts, or exported games currently exist.
 
@@ -2682,13 +2682,14 @@ Duplicate or overlapping decisions should be merged rather than allowed to creat
 
 ## 95. Next Source
 
-Current control is:
+Current post-close control is:
 
 ```text
-RSM-6-CLOSE1-SOURCE1 source candidate
+Gate B = ACTIVE / CURRENT
+owner-directed post-RSM-6 source-alignment review checkpoint / separate authority required
 ```
 
-RSM-6 I1-I8 and V1 are accepted at implementation baseline `dbd3f2be31d89ca36a17ccb4914e21623df424a2`, but terminal RSM-6 closure is not claimed by this source candidate. Independent review and publication must precede that terminal statement. RSM-7 is next in roadmap order and remains unauthorized; this alignment adds no RSM-7 decision or implementation scope.
+RSM-6 is `MILESTONE CLOSED / PASS`: I1-I8 and V1 remain accepted at implementation baseline `dbd3f2be31d89ca36a17ccb4914e21623df424a2`, and closure publication is `34b1148e1c7be12e30f1e962148d40b5027a7b07` with natural CI `32526483832 / 96909482744 / attempt 1 / success`. RSM-7 is next in roadmap order, has not started, and remains unauthorized; all RSM-7+ decisions remain deferred unless separately accepted. No waiting broader alignment proposal is accepted or integrated here.
 
 ---
 
