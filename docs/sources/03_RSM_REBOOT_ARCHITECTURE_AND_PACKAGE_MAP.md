@@ -574,6 +574,35 @@ POST-RSM-18 Studio Identity is a RetroStage-owned **editor-local/application-loc
 - PIE interlock owns only Studio playback behavior and restores the exact pre-PIE Studio state.
 - Cooking/export treats all Studio Identity state/media as editor-only unless a file separately entered project authority through explicit import.
 
+#### 9.1A Detailed SICE Local-State / Media Contract
+
+Studio Identity uses application/user-data persistence, not project persistence.
+
+Recommended local records may contain:
+```text
+CreatorProfile
+RecentProjectEntry
+ProjectMemory
+SessionRitualPreferences
+GalleryCaptureRecord
+StudioPlayerLibraryPreferences
+StudioRadioPreferences
+StudioPresetPreferences
+StudioExperienceVisibility/Disable
+```
+
+`ProjectMemory` may record first/last open timestamps, last valid Scene reference, session count, accumulated Studio session time, last session duration, recent/favorite capture references and safe last-known local path metadata.
+
+`GalleryCaptureRecord` may record `captureId`, stable project identity, optional stable Scene identity, `createdAt`, favorite/pinned state and a Studio-owned local media locator. Missing media, moved projects or deleted Scenes produce stale/missing local diagnostics only; they do not mutate project data.
+
+Studio Player media selection is explicitly initiated by the user. Main/Preload operations must validate IPC shape, sender/origin where applicable, allowed operation and selected path before filesystem access. Permission/path failures are returned as typed local-media diagnostics. Background recursive disk discovery is forbidden.
+
+Studio Presets may coordinate only editor-local presentation/comfort preferences. They cannot mutate game `PresentationProfile`, Scene lighting/materials/cameras, gameplay, runtime audio or exported-player rendering.
+
+PIE audio interlock stores an explicit pre-PIE local playback snapshot sufficient to restore play/pause, volume and supported position behavior. The interlock snapshot is transient/local and cannot become Runtime Save state.
+
+Master disable must make all Studio records optional; no canonical open/save/PIE/cook/export path may require them.
+
 ### 9.2 Gameplay / Storytelling / Player-Experience Semantic Ownership
 
 RetroStage uses one shared typed gameplay meaning layer across specialized authoring surfaces, PIE, player runtime, diagnostics, save, and later Flow Graph/Sequencer integration.
@@ -803,6 +832,267 @@ required runtime/export meaning unknown or owner unavailable
 ```
 
 Optional/unreachable unknown data may be preserved only when the requested operation proves it is not required. RetroStage must not guess semantics, silently drop required data, or elevate unknown values into executable authority.
+
+### 9.11A Game-Wide Runtime Detail Completion
+
+**Event queue.** Runtime Event/Action dispatch declares one bounded mode equivalent to `IMMEDIATE_ALLOWED`, `DEFERRED_TO_PHASE_BOUNDARY`, or `DEFERRED_TO_NEXT_TICK`. Same-priority queued items use deterministic accepted enqueue order plus stable tie-break identity. Cancellation, owner teardown, re-entry and work enqueued during drain are explicit. Immediate dispatch still consumes causal-work budget and cannot recurse around phase/idempotency rules.
+
+**Level diagnostics / optional flow view.** Creator-facing validation may report blocked spawn, insufficient head/door/step clearance, traversal-metric mismatch, unreachable required Section/exit, invalid dynamic navigation link, stale navigation projection, invalid cross-Scene reference, camera clearance/composition obstruction and Scene/Section ownership conflict. A World/Level Flow visualization is optional editor-only derived analysis; it is not a canonical graph or new milestone.
+
+**Critical audio cues.** A cue whose late start changes gameplay/dialogue/sequence/presentation meaning is marked synchronization-critical by the owning semantic contract. It requires readiness/preload or an explicit degraded/blocker policy. Missing/late critical-cue behavior is diagnosable. Sequence/dialogue/UI audio shares normal audio lifetime/ownership and interruption/restoration semantics.
+
+**Runtime session generation.** New Game, fresh full retry, return-to-title→new session and PIE restart mint a new session generation. Async/worker completion validates that generation at acceptance time; older generations cannot regain authority.
+
+**Composition transaction.** Multi-document authoring that changes GameDefinition plus referenced profile/document semantics commits through normal atomic authoring transaction/command authority. Validation/cancellation/failure cannot leave a half-applied canonical graph.
+
+**Resolver acceptance.** The shared resolver is regression-tested for deterministic base output, editor-state independence, Preview/PIE parity, cook/export parity, missing-reference failure, migration/default compatibility, override provenance and stable save/reload round-trip.
+
+**Dynamic navigation publication.** Gameplay passability changes publish derived navigation at an explicit owner/update boundary. Generation leases reject stale navigation completion; unload cancels/rejects owner work; save/load reconstructs backend navigation from semantic state.
+
+### 9.12 Feature-Level Gameplay / Player-Experience Normalization
+
+Feature-level gameplay and player-experience detail from the roadmap annex reuses existing authorities:
+
+```text
+GameDefinitionDocument = game-wide composition by stable reference
+Supported Game Profile = capability envelope
+typed gameplay profiles/components/recipes = subsystem-owned canonical authoring semantics
+Player Experience Designer / Story & Objective Spine / Inventory & Puzzle Workshop = editor-only views/workflows
+React/Zustand/Babylon/Havok/Recast = transient/derived implementation state
+```
+
+`Screen Stack`, UI layer/policy, focus/back/restoration, save eligibility and player settings may be typed runtime/player-experience contracts, but they do not move story/inventory/health/save authority into UI state.
+
+`ALPHA CORE / SUPPORTED / CONDITIONAL / EDITOR ONLY` remain roadmap-scope labels only.
+
+### 9.13 Export Disposition and Save Participation Normalization
+
+```text
+EDITOR_ONLY
+COOKED
+RUNTIME
+HYBRID
+```
+
+is the only export-disposition vocabulary.
+
+Save participation is orthogonal. Candidate wording `RUNTIME + SAVE` means `RUNTIME` plus explicit save participation; `COOKED + RUNTIME` means `HYBRID`.
+
+### 9.14 Feature-Level Visual / Asset-Pipeline Architecture Annex
+
+The following reviewed Source-03 visual architecture detail is binding after current-authority normalization:
+
+
+### PART D — SOURCE 03: ARCHITECTURE AND PACKAGE MAP ALIGNMENT
+
+#### 36. Preserve Existing Package Strategy
+
+Do **not** create one new package per feature or milestone.
+
+Preserve the existing planned ownership model and extend existing package responsibilities only when a proven boundary exists.
+
+The primary planned ownership remains:
+
+```text
+Canonical RetroStage Documents / Settings
+              │
+              ▼
+Application / Authoring Policy
+              │
+      ┌───────┴─────────┐
+      ▼                 ▼
+Asset Pipeline      Runtime/Renderer Projection
+      │                 │
+      ▼                 ▼
+Cooked Derivatives  Babylon.js 9 runtime resources
+```
+
+---
+
+#### 37. `@retrostage/asset-pipeline` Additions
+
+Extend the planned responsibilities with adapter families as needed, without making them separate packages by default:
+
+- image-processing adapter;
+- atlas-packing adapter;
+- geometry-retroization adapter;
+- derivative recipe coordinator;
+- deterministic-random/noise adapter where a real boundary exists;
+- transactional temporary-artifact validation/promotion support.
+
+Preserve existing ownership exclusions:
+
+- asset stable identity is not owned by the third-party tool;
+- canonical import-setting meaning is not owned by the third-party tool;
+- license/provenance truth is not owned by the third-party tool;
+- runtime resource lifetime is not owned by the asset pipeline.
+
+---
+
+#### 38. Renderer/Runtime Projection Boundary
+
+`@retrostage/renderer-babylon9` or the owning Babylon adapter may implement:
+
+- renderer projection of Geometry/Texture/Material/Raster Character;
+- shadows/fog/exposure presentation;
+- Atmosphere Volume runtime projection;
+- camera presentation behavior;
+- VFX/cards/particle projection;
+- runtime material variants;
+- instances/thin instances as performance representation;
+- derived render resources.
+
+It must **not** own canonical presentation meaning.
+
+---
+
+#### 39. New Architecture Invariants
+
+Add or reinforce the following concepts:
+
+```text
+Babylon Material
+≠ canonical Material meaning
+
+Babylon fog/light/post-process state
+≠ canonical Atmosphere / Presentation documents
+
+ThinInstance
+≠ canonical Entity identity
+
+Derived mesh
+≠ source mesh
+
+Derived texture
+≠ source texture
+
+Presentation Profile
+≠ renderer object graph
+
+Atmosphere Volume
+≠ Babylon-only state
+
+Third-party algorithm
+≠ RetroStage product policy
+
+Authoring Tool
+≠ Runtime Capability
+
+Editor Representation
+≠ Exported Runtime Representation
+
+Editor Dependency
+≠ Player Dependency
+
+Preview Success
+≠ Export Success
+```
+
+---
+
+#### 39A. Persisted Presentation Ownership and Runtime-Override Architecture
+
+Source 03 should explicitly preserve four separate authorities:
+
+```text
+Canonical project presentation / atmosphere intent
+≠ transient renderer objects
+≠ local player quality / accessibility settings
+≠ editor-local Studio Identity / workspace comfort state
+```
+
+A useful conceptual runtime projection is:
+
+```text
+canonical authored intent
++ active scene/volume/event/sequence state
++ validated quality/hardware fallback
++ validated accessibility/comfort override
+        ↓
+effective runtime presentation state
+        ↓
+RetroStage renderer/audio adapters
+        ↓
+Babylon / audio runtime primitives
+```
+
+The exact data structures are not frozen here. Required properties are:
+
+- deterministic and traceable precedence;
+- no runtime override silently writes back into canonical project documents;
+- no Babylon object becomes the persisted truth;
+- save/reopen and migration preserve canonical authored intent;
+- generated derivatives remain rebuildable and separately versioned/hashed as required;
+- editor Preview and exported player use compatible color/output semantics rather than unrelated pipelines;
+- player quality/accessibility state can be reset/changed without losing creator-authored project defaults.
+
+Where a conflict exists between creator-locked identity and a hardware fallback, the result must be explicit: supported fallback, build warning/blocker, or declared unsupported target — never unexplained silent substitution.
+
+#### 40. Export Disposition Architecture
+
+Canonical authoring meaning must be able to resolve through a declared disposition:
+
+```text
+Canonical Authoring Meaning
+        │
+        ▼
+Export Disposition
+        ├─ EDITOR_ONLY → editor-only representation; excluded from player
+        ├─ COOKED      → deterministic cook pipeline → validated artifact
+        ├─ RUNTIME     → runtime contract → player behavior
+        └─ HYBRID      → validated cooked artifacts + runtime behavior
+```
+
+Exact schema belongs to later milestone contract design.
+
+---
+
+#### 41. Heavy Job Isolation
+
+Mesh simplification, image conversion, palette conversion, atlas generation, and other memory-heavy transformations must not be designed as synchronous renderer/UI-thread mutations.
+
+Preferred architecture direction:
+
+```text
+canonical request
+→ queued/isolated Node-side job
+→ temporary artifact
+→ validation
+→ atomic promotion
+→ hot-swap/reload through approved resource lifecycle
+```
+
+On failure:
+
+- canonical project remains safe;
+- source asset remains safe;
+- last-good derivative remains safe;
+- temporary partial output is not promoted;
+- creator receives a structured diagnostic.
+
+---
+
+#### 42. Scatter Ownership
+
+Bounded scatter must preserve RetroStage-owned semantics:
+
+```text
+RetroStage Scatter Settings
++ seed
++ collection
++ exclusions
++ placement policy
+        ↓
+deterministic authored placement
+        ↓
+cooked/authored representation
+        ↓
+Babylon instance / thin-instance optimization where appropriate
+```
+
+Runtime optimization identities must not become canonical authored identity.
+
+---
 
 ---
 
@@ -1695,6 +1985,25 @@ The store-neutral standalone package must remain complete on its own for all non
 Electron/Babylon player hosting remains subject to representative hardware/process/GPU/lifecycle qualification for claimed commercial targets. Qualification is evidence-driven and does not imply a benchmark program or pre-admit any vendor SDK.
 
 A new package is not required merely because a store target exists; ordinary package-creation rules still apply.
+
+### 15.19A Packaged-Player Store Qualification / Update Authority
+
+`apps/player-electron` remains store-neutral by default. A selected store adapter is accepted only through physical target evidence and does not change renderer/gameplay/save authority.
+
+For an enabled Steam target, target validation may include client launch, overlay lifecycle, fullscreen/focus transitions, admitted callback/controller features, bridge initialization ordering and clean platform-resource shutdown.
+
+For an enabled Epic target, target validation may include launcher/distribution launch, artifact/config resolution, admitted achievements/cross-store/EOS/overlay/social features and clean platform-resource shutdown.
+
+Electron Main is the player host/supervisor. Observable renderer/GPU/child-process loss is translated into RetroStage error/diagnostic categories with available reason preservation; recovery or shutdown must not silently corrupt runtime/save state.
+
+Target-distribution update ownership is separate from package creation:
+```text
+RetroStage export pipeline → deterministic package/version/artifact truth
+Steam target → Steam depot/distribution update transport
+Epic target → Epic artifact/distribution update transport
+standalone self-update → absent unless separately designed/admitted
+```
+The platform adapter may integrate upload/depot metadata at release tooling boundaries, but neither a store updater nor Electron self-updater becomes canonical/runtime authority.
 
 ---
 

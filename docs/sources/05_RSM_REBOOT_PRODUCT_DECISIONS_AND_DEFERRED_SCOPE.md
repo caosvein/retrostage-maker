@@ -2507,6 +2507,92 @@ Compatibility policy must account for GameDefinition schema/reference evolution,
 
 External-process wrappers, worker pools, media/asset tools and graph helpers remain behind approved Node/Main/worker/application boundaries. No project-provided shell command, arbitrary Renderer process execution, secret-bearing canonical configuration, or worker direct authority mutation is permitted.
 
+### D-018 / D-019 extension — session generation and queued Event dispatch are explicit
+
+New Game, fresh full retry, return-to-title followed by a new runtime session, and PIE restart mint a fresh runtime-session generation. Async/worker completion from an older generation cannot commit into the newer session.
+
+Event/Action dispatch uses an explicit bounded dispatch mode equivalent to `IMMEDIATE_ALLOWED`, `DEFERRED_TO_PHASE_BOUNDARY`, or `DEFERRED_TO_NEXT_TICK`. Same-priority queue order is deterministic; cancellation/re-entry/owner teardown are defined; immediate dispatch cannot bypass idempotency or causal-work budgets.
+
+### D-053 extension — synchronization-critical audio cannot silently arrive late
+
+Audio preload/streaming policy distinguishes ordinary cues from synchronization-critical cues whose lateness changes gameplay, dialogue, sequence or presentation meaning. Critical cues require readiness/preload or an explicit diagnosed degraded/blocker path. Sequence/dialogue/UI audio remains within shared audio ownership/lifetime and restoration semantics.
+
+### D-067 extension — store support requires packaged-player qualification and store-native update ownership
+
+Steam/Epic marketplace precedent is not proof that a heavy Electron/Chromium/Babylon player is reliable. Claimed selected-store support requires physical packaged-player launch, graphics/process/lifecycle, overlay/platform-feature where enabled, long-session/resource-churn and clean shutdown evidence.
+
+Observable Electron renderer/GPU/child-process failure is translated into RetroStage diagnostics; store-specific workaround state must not leak into canonical project/runtime semantics.
+
+For store-distributed builds, normal update transport belongs to that distribution target's depot/artifact pipeline. A generic Electron self-updater is not baseline exported-player authority. Store-neutral standalone update behavior is separate future scope.
+
+### D-085 extension — composition edits are transactional and resolver parity is a binding regression contract
+
+A creator operation that changes `GameDefinitionDocument` together with referenced profile/document meaning is committed as one normal authoring transaction. Failure/cancellation cannot leave a half-applied composition graph.
+
+Shared resolver evidence must cover deterministic base resolution, editor-state independence, Preview/PIE parity, cook/export parity, missing-required-reference failure, migration/default compatibility, override provenance and save/reload round-trip stability.
+
+### Feature-Level gameplay principles retained from the reviewed Public-Alpha package
+
+### PART XVIII — Binding Product Principles
+
+These are **candidate durable principles** to consider during source rebase. Do not assign permanent decision IDs until the latest Source 05 is re-read and decision-ID collisions are resolved.
+
+> **Common gameplay must not require Flow Graph. Flow Graph orchestrates and extends gameplay; it does not replace first-class gameplay authoring.**
+
+> **Gameplay feel is coordinated across movement, camera, animation, audio, VFX, UI, haptics and timing; it is not a single movement-speed or combat parameter.**
+
+> **Deliberate gameplay friction must be authored, predictable, readable and reversible. Accidental friction is a usability defect.**
+
+> **RetroStage saves gameplay meaning, not engine object graphs.**
+
+> **Narrative authoring should express story meaning directly through NPCs, dialogue, objectives, clues and story state before falling back to generic graph logic.**
+
+> **Enemy authoring should begin from bounded profiles, perception, attacks and encounter recipes rather than a general-purpose behavior-tree IDE.**
+
+> **Templates and recipes provide behavior and validated defaults; creator-controlled presentation and project identity remain first class.**
+
+> **A gameplay capability is not complete until its required Preview / PIE / Cooked / Export / Save / Diagnostics responsibilities are explicitly proven.**
+
+> **Player UI presents gameplay meaning; UI widgets do not become gameplay authority.**
+
+> **Style may be distinctive; interaction must remain understandable.**
+
+> **Creator UI style is the default, but bounded player accessibility/readability overrides may take precedence where required.**
+
+> **Dialogue content, text identity and dialogue presentation are separate concerns connected through stable contracts.**
+
+> **UI recipes and themes accelerate authoring but must not impose a mandatory RetroStage house interface.**
+
+---
+
+### Feature-Level visual scope guardrails retained from the reviewed presentation package
+
+### PART H — SCOPE GUARDRAILS
+
+#### 58. Explicitly Not Authorized
+
+This alignment must not become an indirect authorization for:
+
+- general-purpose raw shader IDE;
+- unrestricted procedural-world generation;
+- open-world streaming expansion beyond existing bounded roadmap scope;
+- global dynamic weather/climate simulation;
+- full destruction simulation;
+- full cloth simulation;
+- general VFX programming environment;
+- arbitrary code injection;
+- Babylon serialization as canonical project data;
+- destructive source-asset conversion;
+- mandatory PS1 style;
+- mandatory CRT/VHS effect;
+- mandatory vertex wobble;
+- random rendering corruption as a product feature;
+- hidden external executable downloads;
+- renderer-thread heavy asset conversion;
+- one mandatory RetroStage visual/audio identity.
+
+---
+
 ## 85. D-080 — Studio Identity Is an Optional Editor-Local Creator Experience Layer
 
 **Status:** `ADOPTED PRODUCT/ARCHITECTURE DIRECTION; IMPLEMENTATION DEFERRED TO POST-RSM-18`
@@ -2522,6 +2608,21 @@ Recent/Continue must use normal trusted project-open authority. Local media acce
 **Explicitly excluded inside SICE:** cloud/social/public profiles, achievements/streaks/XP/productivity scoring, Spotify/music-service integration, streaming radio, marketplace/payment/seller/entitlement systems, mandatory telemetry, Steamworks/Steam achievements, premature game-audio systems, and detached multi-window/multi-monitor as a closure requirement.
 
 **Roadmap ownership:** `POST-RSM-18 SICE`.
+
+### D-080 feature-level closure / evidence extension
+
+SICE product acceptance also includes:
+- launcher return behavior after project close and a compact/hideable active-workspace footprint;
+- Project Memory field semantics for timestamps, last Scene, session count/time, last duration, capture references and safe last-known location;
+- Gallery capture metadata/tolerance for moved projects, deleted Scenes and missing media;
+- Studio Player explicit local media/library controls without crawling/import/export authority;
+- bounded Studio Preset editor-only domains;
+- exact PIE interlock restoration including pre-paused state and supported volume/position behavior;
+- a master-disable proof of the complete create/edit/save/close/reopen/PIE/stop/cook/export/run-player spine.
+
+SICE closure evidence includes Main/Preload schema/sender/path validation, local-media permission/path failure fixtures, Welcome/Continue/reset/disable acceptance, restart persistence, stale local-reference fixtures, project-dirty invariants, no-network Studio Radio proof and Studio-local export exclusion.
+
+If SICE is later narrowed or deferred, accepted RSM-18 closure remains valid, but RSM-19 cannot silently bypass a still-binding SICE-before-RSM-19 rule. Changing/removing that sequencing dependency requires explicit source change control.
 
 ## 86. D-081 — Controlled Imperfection Is an Authorable Presentation Dimension, Not Accidental Degradation
 
@@ -2613,9 +2714,983 @@ No new package is mandated. Exact physical placement follows Source 03 package-c
 
 **Roadmap ownership:** RSM-7–8 foundation shape/identity, RSM-16 runtime resolution, RSM-18 minimal standalone parity, later gameplay/presentation/save/Scene/audio owners, RSM-94–103 mature cook/export, RSM-112–116 regression/migration.
 
+### D-085 architecture-violation registry — reviewed V5 shortcuts
+
+Unless a later explicit owner-approved decision changes one item, the following remain architecture violations:
+
+1. giant GameMode/all-systems object;
+2. runtime service locator for hidden global configuration;
+3. UI/workspace state as shipped configuration authority;
+4. separate unrelated export resolver;
+5. raw filesystem path as persistent composition identity;
+6. implicit unrelated fallback for missing required meaning;
+7. runtime effective-state write-back into canonical authoring documents;
+8. plugin override escape hatch around resolver/validation/permissions;
+9. resolved cache treated as canonical truth;
+10. render-frame cadence as gameplay timing authority;
+11. ad-hoc Scene destruction transition without transactional lifecycle;
+12. physics/renderer object identity as persistence identity;
+13. Runtime Save during unstable half-applied transition;
+14. competing subsystem-private input/camera ownership flags;
+15. AI hearing derived from speaker/mixer volume;
+16. camera object automatically implies/steals spatial listener authority;
+17. audio lifetime determined only by object GC/renderer destruction;
+18. raw animation frame/index as sole gameplay-critical contract;
+19. repeated Event occurrence automatically implies repeated gameplay effect;
+20. one mutable global RNG stream shared across unrelated domains;
+21. completed async work automatically regains stale authority;
+22. focus loss leaves held gameplay actions latched;
+23. navigation backend state owns door/passability truth;
+24. raw timer/callback outlives semantic owner generation;
+25. platform timer handle/closure serialized as save truth;
+26. unbounded chain of individually legal Events/Actions;
+27. worker/native/WASM process directly mutates canonical/runtime semantic truth;
+28. candidate helper/tool becomes product/canonical/runtime authority;
+29. permissive license alone implies dependency admission;
+30. process wrapper admission automatically authorizes an external executable;
+31. Graphlib/Dagre or other derived helper graph becomes canonical project meaning.
+
+## 91. D-086 — Feature-Level Creator Capability and Anti-Scope Intent Must Survive Roadmap Compression
+
+**Status:** `ADOPTED PRODUCT / ROADMAP GOVERNANCE INVARIANT`
+
+A feature-level creator capability is not considered preserved merely because a generic subsystem with a related name exists.
+
+During source alignment, roadmap cleanup or architecture consolidation, each reviewed feature-level intent must be:
+`CANONICALIZED`, `MERGED INTO A NAMED OWNER`, `NORMALIZED TO A NAMED AUTHORITY`, `EXPLICITLY DEFERRED`, `EXPLICITLY REJECTED`, or `SUPERSEDED BY A NAMED ACCEPTED DECISION`.
+
+The positive gameplay/player-experience inventory and its Deferred/Excluded companion are inseparable. The same rule applies to the Visual Rawness/Atmosphere inventory.
+
+The smallest coherent RetroStage system is preferred over a general-purpose framework when existing bounded semantics can express the creator workflow.
+
+Post-Alpha reconsideration of excluded/deferred scope requires concrete creator demand, clear canonical/runtime/export/save authority, no overlapping second authority, acceptable dependency/security/licensing/performance/support cost, defined migration/diagnostics/parity, and evidence that the addition does not destroy the focused horror/mystery/narrative/liminal creator identity.
+
+**Roadmap ownership:** continuous product governance; no implementation authority by itself.
+
+### Binding first-product anti-scope completeness annex
+
+The following reviewed Deferred/Excluded package is retained as binding scope policy after current-authority normalization:
+
+
+### PART I — HARD FIRST-PRODUCT EXCLUSIONS
+
+The following are already consistent with the canonical v0 exclusions and should remain outside the first Public / Alpha scope unless a formal charter/roadmap change explicitly reopens them.
+
+#### 2. Multiplayer / MMO / Live-Service — `EXCLUDE`
+
+Do not build:
+
+- network replication;
+- multiplayer lobbies;
+- matchmaking;
+- dedicated servers;
+- co-op synchronization;
+- PvP;
+- account service gameplay state;
+- live-service progression;
+- MMO infrastructure.
+
+##### Supported alternative
+Single-player runtime with local player profile/save.
+
+---
+
+#### 3. Open-World Engine / Large Streaming World — `EXCLUDE`
+
+Do not build:
+
+- seamless open-world streaming framework;
+- world partition;
+- kilometer-scale terrain;
+- dynamic world-origin systems;
+- massive runtime population streaming;
+- general outdoor-world simulation.
+
+##### Supported alternative
+Small-to-medium scenes/sections with bounded section visibility/transition and liminal substitution where explicitly supported.
+
+---
+
+#### 4. RTS / Colony / Multi-Unit Command — `EXCLUDE`
+
+Do not build:
+
+- multi-unit selection;
+- squad formation command;
+- economy/resource simulation;
+- base building;
+- factory automation;
+- colony simulation;
+- RTS path planning;
+- mass-agent strategy gameplay.
+
+##### Supported alternative
+One directly controlled protagonist plus bounded NPC/enemy agents.
+
+---
+
+#### 5. General-Purpose RPG Framework — `EXCLUDE`
+
+Do not build a universal RPG engine containing:
+
+- large stat/attribute graphs;
+- class systems;
+- skill trees;
+- party management;
+- equipment-stat optimization;
+- leveling/XP;
+- complex status-effect frameworks;
+- reputation networks;
+- large faction systems;
+- procedural loot;
+- RPG economy.
+
+##### Supported alternative
+Bounded horror/mystery items, health, ammo, objectives, clues, NPC states and supported combat profiles.
+
+---
+
+#### 6. Complex Economy / Vendor / Commerce Gameplay — `EXCLUDE`
+
+Do not build:
+
+- player economy;
+- shops/vendors as a general subsystem;
+- dynamic prices;
+- merchant inventories;
+- currencies;
+- barter;
+- trading simulation.
+
+##### Supported alternative
+Direct story item exchange: Give Item / Receive Item through NPC/dialogue actions.
+
+---
+
+#### 7. Public Marketplace / Payments / DLC Commerce — `EXCLUDE`
+
+Do not confuse installable creator packs with:
+
+- public marketplace;
+- seller accounts;
+- payment processing;
+- entitlements;
+- creator revenue distribution;
+- in-editor DLC commerce.
+
+##### Supported alternative
+Installable templates/genre kits/content bundles under separate product/content rules.
+
+---
+
+#### 8. Unrestricted Procedural World Generation — `EXCLUDE`
+
+Do not build:
+
+- arbitrary procedural terrain;
+- procedural city/world generation;
+- unlimited random dungeon framework;
+- procedural game-generation platform;
+- unrestricted rule-driven world compiler.
+
+##### Supported alternative
+Deterministic bounded scatter, repetition, prefab variants, liminal loop/substitution and authored anomaly recipes.
+
+---
+
+#### 9. General Non-Euclidean World Engine — `EXCLUDE`
+
+Do not build a universal portal/non-Euclidean geometry engine.
+
+##### Supported alternative
+Bounded looping corridors, section substitution, continuity teleport and authored impossible-transition illusions.
+
+---
+
+#### 10. Unrestricted Physics Sandbox — `EXCLUDE`
+
+Do not build:
+
+- user-authored solver behavior;
+- general rigid-body sandbox;
+- soft-body simulation;
+- cloth framework;
+- fully physical inventory;
+- unrestricted joints;
+- large destruction simulation.
+
+##### Supported alternative
+Doors, drawers, carry/drop, pushable props, simple impulses, limited breakables, triggers and kinematic platforms.
+
+---
+
+### PART II — AI / NPC SCOPE TO DEFER
+
+#### 11. General Behavior Tree IDE — `DEFER / DO NOT REQUIRE FOR CORE`
+
+Do not make creators construct every enemy from a generic behavior tree.
+
+##### Why
+It increases product complexity, authoring burden, debugging burden and save/runtime variability.
+
+##### Alpha alternative
+Enemy Profile + bounded state vocabulary + Perception Profile + Attack Profile + Encounter Recipe.
+
+A Behavior Tree-like advanced escape hatch may be reconsidered only after Alpha if creator demand proves that bounded profiles cannot express supported games.
+
+---
+
+#### 12. Advanced GOAP / Utility AI / Planning AI — `DEFER`
+
+Do not build:
+
+- general goal-oriented action planning;
+- utility-scoring behavior framework;
+- planner authoring;
+- dynamic action-domain simulation.
+
+##### Alpha alternative
+Explicit bounded enemy states, typed conditions/actions and Flow Graph orchestration where needed.
+
+---
+
+#### 13. Large-Group / Squad Tactical AI — `EXCLUDE FIRST PRODUCT`
+
+Do not build:
+
+- formation behavior;
+- squad flanking coordinator;
+- tactical cover teams;
+- shared squad blackboard;
+- large combat groups.
+
+##### Alpha alternative
+Independent bounded enemies and small authored encounter groups.
+
+---
+
+#### 14. Life-Simulation NPC Schedules — `DEFER`
+
+Do not build:
+
+- hour-by-hour Sims-style schedules;
+- hunger/sleep/social simulation;
+- autonomous needs;
+- systemic daily routines.
+
+##### Alpha alternative
+Story-stage-driven NPC presence/relocation:
+
+```text
+BeforePower → Reception
+PowerRestored → BasementDoor
+DoctorFound → Gone
+```
+
+---
+
+#### 15. Deep Social / Relationship Simulation — `DEFER`
+
+Do not build:
+
+- relationship graphs across many NPCs;
+- romance system;
+- personality simulation;
+- dynamic social reputation;
+- faction diplomacy.
+
+##### Alpha alternative
+Bounded NPC state, trust/disposition enum/number where narratively useful, conversation memory and story flags.
+
+---
+
+### PART III — QUEST / STORY SCOPE TO DEFER
+
+#### 16. General RPG Quest Engine — `EXCLUDE FIRST PRODUCT`
+
+Do not build:
+
+- hundreds of quest types;
+- quest hubs;
+- daily/repeatable quests;
+- procedural quests;
+- quest reward/economy engine;
+- level-gated quest chains;
+- MMO-style tracker.
+
+##### Alpha alternative
+Objective / Task:
+
+- main / optional / hidden;
+- steps;
+- conditions;
+- progress;
+- completion/failure;
+- story actions;
+- journal/minimal UI.
+
+---
+
+#### 17. Full Detective Deduction Simulator — `DEFER`
+
+Do not build:
+
+- evidence-board logic engine;
+- freeform deduction parser;
+- procedural contradiction solver;
+- complex case database.
+
+##### Alpha alternative
+Clues/Knowledge + Objectives + Dialogue conditions + Story State.
+
+---
+
+#### 18. Procedural Narrative / Generative Story Runtime — `EXCLUDE FIRST PRODUCT`
+
+Do not make runtime story depend on:
+
+- LLM-generated dialogue;
+- dynamically generated quests;
+- procedural narrative planning;
+- uncontrolled AI-authored story state.
+
+##### Alpha alternative
+Authored dialogue, typed conditions/actions, Story Spine, Sequencer and bounded Flow Graph.
+
+---
+
+#### 19. Full Dialogue Scripting Language — `DEFER`
+
+Do not create an unrestricted text scripting language as a prerequisite for narrative authoring.
+
+##### Alpha alternative
+Dialogue Editor with choices, conditions, actions, speaker profile, preview and diagnostics.
+
+A later text-format convenience layer may be evaluated only if it remains a front-end to the same canonical dialogue model.
+
+---
+
+### PART IV — INVENTORY / ITEM SCOPE TO DEFER
+
+#### 20. Complex Crafting System — `EXCLUDE FIRST PRODUCT`
+
+Do not build:
+
+- crafting benches;
+- large recipe trees;
+- ingredient quality;
+- crafting levels;
+- procedural recipes;
+- resource production chains.
+
+##### Alpha alternative
+Bounded `A + B → C` item combine recipes and item-on-target puzzles.
+
+---
+
+#### 21. Random Loot / Rarity / Affix System — `EXCLUDE`
+
+Do not build:
+
+- rarity tiers;
+- random affixes;
+- Diablo-style drops;
+- loot tables;
+- item rolls.
+
+##### Alpha alternative
+Authored item placement and optional direct authored drop on enemy death.
+
+---
+
+#### 22. Equipment / Encumbrance RPG System — `EXCLUDE FIRST PRODUCT`
+
+Do not build:
+
+- weight simulation;
+- armor slots/stat bonuses;
+- equipment load;
+- inventory encumbrance penalties.
+
+##### Alpha alternative
+Weapon equip, quick slots, bounded utility items, fixed inventory capacity.
+
+---
+
+#### 23. Spatial Case Inventory — `DEFER OR ALPHA CONDITIONAL`
+
+A physical footprint inventory grid is desirable for some survival-horror projects but should not block Alpha.
+
+##### Admission condition
+Only promote if:
+
+- slot/list inventory is already stable;
+- gamepad navigation is solid;
+- save/migration is proven;
+- UI complexity is acceptable;
+- creator testing shows clear value.
+
+---
+
+### PART V — COMBAT SCOPE TO DEFER / EXCLUDE
+
+#### 24. Soulslike Combat Framework — `EXCLUDE FIRST PRODUCT`
+
+Do not build:
+
+- frame-perfect dodge systems;
+- parry windows;
+- stamina-metagame;
+- lock-on duel system;
+- weapon scaling;
+- posture systems;
+- deep melee move sets.
+
+##### Alpha alternative
+Simple Melee + Defensive Stun/Repel + bounded recovery/stagger.
+
+---
+
+#### 25. Character-Action / Combo Combat — `EXCLUDE`
+
+Do not build:
+
+- combo trees;
+- launchers;
+- aerial combat;
+- animation-cancel meta;
+- combo scoring;
+- style ranks.
+
+##### Alpha alternative
+Light/Heavy/Shove only where needed.
+
+---
+
+#### 26. Competitive Shooter Framework — `EXCLUDE`
+
+Do not build:
+
+- network shooter mechanics;
+- advanced recoil-pattern editor;
+- competitive aim assist;
+- movement-tech shooter systems;
+- weapon metas;
+- ranking.
+
+##### Alpha alternative
+Bounded horror hitscan shooting with creator-friendly recoil/spread/ammo.
+
+---
+
+#### 27. Advanced Tactical Cover Shooter — `EXCLUDE FIRST PRODUCT`
+
+Do not build:
+
+- cover nodes;
+- blind fire;
+- squad cover AI;
+- tactical lean/peek framework;
+- cover-to-cover navigation.
+
+##### Alpha alternative
+Basic line-of-sight, occlusion, hiding spots and authored environmental composition.
+
+---
+
+#### 28. Complex Ballistics — `EXCLUDE`
+
+Do not build:
+
+- real-world bullet drop;
+- wind;
+- penetration;
+- ricochet simulation;
+- material-dependent ballistic physics;
+- advanced projectile physics.
+
+##### Alpha alternative
+Hitscan + simple projectile.
+
+---
+
+#### 29. Huge Weapon/Attachment System — `EXCLUDE FIRST PRODUCT`
+
+Do not build:
+
+- modular attachments;
+- weapon crafting;
+- dozens of fire modes;
+- gunsmith editor;
+- per-part stat simulation.
+
+##### Alpha alternative
+Weapon Profile with damage, ammo, magazine, reload, fire rate, spread, recoil, range and supported aim mode.
+
+---
+
+#### 30. Large Elemental / Resistance Matrix — `EXCLUDE FIRST PRODUCT`
+
+Do not build a full RPG damage/resistance spreadsheet.
+
+##### Alpha alternative
+Small bounded damage categories sufficient for:
+- generic;
+- melee;
+- projectile;
+- environmental;
+- fire;
+- electric;
+- custom supported tag where needed.
+
+---
+
+#### 31. Full Ragdoll / Gore / Dismemberment Framework — `DEFER`
+
+Do not make Alpha depend on:
+
+- advanced ragdolls;
+- physical dismemberment;
+- gore simulation;
+- persistent body physics;
+- complex corpse collision.
+
+##### Alpha alternative
+Death animation/simple fall, optional bounded impulse, corpse remain/disappear policy.
+
+---
+
+#### 32. Destruction-Heavy Combat — `EXCLUDE FIRST PRODUCT`
+
+Do not build destructible buildings or systemic destruction.
+
+##### Alpha alternative
+Limited authored breakables and Event/Action consequences.
+
+---
+
+### PART VI — MOVEMENT / TRAVERSAL SCOPE TO DEFER
+
+#### 33. Platformer / Parkour Framework — `EXCLUDE FIRST PRODUCT`
+
+Do not build:
+
+- wall run;
+- mantle framework;
+- parkour chains;
+- grappling;
+- advanced air control;
+- climbing puzzles as a general movement system.
+
+##### Alpha alternative
+Grounded movement; profile-gated simple jump only if needed.
+
+---
+
+#### 34. Vehicles — `EXCLUDE FIRST PRODUCT`
+
+Do not build:
+
+- drivable cars;
+- vehicle physics;
+- mounted combat;
+- vehicle AI.
+
+##### Alpha alternative
+Scripted/Sequence-driven vehicle presentation if a sample scene needs it.
+
+---
+
+#### 35. Full Climbing / Ledge System — `DEFER`
+
+A simple authored ladder/transition may be considered later.
+
+Do not create a generalized traversal/IK/climbing framework for Public Alpha.
+
+---
+
+### PART VII — UI / HUD / MENU / TYPOGRAPHY / DIALOGUE-PRESENTATION SCOPE TO DEFER
+
+#### 36. General App/UI Builder — `EXCLUDE`
+
+Player UI authoring is not a generic web/app builder.
+
+Do not expose as the normal gameplay-authoring model:
+
+- arbitrary JavaScript;
+- arbitrary DOM/CSS as canonical UI;
+- unrestricted custom runtime components;
+- arbitrary browser widgets;
+- creator code execution inside UI components.
+
+##### Alpha alternative
+
+Typed UI components, layouts, typography, tokens, bindings, screen policies, screen stack, focus/navigation, motion and recipes.
+
+##### 36.1 Arbitrary Executable Custom Widgets — `EXCLUDE FIRST PRODUCT`
+
+Do not allow user-authored executable UI widgets to become a hidden scripting escape hatch in the Public Alpha.
+
+##### Alpha alternative
+
+A bounded `Custom Screen` composed from supported typed components and bindings.
+
+A controlled Plugin/SDK path may be reconsidered later under the separate extensibility contract.
+
+##### 36.2 General Website / Remote-Web UI Runtime — `EXCLUDE FIRST PRODUCT`
+
+Do not build:
+
+- arbitrary embedded websites as player UI;
+- remote HTML interfaces;
+- network-fetched gameplay UI;
+- web-account dashboards inside exported games.
+
+##### Alpha alternative
+
+Local cooked RetroStage UI assets and runtime documents.
+
+---
+
+#### 37. Dynamic Open-World Map / Navigation UI — `EXCLUDE FIRST PRODUCT`
+
+Do not build:
+
+- GPS/minimap pathfinding;
+- dynamic map discovery;
+- world-scale markers;
+- open-world fast travel;
+- navigation arrows;
+- route planning.
+
+##### Alpha alternative
+
+Optional static authored floorplan/map UI if later admitted.
+
+---
+
+#### 38. MMO-Style Quest Tracker / HUD — `EXCLUDE AS DEFAULT`
+
+RetroStage may technically support text/list UI, but its product defaults should not assume:
+
+- permanent waypoint arrows;
+- large objective tracker;
+- minimap;
+- floating combat numbers;
+- raid frames;
+- multi-party status UI.
+
+##### Alpha alternative
+
+Minimal, journal-only, notification-only or custom creator-authored presentation.
+
+##### 38.1 Full Visual-Novel Engine — `EXCLUDE FIRST PRODUCT`
+
+Do not expand dialogue presentation into:
+
+- complete VN route-management product;
+- save-any-line VN backlog state machine;
+- scene/CG gallery framework;
+- affection/route engine;
+- hundreds of portrait-positioning/layout conventions;
+- visual-novel-specific scripting language.
+
+##### Alpha alternative
+
+Dialogue Editor + Speaker Profile + portrait variants + choices + Dialogue Presentation Profile + Story State + Sequence.
+
+##### 38.2 Complex Radial-Menu Framework — `DEFER`
+
+A radial selector may eventually be useful for a particular game, but it should not be a Public Alpha system requirement.
+
+##### Alpha alternative
+
+List/grid/slot selection plus supported quick slots.
+
+##### 38.3 Full Localization Management Platform — `EXCLUDE AS A TOOLING PRODUCT`
+
+Do **not** confuse the canonical requirement for localization-ready text and final Alpha localization behavior with building a commercial translation-management suite.
+
+Do not build for Alpha:
+
+- translator accounts;
+- cloud translation projects;
+- CAT-tool replacement;
+- translation-memory platform;
+- vendor workflow;
+- machine-translation service;
+- online review portal.
+
+##### Alpha requirement that remains
+
+- stable TextId/string-table semantics;
+- locale resolution;
+- fallback;
+- formatting args;
+- font fallback;
+- missing glyph/key diagnostics;
+- pseudo-localization/expansion fixtures;
+- player-facing localized runtime behavior required by the release milestone.
+
+External import/export conveniences may be evaluated later.
+
+##### 38.4 Custom Text-Shaping / Font Engine From Scratch — `EXCLUDE`
+
+Do not build a complete font rasterizer/shaper/layout engine merely to obtain retro typography.
+
+##### Alpha alternative
+
+Use approved platform/browser/text capabilities behind RetroStage-owned typography, fallback, layout and diagnostics contracts.
+
+A specialized bitmap-font authoring suite remains conditional/post-Alpha unless creator evidence justifies it.
+
+##### 38.5 Full Bitmap-Font Authoring Suite — `DEFER / ALPHA CONDITIONAL`
+
+Do not make Public Alpha depend on:
+
+- bitmap font drawing;
+- glyph painting;
+- kerning editor;
+- atlas authoring suite.
+
+##### Alpha alternative
+
+Supported creator font assets, pixel-safe rendering where possible, fallback/glyph diagnostics, and optionally imported prepared bitmap/font-atlas assets if an owning milestone safely admits them.
+
+##### 38.6 VR / Spatial UI Framework — `EXCLUDE FIRST PRODUCT`
+
+No VR pointer/focus system, world-space VR menus or headset-specific UI architecture.
+
+##### Alpha alternative
+
+Bounded world-space prompts and supported in-world UI surfaces for normal desktop games.
+
+##### 38.7 Procedural UI Generator / Runtime Layout AI — `EXCLUDE FIRST PRODUCT`
+
+Do not generate production UI dynamically from uncontrolled runtime AI or procedural logic.
+
+##### Alpha alternative
+
+Authored screens, recipes, tokens and deterministic responsive rules.
+
+##### 38.8 UI Marketplace / Theme Store — `EXCLUDE FIRST PRODUCT`
+
+Do not create:
+
+- public UI theme marketplace;
+- paid theme commerce;
+- user account/entitlement layer.
+
+##### Alpha alternative
+
+First-party recipes/templates and optional installable packs under existing content-pack policy.
+
+##### 38.9 Full UI Animation / Motion-Graphics Suite — `EXCLUDE FIRST PRODUCT`
+
+Do not turn the UI editor into After Effects.
+
+##### Alpha alternative
+
+Bounded UI motion primitives such as Fade, Slide, Scale, Pulse, Typewriter and simple Wipe with reduced-motion fallbacks.
+
+##### 38.10 Advanced Diegetic / 3D UI Framework — `DEFER`
+
+Do not build a universal 3D UI scene system with arbitrary meshes, browser surfaces, physics and world interaction.
+
+##### Alpha alternative
+
+Bounded world-space prompt, supported terminal/computer-like UI, inspect presentation and authored diegetic screens.
+
+##### 38.11 Floating Combat-Text / Damage-Number Framework — `EXCLUDE AS DEFAULT`
+
+This aesthetic is not central to the supported horror product thesis.
+
+##### Alpha alternative
+
+Hit reaction, audio/VFX/camera feedback, health presentation and optional project-authored simple text if a supported UI binding allows it.
+
+### PART VIII — CINEMATIC / MEDIA SCOPE TO DEFER
+
+#### 39. Full Non-Linear Video Editor — `EXCLUDE`
+
+Do not make RetroStage:
+
+- Premiere;
+- Resolve;
+- After Effects;
+- compositing software;
+- video encoding suite.
+
+##### Alpha alternative
+Conditional video playback track inside Sequencer after codec/backend admission.
+
+---
+
+#### 40. Advanced Facial Animation / Lip Sync — `DEFER`
+
+Do not make Public Alpha depend on:
+
+- facial rig authoring;
+- phoneme editor;
+- auto lip sync;
+- performance capture.
+
+##### Alpha alternative
+Imported animation, portrait/dialogue presentation, simple character animation cues.
+
+---
+
+#### 41. Runtime Video Streaming Platform — `EXCLUDE FIRST PRODUCT`
+
+No remote video streaming or web-media dependency.
+
+##### Alpha alternative
+Local packaged approved media assets only, if admitted.
+
+---
+
+### PART IX — SAVE / ACCOUNT SCOPE TO DEFER
+
+#### 42. Cloud Save Synchronization — `DEFER`
+
+Do not make core Runtime Save depend on:
+
+- Steam Cloud;
+- proprietary cloud accounts;
+- cross-device sync backend.
+
+##### Alpha alternative
+Local robust runtime saves. Platform cloud integration may later wrap the same save contract.
+
+---
+
+#### 43. Account / Login System — `EXCLUDE FIRST PRODUCT`
+
+No player account infrastructure for exported games is required.
+
+---
+
+#### 44. Full Memory Snapshot / Emulator Save State — `EXCLUDE`
+
+Do not serialize:
+
+- entire JavaScript heap;
+- Babylon scene object graphs;
+- physics internals;
+- nav query internals;
+- active VFX instances;
+- arbitrary Flow Graph executor memory.
+
+##### Alpha alternative
+Registered semantic runtime state + safe restore policy.
+
+---
+
+#### 45. Arbitrary Mid-Frame Save — `EXCLUDE FIRST PRODUCT`
+
+Do not promise save at every possible animation/physics/sequence frame.
+
+##### Alpha alternative
+Save eligibility, safe checkpoints, safe markers and authored fallback.
+
+---
+
+### PART X — SCRIPTING / EXTENSIBILITY SCOPE
+
+#### 46. Arbitrary Code as the No-Code Foundation — `REJECT FOR CORE`
+
+Do not require:
+
+- JavaScript;
+- TypeScript;
+- Python;
+- C#;
+- shell commands
+
+to implement normal supported gameplay.
+
+##### Alpha alternative
+Profiles + Components + Recipes + Specialized Editors + Sequence + bounded Flow Graph.
+
+A controlled Plugin/SDK escape hatch remains a later product direction only after core boundaries are stable.
+
+---
+
+#### 47. Unrestricted Flow Graph — `REJECT`
+
+Flow Graph must not become:
+
+- arbitrary filesystem access;
+- arbitrary shell execution;
+- unrestricted HTTP/network access;
+- arbitrary code eval;
+- recursion without budgets;
+- unbounded loops;
+- general renderer programming;
+- hidden second persistence engine.
+
+##### Supported alternative
+Bounded typed nodes using shared Event/Action semantics, validation, execution budgets, tracing and migration.
+
+---
+
+### PART XI — PRODUCT-SCOPE SUBSTITUTION TABLE
+
+The first product should solve the creator's intent with the **smallest coherent RetroStage system**.
+
+| Tempting broad system | Do not build first | Bounded RetroStage alternative |
+|---|---|---|
+| General AI editor | Behavior Tree / GOAP platform | Enemy Profile + Perception + Attack + Encounter Recipe |
+| General RPG quest engine | MMO/RPG quest framework | Objective/Task + Story State + Story Spine |
+| RPG inventory | stats/crafting/loot/economy | Items + slots/list + inspect/combine/puzzle |
+| General combat engine | Souls/combo/tactical shooter | No-combat + defensive + simple melee + horror firearms |
+| Physics sandbox | arbitrary joints/solver | doors/drawers/push/carry/limited breakables |
+| Open-world engine | terrain/world partition | scenes/sections + validated transitions |
+| Procedural engine | runtime world generator | authored repetition/scatter/liminal substitution |
+| Social sim | schedules/needs/relationships | story-driven NPC state/memory |
+| General UI/app builder | arbitrary HTML/CSS/JS/components | typed screens/components/bindings/tokens/navigation |
+| One house UI | fixed RetroStage skin | UI Theme + Typography + creator-owned screens/recipes |
+| Translation-management platform | cloud CAT/translator workflow | stable TextId + locale/fallback/runtime + diagnostics |
+| Custom font/text engine | full shaping/rasterizer stack | approved text stack behind RetroStage typography contracts |
+| Full visual-novel engine | route/CG/backlog framework | Dialogue Editor + Presentation Profile + Story State + Sequence |
+| Motion-graphics editor | arbitrary UI animation timeline | bounded UI motion + Sequencer hooks |
+| Dynamic open-world map | GPS/minimap/navigation system | optional authored static floorplan |
+| Cinematic suite | NLE/compositor | native Sequencer + conditional media playback |
+| Scripting platform | arbitrary code | first-class workflows + bounded Flow Graph |
+| Cloud account/save | backend platform | local versioned Runtime Save |
+| General 3D/VR UI | arbitrary spatial UI runtime | bounded world prompts/diegetic screens |
+
+### PART XII — Post-Alpha Reconsideration Rules
+
+A deferred feature should not be promoted merely because:
+
+- a library makes it easy;
+- one internal demo needs it;
+- an agent can generate the code;
+- a competitor has it;
+- it sounds "engine-like";
+- it is technically interesting.
+
+A deferred feature may be reconsidered only when there is evidence of:
+
+1. repeated creator demand inside the supported personas;
+2. a clear product workflow that cannot be expressed with current bounded systems;
+3. source-authority compatibility;
+4. a stable canonical owner;
+5. Preview / PIE / Export responsibility;
+6. Runtime Save implications;
+7. diagnostics and repair UX;
+8. migration/compatibility impact;
+9. performance budget;
+10. dependency/license/security impact where applicable;
+11. representative golden-project proof;
+12. explicit scope tradeoff and schedule consequence.
+
+---
+
 # Deferred Scope Registry
 
-## 91. Deferred but Approved Product Directions
+## 92. Deferred but Approved Product Directions
 
 The following directions are approved but must wait for their owning milestones.
 
@@ -2661,7 +3736,7 @@ No table entry authorizes implementation before the canonical roadmap reaches it
 
 ---
 
-## 92. Conditional Third-Party and Tooling Registry
+## 93. Conditional Third-Party and Tooling Registry
 
 The following are not automatically installed merely because their direction is approved. Exact dependency admission remains milestone-owned.
 
@@ -2755,7 +3830,7 @@ RSM-6 admits exactly `@babylonjs/core@9.21.2` and `@babylonjs/loaders@9.21.2` as
 
 # Explicit Rejections and Out-of-Scope Directions
 
-## 93. Rejected Architecture Directions
+## 94. Rejected Architecture Directions
 
 The following are rejected for the reboot baseline:
 
@@ -2774,7 +3849,7 @@ The following are rejected for the reboot baseline:
 
 ---
 
-## 94. Rejected Dependency and Licensing Directions
+## 95. Rejected Dependency and Licensing Directions
 
 The following are rejected by default:
 
@@ -2791,7 +3866,7 @@ The following are rejected by default:
 
 ---
 
-## 95. Out-of-Scope Product Directions
+## 96. Out-of-Scope Product Directions
 
 The following remain outside v0:
 
@@ -2826,7 +3901,7 @@ The following remain outside v0:
 
 # Superseded Historical Decisions
 
-## 96. Superseded Live-Status Claims
+## 97. Superseded Live-Status Claims
 
 All pre-loss claims that a milestone is currently implemented, active, next, passed, or closed are superseded for reboot live status.
 
@@ -2834,7 +3909,7 @@ They remain historical evidence only.
 
 ---
 
-## 97. Superseded Technology Alternatives
+## 98. Superseded Technology Alternatives
 
 Previous discussions of switching the baseline to Godot, Stride, Wicked Engine, or a custom native renderer are superseded by the approved reboot technology contract unless future evidence triggers formal replacement review.
 
@@ -2842,7 +3917,7 @@ This does not claim those technologies are commercially unusable. It records tha
 
 ---
 
-## 98. Superseded Named Companion-Product Assumption
+## 99. Superseded Named Companion-Product Assumption
 
 The named Mnemos Studio assumption is superseded and removed.
 
@@ -2859,7 +3934,7 @@ No package, bridge, roadmap dependency, or product promise may use the removed n
 
 # Open Decisions Owned by Future Milestones
 
-## 99. Open Questions
+## 100. Open Questions
 
 The following questions remain intentionally open.
 
@@ -2892,7 +3967,7 @@ Open questions must not be answered implicitly by whichever package a coding age
 
 # Change Control
 
-## 100. Decision Change Rule
+## 101. Decision Change Rule
 
 A binding decision may be changed only when a proposed replacement includes:
 
@@ -2911,7 +3986,7 @@ A dependency upgrade, package experiment, or implementation convenience does not
 
 ---
 
-## 101. New Decision Admission Rule
+## 102. New Decision Admission Rule
 
 A new durable decision must state:
 
@@ -2930,7 +4005,7 @@ Duplicate or overlapping decisions should be merged rather than allowed to creat
 
 # Immediate Handoff
 
-## 102. Next Source
+## 103. Next Source
 
 Current lifecycle authority remains external to this durable decision registry:
 
@@ -2946,7 +4021,7 @@ RSM-6 is `MILESTONE CLOSED / PASS`: I1-I8 and V1 remain accepted at implementati
 
 # Approval Statement
 
-## 103. Decision Registry Approval
+## 104. Decision Registry Approval
 
 This decision registry adopts the following reboot direction:
 

@@ -418,6 +418,45 @@ RuntimeGameSession / Preview / Cook / Export consumers
 
 This contract is future-direction source truth only. It does not start or authorize RSM-7 implementation.
 
+### V5 Runtime / Composition Detail Completeness Lock
+
+This lock preserves runtime details from the reviewed game-wide composition candidate that must not disappear behind generic subsystem wording.
+
+**Event queue dispatch contract**
+An Event/Action occurrence carries one explicit dispatch class:
+```text
+IMMEDIATE_ALLOWED
+DEFERRED_TO_PHASE_BOUNDARY
+DEFERRED_TO_NEXT_TICK
+```
+or an implementation-equivalent enum with the same bounded semantics. Immediate dispatch is allowed only where the owning phase permits it and still consumes causal-work budget. Same-priority queued work is ordered deterministically by accepted enqueue sequence plus stable tie-break identity. Cancellation, owner teardown, re-entry and dispatch of newly-enqueued work during a drain are explicit; hidden recursion cannot bypass the queue, phase, idempotency or causal-budget contracts.
+
+**Level / traversal creator diagnostics**
+As the owning milestones activate, creator diagnostics must cover representative failures such as blocked/invalid spawn, insufficient head/door/step clearance, traversal-metric mismatch, unreachable required Section/exit, broken dynamic navigation link, invalid cross-Scene reference, camera clearance/composition obstruction, stale derived navigation, and Scene/Section transition ownership conflicts. A World/Level Flow visualization may be added as an optional editor-only derived view if creator need proves it useful; it is not a new canonical graph, milestone, or runtime authority.
+
+**Critical synchronized audio**
+Audio latency classes must distinguish ordinary streamed/preloaded content from a synchronization-critical cue whose late start would change gameplay, dialogue, sequence or presentation meaning. Critical cues require an owning readiness/preload or explicit degraded/blocker policy and diagnostics; silently starting materially late is not valid parity. Sequence/dialogue/UI audio ownership and interruption/restoration reuse the same audio lifetime scopes rather than private UI/Sequencer audio truth.
+
+**Runtime session generation**
+Starting a New Game, full retry that creates a fresh world/session, return-to-title followed by a new session, or PIE restart mints a fresh `RuntimeSessionGeneration` (or accepted equivalent). Async completion from generation N cannot mutate generation N+1 merely because the older task completed later.
+
+**Composition transaction**
+A creator operation that changes `GameDefinitionDocument` together with referenced profiles/documents is one normal multi-document authoring transaction/command. Validation occurs before commit where required, and failure/cancellation cannot leave a half-applied canonical composition graph.
+
+**Resolver parity acceptance A–H**
+The resolver foundation must eventually prove:
+A. deterministic base resolution from equivalent canonical inputs;  
+B. independence from editor/workspace/UI state;  
+C. Preview/PIE effective-configuration parity for the same context;  
+D. cook/export uses the same composition semantics;  
+E. missing required reference/meaning fails closed and is diagnosable;  
+F. supported migration/default evolution preserves declared compatibility;  
+G. effective override provenance is explainable;  
+H. save/reload/round-trip does not silently change effective composition.
+
+**Dynamic navigation timing**
+Door/blocker/Section/teleport/passability changes publish navigation projections at an owning, explicit runtime boundary. A stale derived navigation result cannot overwrite a newer gameplay/passability generation; Scene unload cancels/rejects owner-scoped navigation work; save/load reconstructs navigation from semantic gameplay state rather than serializing backend topology.
+
 ## RSM-9 — Editor Shell / Hierarchy / Inspector Vertical Slice
 **Purpose:** Create the first product-owned editor workspace around the Babylon viewport.  
 **Third-party placement:** React, React DOM, selected Radix primitives, Golden Layout behind an adapter, react-window where scale requires it, CSS Modules, and CSS variables. Development-only Testing Library packages are approved in principle for user-oriented React/DOM tests after exact admission. Storybook is a conditional development-only component-workbench candidate, not a product/runtime dependency.  
@@ -575,6 +614,98 @@ This contract is future-direction source truth only. It does not start or author
 - Prove minimal GameDefinition→resolved runtime→player parity while excluding editor/Studio-local/source authority from the player.
 
 **Exit:** Studio Identity closes only when its local persistence, secure media access, launcher/project-open path, workspace persistence/reset, PIE audio interlock, master-disable behavior, provenance, export exclusion, and no-canonical-authority guarantees are independently proven. On closure, RSM-19 may be separately authorized.
+
+#### SICE Feature-Level Product / Acceptance Lock
+
+The following feature-level SICE contract is binding for the non-numbered control. It refines the high-level direction above without creating project/runtime authority.
+
+**Canonical terminology and lifecycle**
+- `Studio Identity` is the editor-local creator-experience umbrella.
+- `Startup Welcome / Studio Launcher` is pre-project UI. Startup enters the launcher; successful New/Open/Continue project admission removes it completely from the active workbench; closing the active project may return to the launcher.
+- `Studio Home` may be conversational shorthand only; it is not a persistent project workbench authority.
+- Active authoring space remains primary: hero/welcome presentation disappears after project admission; Studio Player/Radio controls are compact and hideable; Gallery/Project Memory are optional surfaces; Creator Profile is mainly Welcome/Settings identity; master disable can reduce persistent Studio footprint to effectively zero.
+
+**Project Memory / Session Ritual detail**
+Project Memory may retain local convenience/history fields such as:
+```text
+firstSeenAt / firstOpenedAt
+lastOpenedAt
+lastValidSceneId/reference when available
+sessionCount
+accumulatedStudioSessionTime
+lastSessionDuration
+recent/favorite capture references
+safe lastKnownProjectLocation for recent-project navigation
+```
+These are local history, never project truth or productivity scoring.
+
+Session Rituals may show non-blocking welcome/close summaries such as last project/scene, session duration, or capture count. They must be independently disableable, must not delay shutdown, require no network service, and must not introduce streaks, achievements, XP, goals, rankings, productivity pressure, or compliance scoring.
+
+**Gallery / capture detail**
+A local Gallery/Recent Capture record may include:
+```text
+captureId
+stable associated project identity
+associated scene identity when available
+createdAt
+favorite/pinned state when supported
+Studio-owned local media locator
+```
+Entity/camera references are optional local convenience only. Project moves, scene deletion, stale records, or missing media must degrade to diagnosable missing/stale local references and must never corrupt, recreate, rewrite, or silently repair canonical projects.
+
+**Studio Player**
+Baseline local-media behavior includes explicit file and/or folder selection, play/pause, previous/next for a list, seek where supported by the selected media, volume, optional shuffle/repeat, local playlist/library preferences, compact/hideable controls, and PIE interlock.
+
+Forbidden Player behavior includes background disk crawling, arbitrary Renderer filesystem access, automatic project import/copy, automatic Audio-asset conversion, export inclusion, or streaming-service integration. `Use/Import in Project` is a separate normal project asset-import command with normal provenance/import rules.
+
+**Studio Radio**
+Studio Radio is offline bundled creator-comfort audio only. Shipped tracks require verifiable ownership/redistribution rights. Baseline operation must require no external API, login, subscription, Spotify/music-service integration, or network radio.
+
+**Studio Preset**
+A Studio Preset may coordinate editor visual tone/preferences within accessibility limits, launcher presentation, Studio Radio selection, Studio Player defaults, and small decorative editor ambience. It must not change Scene lighting, project materials, game cameras, game post-processing, gameplay, runtime audio, exported-player rendering, or canonical `PresentationProfile`.
+
+**PIE audio interlock**
+```text
+capture exact pre-PIE Studio playback state
+→ PIE START
+   → Pause (default) / Dim / Do Nothing local preference
+→ PIE ACTIVE
+→ PIE STOP
+   → restore pre-PIE play/pause state, supported track-position behavior, and volume
+```
+If Studio audio was paused before PIE, it remains paused after PIE Stop. A newer user action during PIE must not be overwritten by stale restore logic unless the interlock contract explicitly owns that state transition.
+
+**Master disable**
+With `Disable Studio Experience`, the following core chain must still pass without Creator Profile, Project Memory, Gallery, Studio Player/Radio/Presets or rituals:
+```text
+create project
+→ edit
+→ save
+→ close
+→ reopen
+→ PIE
+→ stop PIE
+→ cook/export
+→ run player
+```
+
+**Implementation evidence required for SICE closure**
+Evidence must include, as applicable:
+- unit/contract tests for local state, startup/close lifecycle, persistence and reset semantics;
+- Main/Preload IPC schema, sender/origin/path validation and denied-path behavior for local media;
+- React/Electron acceptance for Welcome/Continue/New/Open, workspace reset and Studio disable;
+- filesystem permission/path-failure fixtures;
+- stale recent-project and stale/missing Gallery reference fixtures;
+- restart persistence checks;
+- exact PIE interlock restoration tests, including pre-paused state and volume/position behavior where supported;
+- project-dirty invariants for workspace/Studio-only changes;
+- cooked/export forbidden-content inventory proving Studio-local state/media exclusion;
+- bundled-media provenance/license evidence;
+- a no-network proof for baseline Studio Radio;
+- exact architecture/diff review plus normal V1/CLOSE1 evidence.
+
+**Failure / deferral rule**
+If SICE later proves materially riskier or more expensive than expected, accepted RSM-18 closure remains valid. SICE may be narrowed/deferred only through explicit source change control. RSM-19 may not silently bypass a still-binding SICE-before-RSM-19 rule; removing or changing that sequencing dependency requires a formal roadmap/decision amendment.
 
 # Gate C — Controlled Authoring Foundation
 
@@ -821,6 +952,2922 @@ Supported Game Profile / capability envelope
 **Representative first-product composition target:** fixed-camera survival horror, modern chase horror, mystery/narrative horror, liminal/anomaly horror, and action-horror-lite must be achievable by composition of the same bounded systems rather than separate engine architectures.
 
 The Deferred Scope Registry in Source 05 remains binding: this direction does not authorize multiplayer/live-service, open-world/RTS/general-RPG scope, unrestricted procedural/physics systems, broad RPG loot/economy/crafting frameworks, general-purpose UI/application builders, unrestricted scripting/Flow Graph, or other excluded first-product systems.
+
+## Feature-Level Gameplay / Storytelling / Player-Experience Completeness Annex
+
+**Status:** `BINDING ROADMAP DETAIL / REBASED TO CURRENT AUTHORITY MODEL`
+
+The following reviewed capability detail is retained at feature level so future source alignment cannot collapse product intent into generic subsystem names.
+
+Normalization rules for this annex:
+- `ALPHA CORE / ALPHA SUPPORTED / ALPHA CONDITIONAL / EDITOR ONLY` are product-scope labels only; they do not replace `RequestedCapabilities / SupportedCapabilities / EffectiveCapabilities`.
+- `Supported Game Profile` is the project capability envelope. Player/Movement/Camera/Enemy/Attack/Weapon/Feedback/SaveExperience and similar profiles remain typed subsystem-owned authoring semantics referenced by `GameDefinitionDocument`.
+- specialized editors/workshops/directors are editor-only views/workflows unless another canonical source explicitly assigns persisted semantics.
+- official export disposition remains `EDITOR_ONLY / COOKED / RUNTIME / HYBRID`; save participation is separate metadata.
+- Public Alpha language in this annex refers to the RSM-120 `Public Alpha / Investor Demo Maturity Gate`, not first public availability.
+- current Source 00–09 authority rules override any older routing/implementation wording; the feature-level intent below remains binding unless explicitly deferred/rejected/superseded.
+
+### PART I — No-Code Gameplay Foundation
+
+#### 4. Shared Gameplay Semantics — `ALPHA CORE`
+
+All first-class gameplay systems should share RetroStage-owned typed semantics instead of creating private mini-engines.
+
+Required foundations:
+
+- stable gameplay identities;
+- typed variables;
+- typed events;
+- typed actions;
+- typed conditions;
+- explicit state transitions;
+- explicit save participation;
+- creator-readable diagnostics;
+- Preview / PIE / Export disposition;
+- migration/version identity where persisted.
+
+Common condition vocabulary should cover bounded cases such as:
+
+```text
+Has Item
+Does Not Have Item
+Story Flag
+Objective State
+NPC State
+Enemy State
+Entity State
+Entered Area
+Interaction Completed
+Readable Read
+Clue Known
+Counter
+Timer
+Sequence Completed
+Scene/Section State
+```
+
+Common actions should cover bounded cases such as:
+
+```text
+Set Story Flag
+Set Variable
+Start / Update / Complete / Fail Objective
+Give / Remove Item
+Set NPC State
+Set Enemy State / Activate Enemy
+Enable / Disable Entity
+Lock / Unlock / Open Interaction
+Play Audio
+Play Sequence
+Change Supported Presentation/Atmosphere State
+Transition Scene
+Emit Typed Event
+```
+
+**Invariant:** Dialogue, objectives, recipes, Sequence and Flow Graph must consume the same semantic registry rather than creating incompatible action languages.
+
+---
+
+#### 5. Profiles, Components, Recipes and Specialized Editors — `ALPHA CORE`
+
+##### Profiles
+Reusable tuning/feel definitions, for example:
+
+- Movement Profile
+- Camera Profile
+- Interaction Profile
+- Feedback Profile
+- Enemy Profile
+- Perception Profile
+- Attack Profile
+- Weapon Profile
+- Save Experience Profile
+- Screen Policy
+- UI Theme / Design Tokens
+- Typography Style
+- Dialogue Presentation Profile
+- Subtitle Profile
+- Notification Profile
+- UI Audio Profile
+
+##### Components
+Direct entity capabilities, for example:
+
+- Interactable
+- Health
+- Dialogue Speaker
+- Readable
+- Objective Trigger
+- Inventory Container
+- Damage Receiver
+- Patrol Agent
+- Save Point
+- Puzzle Target
+
+##### Recipes
+Validated combinations of multiple systems, for example:
+
+- Locked Door
+- Drawer
+- Lever / Switch
+- Pickup Item
+- Readable Note
+- Item-on-Target Puzzle
+- Save Point
+- Checkpoint
+- Patrol & Investigate Enemy
+- Chase
+- Stealth Encounter
+- NPC Conversation
+- Liminal Loop / Anomaly pattern
+
+##### Specialized Editors
+Common complex authoring should use a dedicated product workflow rather than generic graphs where practical:
+
+- Fixed Camera Composer
+- Dialogue Editor
+- Objective / Task Editor
+- Inventory & Puzzle Workshop
+- Patrol / Perception Editor
+- Enemy / Encounter Editor
+- Player UI Designer
+- Player Experience Designer
+- Sequencer
+- Story & Objective Spine
+- Progress & Save Director
+
+---
+
+### PART II — Player Control & Movement
+
+#### 6. Protagonist / Player Profile — `ALPHA CORE`
+
+A first-class player/protagonist definition is currently under-specified and should be made explicit.
+
+It should own or reference:
+
+- player identity;
+- spawn/restore behavior;
+- Movement Profile;
+- camera/control interpretation;
+- interaction profile;
+- health/damage participation;
+- inventory ownership;
+- input action mapping;
+- animation set;
+- footstep/noise profile;
+- optional combat capability;
+- save participation.
+
+It must not turn the player entity into one giant opaque component.
+
+---
+
+#### 7. Movement Feel — `ALPHA CORE`
+
+Movement is not only `speed`.
+
+Supported creator-facing controls should include, where relevant to the chosen profile:
+
+- walk speed;
+- run speed;
+- sprint behavior;
+- acceleration;
+- deceleration;
+- turn rate;
+- strafe enable/disable;
+- backward speed;
+- analog response curve;
+- deadzone;
+- start/stop/turn weight;
+- camera-relative vs character-relative movement;
+- hold/toggle run;
+- hold/toggle aim;
+- crouch where supported;
+- slope/step behavior;
+- simple grounded collision response.
+
+Recommended built-in Movement Profile directions:
+
+```text
+Modern Exploration
+Heavy Exploration
+Classic Tank
+Modern Fixed-Camera
+TPS Horror
+Limited FPS Horror
+Top-Down
+Isometric
+Custom
+```
+
+##### Optional simple jump — `ALPHA CONDITIONAL`
+
+If creator testing proves it necessary for TPS/Limited-FPS projects, support a **simple profile-gated grounded jump**.
+
+Do not interpret this as:
+
+- platformer movement;
+- wall running;
+- parkour;
+- ledge traversal framework;
+- climbing simulation.
+
+---
+
+#### 8. Movement ↔ Animation ↔ Footstep Integration — `ALPHA CORE`
+
+Movement should emit stable high-level states/events consumed by presentation:
+
+```text
+Idle
+Walk
+Run
+Backward
+Strafe
+Turn
+Start
+Stop
+Aim Walk
+Crouch
+Injured
+```
+
+Footsteps should use surface-aware cue profiles where supported.
+
+Gameplay hearing must use explicit gameplay noise events, not raw audio-waveform analysis as hidden AI authority.
+
+Example:
+
+```text
+Walk Footstep → Noise 0.30
+Run Footstep  → Noise 0.70
+Gunshot       → Noise 1.00
+```
+
+---
+
+### PART III — Camera & View Feel
+
+#### 9. Supported Camera Families — `ALPHA CORE`
+
+Public Alpha should preserve the already-adopted v0 camera families:
+
+- Fixed Camera;
+- TPS / Shoulder Camera;
+- Top-Down;
+- Isometric;
+- Limited FPS.
+
+Camera and movement are separate profiles.
+
+Examples:
+
+```text
+Fixed Camera + Classic Tank
+Fixed Camera + Modern Camera-Relative Movement
+TPS Camera + Heavy Exploration Movement
+Limited FPS + No-Combat
+```
+
+No camera family should force an unrelated combat or movement architecture.
+
+---
+
+#### 10. Gameplay Camera Feel — `ALPHA CORE`
+
+Creator-facing camera gameplay controls should include bounded support for:
+
+- activation volumes;
+- priority;
+- cuts/blends;
+- framing;
+- damping/weight;
+- rotation lag;
+- movement lag where applicable;
+- FOV changes;
+- collision handling;
+- recentering where relevant;
+- aim camera behavior;
+- sensitivity;
+- fixed-camera control interpretation;
+- camera transition safety.
+
+Camera presentation effects already belonging to the visual/atmosphere alignment remain separate from gameplay semantics.
+
+---
+
+### PART IV — Interaction & Physical Props
+
+#### 11. Interaction Feel — `ALPHA CORE`
+
+Interaction should expose:
+
+- Focus / Proximity / Crosshair targeting modes;
+- range;
+- focus cone;
+- line-of-sight;
+- deterministic priority;
+- stable tie-breaks;
+- prompt delay;
+- prompt placement;
+- Tap / Hold / Toggle / Automatic / Sequence-driven activation;
+- creator-readable targeting diagnostics.
+
+Interaction detection and gameplay result must remain separate.
+
+---
+
+#### 12. Physical Interaction Recipes — `ALPHA CORE`
+
+Supported bounded physical/kinematic interaction families:
+
+- hinged doors;
+- sliding doors;
+- drawers;
+- levers;
+- buttons/switches;
+- pushable props;
+- carry/drop;
+- controlled impulses;
+- kinematic platforms;
+- limited breakables;
+- inspectable props;
+- trigger volumes.
+
+Common interactions must not require generic physics programming.
+
+##### Hiding Spot Recipe — `ALPHA SUPPORTED`
+
+A horror-focused hiding workflow should be added explicitly:
+
+- locker / closet / under-object style bounded hide target;
+- enter/exit;
+- optional peek;
+- player visibility/noise state;
+- enemy search interaction;
+- safe exit conditions;
+- camera/UI hooks;
+- diagnostics.
+
+This should not become a general cover system.
+
+---
+
+### PART V — Items, Inventory & Puzzles
+
+#### 13. Item Definition & Item Runtime State — `ALPHA CORE`
+
+Separate:
+
+```text
+Item Definition
+≠
+runtime possession / quantity / instance state
+```
+
+Supported initial item classes:
+
+- Key Item
+- Puzzle Item
+- Consumable
+- Ammo
+- Weapon
+- Readable / Document
+- Clue / Evidence
+- Utility Item
+- bounded Custom Item using supported actions
+
+Common item actions:
+
+- Inspect
+- Use
+- Combine
+- Equip
+- Quick Slot
+- Discard
+- Read
+
+Not every item supports every action.
+
+---
+
+#### 14. Inventory Models — `ALPHA CORE`
+
+Support at least:
+
+- Unlimited List;
+- Fixed Slots;
+- simple visual Grid over slot semantics.
+
+Inventory behavior and inventory UI skin remain separate.
+
+##### Spatial case inventory — `POST-ALPHA OR ALPHA CONDITIONAL`
+
+A Resident-Evil-4-style physical footprint/grid case may be added later or admitted only if schedule and UX evidence justify it.
+
+It is not required to prove the Public Alpha thesis.
+
+---
+
+#### 15. Inventory & Puzzle Workshop — `ALPHA CORE`
+
+First-class authoring should cover:
+
+- pickups;
+- key/lock;
+- item-on-target;
+- consumables;
+- inspect mode;
+- 3D inspect rotation/zoom;
+- bounded inspect hotspots;
+- A + B → C combine recipes;
+- multi-slot puzzle targets;
+- keypad/code puzzles;
+- storage containers;
+- shared item box;
+- ammo/weapon linkage;
+- quick slots where enabled;
+- critical-item protection;
+- progression diagnostics.
+
+Puzzle state must be high-level and save-safe, not raw physics-object state.
+
+---
+
+#### 16. Storage Box / Container — `ALPHA SUPPORTED`
+
+Support:
+
+- Local Container;
+- Shared Storage;
+- capacity policy;
+- allowed item categories;
+- persistence.
+
+This is especially valuable to classic survival-horror workflows.
+
+---
+
+#### 17. Utility Equipment — `ALPHA SUPPORTED`
+
+A bounded utility-item pattern should exist for common horror mechanics such as:
+
+- flashlight;
+- battery-backed light;
+- story tool;
+- fuse/tool-like equipment.
+
+This is not a general equipment-stat system.
+
+---
+
+### PART VI — Storytelling, NPC, Dialogue & Objectives
+
+#### 18. Story State — `ALPHA CORE`
+
+Story progression needs a first-class typed state surface rather than scattered hidden variables.
+
+Supported story-state types:
+
+- Boolean flags;
+- bounded numbers/counters;
+- enums;
+- stable references where justified.
+
+Scopes should distinguish:
+
+- game/global runtime;
+- scene;
+- NPC;
+- objective;
+- temporary/session.
+
+Persistent story state participates explicitly in Runtime Save.
+
+---
+
+#### 19. Clue / Knowledge System — `ALPHA SUPPORTED`
+
+Mystery storytelling benefits from separating **knowledge** from physical inventory.
+
+Example:
+
+```text
+HasItem(BasementKey)
+≠
+KnowsCode(5731)
+```
+
+Clues may contain:
+
+- stable ClueId;
+- title/description;
+- source;
+- related character/location/objective;
+- journal visibility;
+- acquisition state.
+
+Clues may unlock dialogue choices or objectives.
+
+Do not turn this into a full detective-deduction simulator in Alpha.
+
+---
+
+#### 20. NPC Profile — `ALPHA CORE`
+
+A creator should not author a general behavior tree to create a story NPC.
+
+Supported bounded NPC configuration:
+
+- stable NPC identity;
+- speaker profile;
+- role;
+- stationary / wander / patrol;
+- simple follow where supported;
+- face/look-at player;
+- default dialogue;
+- animation set;
+- interaction behavior;
+- story-driven availability;
+- persistent narrative state;
+- conversation memory;
+- bounded story-driven relocation.
+
+No vendor/economy system is required.
+
+---
+
+#### 21. Dialogue Editor — `ALPHA CORE`
+
+The Dialogue Editor should support:
+
+- linear lines;
+- speaker identity;
+- stable text/string-table references;
+- choices;
+- conditions;
+- actions;
+- voice cue reference;
+- animation/emotion cue;
+- camera/presentation hook;
+- auto-advance/manual advance;
+- skip/interrupt policy;
+- subtitle presentation;
+- conversation preview;
+- unreachable branch diagnostics.
+
+Supported conversation modes:
+
+- Gameplay
+- Focused
+- Cinematic
+- Radio / Offscreen
+- Bark
+
+Dialogue actions consume the shared Event/Action registry.
+
+---
+
+#### 22. Dialogue Memory & Barks — `ALPHA SUPPORTED`
+
+Support bounded persistent conversation memory:
+
+- conversation never played / completed;
+- selected choice where explicitly persistent;
+- story-state consequences.
+
+Barks should support:
+
+- text/audio;
+- condition;
+- priority;
+- cooldown;
+- interruption policy.
+
+---
+
+#### 23. Objective / Task System — `ALPHA CORE`
+
+Keep the canonical product concept **Objective / Task** rather than building a general RPG Quest Engine.
+
+Required states:
+
+```text
+INACTIVE
+ACTIVE
+COMPLETED
+FAILED
+```
+
+Visibility is separate from gameplay state.
+
+Creator-facing support:
+
+- main / optional / hidden;
+- objective text;
+- steps;
+- conditions;
+- progress;
+- completion/failure;
+- On Start / Update / Complete / Fail actions;
+- persistence;
+- minimal notification;
+- journal-only presentation;
+- optional HUD presentation.
+
+World-marker guidance should never be mandatory.
+
+---
+
+#### 24. Story & Objective Spine — `ALPHA SUPPORTED`
+
+Provide a high-level narrative structure view such as:
+
+```text
+Chapter / Section
+├─ Story Beat
+├─ NPC Conversation
+├─ Objective
+├─ Clue
+├─ Sequence
+└─ World Reaction
+```
+
+This is **not Flow Graph**.
+
+- Story Spine = high-level narrative structure.
+- Flow Graph = bounded conditional/orchestration logic.
+
+---
+
+#### 25. Narrative Recipes — `ALPHA SUPPORTED`
+
+Useful first-party recipes:
+
+- First Meeting
+- Talk to NPC
+- Give Item to NPC
+- Receive Item from NPC
+- Read Note → Start Objective
+- Dialogue Choice → Set Story Flag
+- Objective → Unlock Dialogue
+- NPC Leaves / Relocates After Conversation
+- Radio Message
+- Environmental Reveal
+- Dialogue → Chase
+- Sequence → Objective
+- Readable → Clue
+- Clue → Dialogue Choice
+
+---
+
+### PART VII — Enemy, Stealth & Encounter Authoring
+
+#### 26. Enemy Profile — `ALPHA CORE`
+
+A reusable Enemy Profile should reference:
+
+- behavior archetype;
+- navigation agent;
+- movement speeds;
+- perception profile;
+- attack profiles;
+- health/reaction profile;
+- animation set;
+- audio/VFX feedback;
+- activation policy;
+- save/persistence policy;
+- encounter tags/references.
+
+The creator must not need a general behavior-tree IDE.
+
+---
+
+#### 27. Enemy State Vocabulary — `ALPHA CORE`
+
+Bounded states may include:
+
+```text
+IDLE
+PATROL
+SUSPICIOUS
+INVESTIGATE
+ALERT
+CHASE
+SEARCH
+ATTACK
+RECOVER
+STUNNED
+RETURN
+DEAD
+```
+
+Not every enemy must use every state.
+
+---
+
+#### 28. Alpha Enemy Archetypes — `ALPHA SUPPORTED`
+
+Supported first-product archetypes:
+
+- Roamer
+- Patroller
+- Watcher / Guard
+- Investigator
+- Chaser
+- Searcher
+- Ambusher
+- Stalker
+- Unkillable Pursuer
+- Stationary Threat
+- Set-Piece Enemy
+- Bounded Boss
+
+No squad tactics, formation AI or large-scale battle coordination.
+
+---
+
+#### 29. Perception Profile — `ALPHA CORE`
+
+Support:
+
+- sight distance;
+- field of view;
+- line-of-sight/occlusion;
+- hearing;
+- gameplay noise events;
+- suspicion;
+- progressive/instant/hybrid detection;
+- memory/last-known position;
+- investigate;
+- search;
+- return;
+- bounded concealment modifiers;
+- performance budgets;
+- creator-readable debug visualization.
+
+Gameplay visibility must not silently depend on renderer luminance as canonical truth.
+
+---
+
+#### 30. Enemy Activation & Encounter Recipes — `ALPHA SUPPORTED`
+
+Activation sources:
+
+- Always
+- Area
+- Objective State
+- Story Flag
+- Sequence
+- Typed Event
+- Manual authoring state
+
+Recipes:
+
+- Patrol & Investigate
+- Guarded Corridor
+- Dormant Ambush
+- Enemy Behind Door
+- Chase
+- Search & Return
+- Unkillable Pursuer
+- Enemy After Objective
+- Enemy After Pickup
+- Enemy Interrupts Story Beat
+- Safe Room Boundary
+- Bounded Boss Encounter
+
+---
+
+### PART VIII — Bounded Combat
+
+#### 31. Public Alpha Combat Types
+
+The first product should support **multiple horror-relevant combat modes without becoming a general combat framework**.
+
+##### `ALPHA CORE`
+
+1. **No-Combat / Evasion**
+2. **Stealth / Avoidance**
+3. **Defensive Stun / Repel**
+4. **Simple Melee**
+5. **Classic Survival-Horror Firearms**
+6. **TPS Horror Shooting**
+7. **Limited FPS Horror Shooting**
+8. **Enemy Melee / Lunge**
+9. **Simple Enemy Projectile**
+10. **Environmental Damage / Hazards**
+
+##### `ALPHA SUPPORTED`
+
+11. **Bounded Set-Piece / Boss Encounter** with small fixed phase count.
+
+---
+
+#### 32. Shared Combat Semantics — `ALPHA CORE`
+
+Avoid separate combat engines for Fixed/TPS/FPS.
+
+Shared semantics should cover:
+
+- Health;
+- Damage;
+- Damage Source;
+- bounded Damage Type;
+- Hit Result;
+- Hurtbox;
+- Attack Profile;
+- Weapon Profile;
+- Ammo;
+- Death;
+- Reset;
+- Stagger;
+- Stun;
+- Interrupt;
+- bounded Knockback;
+- hit reaction;
+- invulnerability window where supported;
+- feedback hooks;
+- save eligibility.
+
+Camera/input projection may differ while damage/weapon semantics remain shared.
+
+---
+
+#### 33. Attack Profiles — `ALPHA CORE`
+
+Supported attack primitives:
+
+- Contact
+- Melee Arc
+- Lunge
+- Projectile
+- bounded Hitscan Ranged
+- Area / Hazard
+
+Attack phase model:
+
+```text
+Windup
+→ Active
+→ Recovery
+```
+
+Creator may bind:
+
+- animation;
+- audio cue;
+- VFX;
+- hitbox activation;
+- feedback.
+
+This gives attacks readable telegraphing and deterministic timing.
+
+---
+
+#### 34. Weapon Profiles — `ALPHA CORE`
+
+Initial firearm scope should prefer **hitscan** for reliability and debugging.
+
+Weapon Profile supports bounded controls such as:
+
+- damage;
+- ammo type;
+- magazine;
+- reload;
+- fire rate;
+- spread/accuracy;
+- recoil;
+- range;
+- aim mode;
+- aim FOV;
+- supported target assistance.
+
+Fixed-camera aim assistance may include:
+
+- Off
+- Soft Target Preference
+- Classic Snap
+
+No competitive-shooter aim-assist framework is required.
+
+---
+
+#### 35. Player Health & Healing — `ALPHA CORE`
+
+Explicitly add player-facing health/healing semantics.
+
+Support:
+
+- numeric health or bounded health-state presentation;
+- healing consumable;
+- player hit reaction;
+- death;
+- optional status display such as Fine / Caution / Danger;
+- feedback profile;
+- save participation.
+
+Do not add RPG attribute/stat systems.
+
+---
+
+#### 36. Bounded Boss / Phase Encounter — `ALPHA SUPPORTED`
+
+Support a small fixed phase model such as:
+
+```text
+Phase 1
+→ condition
+Phase 2
+→ optional Sequence / Environment Action
+Phase 3
+```
+
+A phase may change:
+
+- attack set;
+- movement;
+- aggression;
+- environment action;
+- sequence;
+- objective.
+
+No raid-boss or general boss scripting product is required.
+
+---
+
+### PART IX — Save, Death, Retry & Persistence
+
+#### 37. Core Save Principle — `ALPHA CORE`
+
+> **RetroStage saves gameplay meaning, not engine object graphs.**
+
+Persist high-level authored state such as:
+
+- item possession;
+- door locked/open semantic state;
+- puzzle state;
+- objective progress;
+- story flags;
+- dialogue memory;
+- clues;
+- NPC persistent state;
+- enemy alive/dead or supported encounter state;
+- checkpoint/restore anchor.
+
+Do not serialize Babylon/Havok/AI-internal object graphs as canonical save truth.
+
+---
+
+#### 38. Save Experience Profiles — `ALPHA CORE`
+
+Support:
+
+- Checkpoint Only
+- Save Points Only
+- Anywhere Manual, if the chosen GameProfile supports safe save eligibility
+- Hybrid
+- Limited-Resource Save
+
+Save Point Recipe may optionally consume an authored item/token.
+
+---
+
+#### 39. Save Slots / Continue — `ALPHA CORE`
+
+Support:
+
+- stable slot identity;
+- multiple manual slots;
+- separate autosave/checkpoint slots;
+- timestamps;
+- playtime;
+- optional screenshot;
+- location/chapter metadata;
+- version;
+- corruption handling;
+- Continue from newest compatible valid save;
+- safe delete;
+- fallback to previous valid generation when explicitly supported.
+
+---
+
+#### 40. Transactional Runtime Save — `ALPHA CORE`
+
+Desired semantic pipeline:
+
+```text
+Capture registered state
+→ build candidate
+→ validate schema
+→ write temporary generation
+→ validate/hash
+→ promote
+→ update current generation
+```
+
+Failed save must preserve the previous valid generation.
+
+Exact physical save layout remains an implementation contract owned by the save milestone; this candidate does not freeze filenames.
+
+---
+
+#### 41. Save Eligibility — `ALPHA CORE`
+
+Explicit states:
+
+```text
+ALLOWED
+DEFERRED
+BLOCKED
+```
+
+Examples that may block/defer saving:
+
+- unsafe scene transition;
+- unsupported Sequence moment;
+- pending transactional puzzle change;
+- unsupported active attack/encounter state.
+
+Creator-facing diagnostics should explain why.
+
+---
+
+#### 42. Death / Retry — `ALPHA CORE`
+
+First-class common policies:
+
+- Reload Last Checkpoint
+- Show Death Screen → Retry
+- Return to Main Menu
+- Custom bounded Event/Action route
+
+No Flow Graph should be required for the basic policy.
+
+---
+
+### PART X — Player UI, HUD, Menu, Typography & Dialogue Presentation
+
+#### 43. Player UI Design Language — `ALPHA CORE`
+
+RetroStage Player UI must be a project-owned game-production system, not a fixed RetroStage skin.
+
+The architectural model is:
+
+```text
+GAMEPLAY / STORY MEANING
+        ↓
+typed runtime binding
+        ↓
+UI screen / HUD component
+        ↓
+theme / typography / layout
+        ↓
+motion / audio / feedback
+        ↓
+PLAYER
+```
+
+The UI never becomes the owner of gameplay truth.
+
+Examples:
+
+```text
+PlayerHealth = 35
+≠
+red progress bar
+
+ObjectiveState = ACTIVE
+≠
+objective toast
+
+InventoryEntry = BasementKey
+≠
+inventory slot widget
+```
+
+The first is gameplay/runtime meaning.  
+The second is replaceable player presentation.
+
+This separation is required so that two creators can use the same gameplay system while producing visibly and interactively distinct games.
+
+##### 43.1 Core Player-UI concepts
+
+The Public Alpha design should distinguish:
+
+```text
+Screen
+HUD Layer
+UI Component
+Runtime Binding
+Screen Policy
+Screen Stack
+UI Layer
+UI Theme / Design Tokens
+Typography Style
+Dialogue Presentation Profile
+Subtitle Profile
+Notification Profile
+UI Audio Profile
+UI Motion
+Accessibility Override
+```
+
+These concepts are product language. They must not be aliases for arbitrary React/DOM implementation details.
+
+##### 43.2 UI Screen
+
+A `Screen` is a concrete authored player-facing interface.
+
+Representative screen families:
+
+- Title / Main Menu
+- Pause
+- Inventory
+- Inspect
+- Journal
+- Save / Load
+- Settings
+- Death / Retry
+- Dialogue / Focused Conversation
+- Readable / Document
+- Credits
+- bounded Custom Screen
+
+A screen may begin from a Screen Recipe, but the recipe must not force one exported visual identity.
+
+##### 43.3 Screen Stack — `ALPHA CORE`
+
+Menu navigation should not require graph programming.
+
+The runtime should understand safe operations such as:
+
+```text
+Open Screen
+Close Screen
+Replace Screen
+Return
+```
+
+Example:
+
+```text
+Gameplay
+  ↓
+Pause
+  ↓
+Settings
+  ↓
+Audio Settings
+
+Back:
+Audio Settings
+→ Settings
+→ Pause
+→ Gameplay
+```
+
+Screen navigation must preserve focus, input context and restoration semantics where supported.
+
+##### 43.4 UI Layer Model — `ALPHA CORE`
+
+UI composition needs explicit ordering so HUD, dialogue, menus and critical system messages do not fight each other.
+
+A bounded layer direction may include:
+
+```text
+World UI
+Gameplay HUD
+Narrative / Dialogue
+Menu
+Modal
+System / Critical
+```
+
+Exact names may change at implementation time, but the runtime must have a deterministic layer/priority model.
+
+Examples:
+
+- Pause hides or suspends gameplay prompts according to policy.
+- A save-failure modal appears above the Pause screen.
+- Subtitles remain readable without being accidentally covered by normal HUD.
+- Cinematic UI can temporarily suppress gameplay HUD and restore it safely.
+
+##### 43.5 Screen Policy — `ALPHA CORE`
+
+A screen should explicitly declare what happens to gameplay while it is active.
+
+Representative policy fields:
+
+```text
+Pause World
+Player Movement
+Player Actions
+Camera Input
+Gameplay HUD
+Mouse Cursor
+Input Context
+Audio Snapshot
+Save Eligibility Interaction
+```
+
+Examples:
+
+###### Classic survival-horror inventory
+
+```text
+Pause World       Yes
+Player Input      Locked
+Camera Input      Locked
+Gameplay HUD      Hidden
+Cursor            Profile-dependent
+Audio Snapshot    Inventory
+```
+
+###### Modern in-world inventory
+
+```text
+Pause World       No
+Player Movement   Locked
+Camera            Allowed
+HUD               Dimmed
+```
+
+###### Focused dialogue
+
+```text
+Pause World       No
+Movement          Locked
+Camera            Dialogue Profile
+HUD               Hidden/Dimmed
+```
+
+`Screen Policy` prevents UI behavior from becoming a collection of undocumented side effects.
+
+##### 43.6 Bounded UI Component Set — `ALPHA CORE`
+
+The first product should provide enough components to build the supported game UI without becoming a general web/app builder.
+
+Candidate component vocabulary:
+
+```text
+Text
+Bounded Rich Text
+Image
+Panel
+Button
+List
+Grid
+Stack
+Spacer
+Icon
+Progress Bar / Meter
+Selector
+Slider
+Toggle
+Tab
+Scroll View
+Prompt
+Dialogue Choice
+Inventory Slot
+Save Slot
+```
+
+Components may expose documented states such as:
+
+```text
+Normal
+Hover
+Focus
+Pressed
+Disabled
+Selected
+Unavailable
+```
+
+Do not expose arbitrary executable DOM/JavaScript components as the core authoring path.
+
+##### 43.7 Layout, Reference Resolution & Safe Area — `ALPHA CORE`
+
+UI authoring should support bounded responsive layout primitives:
+
+- anchor;
+- alignment;
+- margin;
+- padding;
+- fixed size;
+- percentage size;
+- min/max size;
+- stack direction;
+- grid;
+- safe-area alignment;
+- aspect behavior.
+
+A project should define a UI reference-resolution direction such as:
+
+```text
+640×480
+1280×720
+1920×1080
+Custom supported reference
+```
+
+Retro/pixel UI should support project-safe behavior such as:
+
+- pixel snapping where appropriate;
+- nearest sampling where supported;
+- integer scaling where applicable;
+- predictable placement under 4:3 / 16:9 / 16:10;
+- bounded ultrawide safe policy.
+
+The editor should provide aspect previews rather than forcing creators to discover clipping only after export.
+
+##### 43.8 Player Experience Designer — `ALPHA SUPPORTED`
+
+A high-level editor workspace may organize the player-facing experience without becoming a new runtime authority.
+
+Candidate structure:
+
+```text
+PLAYER EXPERIENCE
+
+Frontend
+├ Main Menu
+├ Pause
+├ Settings
+├ Save / Load
+└ Death / Continue
+
+Gameplay HUD
+├ Health
+├ Ammo
+├ Prompt
+├ Crosshair
+└ Notifications
+
+Narrative
+├ Dialogue
+├ Subtitle
+├ Readable
+└ Journal
+
+Gameplay Screens
+├ Inventory
+├ Inspect
+└ Objective
+
+Design System
+├ Typography
+├ Tokens
+├ UI Audio
+└ Motion
+
+Accessibility
+├ Text / UI Scale
+├ Subtitle
+├ Motion
+├ Input
+└ Contrast
+
+Diagnostics
+├ Layout
+├ Focus
+├ Text
+└ Export
+```
+
+This is an editor/orchestration surface over existing UI/runtime authorities, not a second UI state model.
+
+---
+
+#### 44. Typography, Text Identity & Localization — `ALPHA CORE`
+
+Typography is a first-class project design dimension, but text must remain localization-safe and diagnosable.
+
+##### 44.1 Typography roles
+
+At minimum, creators should be able to define coordinated roles such as:
+
+```text
+Body
+Heading
+Menu
+HUD
+Prompt
+Dialogue
+Subtitle
+Speaker Name
+Dialogue Choice
+Readable Title
+Readable Body
+Inventory
+Objective
+Save Slot
+Numeric HUD
+```
+
+Each role may reference a reusable Typography Style.
+
+##### 44.2 Typography Style
+
+Candidate properties:
+
+- font asset;
+- supported weight/style where available;
+- size;
+- line height;
+- letter spacing;
+- alignment;
+- color/token reference;
+- outline;
+- shadow;
+- wrapping;
+- max lines;
+- pixel snap where relevant;
+- reveal/typewriter pacing where relevant;
+- text-sound reference;
+- fallback chain.
+
+The implementation may use platform/browser text technology behind RetroStage contracts. RetroStage should not unnecessarily build a complete text-shaping engine from scratch.
+
+##### 44.3 Creator font assets
+
+Distinct project UI requires creator-controlled font assets.
+
+Public Alpha should provide a supported font-asset path, subject to exact format, packaging, provenance and license rules owned by the asset/text milestones.
+
+The product must preserve:
+
+- AssetId rather than raw filesystem path;
+- source/provenance metadata;
+- cooked/export-safe font representation where required;
+- glyph coverage diagnostics;
+- fallback behavior.
+
+A dedicated bitmap-font authoring/atlas-generation suite is **not** required for Alpha. Pixel-friendly rendering is still important.
+
+##### 44.4 Stable TextId and string-table semantics
+
+Visible strings must not be persistent identity.
+
+Example:
+
+```text
+TextId:
+dialogue.elena.warning_01
+```
+
+may resolve to:
+
+```text
+"You shouldn't be here."
+```
+
+The Alpha system should preserve the existing canonical direction for:
+
+- stable text identity;
+- source locale;
+- locale keys;
+- fallback;
+- formatting arguments;
+- source context;
+- Unicode normalization;
+- missing-key diagnostics;
+- font fallback;
+- missing-glyph diagnostics;
+- expansion/truncation fixtures;
+- CJK/RTL/Bidi readiness.
+
+A full external translation-management platform is not required, but the shipped product must be capable of resolving supported localized player-facing text safely by the final Alpha gate.
+
+##### 44.5 Font fallback and glyph diagnostics
+
+A chosen visual font must not silently produce unreadable squares.
+
+Example diagnostic:
+
+```text
+WARNING
+
+Font "NightmarePixel" does not contain:
+Ğ
+ş
+İ
+
+Affected TextIds:
+dialogue.elena_043
+menu.settings
+```
+
+A Typography Style may define a supported fallback chain.
+
+Exact bundled fallback fonts and their redistribution rights remain technology/release evidence, not assumptions in this candidate.
+
+##### 44.6 Text expansion / overflow preview — `EDITOR ONLY`
+
+The editor should provide stress states such as:
+
+```text
+100%
+130%
+160%
+200% player text scale
+Pseudo-locale expansion
+CJK fixture
+RTL/Bidi readiness fixture where supported
+```
+
+Creator-readable diagnostics should detect:
+
+- clipped text;
+- overflow;
+- overlap;
+- unsupported glyph;
+- missing TextId;
+- unsafe truncation;
+- unusable line count;
+- text outside safe area.
+
+This helper is editor-only; the exported game carries the resulting runtime UI/text behavior, not the diagnostic editor.
+
+---
+
+#### 45. HUD, Prompts, Notifications & Gameplay Feedback — `ALPHA CORE`
+
+HUD is optional and compositional. A RetroStage game may legitimately have no persistent HUD.
+
+##### 45.1 HUD building blocks
+
+Supported bounded HUD blocks should include:
+
+- health;
+- ammo;
+- interaction prompt;
+- objective notification;
+- optional current-objective display;
+- crosshair where required by profile;
+- player status;
+- quick slots where enabled;
+- message/notification feed;
+- bounded boss health where an encounter uses it.
+
+No-HUD and minimal-HUD games are first-class outcomes.
+
+##### 45.2 HUD visibility rules
+
+Common visibility rules should be authorable without Flow Graph:
+
+```text
+Always
+When Changed
+When Below Threshold
+When Combat Active
+While Weapon Equipped
+While Aiming
+On Update For Duration
+Only When Valid Target
+Never
+Supported condition
+```
+
+Example Minimal Horror HUD recipe:
+
+```text
+Health       hidden unless changed / damaged
+Objective    toast + journal only
+Prompt       contextual
+Crosshair    only while aiming
+Ammo         while aiming / reloading
+```
+
+The recipe supplies behavior and defaults, not a mandatory visual skin.
+
+##### 45.3 Interaction Prompt
+
+Prompt presentation should consume the interaction system rather than duplicate it.
+
+Candidate prompt bindings:
+
+```text
+Action Label
+Device Glyph
+Target Name if allowed
+Hold Progress
+Available / Unavailable State
+Reason TextId where appropriate
+```
+
+Presentation controls may include:
+
+- HUD or world-space mode;
+- icon/text ordering;
+- background;
+- hold bar/ring;
+- distance fade;
+- enter/exit motion.
+
+Input-device changes should update the prompt through the input/glyph contract.
+
+##### 45.4 Controller glyphs
+
+The player should see device-aware prompts for supported input families.
+
+The exact art, trademark/platform naming and redistribution rules for controller glyph assets must be validated before shipping; no platform-specific asset right is assumed by this candidate.
+
+##### 45.5 Crosshair
+
+Bounded support is sufficient:
+
+```text
+Hidden
+Dot
+Cross
+Image
+Bounded dynamic spread
+```
+
+Possible states:
+
+```text
+Normal
+Aim
+Valid Target
+Interaction
+```
+
+This is not a competitive-shooter crosshair framework.
+
+##### 45.6 Health presentation
+
+The same health runtime may be presented as:
+
+- bar;
+- segments;
+- numeric value;
+- text state;
+- icon;
+- portrait state;
+- hidden.
+
+A survival-horror project may use:
+
+```text
+FINE
+CAUTION
+DANGER
+```
+
+without changing health semantics.
+
+Critical state should not rely on color alone when accessibility requires an additional text/icon signal.
+
+##### 45.7 Notification / Toast system
+
+Common gameplay systems need a shared notification route rather than separate one-off screens.
+
+Representative notifications:
+
+```text
+Item Acquired
+Objective Updated
+New Clue
+Cannot Use
+Door Locked
+Save Complete
+Save Failed
+```
+
+A Notification Profile may define:
+
+- placement;
+- duration;
+- enter/exit motion;
+- typography;
+- sound;
+- priority;
+- queue policy;
+- duplicate policy.
+
+Bounded priorities may include:
+
+```text
+Critical
+Important
+Normal
+Ambient
+```
+
+This prevents multiple gameplay systems from visually colliding.
+
+##### 45.8 UI Design Tokens
+
+Project-level UI tokens should cover at least:
+
+- primary/secondary text;
+- accent;
+- danger;
+- panel background;
+- panel border;
+- spacing;
+- border width;
+- corner treatment where applicable;
+- focus;
+- hover;
+- disabled;
+- motion defaults.
+
+`UI Theme / Design Tokens` are not the same concept as the world `Presentation Profile`.
+
+They may coordinate by default, but creator overrides win.
+
+##### 45.9 UI Motion & Reduced Motion
+
+Bounded UI motion primitives may include:
+
+```text
+Fade
+Slide
+Scale
+Pulse
+Typewriter
+Bounded Wipe
+```
+
+Each relevant motion should define a reduced-motion fallback, for example:
+
+```text
+Slide + Scale
+→ Reduced Motion
+Fade
+```
+
+The product should not force accessibility users to accept motion purely because it is part of the creator's default style.
+
+##### 45.10 UI Audio Profile
+
+UI identity includes sound.
+
+A reusable profile may bind:
+
+```text
+Navigate
+Confirm
+Cancel
+Error
+Open
+Close
+Tab
+```
+
+to project audio cues.
+
+UI audio consumes the approved audio runtime; it does not create a separate sound authority.
+
+---
+
+#### 46. Frontend, Menus, Inventory UI, Dialogue Presentation & Readables — `ALPHA CORE`
+
+##### 46.1 Public Alpha player screens
+
+The exported game should be able to author:
+
+- Title / Main Menu;
+- New Game;
+- Continue;
+- Load;
+- Pause;
+- Inventory;
+- Inspect;
+- Dialogue / Subtitle;
+- Objective / Journal;
+- Save / Load;
+- Settings;
+- Death / Retry;
+- Credits;
+- Quit / Return.
+
+A bounded Custom Screen may be supported when it uses the same typed components/bindings and does not introduce arbitrary executable code.
+
+##### 46.2 Main Menu / Game Frontend
+
+Common actions:
+
+```text
+Continue
+New Game
+Load Game
+Settings
+Credits
+Quit
+```
+
+The creator should not implement save scanning or application-exit logic through generic graphs.
+
+Background presentation may use supported:
+
+- static image;
+- live rendered scene;
+- authored camera scene;
+- video only if the Media/Video capability is separately admitted.
+
+##### 46.3 New Game flow
+
+Common no-code flow:
+
+```text
+New Game
+→ optional confirmation
+→ optional bounded difficulty/profile selection
+→ initialize supported runtime state
+→ load start scene
+```
+
+Basic frontend flow should not require Flow Graph.
+
+##### 46.4 Continue
+
+`Continue` binds to the Runtime Save subsystem:
+
+```text
+newest compatible valid save
+```
+
+The UI does not independently discover, parse or rank save files.
+
+##### 46.5 Pause Menu
+
+Representative actions:
+
+```text
+Resume
+Inventory
+Journal
+Save [when policy allows]
+Load
+Settings
+Return to Main Menu
+Quit
+```
+
+Creators choose which actions are present.
+
+##### 46.6 Runtime Settings screen
+
+Projects should bind UI controls to shared typed settings rather than reinvent settings logic.
+
+Representative groups:
+
+```text
+Display
+Audio
+Input
+Subtitles
+Accessibility
+Gameplay-supported options
+```
+
+Typical settings:
+
+- master/music/SFX/voice volume;
+- resolution/window/display policy where supported;
+- VSync/presentation quality where supported;
+- mouse/controller sensitivity;
+- control rebinding;
+- subtitles;
+- subtitle size;
+- UI/text scale;
+- reduced motion;
+- camera shake;
+- hold/toggle alternatives.
+
+##### 46.7 Confirmation & System Message Modal
+
+First-class modal primitives should support:
+
+```text
+Confirm
+Cancel
+Optional third action
+```
+
+and player-facing system/error messaging.
+
+Example:
+
+```text
+Save failed.
+Your previous save was not changed.
+```
+
+Critical failures must not be silent.
+
+##### 46.8 Inventory UI
+
+Inventory UI consumes inventory semantics:
+
+```text
+Inventory Entries
+→ List / Grid
+→ Item Slot
+```
+
+A slot may bind:
+
+- icon;
+- display name;
+- quantity;
+- selection;
+- equipped state;
+- supported status markers.
+
+Available context actions come from the Item Definition/runtime:
+
+```text
+USE
+EXAMINE
+COMBINE
+EQUIP
+DISCARD
+```
+
+The UI does not reimplement item rules.
+
+##### 46.9 Inspect UI
+
+A bounded inspect screen may combine:
+
+- 3D item viewport;
+- name;
+- description;
+- rotation/zoom controls;
+- hotspot prompts;
+- accessible text.
+
+The inspect screen is a specialized player-UI recipe over the item/inspect runtime.
+
+##### 46.10 Save / Load UI
+
+Save-slot UI binds to Runtime Save metadata such as:
+
+```text
+SlotId
+Location / Section
+Playtime
+Timestamp
+Optional Thumbnail
+Compatibility / Corruption Status
+```
+
+Possible visual recipes:
+
+- Minimal List
+- Typewriter
+- Memory-Card-inspired
+- Photo/Record style
+
+The runtime state remains the same.
+
+##### 46.11 Journal UI
+
+A project may expose selected sections such as:
+
+```text
+Objectives
+Documents
+Clues
+Characters
+```
+
+All sections are optional.
+
+The journal consumes Story/Objective/Clue data; it does not become a second narrative database.
+
+##### 46.12 Simple static authored map / floor plan — `ALPHA CONDITIONAL`
+
+A bounded static map/floorplan screen may be admitted if creator demand and UI schedule justify it.
+
+This does not authorize:
+
+- GPS;
+- dynamic open-world minimap;
+- navigation path rendering;
+- fast travel;
+- world-scale discovery simulation.
+
+##### 46.13 Dialogue Presentation Profile — `ALPHA CORE`
+
+Dialogue content and dialogue appearance are separate.
+
+The same dialogue graph/content should be displayable through supported modes such as:
+
+```text
+Classic Text Box
+Portrait Box
+Cinematic Subtitle
+Minimal Subtitle
+Focused Conversation
+Radio / Offscreen
+Bark
+Custom UI-backed bounded presentation
+```
+
+A Dialogue Presentation Profile may control:
+
+- panel treatment;
+- speaker-name presentation;
+- portrait region;
+- text area;
+- choice area;
+- advance indicator;
+- typography roles;
+- text reveal behavior;
+- UI audio;
+- screen policy;
+- HUD interaction.
+
+##### 46.14 Dialogue portraits — `ALPHA SUPPORTED`
+
+Speaker Profiles may reference bounded portrait variants such as:
+
+```text
+Neutral
+Angry
+Afraid
+Injured
+```
+
+A dialogue beat may select an authored emotion/portrait variant.
+
+This is a low-cost narrative presentation capability and does not imply a full facial-animation system.
+
+##### 46.15 Dialogue choice presentation
+
+Alpha needs a readable list-based choice model.
+
+States may include:
+
+```text
+Normal
+Focused
+Selected
+Unavailable
+Hidden
+```
+
+Whether a choice exists or is available belongs to dialogue/story semantics.  
+How that state looks belongs to presentation.
+
+A general radial-dialogue framework is not required for Alpha.
+
+##### 46.16 Dialogue pacing
+
+Bounded controls may include:
+
+```text
+Reveal:
+  Instant
+  Typewriter
+
+Characters Per Second
+Punctuation Pause
+Auto Advance:
+  Manual
+  Voice End
+  Timed
+```
+
+A text-blip cue may be used for retro presentation.
+
+Player accessibility should be able to bypass forced slow text through supported instant/fast-text options.
+
+##### 46.17 Dialogue skip / advance semantics
+
+A reliable default policy should distinguish:
+
+```text
+First advance input:
+  complete current text reveal
+
+Next advance input:
+  advance line
+```
+
+Voice handling should have explicit interruption policy.
+
+The product must avoid ambiguous cases where one input both skips unread text and closes the conversation unexpectedly.
+
+##### 46.18 Dialogue history — `ALPHA SUPPORTED`
+
+A bounded optional history/log may show recent spoken lines for narrative/mystery projects.
+
+It should use the same TextId/speaker data and must not become a second dialogue-state authority.
+
+##### 46.19 Subtitle Profile — `ALPHA CORE`
+
+Subtitles are not limited to interactive dialogue.
+
+They may present:
+
+- dialogue;
+- bark;
+- radio/offscreen speech;
+- cinematic voice;
+- narration;
+- important off-screen speech.
+
+Creator defaults should include bounded:
+
+- position;
+- width;
+- typography;
+- speaker name;
+- background;
+- outline;
+- max lines;
+- timing/fade.
+
+##### 46.20 Player subtitle/accessibility override
+
+Creator styling is the default, but player readability options may override it where accessibility requires.
+
+Example:
+
+```text
+Creator subtitle size: Small
+Player setting: Large
+→ Runtime uses supported Large size
+```
+
+Supported player overrides should include, where relevant:
+
+- subtitle size;
+- subtitle background/opacity;
+- speaker names;
+- UI/text scale.
+
+**Principle:**
+
+> Creator style is the default; player readability settings may override presentation where accessibility requires it.
+
+##### 46.21 Non-speech audio captions — `ALPHA SUPPORTED`
+
+Audio cues may optionally reference localized caption TextIds:
+
+```text
+[door slams]
+[distant scream]
+[phone ringing]
+```
+
+This is especially valuable for accessibility, but is not mandatory for every sound.
+
+##### 46.22 Readable presentation
+
+Readables may use supported modes such as:
+
+```text
+Fullscreen Document
+Paper Overlay
+Inspect + Text
+Simple Text Panel
+Multi-page
+```
+
+Controls:
+
+- next/previous page;
+- close;
+- supported zoom;
+- accessible text mode.
+
+If a readable relies on an image of handwritten/graphical text, the creator should be able to provide an accessible text transcript.
+
+##### 46.23 Focus & navigation behavior
+
+Mouse, keyboard and controller should operate the same screen model.
+
+Each screen needs:
+
+- default focus;
+- deterministic navigation;
+- Back action;
+- focus states;
+- disabled-state behavior.
+
+Auto-generated navigation may be offered, but creator validation must detect unreachable or trapped controls.
+
+##### 46.24 UI / dialogue interruption & restoration
+
+Narrative presentation must define what happens when gameplay interrupts it.
+
+Candidate interruption policies:
+
+```text
+Uninterruptible
+Interrupt On Danger
+Interrupt On Damage
+Manual Cancel
+Sequence Controlled
+```
+
+UI restoration must be deterministic:
+
+- HUD returns when appropriate;
+- input context restores;
+- camera policy restores;
+- dialogue/subtitle surfaces close or resume according to contract.
+
+##### 46.25 Sequencer UI integration
+
+RSM-106 already assigns UI and dialogue/subtitle tracks to the native Sequencer direction.
+
+Candidate bounded sequence actions may include:
+
+```text
+Show / Hide Gameplay HUD
+Show / Hide Screen
+Show Text / Subtitle
+Set temporary UI state
+Fade UI
+Cinematic Bars
+Restore prior UI state
+```
+
+Cinematic bars are a UI overlay and should not be confused with output aspect-ratio letterboxing.
+
+##### 46.26 World-space / diegetic UI — `ALPHA SUPPORTED`
+
+Bounded support may include:
+
+- world-space interaction prompt;
+- in-world computer/terminal screen where supported;
+- item inspect interface;
+- diegetic status presentation where authored.
+
+Do not interpret this as authorization for a full 3D/VR UI framework or arbitrary in-world browser surface.
+
+##### 46.27 UI Recipes — `ALPHA SUPPORTED`
+
+Useful first-party recipes:
+
+```text
+Minimal Horror HUD
+Classic Survival-Horror Inventory
+Modern Item Grid
+Classic Text-Box Dialogue
+Cinematic Subtitles
+PS1-Inspired Pause Menu
+Minimal Save Slots
+Readable Document
+Objective Toast
+Controller Prompt
+```
+
+Recipes provide behavior/layout starting points.
+
+**Identity rule:** two creators using the same recipe should be able to produce visibly distinct games by changing typography, tokens, panels, icons, spacing, motion, audio and layout without code.
+
+##### 46.28 UI Readability / Navigation Diagnostics — `ALPHA CORE`
+
+Creator-readable diagnostics should cover at least:
+
+```text
+Text clipped
+Text overflow
+Missing TextId
+Missing glyph
+Low critical-text contrast
+Control outside safe area
+Focus unreachable
+Focus trap
+No Back action
+Controller glyph missing
+Subtitle exceeds safe width
+HUD / subtitle collision
+Prompt hidden by higher layer
+Unsupported binding
+Invalid screen policy
+Missing runtime setting binding
+```
+
+Warnings should be actionable and must not become an aesthetic police system.
+
+Accessibility-critical failures can block readiness where the governing milestone requires it.
+
+##### 46.29 UI asset / runtime boundary
+
+UI assets such as:
+
+- icons;
+- portraits;
+- panel textures;
+- cursors;
+- fonts;
+- backgrounds;
+- UI sprites
+
+must use the normal AssetId/source/cooked ownership rules.
+
+No canonical UI document should depend on raw absolute filesystem paths.
+
+##### 46.30 UI transient state vs persistent state
+
+Do not confuse:
+
+```text
+gameplay state
+player settings
+runtime save state
+transient UI state
+```
+
+Examples normally **not** part of gameplay save truth:
+
+```text
+hovered button
+current mouse position
+half-revealed text
+open editor inspector
+temporary focus highlight
+```
+
+Player preferences such as:
+
+- volume;
+- input bindings;
+- subtitle size;
+- UI/text scale;
+- accessibility options
+
+belong to the player-data/settings persistence domain, not Project Save.
+
+##### 46.31 Public Alpha UI acceptance
+
+A representative exported project should prove:
+
+```text
+Title
+→ New Game / Continue
+→ Gameplay HUD
+→ Interaction Prompt
+→ Dialogue + Choices
+→ Subtitle
+→ Inventory + Inspect
+→ Objective / Journal
+→ Save / Load
+→ Settings
+→ Pause
+→ Death / Retry
+→ Credits / Quit
+```
+
+with:
+
+- controller navigation;
+- device-aware prompts;
+- localization-safe text identity;
+- font fallback/glyph diagnostics;
+- UI scale/subtitle override;
+- safe-area/aspect validation;
+- clean exported-player behavior.
+
+### PART XI — Input, Controller & Accessibility
+
+#### 47. Controller Feel & UI Navigation — `ALPHA CORE`
+
+Support:
+
+- keyboard/mouse;
+- gamepad;
+- rebinding;
+- binding conflicts;
+- reset defaults;
+- device detection;
+- context-aware input;
+- controller-aware prompts;
+- analog deadzones;
+- response curves where owned by Movement/Input profiles;
+- UI navigation;
+- rumble/haptics where supported;
+- persisted player preferences.
+
+The same player screen should normally serve mouse, keyboard and controller rather than requiring separate duplicated screens.
+
+##### 47.1 Focus navigation
+
+A screen should have:
+
+```text
+Default Focus
+Up
+Down
+Left
+Right
+Confirm
+Cancel / Back
+```
+
+semantics.
+
+Auto-navigation may be supported, but creator validation must detect:
+
+- unreachable control;
+- focus trap;
+- invalid Back path;
+- hidden control still receiving focus;
+- controller-only dead end.
+
+##### 47.2 Device glyph switching
+
+Interaction and UI prompts should consume the active-device contract.
+
+The exact shipped glyph assets remain subject to platform/trademark/license review.
+
+---
+
+#### 48. Accessibility & Player Overrides — `ALPHA CORE`
+
+Public Alpha should provide representative player-facing options including:
+
+- subtitles;
+- subtitle size;
+- subtitle background where supported;
+- speaker-name option;
+- UI/text scale;
+- font fallback;
+- contrast support;
+- color-independent critical feedback;
+- reduced motion;
+- camera-shake reduction/disable;
+- hold/toggle alternatives;
+- input rebinding;
+- controller navigation;
+- mouse/controller sensitivity;
+- audio caption support where authored;
+- audio/dynamic-range direction where supported;
+- display settings needed by the supported player.
+
+Accessibility is an exported-game capability, not only an editor preference.
+
+##### 48.1 Creator default vs player override
+
+The creator defines the game's intended presentation.
+
+The player may override bounded readability/comfort settings when accessibility requires it.
+
+Examples:
+
+```text
+creator subtitle size
+→ player larger subtitle size
+
+creator slide animation
+→ reduced-motion fade
+
+creator hold interaction
+→ supported toggle alternative
+```
+
+##### 48.2 Accessibility preview — `EDITOR ONLY`
+
+Useful editor preview modes may include:
+
+```text
+Large Text
+Maximum Supported UI Scale
+Reduced Motion
+High-Contrast Stress
+Controller Only
+Subtitle Background On
+Pseudo-localized Text
+```
+
+These are authoring aids and do not become separate runtime game systems.
+
+##### 48.3 Readable accessibility
+
+Where story information is conveyed through stylized document art, a creator should be able to provide accessible text backing/transcript so the game does not rely exclusively on an unreadable image.
+
+##### 48.4 Accessibility diagnostics
+
+Creator-readable diagnostics should detect representative risks such as:
+
+- critical text below supported size policy;
+- missing subtitle text;
+- missing glyph;
+- text clipping at supported scale;
+- focus unreachable by controller;
+- color-only critical state;
+- motion with no reduced-motion fallback where required;
+- hold action with no allowed alternative when the chosen accessibility policy requires one.
+
+### PART XII — Feedback Language
+
+#### 49. Feedback Profile — `ALPHA CORE`
+
+Gameplay feel should be coordinated across:
+
+```text
+Animation
+Audio
+VFX
+UI
+Camera
+Haptic
+Time response
+```
+
+Typical feedback events:
+
+- interaction accepted;
+- interaction rejected;
+- pickup;
+- objective updated;
+- player hit;
+- enemy hit;
+- weapon fire;
+- reload;
+- door locked;
+- puzzle success;
+- save complete;
+- damage/death.
+
+A profile supplies defaults; per-action creator overrides remain available.
+
+---
+
+#### 50. Horror Friction Principle — `ALPHA CORE`
+
+> **Deliberate friction must be authored, predictable, readable and reversible. Accidental friction is a usability defect.**
+
+Acceptable deliberate friction may include:
+
+- heavy turning;
+- slower door interaction;
+- constrained inventory;
+- manual aiming;
+- limited sprint;
+- deliberate animation recovery.
+
+Not acceptable as "horror feel":
+
+- ignored input;
+- unexplained lag;
+- inconsistent targeting;
+- camera fighting the player;
+- hidden interaction rules.
+
+---
+
+### PART XIII — Sequencing, Cinematics & Media
+
+#### 51. Native Sequencer — `ALPHA CORE`
+
+Support the already-approved native sequence families:
+
+- camera;
+- transform;
+- animation;
+- audio;
+- dialogue/subtitle;
+- VFX;
+- lighting;
+- material/post-process;
+- UI;
+- scene visibility;
+- Event/Action.
+
+Also require:
+
+- preview/scrub;
+- interruption policy;
+- skip policy;
+- state restoration;
+- safe gameplay handoff;
+- diagnostics.
+
+---
+
+#### 52. Video / FMV Media Track — `ALPHA CONDITIONAL`
+
+A bounded video/media track is a useful PS1/PS2-era and horror workflow, but it is not currently an explicit canonical Sequencer track.
+
+Candidate capability:
+
+- video asset reference;
+- fullscreen / fit / fill / custom rect;
+- audio volume;
+- start/end;
+- skippable;
+- fade in/out;
+- input lock;
+- pause gameplay;
+- restore gameplay;
+- On Finished action;
+- scene transition hook.
+
+**Admission rule:** The capability may be accepted as Public Alpha scope only after exact codec/container/backend, redistribution, Electron packaging, hardware-decoding/fallback, security and license review in the technology contract.
+
+RetroStage should support **playback and sequencing**, not become a video editor/NLE.
+
+---
+
+#### 53. Scene Transition / Loading Experience — `ALPHA CORE`
+
+This is a currently under-specified player-experience area and should become explicit.
+
+Support:
+
+- validated destination;
+- fade out/in;
+- transition audio;
+- optional loading presentation;
+- input lock;
+- restore point;
+- optional Sequence;
+- optional conditional video/FMV;
+- failure diagnostics.
+
+Example:
+
+```text
+Door Interaction
+→ Fade Out
+→ checkpoint if policy allows
+→ Play FMV (conditional)
+→ Load Scene
+→ Restore Player
+→ Fade In
+```
+
+---
+
+### PART XIV — Gameplay Diagnostics & Creator Trust
+
+#### 54. Gameplay Diagnostics — `ALPHA CORE`
+
+Creator-readable diagnostics must cover at least:
+
+- interaction targeting;
+- missing/invalid prompts;
+- objectives;
+- inventory progression;
+- puzzle references;
+- narrative branches;
+- NPC dialogue selection reason;
+- navigation;
+- enemy state;
+- perception;
+- combat/damage;
+- animation marker issues;
+- runtime save eligibility;
+- missing restore anchors;
+- scene transitions;
+- sequence interruption/restore;
+- UI/text/localization risks;
+- screen-stack / restoration errors;
+- focus/navigation traps;
+- safe-area/aspect/layout overflow;
+- missing glyphs / invalid font fallback;
+- subtitle/HUD collisions;
+- unsupported accessibility override paths;
+- runtime-binding errors;
+- export capability parity.
+
+Raw engine logs are supplemental, not the primary product experience.
+
+---
+
+#### 55. Narrative Trace — `ALPHA SUPPORTED`
+
+Example:
+
+```text
+Player acquired Photo
+StoryFlag FoundPhoto = true
+NPC Elena selected Dialogue Elena_Photo
+Reason: FoundPhoto == true
+Dialogue completed
+Objective FindDoctor started
+```
+
+---
+
+#### 56. AI / Perception Trace — `ALPHA CORE`
+
+Example:
+
+```text
+Enemy did not detect player
+Sight: PASS
+Distance: PASS
+Line of Sight: BLOCKED
+Occluder: Door_03
+```
+
+or:
+
+```text
+Noise: PlayerFootstep
+Intensity: 0.42
+Threshold: 0.31
+Result: INVESTIGATE
+```
+
+---
+
+#### 57. Save Trace — `ALPHA CORE`
+
+Show creator-readable:
+
+- save request;
+- eligibility;
+- captured systems;
+- generation;
+- validation;
+- promotion;
+- restore;
+- migration/fallback reason.
+
+---
+
+### PART XV — Export / Runtime Parity
+
+#### 58. Export Disposition — `ALPHA CORE`
+
+Every creator-facing gameplay capability must declare one of:
+
+```text
+RUNTIME
+COOKED
+HYBRID
+EDITOR_ONLY
+```
+
+Examples:
+
+| Capability | Disposition |
+|---|---|
+| Movement Profile | RUNTIME |
+| Dialogue runtime | RUNTIME |
+| Dialogue Editor | EDITOR_ONLY |
+| Objective runtime | RUNTIME |
+| Story flags | RUNTIME + SAVE |
+| Inventory runtime | RUNTIME + SAVE |
+| Enemy AI / perception | RUNTIME |
+| Navmesh/bake | COOKED + RUNTIME |
+| Weapon/Attack profiles | RUNTIME |
+| Save system | RUNTIME |
+| Sequencer | RUNTIME |
+| Sequence editor | EDITOR_ONLY |
+| UI runtime | RUNTIME |
+| UI editor | EDITOR_ONLY |
+| Gameplay diagnostics UI | EDITOR_ONLY / dev instrumentation |
+| Recipe editor | EDITOR_ONLY |
+| Recipe-produced gameplay data | RUNTIME / HYBRID |
+| Video playback | RUNTIME + COOKED, if admitted |
+
+A feature working only in Preview is not complete.
+
+---
+
+#### 59. Required Product Chain
+
+Relevant non-editor-only capabilities should prove:
+
+```text
+AUTHOR
+  ↓
+PREVIEW where applicable
+  ↓
+PIE
+  ↓
+COOK
+  ↓
+EXPORT
+  ↓
+CLEAN SUPPORTED MACHINE
+```
+
+Supported quality/fallback changes may lower fidelity.
+
+They must not silently erase gameplay or narrative meaning.
+
+---
+
+### PART XVII — Public Alpha Proof Projects / Acceptance Scenarios
+
+#### 60. Required Representative Gameplay Proof
+
+At least one coherent exported project should demonstrate the cross-system chain.
+
+Suggested proof:
+
+```text
+Launch exported player
+→ Title / Main Menu
+→ verify controller focus + device prompt
+→ open Settings
+→ change subtitle/UI accessibility option
+→ New Game
+→ Move / Run / Crouch where profile supports
+→ Fixed Camera section
+→ contextual Interaction Prompt
+→ Interact with Readable
+→ accessible text / readable presentation works
+→ Learn Clue
+→ Talk to NPC
+→ Dialogue Presentation + subtitle works
+→ Dialogue branch changes because of Clue
+→ Objective starts
+→ objective notification / journal updates
+→ Pick up Key
+→ inventory UI updates
+→ Inspect Item
+→ Unlock Door
+→ Enemy activates
+→ Perception / Chase works
+→ Player evades or uses bounded combat
+→ HUD/feedback reacts correctly
+→ Puzzle item acquired
+→ Puzzle completed
+→ Objective updates
+→ Sequence plays
+→ cinematic UI hides/restores safely
+→ Save / checkpoint
+→ Save/Load UI shows valid metadata
+→ Exit application
+→ Relaunch exported player
+→ Continue / Load
+→ runtime state restores
+→ settings/accessibility preference persists
+→ final transition / exit
+```
+
+The project should include real project-specific UI, typography, audio, presentation and gameplay feedback rather than generic debug UI.
+
+---
+
+#### 61. Minimum Alpha Gameplay Genres Proved by Composition
+
+The Public Alpha does not need a separate engine architecture for each game type.
+
+The same bounded systems should be able to compose at least:
+
+##### Fixed-camera survival horror
+```text
+Fixed Camera
++ Tank or Modern Fixed movement
++ doors/keys
++ inventory/puzzle
++ NPC/dialogue
++ limited handgun or no-combat
++ save point
+```
+
+##### Modern chase horror
+```text
+TPS or Limited FPS
++ no-combat
++ stalker / unkillable pursuer
++ hiding
++ objectives
++ sequence
+```
+
+##### Mystery / narrative horror
+```text
+exploration
++ dialogue
++ readables
++ clues
++ objectives
++ Story Spine
++ light puzzle
+```
+
+##### Liminal / anomaly horror
+```text
+limited FPS or fixed camera
++ looping section
++ anomaly state
++ objective/observation logic
++ atmosphere
++ no-combat or pursuer
+```
+
+##### Action-horror-lite
+```text
+TPS or Limited FPS
++ hitscan weapon
++ bounded enemies
++ ammo
++ inventory
++ checkpoint
+```
+
+---
 
 # Gate D — First Playable Creator
 
@@ -1261,6 +4308,1439 @@ RetroStage presentation is a coordinated authored system, not a mandatory filter
 
 This alignment does not admit new rendering/media dependencies and does not authorize implementation before the owning milestone.
 
+## Feature-Level Visual Character / Rawness / Atmosphere / Export-Parity Completeness Annex
+
+**Status:** `BINDING ROADMAP DETAIL / REBASED TO CURRENT AUTHORITY MODEL`
+
+This annex preserves the reviewed creator-facing visual capability inventory at feature level. Generic camera/lighting/material/post-processing subsystem presence is not sufficient closure.
+
+Normalization rules:
+- `PresentationProfile` remains the single canonical game-presentation authority; Visual Rawness is a coordinated dimension, not a second profile document.
+- creator defaults, player quality/accessibility overrides and editor-local Studio Identity remain separate authorities.
+- Babylon/render/audio/VFX objects are derived projection only.
+- official export disposition remains `EDITOR_ONLY / COOKED / RUNTIME / HYBRID`.
+- dependency/tool references are candidates only unless Source 06 separately admits them.
+- the feature-level intent below is binding; old proposal/promotion wording is not implementation authority.
+
+### PART A — GLOBAL PRODUCT AND PRESENTATION MODEL
+
+#### 4. New Product Vocabulary
+
+The following terms should become explicit RetroStage product vocabulary where their owning source permits it.
+
+##### 4.1 Presentation Profile
+
+A coordinated set of project presentation defaults. A profile may configure several visual and acoustic dimensions together, but every supported creator-facing parameter remains independently overrideable.
+
+A Presentation Profile is **not** a mandatory house style.
+
+Candidate example profiles:
+
+- `Brutalist PSX Raw`
+- `PS1 Constraint`
+- `Clean PS1`
+- `Early PS2 Atmospheric`
+- `Low-Poly Cinematic`
+- `Pixel Resolution Hybrid`
+- `Sprite-3D Hybrid`
+- `Custom`
+
+Profile names are product-facing examples, not historical-hardware accuracy claims.
+
+##### 4.2 Visual Rawness
+
+`Visual Rawness` describes intentional control over visual information density, precision, smoothness, sampling cleanliness, shading cleanliness, visibility, and temporal cadence.
+
+It is not a generic graphics-quality slider.
+
+Canonical dimensions:
+
+```text
+Visual Rawness
+├─ Geometry Rawness
+├─ Texture Rawness
+├─ Material Rawness
+├─ Lighting Rawness
+├─ Raster / Output Rawness
+└─ Temporal Rawness
+```
+
+Rawness must be:
+
+- explicit;
+- authorable;
+- bounded;
+- reversible where the workflow is non-destructive;
+- diagnosable;
+- profile-aware;
+- creator-controlled.
+
+Rawness must not mean accidental corruption, random broken rendering, or mandatory degradation.
+
+##### 4.3 Geometry Character
+
+The creator-facing character of mesh density, precision, normals, hard-edge treatment, generated LODs, and safely supported de-polish behavior.
+
+##### 4.4 Texture Character
+
+The creator-facing character of texture resolution, filtering, mip behavior, anisotropy, palette, posterization, dithering, and atlas/sprite sampling.
+
+##### 4.5 Material Character / Material De-Polish
+
+A constrained authoring layer that can reduce modern PBR cleanliness without requiring raw shader programming. Typical dimensions include specular response, reflection response, normal-detail influence, roughness complexity, vertex color influence, transparency character, and supported retro lighting models.
+
+##### 4.6 Raster Character
+
+The creator-facing character of internal resolution, upscale policy, anti-aliasing, aspect ratio, integer scaling, output color precision, dithering, and bounded PSX-inspired raster/UV/vertex precision behavior.
+
+##### 4.7 Temporal Character
+
+The creator-facing cadence of animation, sprite/flipbook playback, and VFX. It permits continuous or intentionally stepped/sample-and-hold presentation without requiring the runtime render loop itself to run at that cadence.
+
+##### 4.8 Atmosphere Volume
+
+A canonical RetroStage-authored spatial volume that blends a bounded set of atmosphere/presentation/audio parameters when the relevant runtime listener or player enters or approaches it.
+
+Possible controlled domains include:
+
+- fog;
+- exposure;
+- color/LUT influence;
+- lighting influence;
+- supported presentation overrides;
+- VFX density or state;
+- audio snapshot reference;
+- reverb/acoustic state;
+- blend distance/time.
+
+An Atmosphere Volume is not Babylon-only state.
+
+##### 4.9 Atmosphere Director
+
+A creator-facing orchestration workflow that coordinates existing RetroStage-owned systems across image, space, motion, camera, and sound.
+
+It is **not** a one-click “Make Horror” effect and must not hide or replace the underlying authoring dimensions.
+
+Conceptual grouping:
+
+```text
+Atmosphere Director
+
+VISUAL
+├─ Geometry Character
+├─ Texture Character
+├─ Material Character
+├─ Raster Character
+└─ Temporal Character
+
+SPACE
+├─ Lighting
+├─ Fog
+├─ Atmosphere Volumes
+├─ Sky / Backdrop
+├─ Surface Dressing
+└─ Set Dressing
+
+MOTION
+├─ Ambient Motion
+├─ Environmental FX
+└─ VFX
+
+CAMERA
+├─ Composition
+├─ Weight
+├─ Framing
+└─ Controlled Imperfection
+
+AUDIO
+├─ Room Tone
+├─ Reverb / Occlusion
+├─ Tension
+├─ Silence
+└─ Adaptive Layers
+```
+
+##### 4.10 Surface Dressing / Surface Storytelling
+
+Creator-facing use of decals/cards/approved surface layers to add leaks, rust, dirt, cracks, posters, wet patches, soot, blood/organic marks, and custom decals without requiring a unique mesh and unique high-resolution texture for every environmental variation.
+
+##### 4.11 Ambient Motion
+
+A lightweight deterministic or authorable motion system for environment objects and presentation elements, such as oscillation, rotation, sway, pulse, flicker, or bounded curve-driven motion.
+
+It is not a general physics or cloth simulation system.
+
+##### 4.12 Environmental FX Recipe
+
+A bounded authoring recipe for atmospheric effects such as rain, snow, ash, dust, drips, steam, embers, mist, or light falling debris. A recipe may coordinate particles, cards, screen layers, sound, and wind direction but must not become a global climate/weather simulator.
+
+##### 4.13 Atmosphere Analysis
+
+Editor-only diagnostic views that help creators understand why a scene does or does not read atmospherically.
+
+Candidate views include:
+
+- Contrast;
+- Luminance;
+- Silhouette;
+- Fog Depth;
+- Lighting;
+- Material Complexity;
+- Texture Density;
+- Shadow Coverage;
+- Overdraw;
+- Palette;
+- Focal Region.
+
+##### 4.14 Look Snapshot / A-B Compare
+
+An editor-only workflow that captures the same camera under different presentation states and supports A/B, B/C, before/after, or wipe comparison. It exists to make profile and Rawness decisions evidence-based rather than memory-based.
+
+---
+
+#### 5. Five Binding Presentation Invariants
+
+The aligned sources should preserve these exact concepts:
+
+> **Rawness is intentional, not broken.**
+
+> **Retroization is non-destructive.**
+
+> **Profiles suggest; creator overrides win.**
+
+> **Third-party algorithms accelerate; RetroStage owns meaning.**
+
+> **Atmosphere is coordinated across space, image, motion, and sound — not reduced to post-processing.**
+
+---
+
+#### 5A. Additional Cross-Cutting Contracts
+
+The atmosphere/presentation direction needs several contracts that apply across individual feature families.
+
+##### 5A.1 Persisted Presentation State Is Canonical, Versioned, and Migration-Safe
+
+Any project-authored state that materially defines the exported game's presentation must live in explicit RetroStage-owned persisted semantics rather than only in Babylon objects, React state, transient editor stores, or generated derivatives.
+
+This includes, where applicable:
+
+- Presentation Profile identity and creator overrides;
+- Visual Rawness dimensions;
+- Atmosphere Volume identity, bounds, blend policy, and references;
+- camera-character settings;
+- lighting/fog/exposure authoring state;
+- material-character settings;
+- Temporal Character settings;
+- Environmental FX recipe references and creator overrides;
+- atmosphere-audio references and states;
+- deterministic seeds when they affect authored/reproducible output.
+
+Required direction:
+
+```text
+versioned canonical meaning
+→ validate
+→ save
+→ reopen
+→ migrate when schema changes
+→ project/runtime projection
+```
+
+A save/reopen or migration must not silently reset a creator's presentation identity to newer defaults. Generated/cooked derivatives may be rebuilt, but canonical intent must remain independently recoverable.
+
+##### 5A.2 Creator Artistic Intent Is Distinct From Runtime Quality and Accessibility State
+
+RetroStage must distinguish:
+
+```text
+creator-authored artistic intent
+≠ player quality/performance preference
+≠ accessibility/comfort override
+≠ hardware fallback
+```
+
+For example, a creator may intentionally author hard low-resolution shadows and 4:3 output as identity, while particle density or expensive reflection quality may be quality-scalable. Likewise, a reduced-motion or flicker-safety option may alter a motion/flicker effect for accessibility without rewriting the project document.
+
+A future owning milestone may formalize concepts similar to:
+
+- `CREATOR_LOCKED` — changing it would materially replace the intended project identity;
+- `PLAYER_ADJUSTABLE_WITHIN_CREATOR_BOUNDS` — creator defines safe range/default;
+- `QUALITY_SCALABLE` — fidelity may be reduced through validated fallback tiers;
+- `ACCESSIBILITY_OVERRIDE` — player comfort/safety takes precedence within explicit supported behavior.
+
+**The exact enum names are not frozen by this candidate.** What is binding is the separation of authority and the requirement that overrides be bounded, diagnosable, and non-destructive to canonical project state.
+
+##### 5A.3 Color / Output Pipeline Ordering Must Be Explicit
+
+Retro identity can change materially when color transforms are reordered. The aligned roadmap/architecture should require an explicit supported ordering contract across the relevant stages, conceptually:
+
+```text
+source color-space interpretation
+→ material / lighting result
+→ exposure / tone mapping
+→ LUT / palette treatment
+→ reduced precision / posterization where used
+→ dithering where used
+→ internal-resolution / upscale policy
+→ final display/output transform
+```
+
+This candidate does not freeze one shader graph or one exact order for every backend mode. It requires the owning renderer/presentation milestone to define, validate, and preserve the supported order so Editor Preview, PIE, cooked runtime, screenshots/captures where relevant, and standalone output do not drift semantically.
+
+##### 5A.4 Deterministic Variation Must Be Reproducible Where It Affects Authored Meaning or QA
+
+Noise, scatter, flicker variants, ambience variants, procedural-looking VFX variation, and other bounded variation may use randomness, but where reproducibility is needed the seed/timebase must be explicit enough to support:
+
+- save/reopen stability where authored placement/state is expected;
+- deterministic cooking where required;
+- reproducible bug reports;
+- golden-scene/golden-project regression;
+- replay/test fixtures.
+
+This does not require every visual particle to be bit-identical across every GPU. It requires the system to distinguish intentional nondeterminism from testable deterministic state.
+
+##### 5A.5 Editor-Local Studio Identity / Comfort State Must Never Become Game Presentation Authority
+
+If a separate Studio Identity / Creator Experience candidate is later promoted, its editor-local state must remain separate from game/export state.
+
+Examples:
+
+```text
+StudioPreset
+≠ PresentationProfile
+
+Studio Player / Studio Radio
+≠ Project Audio Asset / Runtime AudioCue
+
+Editor accent / workspace mood
+≠ Scene lighting / fog / LUT / game color treatment
+
+Creator comfort music
+≠ exported ambience
+```
+
+No editor-local mood preset, Studio audio, welcome-screen state, creator profile, or workspace layout may silently dirty the game project or affect standalone export unless the creator explicitly invokes a supported project-authoring command that produces canonical game data.
+
+##### 5A.6 Accessibility and Comfort Overrides Are Part of Presentation Correctness
+
+Some proposed atmosphere tools intentionally use motion, flicker, contrast, low-resolution output, rapid transitions, or audio pressure. The product direction must therefore leave room for explicit creator/player-safe handling such as:
+
+- reduced camera sway/head-bob where exposed;
+- reduced or disabled non-essential flicker/strobe behavior;
+- safe defaults and diagnostics for high-frequency flicker;
+- reduced motion for non-essential screen-space effects where applicable;
+- accessibility-aware player settings using the shared typed runtime-settings foundation.
+
+Accessibility behavior must not be implemented by mutating canonical authoring documents at runtime. It should be applied through explicit runtime settings/override policy.
+
+##### 5A.7 Presentation Profile / Preset Lifecycle, Versioning, and Provenance
+
+A Presentation Profile can be both a convenient starting point and a long-lived project dependency. RetroStage must therefore avoid a failure mode where updating a built-in/profile pack silently changes the look of an existing game.
+
+The owning milestones should define an explicit policy such as versioned references, project-owned resolved settings/snapshots, or another deterministic mechanism that preserves creator intent. The exact storage strategy is not frozen here.
+
+Required behavior:
+
+- an applied profile/preset has stable identity and compatible version semantics;
+- changing a shipped preset's future defaults does not silently restyle already-authored supported projects;
+- creator overrides remain explicit and migration-safe;
+- missing/incompatible profile versions produce diagnostics and a migration/remap path where supported;
+- project portability rules define whether required profile resources are embedded, referenced, or installed through an approved content-pack contract;
+- bundled LUTs, palettes, noise textures, cards, audio, sample assets, fonts, or other media used by presentation/atmosphere presets carry source/provenance/usage/redistribution metadata where applicable.
+
+Software-library licensing does not substitute for rights to bundled presentation media.
+
+##### 5A.8 Runtime Save Participation for Dynamic Atmosphere Is Explicit, Not Automatic
+
+Some atmosphere changes are merely transient presentation state; others represent gameplay progression and must survive a checkpoint.
+
+Examples that may need save participation when authored as game state:
+
+- power is permanently disabled and the lighting/ambience state changed;
+- a room entered a persistent anomaly variant;
+- a story event permanently changed fog, soundscape, or environmental state;
+- a persistent weather/Environmental FX recipe is tied to registered progression state.
+
+Examples that usually should **not** require raw-state serialization:
+
+- current particle positions;
+- Babylon object instances;
+- current shader object handles;
+- arbitrary fog-card animation phase;
+- transient camera damping velocity unless a specific supported contract requires it.
+
+Required model:
+
+```text
+gameplay-semantic registered state
+→ Runtime Save registry
+→ restore
+→ recompute effective presentation through RetroStage systems
+```
+
+not:
+
+```text
+serialize Babylon/render/audio implementation state
+```
+
+RSM-65/66 remain the owners of Runtime Save / slot persistence. Presentation and atmosphere systems must declare save participation only when their state is approved player progress.
+
+### PART B — EXPORT / RUNTIME PARITY CONTRACT
+
+#### 6. Core Rule
+
+Every creator-facing capability that affects the intended player experience must declare an export disposition of:
+
+- `RUNTIME`
+- `COOKED`
+- `HYBRID`
+- `EDITOR_ONLY`
+
+Preview success alone is never completion evidence.
+
+The supported artistic/gameplay meaning authored by the creator must remain materially equivalent across every stage required by that disposition, subject only to explicit supported quality/fallback differences.
+
+Quality reduction is allowed. Silent semantic disappearance is not.
+
+---
+
+#### 7. Export Disposition Definitions
+
+##### 7.1 `RUNTIME`
+
+The final player actively executes the feature using cooked settings/data and approved runtime code.
+
+Typical examples:
+
+- Camera Weight / Damping;
+- Micro Sway;
+- FOV Breathing;
+- camera transitions;
+- Atmosphere Volumes;
+- fog/exposure behavior;
+- shadow character;
+- runtime material character;
+- stepped animation playback;
+- Ambient Motion;
+- Environmental FX;
+- audio zones, tension, ducking, and snapshots.
+
+##### 7.2 `COOKED`
+
+The authoring/cooking tool does not ship as player functionality. Its validated output does.
+
+Typical examples:
+
+- texture resize;
+- offline palette reduction;
+- offline dithering;
+- atlas packing;
+- mesh simplification;
+- generated cooked mesh derivatives;
+- generated cooked texture derivatives;
+- some baked AO/lightmap outputs.
+
+##### 7.3 `HYBRID`
+
+Part of the feature is produced at cook time and another part is interpreted at runtime.
+
+Typical examples:
+
+- LOD generation + runtime LOD selection;
+- Visual Rawness profiles;
+- Material De-Polish when part of the character is baked and part runtime;
+- Surface Dressing;
+- generated presentation assets consumed by runtime;
+- sprite atlas generation + runtime sprite playback.
+
+##### 7.4 `EDITOR_ONLY`
+
+The capability assists creation or diagnosis and must be excluded from the player artifact.
+
+Typical examples:
+
+- Atmosphere Analysis views;
+- Look A/B Compare;
+- authoring gizmos;
+- scatter handles;
+- diagnostic overlays;
+- import controls;
+- Project Doctor authoring panels;
+- Babylon Inspector;
+- editor docking/workbench state.
+
+---
+
+#### 8. Proposed Disposition Matrix
+
+| Capability | Proposed disposition |
+|---|---|
+| Camera Weight / Damping | `RUNTIME` |
+| Micro Sway / FOV Breathing | `RUNTIME` |
+| Fixed-camera transitions | `RUNTIME` |
+| Background / Foreground Plates | `HYBRID` |
+| Fog / layered atmospheric depth | `RUNTIME / HYBRID` |
+| Fog–draw-distance coupling | `RUNTIME` |
+| Atmosphere Volume | `RUNTIME` |
+| Exposure Lag | `RUNTIME` |
+| Light Cookies | `RUNTIME / HYBRID` |
+| Retro Shadow Modes | `RUNTIME` |
+| AO Character | `RUNTIME / COOKED / HYBRID`, mode-dependent |
+| Sky / Backdrop / Horizon | `RUNTIME / COOKED`, implementation-dependent |
+| Visual Rawness Profile | `HYBRID` |
+| Internal Resolution / AA / 4:3 / Integer Scaling | `RUNTIME` |
+| Runtime color precision / runtime dithering | `RUNTIME` |
+| Offline texture dithering / palette derivative | `COOKED` |
+| Vertex Jitter | `RUNTIME` |
+| Geometry / attribute quantization derivative | `COOKED / HYBRID` |
+| Affine-style / UV Character | `RUNTIME` |
+| Mesh Decimation | `COOKED` |
+| Generated LOD | `HYBRID` |
+| Texture Resize | `COOKED` |
+| Atlas Generation | `COOKED` |
+| Material De-Polish | `HYBRID` |
+| Flat / Vertex / Gouraud-like supported shading | `RUNTIME` |
+| Transparency Character | `RUNTIME` |
+| Stepped Animation / Sprite Cadence | `RUNTIME` |
+| Sprite Pixel Snapping | `RUNTIME` |
+| Fog / Light / Parallax Cards | `RUNTIME` |
+| Surface Dressing | `HYBRID` |
+| Debris / Clutter Scatter | `COOKED / HYBRID` |
+| Ambient Motion | `RUNTIME` |
+| Environmental FX Recipes | `RUNTIME` |
+| Room Tone / Reverb / Tension / Silence / Ducking | `RUNTIME` |
+| Atmosphere Analysis | `EDITOR_ONLY` |
+| Look A/B Compare | `EDITOR_ONLY` |
+| Scatter Gizmos | `EDITOR_ONLY` |
+
+The exact implementation backend may change during the owning milestone. The export-disposition semantics may change only through explicit review/change control.
+
+---
+
+#### 9. Completion Rules by Disposition
+
+##### `RUNTIME` Done
+
+Relevant evidence must cover:
+
+```text
+Authoring
+→ Preview
+→ PIE
+→ cooked runtime representation
+→ standalone Export
+→ relevant clean-machine validation
+```
+
+##### `COOKED` Done
+
+Relevant evidence must cover:
+
+```text
+Authoring/settings
+→ deterministic cook
+→ derivative validation/integrity
+→ runtime consumption
+→ source/editor processing tools excluded from player unless independently required
+```
+
+##### `HYBRID` Done
+
+Must satisfy both the relevant cooked and runtime obligations.
+
+##### `EDITOR_ONLY` Done
+
+No runtime parity is required, but player-artifact exclusion must be verified.
+
+---
+
+#### 10. Parity Meaning
+
+Parity does **not** require pixel-identical output on every quality tier or hardware profile.
+
+Allowed:
+
+- lower shadow resolution;
+- lower particle density;
+- reduced texture tier;
+- supported effect fallback;
+- lower-cost presentation backend.
+
+Not allowed without an explicit unsupported/fallback state:
+
+- Atmosphere Volume silently disappearing;
+- creator-authored fog meaning being ignored;
+- tension audio missing from player;
+- stepped animation becoming continuous without declared fallback;
+- material character being replaced with an unrelated default;
+- editor-only visual illusion being marketed as exported-game capability.
+
+---
+
+### PART C — SOURCE 01: CANONICAL ROADMAP ALIGNMENT
+
+#### 10A. RSM-37 / RSM-39 — Typed Atmosphere and Presentation Actions
+
+The Visual Rawness / Atmosphere work must reuse the existing typed Event/Action and Scene Director architecture rather than inventing private strings, hidden scripts, or an unrelated atmosphere automation system.
+
+RSM-37 should eventually be able to describe supported creator-facing actions/events for needs such as:
+
+- activate/deactivate or blend an authored atmosphere state;
+- request camera-profile or camera-character transitions;
+- request supported lighting/fog/exposure changes;
+- start/stop or parameterize supported Ambient Motion / Environmental FX behavior;
+- request audio ambience/tension/snapshot changes;
+- restore an authored state after interruption;
+- expose validation/export-support metadata for each action.
+
+RSM-39 should coordinate narrative-section progression with those typed actions when atmosphere changes are part of authored scene flow.
+
+**Boundary:** exact event/action names, payload schemas, restoration semantics, and execution budgets belong to the owning milestones. This candidate only requires reuse of the shared semantic registry.
+
+#### 11. RSM-42 — Camera Authoring / Activation Zones / Composition Toolkit
+
+Preserve existing purpose and ownership. Add or clarify the following creator-facing capabilities:
+
+- Camera Weight / Damping with bounded translation/rotation response;
+- Micro Sway / Breathing as optional low-amplitude camera character;
+- bounded FOV Breathing for supported states/transitions;
+- camera-transition character beyond a raw duration value;
+- Foreground Framing Helpers and foreground occlusion composition workflows;
+- Fixed-Camera Background Plates;
+- camera-specific Foreground Plates / overlays;
+- background plate + 3D actor + simple occluder workflow where supported;
+- export disposition for every camera-character feature;
+- parity proof for used camera-character features.
+
+**Boundary:** no mandatory camera shake, wobble, or fixed house style.
+
+---
+
+#### 12. RSM-43 — Lighting / Atmosphere Runtime
+
+Extend the milestone to cover:
+
+##### Lighting Character
+
+- supported Retro Shadow Modes such as No Dynamic Shadow, Blob/Contact, Hard Low-Resolution, Baked/Lightmapped direction, and supported modern modes;
+- Light Cookies / Projected Masks;
+- bounded AO Character, including support direction for baked/vertex and supported runtime variants;
+- bounded selective/fake reflection direction where justified.
+
+##### Atmospheric Depth
+
+- layered fog/haze;
+- background haze;
+- local fog/card integration;
+- near/mid/far depth separation;
+- fog ↔ draw-distance coupling;
+- controlled visibility cutoff where supported;
+- Controlled Detail Loss as an explicit presentation intent.
+
+##### Exposure
+
+- exposure adaptation;
+- optional Exposure Lag;
+- bounded response and fallback behavior.
+
+##### Atmosphere Volumes
+
+Introduce RetroStage-owned atmosphere volume semantics covering a bounded blendable subset of:
+
+- fog;
+- exposure;
+- color/presentation influence;
+- lighting influence;
+- VFX state/density;
+- audio snapshot/reverb references;
+- blend distance/time.
+
+##### Sky / Backdrop / Horizon
+
+Support bounded environment-backdrop workflows such as:
+
+- solid/gradient backgrounds;
+- low-resolution sky/panorama;
+- backdrop cards;
+- distant silhouette layers;
+- horizon haze;
+- fog merging.
+
+**Boundary:** no open-world or global dynamic weather/climate system is authorized.
+
+---
+
+#### 13. RSM-44 — Retro Presentation Profiles / Frame-Graph Architecture
+
+Expand RSM-44 into the canonical profile/renderer-level owner for Visual Rawness and Raster Character.
+
+Add or clarify:
+
+- Visual Rawness dimensions and override rules;
+- internal resolution and upscale policy;
+- explicit AA Policy;
+- 4:3 / 16:9 / supported custom aspect direction;
+- integer scaling;
+- letterbox/pillarbox;
+- optional overscan;
+- reduced color precision / posterization;
+- runtime dithering;
+- LUT/palette treatment;
+- controlled vertex-position/raster precision direction;
+- controlled Vertex Jitter;
+- UV precision / affine-style texture character;
+- capability/quality/fallback metadata for every supported presentation dimension;
+- export disposition for each profile dimension;
+- creator override precedence over profile defaults;
+- explicit supported color/output ordering across color-space interpretation, exposure/tone mapping, LUT/palette, reduced precision/posterization, dithering, upscale, and final display transform;
+- metadata/policy that distinguishes creator-locked artistic intent from quality-scalable, player-adjustable-within-bounds, accessibility-override, and hardware-fallback behavior without freezing exact enum names here;
+- persisted/versioned presentation-state requirements sufficient for save/reopen and later migration without silent reset to newer profile defaults.
+
+Candidate profile family may include:
+
+- Brutalist PSX Raw;
+- PS1 Constraint;
+- Clean PS1;
+- Early PS2 Atmospheric;
+- Low-Poly Cinematic;
+- Pixel Resolution Hybrid;
+- Sprite-3D Hybrid;
+- Custom.
+
+**Boundary:** profiles are coordinated defaults, not mandatory visual brands and not claims of exact historical hardware emulation.
+
+---
+
+#### 14. RSM-45 — Atmosphere Audio Foundation / Preview-PIE Integration
+
+Preserve the basic audio milestone and add only the early atmosphere subset needed before mature RSM-88 audio:
+
+- basic Room Tone authoring;
+- ambience layering/loops/fades;
+- basic Proximity Ambience;
+- basic tension-state hooks;
+- Atmosphere Volume audio hooks;
+- basic silence/duck behavior direction;
+- Preview/PIE lifecycle correctness;
+- export disposition for all supported early-audio features.
+
+**Boundary:** mature mixer, acoustic authoring, adaptive audio, and full snapshot workflow remain RSM-88-owned.
+
+---
+
+#### 15. RSM-56 — Level Design / Blockout Tools
+
+Add only the set-dressing foundations that belong to level placement:
+
+- surface-aware placement;
+- ground/surface snapping for dressing content;
+- composition-friendly foreground placement helpers;
+- placement/exclusion guidance used later by bounded scatter tools.
+
+**Boundary:** no general procedural environment generator.
+
+---
+
+#### 16. RSM-57 — Liminal Blockout / Repetition / Transitional Architecture Toolkit
+
+Extend controlled repetition into a bounded deterministic `Debris / Clutter Scatter` authoring accelerator.
+
+Candidate controls:
+
+- Collection;
+- Density;
+- Minimum Spacing;
+- Cluster Strength;
+- Scale Variation;
+- Rotation Variation;
+- Surface Alignment;
+- Ground Hugging;
+- Exclusion Areas;
+- Deterministic Seed.
+
+Use cases may include rubble, trash, concrete chunks, papers, broken furniture, bottles, cables, vegetation, and atmospheric clutter.
+
+Requirements:
+
+- deterministic result for the same authored state/seed;
+- editable/bakeable authored representation where appropriate;
+- no hidden procedural-world authority;
+- diagnostics for excessive or invalid generation;
+- explicit export disposition, normally `COOKED / HYBRID`.
+
+---
+
+#### 17. RSM-58 — Prefab / Variant System
+
+Extend prefab/variant authoring to support:
+
+- reusable scatter collections;
+- deterministic presentation variants;
+- visual variants separate from gameplay variants;
+- safe update/override behavior for dressing sets;
+- stable identity after generated/baked authoring operations where supported.
+
+---
+
+#### 18. RSM-75 — GLB / glTF Asset Pipeline
+
+Expand creator-facing geometry derivative capabilities while preserving source ownership.
+
+Add or clarify:
+
+- Mesh Simplification / Decimation;
+- target triangle percentage/count direction;
+- Generated LOD derivatives;
+- position quantization assistance;
+- supported attribute quantization assistance;
+- Normal Simplification / Normal Character;
+- Hard-Edge Character where safely supported;
+- bounded Geometry De-Polish;
+- temporary derivative → validation → promotion flow;
+- diagnostics when requested simplification cannot be safely reached;
+- source asset never mutated or replaced by a retroized derivative.
+
+**Boundary:** risky topology-edit operations such as arbitrary automatic bevel removal are not promised unless separately proven safe.
+
+---
+
+#### 19. RSM-76 — Texture / Sprite Atlas / Retro Image Import
+
+Expand the milestone with non-destructive Texture Character authoring:
+
+- maximum/derived texture-size policy;
+- supported arbitrary/downscale derivative generation;
+- nearest / linear and later admitted filtering policies;
+- Mipmap Off / Limited / Normal direction;
+- Mip Bias;
+- Anisotropy control;
+- Palette Reduction;
+- Posterization;
+- ordered and admitted error-diffusion dithering;
+- atlas generation;
+- atlas padding / relevant packing policy;
+- stable SpriteSliceId preservation;
+- sprite sampling/pixel character;
+- exact source/cooked distinction;
+- export disposition of each derivative or runtime setting.
+
+**Boundary:** KTX/Basis/native image tooling remains separately audited and is not authorized by this proposal.
+
+---
+
+#### 20. RSM-77 — Content Integrity / Hashing / Cache Invalidation
+
+Extend derivative identity to include relevant Retroization/Rawness recipes.
+
+A derivative identity should be sensitive, where relevant, to:
+
+- source hash;
+- importer version;
+- derivative recipe/version;
+- geometry settings;
+- texture settings;
+- palette/dither settings;
+- relevant rawness settings;
+- relevant presentation-compatible settings.
+
+Requirements:
+
+- invalidate only affected caches/derivatives;
+- never silently use stale retroized outputs;
+- detect partial/failed jobs;
+- surface repair actions.
+
+---
+
+#### 21. RSM-78 — Asset Reimport / Import Cache / Non-Destructive Settings
+
+Require safe retroization reimport behavior:
+
+```text
+source changed
+→ generate temporary derivative
+→ validate
+→ atomically promote if valid
+```
+
+On failure:
+
+- source remains intact;
+- canonical settings remain intact;
+- previous last-good derivative remains intact;
+- valid references remain intact where possible;
+- creator receives a meaningful diagnostic.
+
+---
+
+#### 20A. RSM-65 / RSM-66 — Runtime Save / Checkpoint Participation Boundary
+
+Dynamic atmosphere/presentation state must integrate with the existing registered Runtime Save model only where it represents approved player progress.
+
+RSM-65 should be able to restore gameplay-semantic state that causes RetroStage systems to reconstruct the effective visual/audio atmosphere after load. It should not serialize raw Babylon, shader, particle, mixer-node, or renderer object state.
+
+The owning atmosphere/presentation system must classify relevant state as one of:
+
+- canonical project authoring state — never written by Runtime Save;
+- registered runtime-progress state — saveable/migratable when explicitly supported;
+- transient derived runtime state — recomputed/reset on restore according to documented semantics.
+
+RSM-66 player profiles/slots may persist player quality/accessibility preferences through the proper runtime-settings/profile path, but those local preferences remain separate from project authoring files.
+
+#### 21A. RSM-79 — Audio Import / Transcode / Loop Metadata Dependency Note
+
+Atmosphere-audio authoring depends on a trustworthy audio content pipeline. RSM-79 remains the owner of source format support, loop metadata, streaming/loudness metadata, waveform/preview derivatives, and any admitted transcode tooling.
+
+Clarify the boundary:
+
+```text
+Audio source/import/transcode/derivative policy → RSM-79
+Runtime mixer/spatial/adaptive atmosphere behavior → RSM-88
+Atmosphere orchestration/parity → RSM-89
+Export/cooked manifest/runtime inclusion → RSM-94–103
+```
+
+No FFmpeg, codec binary, or other audio executable is authorized by this alignment candidate. Cook-time audio tooling is not automatically a player runtime dependency.
+
+#### 22. RSM-80 — Runtime Asset Loading / Resource Manager
+
+Clarify runtime resolution of:
+
+- correct cooked mesh derivative;
+- texture derivative;
+- LOD chain;
+- atlas/sprite derivative;
+- material/presentation resource variant;
+- explicit fallback when a required cooked artifact is unavailable.
+
+Runtime code resolves these through stable RetroStage asset identity rather than physical derivative filenames becoming gameplay/canonical authority.
+
+---
+
+#### 23. RSM-81 — Large Project Scalability / Resource Disposal
+
+Add or clarify resource safety for presentation/retroization workflows:
+
+- disposal of superseded preview derivatives;
+- disposal of replaced cooked preview resources;
+- LOD/resource memory budgets;
+- texture-tier budgets;
+- VFX/atmosphere resource budgets;
+- Hero / Supporting / Background content-budget direction;
+- no unbounded retention of original + multiple generated GPU variants.
+
+---
+
+#### 24. RSM-82 — Editor Performance Profiling / Slow Operation Detector
+
+Extend slow-operation diagnostics to include:
+
+- mesh conversion/simplification;
+- image conversion;
+- atlas generation;
+- derivative validation;
+- shader/material variant compilation;
+- transparent overdraw from atmospheric cards;
+- fog/VFX cost;
+- derivative/cache memory cost;
+- slow background jobs.
+
+Diagnostics should identify dominant causes rather than report only a generic “scene slow” state.
+
+---
+
+#### 25. RSM-83 — Material / Shader / Retro LookDev Editor
+
+Extend constrained material authoring with `Material De-Polish` and `Material Character`.
+
+Candidate controls:
+
+- Specular Suppression;
+- Reflection Suppression;
+- Normal Detail Suppression;
+- roughness simplification;
+- material-layer simplification where supported;
+- vertex-color influence;
+- dirt/variation masks;
+- UV character hooks;
+- supported retro PBR-lite direction.
+
+Supported material character should include, where validated:
+
+- Unlit;
+- Flat-like;
+- Vertex Lit;
+- Gouraud-like;
+- Lightmapped;
+- supported modern material profile.
+
+##### Transparency Character
+
+Add creator-facing supported transparency character such as:
+
+- Modern Blend;
+- Alpha Cutout;
+- Dithered;
+- Threshold / Stepped;
+- Additive;
+- Retro Card.
+
+##### AO Character
+
+Coordinate supported AO behavior with RSM-43 lighting/runtime and the material workflow.
+
+**Boundary:** no general raw GLSL/HLSL shader IDE.
+
+---
+
+#### 26. RSM-84 — Skeletal / Sprite / Flipbook Animation Pipeline
+
+Add `Temporal Rawness` support:
+
+- Continuous animation cadence;
+- Stepped / Sample-and-Hold cadence;
+- supported custom sample rate;
+- sprite/flipbook cadence controls;
+- Sprite Pixel Snapping where applicable;
+- Preview/PIE/player parity for selected cadence.
+
+The runtime may render at a high frame rate while animation poses update at the chosen authored cadence.
+
+---
+
+#### 27. RSM-85 — Animation State Machine / Locomotion / Retargeting
+
+Require transition/blending systems to preserve the creator-selected Temporal Character unless the creator explicitly selects a different transition behavior.
+
+A stepped presentation must not silently become continuous merely because a state transition or blend exists.
+
+---
+
+#### 28. RSM-86 — Retro VFX / Particle / Sprite FX Authoring
+
+Expand bounded VFX authoring with low-cost perceptual atmosphere techniques:
+
+- Fog Cards;
+- Light / God-Ray Cards;
+- Dust / Smoke / Mist Cards;
+- Parallax Background Cards;
+- supported depth-fade intersections;
+- Stepped VFX cadence;
+- Animated Grime / Noise;
+- deterministic variation seeds.
+
+##### Surface Storytelling / Surface Dressing
+
+Add creator workflows for:
+
+- Leak;
+- Rust;
+- Dirt;
+- Crack;
+- Poster;
+- Wet Patch;
+- Soot;
+- Blood / Organic;
+- Custom Decal.
+
+##### Ambient Motion
+
+Add bounded transform/material-motion profiles such as:
+
+- Oscillate;
+- Rotate;
+- Sway;
+- Pulse;
+- Flicker;
+- Custom Curve.
+
+Candidate controls:
+
+- Speed;
+- Amplitude;
+- Phase;
+- Deterministic Seed where relevant.
+
+##### Environmental FX Recipes
+
+Support bounded authoring recipes such as:
+
+- Rain;
+- Snow;
+- Ash;
+- Dust;
+- Drips;
+- Steam;
+- Embers;
+- Mist;
+- light falling debris.
+
+**Boundary:** no full climate/weather simulator, full destruction engine, or general VFX programming environment.
+
+---
+
+#### 29. RSM-88 — Audio Runtime / Mixer / Spatial / Adaptive Sound
+
+Extend mature atmosphere audio with:
+
+- Room Tone layering;
+- ambience variants;
+- proximity rumble/tension layers;
+- reverb/acoustic zones;
+- acoustic transitions;
+- ducking;
+- mixer snapshots;
+- deterministic/randomized one-shot selection where appropriate and owned by RetroStage semantics;
+- Atmosphere Volume integration;
+- creator diagnostics/budgets.
+
+##### Acoustic Tension / Silence
+
+Silence and reduction of sound are first-class authorable atmosphere tools.
+
+Support creator-authored states in which music, ambience, selected frequency content, or room tone may be reduced or transitioned to create tension.
+
+---
+
+#### 30. RSM-89 — Advanced Retro Presentation / Animation / VFX / UI / Audio Parity
+
+Make RSM-89 the mature convergence point for `Atmosphere Director`, `Visual Rawness`, analysis tooling, and full presentation parity.
+
+Add or clarify:
+
+- coordination of Camera Character, Lighting, Fog, Atmosphere Volumes, Material Character, Raster Character, Temporal Character, VFX, Environmental FX, Surface Dressing, and Audio Atmosphere;
+- Atmosphere Director authoring workflow;
+- quality tiers/fallbacks for these systems;
+- Atmosphere Analysis views;
+- Look Snapshot / A-B Compare;
+- visual/audio regression fixtures;
+- explicit export disposition for every used presentation/atmosphere capability;
+- no editor-only illusion may be presented as an exported-game capability.
+
+##### Proposed RSM-89 parity exit strengthening
+
+All used Visual Rawness, Atmosphere Director, material, animation, VFX, audio, camera, and environment-presentation capabilities in the representative project have declared export disposition and preserve materially equivalent creator intent across every required Preview/PIE/Cooked/Export stage.
+
+---
+
+#### 31. RSM-90 — Minimum Hardware Target / Compatibility Profiles
+
+Extend fallback profiles to every new atmosphere/rawness capability where needed.
+
+Each relevant capability should have a support state such as:
+
+- `Full`
+- `Reduced`
+- `Minimal`
+- `Unsupported`
+
+Fallback may reduce fidelity but must not silently erase semantic intent.
+
+Examples:
+
+- lower shadow resolution;
+- lower particle count;
+- lower texture tier;
+- reduced expensive post-processing;
+- retaining cheaper cards/fog/silhouette treatment where possible.
+
+---
+
+#### 32. RSM-91 — Production Content Creator Gate
+
+Strengthen Gate F acceptance with at least two deliberately distinct presentation proofs.
+
+Candidate golden content:
+
+##### A — Brutalist PSX Raw
+
+- high/raw geometry/material/raster character;
+- dark controlled-detail-loss lighting;
+- low texture information density;
+- hard silhouettes;
+- rubble/clutter;
+- strong fog depth;
+- industrial atmosphere audio.
+
+##### B — Clean Early-PS2 Atmospheric
+
+- richer geometry/material response;
+- cleaner texture character;
+- smoother camera;
+- subtler raster artifacts;
+- more cinematic fog/audio.
+
+Requirements:
+
+- both are built with the same RetroStage product architecture;
+- they must not look like recolors of one mandatory template;
+- both must be proven as exported/packaged experiences, not screenshots only;
+- editor-only analysis/helper systems must not leak into player artifacts;
+- critical atmosphere/presentation parity findings must be closed.
+
+---
+
+#### 32A. RSM-92 — Runtime Platform / Display Output Contract
+
+The standalone target contract must own the OS/display conditions that can materially alter RetroStage presentation.
+
+Add or clarify validation direction for:
+
+- windowed / borderless / fullscreen behavior as supported;
+- resize and display-mode changes;
+- 4:3 and other authored aspect behavior;
+- letterbox/pillarbox correctness;
+- integer-scaling behavior and explicit fallback when the target display cannot satisfy the ideal integer multiple;
+- DPI / display scaling interaction;
+- internal-resolution and final-output mapping;
+- renderer-backend capability/fallback differences that affect presentation;
+- audio-device/runtime-environment behavior relevant to atmosphere parity.
+
+The exact Windows versions, DPI thresholds, resolutions, and hardware limits remain evidence-driven milestone decisions. The requirement is that final display behavior not be left as an accidental Electron/browser-window consequence.
+
+#### 33. RSM-94 — Cooked Content Manifest / Runtime Content Contract
+
+Clarify that the mature cooked manifest must support the semantics necessary to distinguish:
+
+- runtime-required content/capabilities;
+- cooked derivatives;
+- hybrid runtime+cooked requirements;
+- editor-only/excluded content;
+- capabilities and fallbacks required by the player.
+
+Do not prescribe the final field names in this source-alignment candidate; schema details belong to the owning milestone contract.
+
+---
+
+#### 34. RSM-95 — Export Compiler / Deterministic Runtime Layout
+
+Extend export compiler responsibilities to:
+
+- select correct cooked geometry/texture/atlas derivatives;
+- prepare material/presentation variants;
+- prepare runtime atmosphere/presentation data;
+- resolve audio/VFX/presentation references;
+- exclude editor-only data and authoring-only processing tools;
+- produce an export blocker if a used non-editor-only capability lacks a valid runtime/cooked projection;
+- preserve deterministic output and explain artifact differences.
+
+---
+
+#### 35. RSM-96 — Standalone Runtime App Flow
+
+Clarify that exported runtime must execute all used supported `RUNTIME` and runtime portions of `HYBRID` capabilities without requiring the editor application or authoring services.
+
+Examples include:
+
+- Atmosphere Volume runtime;
+- Camera Character;
+- presentation profiles;
+- material character;
+- VFX/Environmental FX;
+- Temporal Character;
+- audio atmosphere.
+
+The player must not contain unnecessary editor UI, import authoring tools, analysis views, or editor-only dependencies.
+
+---
+
+#### 35A. RSM-97 — Runtime Error Boundary / Presentation Fallback Policy
+
+Runtime failure handling should include presentation/atmosphere resources and capabilities.
+
+Examples:
+
+- missing cooked LUT/palette/texture derivative;
+- unsupported material/presentation variant;
+- missing Atmosphere Volume reference;
+- failed audio ambience/snapshot reference;
+- unavailable optional effect at the active hardware tier.
+
+The runtime must classify failures as fatal, recoverable, degraded, or creator-build problems according to the owning contract. A fallback must be explicit and diagnosable rather than silently replacing project identity.
+
+#### 35B. RSM-98 — Structured Logging / Atmosphere and Presentation Trace
+
+Structured trace should be able to explain relevant state transitions and fallback decisions, including stable project/scene/entity/asset/presentation identities where available.
+
+Useful trace classes include:
+
+- active Presentation Profile and overrides;
+- Atmosphere Volume enter/exit/blend state;
+- camera-character transition requests;
+- material/presentation variant selection;
+- quality/accessibility/fallback overrides;
+- asset-derivative resolution;
+- audio snapshot/tension/ambience transitions;
+- export/runtime capability fallback.
+
+Raw Babylon object identities must not become the creator-facing trace authority.
+
+#### 35C. RSM-99 — Live Atmosphere / Presentation Debugging
+
+The runtime debugger should eventually let creators inspect why the running game differs from expectation without making runtime state canonical.
+
+Candidate readouts include:
+
+- effective presentation profile and individual overrides;
+- active Atmosphere Volumes and blend weights;
+- effective fog/exposure/lighting character;
+- current camera-character state;
+- effective quality/accessibility overrides;
+- selected material/texture/LOD derivatives;
+- active Ambient Motion / Environmental FX states;
+- current ambience/reverb/tension/snapshot state.
+
+This is creator-facing diagnosis, not permission for arbitrary Babylon mutation.
+
+#### 35D. RSM-100 — Build Stripping Must Understand Presentation Dispositions and Dynamic References
+
+The dependency optimizer/build stripper must distinguish:
+
+- editor-only analysis views and authoring helpers;
+- source-only/cook-only tools;
+- unused presentation/material/shader variants;
+- runtime-required variants selected dynamically by approved profile/quality/accessibility logic;
+- dynamically referenced Atmosphere/FX/audio content that must not be stripped incorrectly.
+
+A build-size optimization is invalid if it removes a supported dynamically reachable atmosphere/presentation capability.
+
+#### 35E. RSM-101 — Project Doctor / Export Validation for Atmosphere and Visual Rawness
+
+Project Doctor should eventually diagnose export-readiness problems such as:
+
+- used non-editor-only capability has no valid cooked/runtime projection;
+- presentation profile references missing or stale derivatives;
+- Atmosphere Volume references missing audio/VFX/material resources;
+- unsupported profile/hardware combination;
+- quality fallback would materially violate a creator-locked presentation requirement;
+- excessive transparent overdraw / VFX / texture-memory cost where measurable;
+- dangerous or unsupported flicker/reduced-motion interaction where rules can be proven;
+- editor-only content has leaked into an export dependency graph;
+- deterministic seed/settings mismatch produces stale derivatives.
+
+The Doctor must remain evidence-driven and must not claim subjective artistic quality as a validation truth.
+
+#### 35F. RSM-102 — Packaged Artifact Evidence
+
+Release artifact reporting should make the atmosphere/presentation pipeline auditable by recording, where applicable:
+
+- packaged runtime presentation/material variants;
+- cooked derivative inventories/hashes;
+- player dependency graph and notices;
+- native/WASM inventory for admitted processing/runtime dependencies;
+- absence of editor-only analysis/import tooling from player artifacts;
+- warnings/fallbacks relevant to the selected target profile.
+
+#### 35G. RSM-103 — Final Performance / Render / Export / Clean-Machine Parity Gate
+
+RSM-103 should explicitly include representative Visual Rawness/Atmosphere profiles in final profiling and parity work.
+
+Acceptance direction:
+
+- profile representative hardware tiers;
+- test frame pacing with fog/transparency/cards/particles/material variants and audio atmosphere;
+- test display resize/fullscreen/DPI/aspect/integer-scale behavior;
+- prove clean-machine standalone execution;
+- compare Preview/PIE/player material intent rather than demanding impossible pixel identity;
+- close unexplained runtime fallback or artifact leakage.
+
+This is the mature Gate G proof that the feature set is a real exported-game capability rather than an editor showcase.
+
+#### 35H. RSM-104 / RSM-105 — Flow Graph Boundary
+
+Flow Graph may expose approved atmosphere/presentation actions through the same Event/Action registry, for example transitions, toggles, parameter changes, or state requests.
+
+It must not gain:
+
+- arbitrary shader code;
+- arbitrary renderer-object access;
+- direct Babylon mutation;
+- unrestricted per-frame loops used as a substitute for missing presentation APIs.
+
+Execution budgets, trace, validation, and export support remain mandatory.
+
+#### 35I. RSM-106 — Native Sequencer Integration
+
+The native Sequencer should be able to orchestrate supported atmosphere/presentation tracks using existing canonical semantics rather than creating a second authority.
+
+Potential track/control families include:
+
+- camera-character/profile transitions;
+- lighting/fog/exposure parameters;
+- material/presentation parameters;
+- VFX / Ambient Motion / Environmental FX triggers;
+- audio ambience/snapshot/tension changes;
+- visibility/scene-state interaction through existing sequence contracts.
+
+Scrub, interruption, skip, restoration, and Preview/PIE/Export parity must be defined by RSM-106. There must be no independent "Atmosphere Timeline" runtime that bypasses the native sequence/event architecture.
+
+#### 35I-A. RSM-108 / RSM-109 / RSM-110 — Presentation Preset / Pack Lifecycle
+
+The later genre-kit/template/content-pack milestones should own distribution and compatibility of reusable Presentation Profiles, atmosphere recipes, and any bundled presentation media.
+
+Required direction:
+
+- RSM-108 presets remain replaceable starting points and preserve project identity;
+- RSM-109 versions/migrates profiles, recipes, and sample projects predictably;
+- RSM-110 owns local pack manifest, provenance, license, dependency, update, removal, and project portability rules;
+- project behavior must not silently change because a globally installed preset/pack was updated;
+- pack removal must diagnose or protect projects that still depend on required resources;
+- bundled presentation media follows existing asset-provenance and redistribution rules.
+
+This candidate does not create a marketplace, entitlement system, or DLC-commerce requirement.
+
+#### 35J. RSM-112 / RSM-113 — Golden Presentation Regression and Reproducibility
+
+At least one living/golden project should exercise the aligned presentation pipeline across later QA.
+
+Regression direction should cover, where practical:
+
+- representative fixed-camera and free-camera scenes;
+- Atmosphere Volume transitions;
+- Presentation Profile / Visual Rawness settings;
+- cooked mesh/texture derivatives;
+- material and transparency character;
+- Temporal Character / Ambient Motion / VFX;
+- audio ambience/tension/zone transitions;
+- player quality/accessibility fallback behavior;
+- migration of persisted presentation data;
+- build stripping and clean export.
+
+Deterministic seeds, replayable inputs, fixed camera viewpoints, hashes, and approved visual/audio comparison methods should be used where they make regressions reproducible. Expected GPU/audio nondeterminism must be separated from true regressions rather than hidden by overly brittle pixel-perfect rules.
+
+RSM-113 CI should run the appropriate migration/cook/export/artifact tests and preserve dependency/notice evidence.
+
+#### 35K. RSM-116 — Presentation / Derivative Compatibility and Migration
+
+Project compatibility policy must include presentation documents/settings and derivative recipes.
+
+Required direction:
+
+- supported historical presentation/profile settings open or migrate explicitly;
+- destructive migration receives backup/rollback protection;
+- deprecated profile dimensions produce diagnostics rather than silent loss;
+- changing renderer implementation or profile defaults must not silently "refresh" an existing supported project's authored identity;
+- rebuildable derivatives may be regenerated from preserved canonical intent using versioned migration/import rules;
+- unsupported old behavior must be explained through compatibility diagnostics.
+
+This does not promise infinite exact visual preservation across every future major version; it requires explicit support policy and no silent abandonment of supported project meaning.
+
+#### 35L. RSM-119 — Accessibility / Comfort Validation for Atmospheric Presentation
+
+Public-readiness work should validate the shared runtime-settings path for presentation features that can affect comfort or safety.
+
+Representative checks should include:
+
+- reduced camera sway/head-bob where exposed as non-essential motion;
+- reduced/disabled non-essential flicker or strobe effects;
+- safe-default/diagnostic direction for creator-authored high-frequency flicker where measurable;
+- reduced-motion handling for non-essential screen-space effects where applicable;
+- settings persistence without mutating canonical project authoring data;
+- documentation of creator-locked versus player-adjustable presentation behavior.
+
+Exact accessibility UX belongs to the owning milestones and Source 05 accessibility decisions; this candidate only requires the atmosphere system not to make such support architecturally impossible.
+
 # Gate F — Production Content Creator
 
 ## RSM-73 — Asset Registry / Source Metadata / License Contract
@@ -1489,7 +5969,7 @@ This alignment does not admit new rendering/media dependencies and does not auth
 **Purpose:** Validate the complete asset and presentation workflow as a creator product.  
 **Third-party placement:** All Gate F systems plus packaged-player and regression evidence.  
 **Key deliverables:**
-- Build a representative content-rich sample.
+- Build a representative content-rich sample and at least two deliberately distinct exported presentation proofs: one `Brutalist PSX Raw` direction and one `Clean Early-PS2 Atmospheric` direction, proving shared architecture without one recolored house style.
 - Validate import, reimport, materials, animation, VFX, UI, audio, performance, and fallback behavior.
 - Audit asset provenance and packaged derivatives.
 - Close critical usability, memory, and parity findings.
@@ -1678,6 +6158,30 @@ The initial Electron player remains valid only through evidence, not assumption.
 - For selected store targets, verify the target adapter/overlay/runtime behavior required by current release evidence without treating vendor behavior as canonical game authority.
 **Exit:** Gate G closes when RetroStage reliably produces diagnosed, optimized, standalone Windows games.
 
+### Cross-Milestone Store / Heavy-3D Packaged-Player Qualification Lock
+
+**Type:** `RELEASE QUALIFICATION CONTRACT / NOT A BENCHMARK PROGRAM`
+
+Marketplace precedent does not prove RetroStage's Electron + Chromium + Babylon heavy-3D runtime. Claimed commercial store support requires physical packaged-player evidence on the selected target path.
+
+Required qualification categories:
+- **Minimal host integrity:** release player excludes editor/authoring/test/Inspector authority and loads the cooked runtime manifest as runtime content truth.
+- **Hardware graphics:** observe the actual graphics capability/path; classify degraded/unsupported behavior; do not silently claim support through unacceptable software rendering when the target requires hardware acceleration.
+- **Steam target when enabled:** physically prove launch from Steam client; windowed/borderless/fullscreen and focus/Alt-Tab; overlay activation/deactivation where used; optional achievement/store/controller callbacks only when that feature is enabled; correct admitted bridge initialization ordering; shutdown without orphaned store/native resources; store-neutral build remains free of Steam requirement.
+- **Epic target when enabled:** physically prove launch from Epic Games Launcher / selected distribution path; target artifact/config resolution; achievements/cross-store/EOS/overlay/social behavior only when the shipped feature set actually requires and admits it; shutdown without orphaned platform resources; store-neutral build remains free of Epic/EOS requirement.
+- **Host/process supervision:** classify renderer/GPU/child-process loss, preserving available crash/OOM/launch/integrity/memory-eviction reason; produce local diagnostic evidence; use controlled shutdown or an explicitly designed recovery path; never silently restart into save/runtime corruption.
+- **Long-session/resource churn:** repeated Scene load/unload, derived-resource create/dispose, save/load where applicable, suspend/resume, focus/window transitions, overlay/device transitions where applicable, and clean shutdown without monotonic unmanaged retention or stale async resurrection.
+- **Representative target coverage:** use supported Windows/GPU/store environments selected by the runtime target contract; this is compatibility/stability evidence, not a universal FPS score or public benchmark.
+
+**Store update ownership**
+For store-delivered builds, the selected distribution target owns normal patch/update delivery:
+```text
+Steam build updates → Steam distribution pipeline
+Epic build updates  → Epic distribution pipeline
+store-neutral standalone update → separate future policy if ever required
+```
+A generic Electron self-updater is not baseline exported-game authority. RetroStage owns reproducible package content and version identity; the store owns distribution/depot/update transport for that target.
+
 # Gate H — No-Code Narrative Production
 
 ## RSM-104 — Flow Graph Runtime
@@ -1865,6 +6369,7 @@ The initial Electron player remains valid only through evidence, not assumption.
 **Key deliverables:**
 - Produce at least one representative PS1/early-PS2-inspired horror, mystery, narrative, or liminal game through supported creator workflows.
 - Demonstrate create/open/save/migrate/recover, scene and asset authoring, gameplay, camera, presentation, animation, VFX, audio, UI, no-code logic, sequencing, PIE, debugging, validation, cooking, and standalone export.
+- Run at least one representative exported player-experience path from Title/New Game or Continue through gameplay/interaction, story/dialogue/objective, inventory/item or puzzle use, save/load/continue, settings/accessibility and a representative death/retry or completion flow.
 - Run the editor and exported game on clean supported machines and verify performance, compatibility, security, licenses, notices, and recovery.
 - Close all release-critical findings and publish truthful limitations.
 **Exit:** RetroStage Maker satisfies the complete Public Alpha / investor-demo maturity gate: a focused, independent creator product whose full RSM-0→120 obligations are proven. Any earlier Early Access release is commercial evidence and customer history, not a substitute for this maturity closure.
