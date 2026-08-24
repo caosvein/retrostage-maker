@@ -6,16 +6,18 @@
 **Current gate:** `Gate B — ACTIVE / CURRENT`  
 **Last fully closed milestone:** `RSM-6 — MILESTONE CLOSED / PASS`  
 **Next milestone boundary:** `RSM-7 — Canonical Project / Scene Document Foundation — NOT STARTED / NOT AUTHORIZED`  
-**Current task:** `Owner-directed post-RSM-6 source-alignment review checkpoint — separate authority required`  
+**Current task:** `PRE-RSM-7 final handoff after accepted COMPLETENESS-FIX2 publication — external Source mirror convergence and independent verification required before separate RSM-7 owner authorization`  
 **Milestone/control state:** `RSM-6 MILESTONE CLOSED-PASS / GATE B ACTIVE-CURRENT / RSM-7 NEXT-NOT STARTED-NOT AUTHORIZED`  
-**Task state:** `WAITING BROADER ALIGNMENT PROPOSALS NOT ACCEPTED / NOT INTEGRATED`  
-**Snapshot date:** 2026-08-22  
+**Task state:** `COMPLETENESS-FIX2 ACCEPTED-PUBLISHED / PRE-RSM-7 FINAL HANDOFF / MIRROR CONVERGENCE NOT YET CLAIMED`  
+**Snapshot date:** 2026-08-24  
 **Timezone:** Europe/Istanbul  
 **Repository:** `PRESENT — C:\RetroStage\retrostage-maker`  
 **RSM-2:** `CLOSED / SOURCE PASS`  
 **RSM-4:** `CLOSED`  
 **RSM-5:** `MILESTONE CLOSED / PASS`
 **RSM-6:** `MILESTONE CLOSED / PASS`
+**Accepted alignment publication commit:** `070d7aa562f3cac0923e766e616d8b9318b0aad3`
+**Accepted alignment natural CI:** `32694913531 / 97335115697 / attempt 1 / push / main / success`
 
 ---
 
@@ -24,6 +26,8 @@
 This document records the durable post-close RSM-6 handoff after I1-I8, their publication chains, fresh-clone automated validation, owner manual acceptance, final independent closure, source publication, and closure natural CI passed, while retaining accepted RSM-3/RSM-4/RSM-5 evidence as historical baseline context.
 
 RSM-6 is `MILESTONE CLOSED / PASS`; I1-I8 are `CLOSED / ACCEPTED`; RSM-6-V1 is `CLOSED / PASS`; RSM-6-CLOSE1 is `FINAL INDEPENDENT PASS`. Gate B remains `ACTIVE / CURRENT` because it spans RSM-5 through RSM-18. RSM-7 is next in roadmap order, has not started, and is not authorized.
+
+The POST-RSM-6 source alignment is `ACCEPTED / PUBLISHED` at commit `070d7aa562f3cac0923e766e616d8b9318b0aad3`; natural CI run `32694913531`, job `97335115697`, attempt 1 completed successfully. Current control is the PRE-RSM-7 final handoff. Mirror convergence is not claimed: the accepted canonical Source generation must converge to the governed external Source mirrors and that convergence must be independently verified before separate RSM-7 owner authorization.
 
 ---
 
@@ -60,6 +64,7 @@ RSM-6 is `MILESTONE CLOSED / PASS`; I1-I8 are `CLOSED / ACCEPTED`; RSM-6-V1 is `
 | RSM-6-I1-I8 | `CLOSED / ACCEPTED` |
 | RSM-6-V1 | `CLOSED / PASS` |
 | RSM-6-CLOSE1 | `FINAL INDEPENDENT PASS` |
+| POST-RSM-6 / PRE-RSM-7 COMPLETENESS-FIX2 | `ACCEPTED / PUBLISHED — 070d7aa562f3cac0923e766e616d8b9318b0aad3 / CI 32694913531 / 97335115697 / attempt 1 / success` |
 | RSM-7 | `NEXT MILESTONE / NOT STARTED / NOT AUTHORIZED` |
 
 Historical FIX/failure artifacts remain evidence history. The original failed clone remains preserved and is not promoted as current success evidence.
@@ -284,18 +289,21 @@ RSM-6 I1-I8 = CLOSED / ACCEPTED
 → RSM-6 = MILESTONE CLOSED / PASS
 → closure/publication baseline 34b1148e1c7be12e30f1e962148d40b5027a7b07
 → closure natural CI 32526483832 / 96909482744 / attempt 1 / push / main / success
-→ current control = owner-directed post-RSM-6 source-alignment review checkpoint / separate authority required
+→ POST-RSM-6 / PRE-RSM-7 COMPLETENESS-FIX2 = ACCEPTED / PUBLISHED
+→ alignment publication commit 070d7aa562f3cac0923e766e616d8b9318b0aad3
+→ alignment natural CI 32694913531 / 97335115697 / attempt 1 / push / main / success
+→ current control = PRE-RSM-7 final handoff / governed external Source mirror convergence and independent verification required / separate RSM-7 owner authorization required
 → RSM-7 = NEXT ROADMAP MILESTONE / NOT STARTED / NOT AUTHORIZED
 ```
 
-Gate B remains active across RSM-5 through RSM-18. This post-close alignment synchronizes the accepted RSM-6 closure truth, accepts none of the waiting broader alignment proposals, and does not authorize RSM-7.
+Gate B remains active across RSM-5 through RSM-18. The accepted COMPLETENESS-FIX2 publication synchronizes the POST-RSM-6 / PRE-RSM-7 Source truth and does not authorize RSM-7. The accepted canonical Source generation must converge to the governed external Source mirrors and be independently verified before separate RSM-7 owner authorization; this candidate does not claim that convergence has occurred.
 
 ---
 
 ## 11. Current Milestone Statement
 
 ```text
-snapshot date = 2026-08-22
+snapshot date = 2026-08-24
 current gate = Gate B — ACTIVE / CURRENT
 last fully closed milestone = RSM-6 — MILESTONE CLOSED / PASS
 RSM-6 I1-I8 = CLOSED / ACCEPTED
@@ -306,8 +314,12 @@ accepted implementation tree = 5a3186fa70a5215fe1aaf770a1b845c5d1ff4107
 accepted implementation validation CI = 32496829684 / 96817113858 / attempt 1 / push / main / success
 accepted closure/publication baseline = 34b1148e1c7be12e30f1e962148d40b5027a7b07
 accepted closure natural CI = 32526483832 / 96909482744 / attempt 1 / push / main / success
-current control = owner-directed post-RSM-6 source-alignment review checkpoint / separate authority required
+POST-RSM-6 / PRE-RSM-7 COMPLETENESS-FIX2 = ACCEPTED / PUBLISHED
+accepted alignment publication commit = 070d7aa562f3cac0923e766e616d8b9318b0aad3
+accepted alignment natural CI = 32694913531 / 97335115697 / attempt 1 / push / main / success
+current control = PRE-RSM-7 final handoff / governed external Source mirror convergence and independent verification required / separate RSM-7 owner authorization required
+mirror convergence = NOT CLAIMED BY THIS CANDIDATE
+PRE-RSM-7 invariant = accepted canonical Source generation must converge to governed external Source mirrors and be independently verified before separate RSM-7 owner authorization
 next milestone boundary = RSM-7 — Canonical Project / Scene Document Foundation
 RSM-7 = NEXT / NOT STARTED / NOT AUTHORIZED
-waiting broader alignment proposals = NOT ACCEPTED / NOT INTEGRATED
 ```
