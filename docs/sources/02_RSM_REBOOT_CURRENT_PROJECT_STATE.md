@@ -4,12 +4,12 @@
 **Role:** Authoritative current-state snapshot for the RetroStage Maker reboot  
 **Project:** RetroStage Maker  
 **Source generation:** Reboot / clean-start  
-**Snapshot date:** 2026-08-24  
+**Snapshot date:** 2026-08-25  
 **Snapshot timezone:** Europe/Istanbul  
 **Document state:** `LIVE SNAPSHOT / RSM-6 MILESTONE CLOSED-PASS / GATE B ACTIVE-CURRENT`  
 **Current product gate:** `Gate B — ACTIVE / CURRENT`  
 **Current milestone/control:** `RSM-6 — MILESTONE CLOSED / PASS; RSM-7 — NEXT / NOT STARTED / NOT AUTHORIZED`  
-**Current task:** `PRE-RSM-7 final handoff after accepted COMPLETENESS-FIX2 publication; governed external Source mirror convergence and independent verification required before separate RSM-7 owner authorization`  
+**Current task:** `PRE-RSM-7 SOURCE ALIGNMENT WAVE2 CREATOR-APPEAL / SICE V4 — GOVERNED INTEGRATION / PROMOTION LIFECYCLE ACTIVE`  
 **Repository:** `PRESENT — C:\RetroStage\retrostage-maker`  
 **Remote origin:** `https://github.com/caosvein/retrostage-maker.git`  
 **Primary branch:** `main`  
@@ -20,9 +20,12 @@
 **Accepted POST-RSM-6 / PRE-RSM-7 alignment:** `COMPLETENESS-FIX2 — ACCEPTED / PUBLISHED`  
 **Accepted alignment publication commit:** `070d7aa562f3cac0923e766e616d8b9318b0aad3`  
 **Accepted alignment natural CI:** `32694913531 / 97335115697 / attempt 1 / push / main / success`  
+**Accepted final-handoff baseline commit:** `24ed950aa098f92d761eebc96695f5b7c956c44b`  
+**Accepted final-handoff natural CI:** `32703866935 / 97360749452 / attempt 1 / push / main / success`  
+**Accepted baseline mirror convergence:** `PASS / independently verified`  
 **RSM-3 decision:** `CLOSED`  
 **Independently accepted/closed reboot product capabilities:** `RSM-5 secure Electron shell; RSM-6 I1-I8 renderer foundation and V1 validation`  
-**Immediate next control step:** `Converge the accepted canonical Source generation to the governed external Source mirrors and independently verify that convergence; only then may separate RSM-7 owner authorization be considered`
+**Immediate next control step:** `Independently review this exact Wave 2 Creator-Appeal / SICE V4 candidate, then require separate publication, natural-CI and mirror-reconvergence evidence before any separate RSM-7 owner authorization`
 
 ---
 
@@ -32,7 +35,9 @@ This document records the durable current truth after all eight RSM-6 implementa
 
 Gate A remains `PASS / CLOSED`. Gate B remains `ACTIVE / CURRENT` because the canonical roadmap spans RSM-5 through RSM-18. RSM-6 is `MILESTONE CLOSED / PASS` at closure/publication baseline `34b1148e1c7be12e30f1e962148d40b5027a7b07`. RSM-7 is the next roadmap milestone, has not started, and is not authorized.
 
-The POST-RSM-6 / PRE-RSM-7 `COMPLETENESS-FIX2` source alignment is `ACCEPTED / PUBLISHED` at commit `070d7aa562f3cac0923e766e616d8b9318b0aad3`; natural CI run `32694913531`, job `97335115697`, attempt 1 completed successfully for the push to `main`. Current control is the PRE-RSM-7 final handoff. Mirror convergence is not claimed: RSM-7 may not be authorized until the accepted canonical Source generation has converged to the governed external Source mirrors and that convergence has been independently verified.
+The POST-RSM-6 / PRE-RSM-7 `COMPLETENESS-FIX2` source alignment remains historical accepted publication truth at commit `070d7aa562f3cac0923e766e616d8b9318b0aad3`; natural CI run `32694913531`, job `97335115697`, attempt 1 completed successfully for the push to `main`. The later accepted PRE-RSM-7 final-handoff baseline is commit `24ed950aa098f92d761eebc96695f5b7c956c44b`; natural CI run `32703866935`, job `97360749452`, attempt 1 completed successfully for the push to `main`, and its governed external Source mirror convergence was independently verified `PASS`.
+
+Current control is `PRE-RSM-7 SOURCE ALIGNMENT WAVE2 CREATOR-APPEAL / SICE V4`; its `GOVERNED INTEGRATION / PROMOTION LIFECYCLE` is active. Advancement through independent review, publication, natural CI and governed mirror reconvergence is evidence-gated: no intermediate result is asserted by this control without its corresponding accepted evidence. Wave 2 final closure is `NOT YET GRANTED`, and this control authorizes no SICE implementation, dependency installation or RSM-7 work. RSM-7 remains `NEXT / NOT STARTED / NOT AUTHORIZED` until final completeness review and separate owner authorization.
 
 ---
 
@@ -70,6 +75,8 @@ The POST-RSM-6 / PRE-RSM-7 `COMPLETENESS-FIX2` source alignment is `ACCEPTED / P
 | RSM-6-V1 | `CLOSED / PASS` | Fresh-clone automated validation and owner manual acceptance independently passed |
 | RSM-6-CLOSE1 | `FINAL INDEPENDENT PASS` | RSM-6 terminal closure accepted; exact source publication and natural Windows CI passed |
 | POST-RSM-6 / PRE-RSM-7 COMPLETENESS-FIX2 | `ACCEPTED / PUBLISHED` | Exact Source alignment published at `070d7aa562f3cac0923e766e616d8b9318b0aad3`; natural CI `32694913531 / 97335115697 / attempt 1 / success` |
+| PRE-RSM-7 final-handoff baseline | `ACCEPTED / PUBLISHED / MIRROR-CONVERGED PASS` | Commit `24ed950aa098f92d761eebc96695f5b7c956c44b`; natural CI `32703866935 / 97360749452 / attempt 1 / success`; baseline mirror convergence independently verified |
+| PRE-RSM-7 SOURCE ALIGNMENT WAVE2 CREATOR-APPEAL / SICE V4 | `CURRENT CONTROL / GOVERNED INTEGRATION / PROMOTION LIFECYCLE ACTIVE` | Exact 29-row intent coverage follows evidence-gated promotion; final closure is not yet granted, with no implementation, dependency admission or RSM-7 authorization |
 | RSM-7 | `NEXT MILESTONE / NOT STARTED / NOT AUTHORIZED` | Canonical project/scene document implementation has not begun |
 
 ---
@@ -311,7 +318,7 @@ The exact admitted renderer dependency graph is `@babylonjs/core@9.21.2` and `@b
 ## 10. Current Handoff
 
 ```text
-snapshot date = 2026-08-24
+snapshot date = 2026-08-25
 Gate A = PASS / CLOSED
 Gate B = ACTIVE / CURRENT
 RSM-4 = CLOSED
@@ -327,8 +334,11 @@ accepted closure natural CI = 32526483832 / 96909482744 / attempt 1 / push / mai
 POST-RSM-6 / PRE-RSM-7 COMPLETENESS-FIX2 = ACCEPTED / PUBLISHED
 accepted alignment publication commit = 070d7aa562f3cac0923e766e616d8b9318b0aad3
 accepted alignment natural CI = 32694913531 / 97335115697 / attempt 1 / push / main / success
-current control = PRE-RSM-7 final handoff / governed external Source mirror convergence and independent verification required / separate RSM-7 owner authorization required
-mirror convergence = NOT CLAIMED BY THIS CANDIDATE
-PRE-RSM-7 invariant = accepted canonical Source generation must converge to governed external Source mirrors and be independently verified before separate RSM-7 owner authorization
+accepted final-handoff baseline commit = 24ed950aa098f92d761eebc96695f5b7c956c44b
+accepted final-handoff natural CI = 32703866935 / 97360749452 / attempt 1 / push / main / success
+baseline mirror convergence = PASS / independently verified
+current control = PRE-RSM-7 SOURCE ALIGNMENT WAVE2 CREATOR-APPEAL / SICE V4
+Wave 2 state = GOVERNED INTEGRATION / PROMOTION LIFECYCLE ACTIVE / FINAL CLOSURE NOT YET GRANTED
+PRE-RSM-7 invariant = evidence-gated independent review → publication → natural CI → governed mirror reconvergence → final completeness review → separate RSM-7 owner authorization
 RSM-7 = NEXT MILESTONE / NOT STARTED / NOT AUTHORIZED
 ```

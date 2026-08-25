@@ -704,6 +704,68 @@ Evidence must include, as applicable:
 - a no-network proof for baseline Studio Radio;
 - exact architecture/diff review plus normal V1/CLOSE1 evidence.
 
+#### SICE Wave 2 Creator-Appeal / Hardening Extension
+
+This non-numbered POST-RSM-18 control also owns the following bounded creator-appeal and structural-hardening work. It extends existing milestone authority; it does not renumber the roadmap, pre-close a later milestone, authorize implementation, or create a second canonical/project/runtime authority.
+
+| Intent | Bound roadmap placement |
+|---|---|
+| `CAE-01` Capture / Showcase Mode | POST-RSM-18 SICE clean-view capture and local Gallery integration; later RSM-44/RSM-83/RSM-89 presentation and capture surfaces may mature it |
+| `CAE-02` Project Hero Selection | POST-RSM-18 SICE local pinned/latest-valid/fallback hero selection |
+| `CAE-03` Scene Mood Board | POST-RSM-18 SICE bounded Scene-associated captures, palette, tags and notes |
+| `CAE-04` Beautiful Empty States | POST-RSM-18 SICE plus existing RSM-33/RSM-35/RSM-54 guidance, readiness, navigation and repair-action authority |
+| `CAE-05` RetroStage Look Lab | POST-RSM-18 bounded discoverability/workbench; canonical presentation maturity remains RSM-43/RSM-44/RSM-83/RSM-89 |
+| `CAE-06` Instant Look A/B | POST-RSM-18 bounded same-camera toggle/wipe comparison; mature snapshot/comparison ownership remains RSM-44/RSM-83/RSM-89 |
+| `CAE-07` Atmosphere Recipes | POST-RSM-18 bounded browser/preview/apply surface; atmosphere and recipe maturity remains RSM-43/RSM-86/RSM-89 and reusable packs remain RSM-108–110 |
+| `CAE-08` Visual Recipe Gallery | POST-RSM-18 built-in/local browser over existing profiles and descriptors; no marketplace or network catalog |
+| `CAE-09` Command Palette / Quick Actions | POST-RSM-18 query/presentation over the existing command/use-case registry; RSM-33/RSM-35/RSM-54 retain mature search/action UX ownership |
+| `CAE-10` Safe Startup / Studio Recovery | POST-RSM-18 local-state-only recovery entry; ordinary project trust/schema/migration/recovery remains authoritative |
+| `CAE-11` Diagnostic Actions | POST-RSM-18 action presentation over centralized diagnostics; RSM-25 and RSM-54 retain diagnostics/navigation/repair-command ownership |
+| `SICE-H1`…`SICE-H10` | POST-RSM-18 SICE structural hardening and closure evidence |
+| `CAE-H1` Preview generation / stale result / disposal | Bounded POST-RSM-18 previews; mature owners inherit RSM-27 generation leases and RSM-81 resource-disposal rules rather than pulling either subsystem forward |
+| `CAE-H2` Recipe Apply atomicity | Inherits the existing composition transaction / D-085 all-or-nothing authority; no new durable decision or transaction system |
+| `CAE-H3` Diagnostic privacy / redaction | POST-RSM-18 creator-facing redacted diagnostics under existing security/privacy/logging rules |
+| `DEP-01` / `DEP-02` | Source 06 planning candidates only; neither package is required merely to enter or close SICE |
+
+Creator-appeal behavior is bounded as follows:
+
+- Showcase capture temporarily hides editor-only chrome/gizmos/selection overlays, captures through the existing render/capture seam, restores the exact prior editor view on success or failure, and publishes only Studio-local Gallery metadata. It does not create a second capture/render authority.
+- Project Hero selection is deterministic: explicit valid pin, otherwise latest valid eligible capture, otherwise built-in fallback. Hero media is lazy, local, non-canonical and failure-isolated.
+- Scene Mood Board stores only Studio-local Scene associations to captures, palette swatches, bounded tags and notes. It is not a cloud board, general whiteboard, canonical Scene document, asset authority or runtime feature.
+- Beautiful Empty States apply existing contextual guidance to Launcher, Gallery, Problems and other SICE surfaces. They remain accessible, honest about state, and route through existing navigation/command authority.
+- Look Lab, Look A/B, Atmosphere Recipe and Visual Recipe Gallery previews are ephemeral derived presentation state. Same-camera comparison must be explicit; stale preview results are rejected; temporary resources are disposed; only explicit Apply may mutate canonical presentation through existing commands.
+- A visual/atmosphere recipe is a bounded descriptor over existing supported presentation controls. Apply is one validated all-or-nothing composition transaction with one history boundary under existing D-085 authority; failure leaves canonical state unchanged.
+- Command Palette enumeration and ranking are side-effect free. Invocation resolves the existing command/use-case identity, performs the normal enabled/validation/confirmation path, and never duplicates mutation implementations.
+- Diagnostic Actions standardize `Go To`, `Reveal`, `Explain`, `Copy`, `Retry`, and command-backed `Fix` descriptors. Problems/validation remain the truth source; unsafe or stale actions fail closed.
+
+##### Binding feature-acceptance invariants
+
+- `CAE-01` Showcase Capture: bounded hardware/capture failure produces fallback/diagnostics rather than a crash; capture failure restores the exact prior editor-view state; output remains project-clean and export-excluded unless explicitly imported.
+- `CAE-05` Look Lab: Cancel or close without Apply restores the exact pre-Lab authored state; unsupported combinations explain the capability reason; active/effective values expose provenance where the existing resolver can.
+- `CAE-06` Look A/B: invalidated or stale comparison snapshots are visibly identified and rejected; closing without Apply produces zero canonical mutation.
+- `CAE-07` Atmosphere Recipes: each recipe declares required capabilities/dependencies, optional ones and fallback; a missing required dependency/capability blocks with explanation; a missing optional dependency/capability degrades predictably; updating a recipe never silently changes already-authored project state; export uses produced canonical semantics, never a hidden recipe runtime.
+- `CAE-08` Visual Recipe Gallery: card/thumbnail preview is lazy and bounded; a missing thumbnail does not block authoring; compatibility derives from actual capability truth; unsupported effects are explained.
+- `CAE-09` Command Palette: disabled commands explain why; keyboard/focus-only operation is complete; destructive commands retain existing confirmation/safety policy.
+- `CAE-10` Safe Startup: reset scope is explicit; full Studio-local reset requires explicit confirmation; local recovery never modifies project files or bypasses project trust, schema, migration or recovery.
+- `CAE-11` Diagnostic Actions: action availability is deterministic; `Go To` resolves stable diagnostic/document identity rather than renderer-object identity; a stale location explains and fails closed rather than crashing; `Fix` remains existing command/undo/validation authority.
+
+The following structural hardening is mandatory for SICE closure:
+
+- `SICE-H1`: one RetroStage-owned, versioned Main-side `StudioLocalStateStore` with explicit schemas, ordered migrations, quarantine, built-in safe defaults, selective reset and atomic replace-safe writes.
+- `SICE-H2`: the first-useful launcher reads only bounded boot/recent-project metadata; Hero, Gallery, Player artwork/metadata and secondary history load lazily under explicit budgets.
+- `SICE-H3`: distinguish Studio-owned captures, rebuildable thumbnails/caches and external user-selected references; expose bounded cleanup, protect favorites/pins, and never delete external originals.
+- `SICE-H4`: two live locations claiming one project identity are an explicit ambiguous local-history state with `fork local history`, `same project`, or `forget location` choices; canonical identity is never silently rewritten.
+- `SICE-H5`: keyboard access, visible focus, reduced motion, accessible contrast, screen-reader naming and no-surprise-audio preferences outrank decorative Studio presets.
+- `SICE-H6`: corrupt/missing Gallery, Player, Hero, Mood Board, layout or preset state degrades independently and cannot block create/open/edit/save/close/reopen/PIE/cook/export/run-player.
+- `SICE-H7`: Safe Startup depends only on a minimal recovery bootstrap and built-in defaults, never on ordinary Gallery/layout/player payloads; corrupt bootstrap data itself falls back safely and remains diagnosable.
+- `SICE-H8`: SICE media uses explicit ownership classes, opaque Renderer-facing handles, canonicalized containment checks and existing path traversal/symlink/reparse/junction policy; deletion is limited to proven Studio-owned roots.
+- `SICE-H9`: media metadata/artwork/image parsing is size-, count-, time- and memory-bounded; active content is rejected/neutralized; malformed media is isolated. Rich metadata is deferred if Main responsiveness cannot be proven without pulling forward the RSM-27 job system.
+- `SICE-H10`: exactly one Main-side durable writer serializes migration/reset/write operations. Multi-instance behavior is deterministic and cannot race two durable writers over the same state.
+- `CAE-H1`: every preview carries request/generation identity; superseded completion is inert, cancel/close/dispose revokes publication, and resources remain bounded.
+- `CAE-H3`: copy/exported diagnostics use a redacted representation; local paths, media tags, user/profile values and secrets remain out of canonical projects, exports, logs and network surfaces by default.
+
+SICE closure must prove each row above directly, including safe-start recovery independence, multi-instance writer behavior, startup/media budgets, media cleanup/deletion containment, stale preview disposal, atomic recipe Apply, diagnostics redaction, accessibility inheritance and independent degraded-mode operation. `fuse.js` and `music-metadata` remain optional milestone-gated planning candidates subject to exact Source 06 admission; no dependency installation is implied here.
+
 **Failure / deferral rule**
 If SICE later proves materially riskier or more expensive than expected, accepted RSM-18 closure remains valid. SICE may be narrowed/deferred only through explicit source change control. RSM-19 may not silently bypass a still-binding SICE-before-RSM-19 rule; removing or changing that sequencing dependency requires a formal roadmap/decision amendment.
 

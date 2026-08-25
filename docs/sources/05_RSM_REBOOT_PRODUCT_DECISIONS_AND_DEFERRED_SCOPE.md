@@ -2622,6 +2622,29 @@ SICE product acceptance also includes:
 
 SICE closure evidence includes Main/Preload schema/sender/path validation, local-media permission/path failure fixtures, Welcome/Continue/reset/disable acceptance, restart persistence, stale local-reference fixtures, project-dirty invariants, no-network Studio Radio proof and Studio-local export exclusion.
 
+### D-080 Wave 2 creator-appeal / hardening extension
+
+The POST-RSM-18 SICE owner is extended with bounded Showcase Capture, deterministic Project Hero fallback, Scene Mood Board, Beautiful Empty States, Look Lab, Look A/B, Atmosphere Recipes, Visual Recipe Gallery, Command Palette/Quick Actions, Safe Startup and Diagnostic Actions. These are optional editor-local/application-local experience surfaces over existing authorities; they do not create canonical game/project/runtime meaning, a second command system, a second diagnostics truth source, a marketplace/network catalog or a second presentation profile.
+
+Existing decision authority is inherited as follows:
+
+| V4 intent | Controlling existing authority |
+|---|---|
+| `CAE-01`, `CAE-02`, `CAE-03`, `CAE-10`, `SICE-H1`…`SICE-H10` | D-080 Studio-local identity, state, media, recovery and disable boundary |
+| `CAE-04` | D-024/D-033 project-clean workspace/local-state boundary plus existing contextual guidance |
+| `CAE-05`, `CAE-06`, `CAE-07`, `CAE-08`, `CAE-H1` | D-049/D-081 canonical presentation and controlled-imperfection authority; previews remain derived and disposable |
+| `CAE-09` | D-018 command authority; palette search/enumeration cannot create parallel mutations |
+| `CAE-11`, `CAE-H3` | D-037/D-063 centralized validation/diagnostic and safe repair guidance, under existing privacy/redaction controls |
+| Later recipe/profile packs | D-060 bounded content/pack direction; no marketplace is required |
+
+The D-080 local-state contract now requires one versioned Main-side Studio store, ordered migrations, quarantine, safe defaults, selective reset, atomic replace-safe persistence, one serialized durable writer and deterministic multi-instance behavior. Startup reads only minimal recovery/recent-project metadata; secondary history and all Hero/Gallery/Player/Mood Board media are lazy and bounded. Gallery media is classified as Studio-owned capture, rebuildable cache or external reference; cleanup is visible, favorites/pins are protected, external originals are never deleted, and path/reparse/junction containment must pass before owned deletion.
+
+Each local feature fails independently. Corrupt Gallery, Hero, Mood Board, Player, layout or preset data cannot block the create/open/edit/save/close/reopen/PIE/cook/export/run-player spine. Safe Startup uses a minimal recovery record independent of ordinary Studio payloads and never bypasses normal project trust, schema, migration or recovery. Project-identity ambiguity is shown explicitly and resolved only through local-history choices; canonical identity is not silently changed.
+
+SICE accessibility and privacy are mandatory: keyboard/focus/reduced-motion/readability/no-surprise-audio preferences outrank decorative presets; copied diagnostics are redacted before publication; local paths, tags, user values and secrets do not enter canonical projects, exports, logs or network surfaces by default. Bounded media parsing must enforce byte/count/dimension/string/time/memory ceilings and may defer rich metadata instead of pulling RSM-27 forward.
+
+Dependency planning remains non-admission. `fuse.js` may be considered only as a replaceable POST-RSM-18 bounded local fuzzy-ranking helper. The single existing `music-metadata` family may also be considered at narrow owner `POST-RSM-18 SICE-I5` for explicitly selected local Studio Player metadata while retaining RSM-79 source inspection. Neither is installed, mandatory for SICE entry/closure, playback/codec authority or permission to expand filesystem/network/runtime scope.
+
 If SICE is later narrowed or deferred, accepted RSM-18 closure remains valid, but RSM-19 cannot silently bypass a still-binding SICE-before-RSM-19 rule. Changing/removing that sequencing dependency requires explicit source change control.
 
 ## 86. D-081 — Controlled Imperfection Is an Authorable Presentation Dimension, Not Accidental Degradation
@@ -3786,7 +3809,8 @@ It must remain read-only/evidence-first by default and must not silently authori
 | External cinematic formats/libraries | Open until audit | RSM-107 | Mapping, round-trip, license, provenance, unsupported-data policy |
 | `@microsoft/api-extractor` | Development-only candidate | First package-boundary/API-review milestone where several public TypeScript APIs justify it | Exact package/license/transitives, config fit, generated-report workflow, player/build exclusion |
 | `pure-rand` | Milestone-gated runtime-adapter candidate | RSM-16+ RNG contract; later RSM-57/RSM-86 consumers only through RetroStage RNG authority | Exact version/license, deterministic fixtures, algorithm-upgrade compatibility, save-state policy |
-| `music-metadata` | Milestone-gated import-inspection candidate | RSM-79 | Exact package/license/transitives, Node/ESM compatibility, malformed-input tests, source-inspection-only boundary |
+| `fuse.js` | Milestone-gated local-ranking candidate | POST-RSM-18 SICE only if bounded local fuzzy ranking materially reduces owned code | Exact package/license/transitives, browser/Electron compatibility, deterministic bounded ranking fixtures, local-query-only adapter boundary; candidate only, no install |
+| `music-metadata` | Milestone-gated import-inspection candidate | POST-RSM-18 SICE-I5 for explicit local Studio Player metadata; retain RSM-79 source inspection | Exact package/license/transitives, Node/ESM compatibility, malformed/oversized-input and responsiveness tests, metadata/source-inspection-only boundary; one family/row, no playback or codec authority |
 | `execa` | Conditional audit | First real audited external-process need | Exact graph/license, Node/Main/worker placement, cancellation/security, external executable separately admitted |
 | `@dagrejs/graphlib` | Milestone-gated derived-graph candidate | RSM-94/100/101 or earlier only when repeated graph algorithms justify it | Exact algorithms, determinism/order, performance/memory, derived-graph-only boundary |
 | `@dagrejs/dagre` | Milestone-gated deferred candidate | Real World/Level/Flow/dependency visual graph layout need only | Exact package/license, Graphlib relation, layout-only boundary; no semantic graph authority |

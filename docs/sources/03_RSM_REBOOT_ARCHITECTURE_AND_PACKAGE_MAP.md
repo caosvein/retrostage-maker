@@ -603,6 +603,54 @@ PIE audio interlock stores an explicit pre-PIE local playback snapshot sufficien
 
 Master disable must make all Studio records optional; no canonical open/save/PIE/cook/export path may require them.
 
+#### 9.1B Wave 2 Creator-Appeal / SICE Hardening Architecture
+
+`StudioLocalStateStore` is the single conceptual authority for POST-RSM-18 Studio-local durable state. Its physical implementation belongs to Electron Main/application-user-data infrastructure behind narrow typed Preload operations. Renderer/UI code may request use cases and render immutable JSON-safe projections; it does not receive arbitrary paths, native filesystem objects or durable-write authority.
+
+The store envelope is versioned independently of canonical project schemas and contains explicit record schemas, ordered migrations, quarantine evidence, built-in defaults and selective-reset boundaries. Exactly one Main-side durable writer serializes migration, reset and writes, commits through atomic replace-safe persistence, and exposes deterministic multi-instance behavior. A second process/window cannot become a competing durable writer. Migration/reset failure preserves the last accepted state when possible, emits a typed local diagnostic and falls back only within the failed Studio feature.
+
+Studio-local records may be extended with:
+
+```text
+ProjectHeroRecord
+SceneMoodBoardRecord
+ShowcaseCaptureRecord / GalleryCaptureRecord
+VisualRecipeBrowserPreferences
+CommandPalettePreferences
+SafeStartupBootstrap
+```
+
+`ProjectHeroRecord` stores an optional explicit capture reference plus derived fallback provenance. Resolution is deterministic: valid explicit pin, else latest valid eligible capture, else built-in fallback. `SceneMoodBoardRecord` stores only stable project/Scene associations, Studio-local capture references, bounded palette swatches, tags and notes. Neither record is canonical Scene/project/runtime truth.
+
+Studio media has three non-overlapping ownership classes:
+
+```text
+STUDIO_OWNED_CAPTURE
+REBUILDABLE_STUDIO_CACHE
+EXTERNAL_USER_SELECTED_REFERENCE
+```
+
+Cleanup may delete only content proven to be inside an owned Studio root after existing normalization, traversal, symlink, reparse-point and junction containment policy passes. Favorites/pins are protected from automatic cleanup. External originals are never deleted; stale external references degrade to local diagnostics. Renderer-facing media identities are opaque handles, never raw paths. Two live locations claiming one project identity remain an explicit ambiguous local-history state until the user chooses fork-local-history, same-project, or forget-location; no choice silently rewrites canonical project identity.
+
+The startup critical path reads only a minimal `SafeStartupBootstrap` plus bounded recent-project metadata needed for a first-useful launcher. Hero images, Gallery pages, Player artwork/metadata, Mood Board media and secondary history are lazy and governed by explicit item/byte/time/memory budgets. The recovery bootstrap is independently parseable and recoverable from built-in defaults; corrupt Gallery/layout/player/preset payloads cannot prevent Safe Startup. Generation-sequence exhaustion or one failed feature cannot poison the launcher/root authority.
+
+Media parsing is defensive and bounded. Input size, decoded dimensions, artwork count/bytes, string lengths, nesting and elapsed work have explicit ceilings; active content is rejected or neutralized. Rich metadata is deferred when Main responsiveness cannot be demonstrated with the pre-RSM-19 architecture. POST-RSM-18 does not pull the RSM-27 general async-job system forward merely to parse media.
+
+Accessibility precedence applies across Launcher, Gallery, Hero, Mood Board, Look Lab, recipe browser, Command Palette, Problems and local Player/Radio: keyboard operation, visible focus, semantic names, readable contrast, reduced motion and no-surprise-audio preferences override decorative Studio presets. Corrupt or unavailable Gallery, Player, Hero, Mood Board, layout or preset state degrades independently and cannot block the core project spine.
+
+Creator-appeal controllers reuse existing authorities:
+
+- Showcase capture coordinates the existing editor-view/capture seam, temporarily suppresses editor-only overlays, and restores the exact previous view in a best-effort `finally` path. It publishes a Studio-owned capture record only after successful media publication.
+- Look Lab, Look A/B, Atmosphere Recipe and Visual Recipe Gallery use ephemeral preview records carrying request/generation identity, baseline fingerprint and resource ownership. Superseded, cancelled, context-invalidated or disposed completions are inert and release temporary resources.
+- Look/A-B comparison fixes the camera/view and identifies the exact compared baseline/candidate. Preview state never becomes canonical until explicit Apply.
+- Visual/atmosphere recipe descriptors reference existing supported presentation controls. Apply validates the complete candidate and enters the existing composition transaction / D-085 authority as one all-or-nothing history action; no half-applied multi-document graph may publish.
+- Command Palette is a side-effect-free query/presentation projection over the existing command/use-case registry. Search results carry existing command identity, availability and confirmation metadata; invocation calls the existing command path.
+- Diagnostic Action descriptors carry diagnostic identity plus `GoTo`, `Reveal`, `Explain`, `Copy`, `Retry`, or existing-command-backed `Fix` metadata. They neither mutate state directly nor replace centralized Problems/validation truth.
+
+Creator-facing diagnostic copy/export uses a dedicated redacted representation. Local absolute paths, media tags, user/profile values, secrets and unapproved free text remain out of canonical project documents, player/export artifacts, logs and network surfaces by default. Redaction happens before serialization/publication; a failed redaction produces no diagnostic payload.
+
+No new package is required by this architecture. A future admitted `fuse.js` may only rank bounded local Command Palette/recipe/diagnostic descriptors. A future admitted `music-metadata` may only parse explicitly selected local Studio Player metadata through Main/Preload mediation. Both remain replaceable adapters and own no command, filesystem, playback, codec, canonical, export or runtime authority.
+
 ### 9.2 Gameplay / Storytelling / Player-Experience Semantic Ownership
 
 RetroStage uses one shared typed gameplay meaning layer across specialized authoring surfaces, PIE, player runtime, diagnostics, save, and later Flow Graph/Sequencer integration.

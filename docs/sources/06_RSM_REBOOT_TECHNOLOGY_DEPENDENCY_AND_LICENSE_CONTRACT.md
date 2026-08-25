@@ -1938,7 +1938,8 @@ meshoptimizer
 |---|---|---|---|
 | `@microsoft/api-extractor` | `DEVELOPMENT_ONLY` | First milestone where multiple meaningful public TypeScript package APIs justify report/diff enforcement | Evidence/tooling only; package API authority remains Source 03 + physical public entrypoints + review; player excluded |
 | `pure-rand` | `MILESTONE_GATED` | RSM-16+ RNG semantics; later RSM-57/RSM-86 consumers | RetroStage owns stream identity, seed provenance, domain separation, save/trace/regression policy; backend numbers only |
-| `music-metadata` | `MILESTONE_GATED` | RSM-79 | Source-file/container/duration/tag inspection only; no decode/runtime/cue/gameplay-noise/codec authority |
+| `fuse.js` | `MILESTONE_GATED` editor-helper candidate | POST-RSM-18 SICE only if bounded local fuzzy ranking materially reduces owned code | Local descriptor ranking only; no command, canonical search-index, project-open, filesystem, validation, persistence, network or runtime authority; exact future admission required |
+| `music-metadata` | `MILESTONE_GATED` | POST-RSM-18 SICE-I5 for explicit user-selected local Studio Player metadata; retain RSM-79 source inspection | Metadata/source-file/container/duration/tag inspection only; no decode, playback, codec, runtime cue, gameplay noise, arbitrary-filesystem, canonical, export or Runtime Save authority; one candidate family, exact first-installer admission required |
 | `execa` | `CONDITIONAL_AUDIT` | First real audited external executable/process need | Node/Main/worker process adapter only; approval of Execa never approves an executable; no Renderer/direct project shell authority |
 | `@dagrejs/graphlib` | `MILESTONE_GATED` | RSM-94/100/101 or earlier only after repeated derived-graph algorithm need | Derived graph projections for reachability/cycles/topology; graph object is never canonical project/runtime truth |
 | `@dagrejs/dagre` | `MILESTONE_GATED` with `DEFERRED_CANDIDATE` status | Only when a real visual graph layout surface exists | Layout coordinates only; no semantic graph authority; may remain absent even if React Flow is later used |
@@ -1953,6 +1954,37 @@ Additional boundary:
 - `ts-morph` is not elevated into this candidate set; reconsider only after repeated Compiler API boilerplate proves a concrete need.
 - No new state manager, ECS, serializer, scripting VM, game framework, audio/physics/navigation engine, renderer, canonical graph framework, DI container, scene framework, or mandatory package is admitted by this alignment.
 - A permissive software license is never by itself admission evidence.
+
+#### POST-RSM-18 SICE candidate-use and pull-forward lock
+
+This Source generation records planning candidates only. It does not install, admit, pin, bundle or approve a release of either package.
+
+```text
+POST-RSM-18 SICE
+→ fuse.js may be admitted only if bounded local fuzzy ranking materially reduces custom code and exact admission passes
+→ the existing music-metadata family may be admitted at SICE-I5 only if rich explicit local Player metadata is accepted and exact admission passes
+→ neither package is required merely to enter or close SICE
+```
+
+`fuse.js` is a replaceable query/ranking implementation behind RetroStage-owned bounded descriptor projections. It may rank Command Palette, recipe-browser or diagnostic-action entries already admitted by their owning registries. It cannot enumerate side effects, invoke commands, define availability, open projects, crawl the filesystem, create canonical indexes, persist authority or enter the exported player.
+
+The planning observation for `fuse.js` was stable `7.5.0`, Apache-2.0, with zero production dependencies at the reviewed snapshot. That observation is research evidence, not a future pin or current installation truth. The first installer must re-query the exact release and repeat license/copyright, transitive, vulnerability, browser/Electron, bundle, notice/SBOM and replacement review.
+
+`music-metadata` remains one existing `MILESTONE_GATED` family with two narrow allowed owners:
+
+```text
+POST-RSM-18 SICE-I5
+→ explicit user-selected local Studio Player metadata only
+
+RSM-79
+→ source-file/container/duration/tag inspection
+```
+
+SICE use must be mediated by secure Electron Main/Preload operations over explicit user-selected media, enforce byte/count/string/time/memory budgets, reject or neutralize active content, isolate malformed files and preserve Main responsiveness. Metadata does not grant playback, decoding, codec, game-audio, canonical document, arbitrary filesystem, export, Runtime Save or network authority. The exact package graph is re-audited by whichever owner first installs it; later reuse depends on then-current compatibility/security/license evidence.
+
+The default SICE production-dependency ceiling for this Wave 2 plan is these two optional helpers. A third new SICE production dependency requires a separate owner-reviewed Source 06 change proving that the approved stack and platform built-ins are insufficient, the dependency materially reduces risk/cost, RetroStage retains architecture authority, and full commercial/transitive/native/binary review passes.
+
+No prerelease is selected merely because it is newer; no unofficial fork is substituted without separate review; no native database, FFmpeg/codec stack, RSM-27 general job system or network/cloud service is pulled into SICE by this plan. No Studio dependency enters the exported player unless separately required and admitted by runtime authority.
 
 ---
 
@@ -2199,7 +2231,8 @@ This ledger records the authoritative upstream source family used for the histor
 | KTX-Software | `https://github.com/KhronosGroup/KTX-Software` | Mixed; conditional audit only |
 | API Extractor | `https://github.com/microsoft/rushstack` / `https://api-extractor.com/` | MIT observed; `DEVELOPMENT_ONLY` candidate only; exact release not frozen |
 | pure-rand | `https://github.com/dubzzz/pure-rand` | MIT observed; `MILESTONE_GATED` RNG-backend candidate only; exact release not frozen |
-| music-metadata | `https://github.com/Borewit/music-metadata` | MIT observed; `MILESTONE_GATED` source-inspection candidate only; exact release not frozen |
+| fuse.js | `https://github.com/krisk/Fuse` | Apache-2.0 observed for planning snapshot 7.5.0 with zero production dependencies; `MILESTONE_GATED` POST-RSM-18 SICE local-ranking candidate only; exact release not frozen or installed |
+| music-metadata | `https://github.com/Borewit/music-metadata` | MIT observed; one `MILESTONE_GATED` family for narrow POST-RSM-18 SICE-I5 local metadata and retained RSM-79 source inspection; exact release not frozen or installed |
 | Execa | `https://github.com/sindresorhus/execa` | MIT observed; `CONDITIONAL_AUDIT` process-adapter candidate only; exact release not frozen |
 | DagreJS Graphlib | `https://github.com/dagrejs/graphlib` | MIT observed; `MILESTONE_GATED` derived-graph candidate only; exact release not frozen |
 | DagreJS Dagre | `https://github.com/dagrejs/dagre` | MIT observed; deferred `MILESTONE_GATED` visual-layout candidate only; exact release not frozen |
