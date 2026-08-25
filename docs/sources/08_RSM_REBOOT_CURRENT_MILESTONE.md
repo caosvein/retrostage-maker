@@ -6,9 +6,9 @@
 **Current gate:** `Gate B — ACTIVE / CURRENT`  
 **Last fully closed milestone:** `RSM-6 — MILESTONE CLOSED / PASS`  
 **Next milestone boundary:** `RSM-7 — Canonical Project / Scene Document Foundation — NOT STARTED / NOT AUTHORIZED`  
-**Current task:** `PRE-RSM-7 SOURCE ALIGNMENT WAVE2 CREATOR-APPEAL / SICE V4 — GOVERNED INTEGRATION / PROMOTION LIFECYCLE ACTIVE`  
+**Current task:** `CIC SOURCE-ALIGNMENT SEMANTIC REBASE / INDEPENDENT REVIEW PREPARATION — NEXT PRE-RSM-7 CONTROL / QUEUED / NOT ACTIVATED / NOT AUTHORIZED`  
 **Milestone/control state:** `RSM-6 MILESTONE CLOSED-PASS / GATE B ACTIVE-CURRENT / RSM-7 NEXT-NOT STARTED-NOT AUTHORIZED`  
-**Task state:** `BASELINE FINAL HANDOFF MIRROR-CONVERGED PASS / WAVE2 V4 EVIDENCE-GATED PROMOTION / FINAL CLOSURE NOT YET GRANTED / RSM-7 NOT AUTHORIZED`  
+**Task state:** `WAVE2 V4 CLOSED-PASS / PUBLISHED / NATURAL-CI PASS / EXTERNAL MIRRORS 11-OF-11 EXACT / FINAL COMPLETENESS PASS / CIC SOURCE-ALIGNMENT QUEUED-NOT ACTIVATED-NOT AUTHORIZED / RSM-7 NOT AUTHORIZED`  
 **Snapshot date:** 2026-08-25  
 **Timezone:** Europe/Istanbul  
 **Repository:** `PRESENT — C:\RetroStage\retrostage-maker`  
@@ -21,6 +21,10 @@
 **Accepted final-handoff baseline commit:** `24ed950aa098f92d761eebc96695f5b7c956c44b`
 **Accepted final-handoff natural CI:** `32703866935 / 97360749452 / attempt 1 / push / main / success`
 **Accepted baseline mirror convergence:** `PASS / independently verified`
+**Accepted Wave2 Creator-Appeal / SICE V4 publication:** `4e5c337445f712a5feeab2f2c2167783086766d9`
+**Accepted Wave2 natural CI:** `32830026684 / 97746392474 / attempt 1 / push / main / completed / success`
+**Accepted Wave2 mirror convergence:** `Google Drive Sources 11/11 exact / PASS; ChatGPT Project Sources 11/11 exact / PASS`
+**Accepted Wave2 final completeness audit:** `PASS`
 
 ---
 
@@ -32,7 +36,9 @@ RSM-6 is `MILESTONE CLOSED / PASS`; I1-I8 are `CLOSED / ACCEPTED`; RSM-6-V1 is `
 
 The historical POST-RSM-6 `COMPLETENESS-FIX2` source alignment remains `ACCEPTED / PUBLISHED` at commit `070d7aa562f3cac0923e766e616d8b9318b0aad3`; natural CI run `32694913531`, job `97335115697`, attempt 1 completed successfully. The later accepted PRE-RSM-7 final-handoff baseline is commit `24ed950aa098f92d761eebc96695f5b7c956c44b`; natural CI run `32703866935`, job `97360749452`, attempt 1 completed successfully, and baseline governed external Source mirror convergence was independently verified `PASS`.
 
-Current control is `PRE-RSM-7 SOURCE ALIGNMENT WAVE2 CREATOR-APPEAL / SICE V4`; its `GOVERNED INTEGRATION / PROMOTION LIFECYCLE` is active. Independent review, publication, natural CI and governed mirror reconvergence are evidence-gated intermediate states and are asserted only when their accepted evidence exists. Wave 2 final closure is `NOT YET GRANTED`, SICE implementation is not started, no dependency is admitted, and RSM-7 remains `NEXT / NOT STARTED / NOT AUTHORIZED`.
+The `PRE-RSM-7 SOURCE ALIGNMENT WAVE2 CREATOR-APPEAL / SICE V4` control is `CLOSED / PASS`. It was published at commit `4e5c337445f712a5feeab2f2c2167783086766d9`; natural CI run `32830026684`, job `97746392474`, attempt 1 completed successfully for the push to `main`. Google Drive Sources and ChatGPT Project Sources each converge `11/11 exact / PASS`, and the final completeness audit is `PASS`.
+
+The next PRE-RSM-7 control is `CIC SOURCE-ALIGNMENT SEMANTIC REBASE / INDEPENDENT REVIEW PREPARATION`. `CIC = QUEUED / NOT ACTIVATED / NOT IMPLEMENTED / NOT AUTHORIZED`; `CIC semantic rebase = NOT YET COMPLETED`; `CIC candidate embedded Source baseline = STALE / MUST NOT BE APPLIED DIRECTLY`. This closure does not integrate CIC architecture, CTX roles, workflow rules or other CIC semantics. RSM-7 remains `NEXT / NOT STARTED / NOT AUTHORIZED` pending separate owner authorization.
 
 ---
 
@@ -71,7 +77,8 @@ Current control is `PRE-RSM-7 SOURCE ALIGNMENT WAVE2 CREATOR-APPEAL / SICE V4`; 
 | RSM-6-CLOSE1 | `FINAL INDEPENDENT PASS` |
 | POST-RSM-6 / PRE-RSM-7 COMPLETENESS-FIX2 | `ACCEPTED / PUBLISHED — 070d7aa562f3cac0923e766e616d8b9318b0aad3 / CI 32694913531 / 97335115697 / attempt 1 / success` |
 | PRE-RSM-7 final-handoff baseline | `ACCEPTED / PUBLISHED / MIRROR-CONVERGED PASS — 24ed950aa098f92d761eebc96695f5b7c956c44b / CI 32703866935 / 97360749452 / attempt 1 / success` |
-| PRE-RSM-7 SOURCE ALIGNMENT WAVE2 CREATOR-APPEAL / SICE V4 | `CURRENT CONTROL / GOVERNED INTEGRATION / PROMOTION LIFECYCLE ACTIVE / FINAL CLOSURE NOT YET GRANTED` |
+| PRE-RSM-7 SOURCE ALIGNMENT WAVE2 CREATOR-APPEAL / SICE V4 | `CLOSED / PASS — 4e5c337445f712a5feeab2f2c2167783086766d9 / CI 32830026684 / 97746392474 / attempt 1 / success / external Source mirrors 11/11 exact each / final completeness PASS` |
+| CIC SOURCE-ALIGNMENT | `NEXT PRE-RSM-7 CONTROL / SEMANTIC REBASE / INDEPENDENT REVIEW PREPARATION / QUEUED / NOT ACTIVATED / NOT IMPLEMENTED / NOT AUTHORIZED / SEMANTIC REBASE NOT YET COMPLETED` |
 | RSM-7 | `NEXT MILESTONE / NOT STARTED / NOT AUTHORIZED` |
 
 Historical FIX/failure artifacts remain evidence history. The original failed clone remains preserved and is not promoted as current success evidence.
@@ -302,12 +309,20 @@ RSM-6 I1-I8 = CLOSED / ACCEPTED
 → accepted final-handoff baseline commit 24ed950aa098f92d761eebc96695f5b7c956c44b
 → accepted final-handoff natural CI 32703866935 / 97360749452 / attempt 1 / push / main / success
 → baseline mirror convergence = PASS / independently verified
-→ current control = PRE-RSM-7 SOURCE ALIGNMENT WAVE2 CREATOR-APPEAL / SICE V4
-→ Wave 2 = GOVERNED INTEGRATION / PROMOTION LIFECYCLE ACTIVE / FINAL CLOSURE NOT YET GRANTED
+→ Wave2 Creator-Appeal / SICE V4 = CLOSED / PASS
+→ Wave2 publication commit = 4e5c337445f712a5feeab2f2c2167783086766d9
+→ Wave2 natural CI = 32830026684 / 97746392474 / attempt 1 / push / main / completed / success
+→ Wave2 Google Drive Sources mirror = 11/11 exact / PASS
+→ Wave2 ChatGPT Project Sources mirror = 11/11 exact / PASS
+→ Wave2 final completeness audit = PASS
+→ current/next PRE-RSM-7 control = CIC SOURCE-ALIGNMENT SEMANTIC REBASE / INDEPENDENT REVIEW PREPARATION
+→ CIC = QUEUED / NOT ACTIVATED / NOT IMPLEMENTED / NOT AUTHORIZED
+→ CIC semantic rebase = NOT YET COMPLETED
+→ CIC candidate embedded Source baseline = STALE / MUST NOT BE APPLIED DIRECTLY
 → RSM-7 = NEXT ROADMAP MILESTONE / NOT STARTED / NOT AUTHORIZED
 ```
 
-Gate B remains active across RSM-5 through RSM-18. The historical accepted COMPLETENESS-FIX2 publication remains preserved, and the accepted final-handoff baseline has independently verified mirror convergence. This Wave 2 V4 Source generation follows an evidence-gated integration/promotion lifecycle: independent review, publication, natural CI and governed mirror reconvergence are recorded only when their accepted evidence exists. Final closure is not yet granted, and this control does not authorize RSM-7; final completeness review and separate RSM-7 owner authorization remain required.
+Gate B remains active across RSM-5 through RSM-18. The historical accepted COMPLETENESS-FIX2 publication remains preserved, and the accepted final-handoff baseline has independently verified mirror convergence. Wave2 Creator-Appeal / SICE V4 is now `CLOSED / PASS` after accepted publication, natural CI, 11/11 exact convergence of both governed external Source mirrors, and final completeness audit. `CIC SOURCE-ALIGNMENT SEMANTIC REBASE / INDEPENDENT REVIEW PREPARATION` is only the queued next PRE-RSM-7 control and is not activated, implemented or authorized; RSM-7 still requires separate owner authorization.
 
 ---
 
@@ -331,9 +346,16 @@ accepted alignment natural CI = 32694913531 / 97335115697 / attempt 1 / push / m
 accepted final-handoff baseline commit = 24ed950aa098f92d761eebc96695f5b7c956c44b
 accepted final-handoff natural CI = 32703866935 / 97360749452 / attempt 1 / push / main / success
 baseline mirror convergence = PASS / independently verified
-current control = PRE-RSM-7 SOURCE ALIGNMENT WAVE2 CREATOR-APPEAL / SICE V4
-Wave 2 state = GOVERNED INTEGRATION / PROMOTION LIFECYCLE ACTIVE / FINAL CLOSURE NOT YET GRANTED
-PRE-RSM-7 invariant = evidence-gated independent review → publication → natural CI → governed mirror reconvergence → final completeness review → separate RSM-7 owner authorization
+Wave2 Creator-Appeal / SICE V4 = CLOSED / PASS
+Wave2 publication commit = 4e5c337445f712a5feeab2f2c2167783086766d9
+Wave2 natural CI = 32830026684 / 97746392474 / attempt 1 / push / main / completed / success
+Wave2 Google Drive Sources mirror = 11/11 exact / PASS
+Wave2 ChatGPT Project Sources mirror = 11/11 exact / PASS
+Wave2 final completeness audit = PASS
+current/next PRE-RSM-7 control = CIC SOURCE-ALIGNMENT SEMANTIC REBASE / INDEPENDENT REVIEW PREPARATION
+CIC = QUEUED / NOT ACTIVATED / NOT IMPLEMENTED / NOT AUTHORIZED
+CIC semantic rebase = NOT YET COMPLETED
+CIC candidate embedded Source baseline = STALE / MUST NOT BE APPLIED DIRECTLY
 next milestone boundary = RSM-7 — Canonical Project / Scene Document Foundation
 RSM-7 = NEXT / NOT STARTED / NOT AUTHORIZED
 ```
