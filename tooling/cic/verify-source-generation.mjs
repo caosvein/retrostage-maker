@@ -10,7 +10,7 @@ export function formatJsonResult(result) {
   return `${JSON.stringify(result, null, 2)}\n`;
 }
 
-export function formatHumanResult(result) {
+function formatHumanResult(result) {
   if (result.status === "PASS") {
     return [
       "CIC source generation: PASS",
