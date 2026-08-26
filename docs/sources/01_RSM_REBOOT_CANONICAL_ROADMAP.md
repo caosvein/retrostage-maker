@@ -332,6 +332,26 @@ Unless a milestone explicitly narrows the requirement, closure requires:
 - Reserve a Frame Graph/backend seam without moving advanced post-processing or presentation authoring into RSM-6.
 **Accepted exit evidence:** A derived scene renders through the real Electron editor viewport; the same adapter foundation is exercised through a real `NullEngine` headless path and RetroStage-owned diagnostics; stable-handle picking, derived asset-container ownership, editor grid/camera/gizmo intent seams, context-loss recovery, and ordered resource teardown are proven while canonical documents remain Babylon-independent. Natural push CI run `32496829684`, job `96817113858`, attempt `1`, on `main` completed with `success`; fresh-clone automated validation and owner manual acceptance independently passed.
 
+### PRE-RSM-7 Context Integrity Control — non-numbered standing engineering control
+
+**Type:** `ENGINEERING GOVERNANCE / NOT PRODUCT IMPLEMENTATION / NOT A NUMBERED MILESTONE`  
+**Lifecycle boundary:** `CIC SOURCE-ALIGNMENT = NEXT PRE-RSM-7 CONTROL / QUEUED`; CIC is `NOT ACTIVATED / NOT IMPLEMENTED / NOT AUTHORIZED`, and RSM-7 remains `NEXT / NOT STARTED / NOT AUTHORIZED` until separate owner authority is granted.
+
+Before RSM-7 production work may start, the Context Integrity Control (CIC) must establish and independently prove a deterministic, model/vendor-agnostic development-context and continuity system derived from canonical Sources, physical repository truth, reviewed task/authorization state, and durable evidence. Generated context, chat history, model memory, caches, registries, and handoff prose remain derived and never become canonical authority.
+
+CIC scope includes:
+
+- bounded Tier 0/1 context with explicit Tier 2 escalation, completeness/closure witnesses, coherent generation fingerprints, stale/expansion gates, per-write preimage protection, and branch/worktree/task isolation;
+- physical dependency and non-inferable semantic relation coverage, durable provenance-bound invariant/scenario/oracle metadata, evidence identity/retention/recovery, and deterministic cache/pack lifecycle;
+- Adaptive Validation as a core capability: versioned scenario/oracle intent, task-derived test plans, exact validated-snapshot evidence, deterministic failure replay, capability-aware blocking, and mandatory wider gates that cannot be optimized away;
+- compact human recovery plus project-chat/progression continuity that works without raw prior chat, preserves one owner-designated active progression lineage, and keeps canonical current control separate from local session workstreams;
+- technical, semantic, and experiential acceptance as separate lanes; experiential brief/result capability remains core while result materialization is conditional on the owning task, with creator-project authority and finishability preserved;
+- survival and transition hardening for compiler self-verification, atomic activation, concurrent writers, durable/revocable authorization, disaster recovery, collision/object availability, remote history, registry/package/mirror completeness, publication-to-CI continuity, bounded scale fixtures, and physical-first truth.
+
+Targeted test pruning remains off until independent false-negative/seeded-omission proof passes; mandatory wider gates always remain. CIC contract/risk/fault-matrix review never substitutes for real implementation and applicable scenario/fault execution.
+
+After CIC closes, context integrity, Adaptive Validation, semantic relation/invariant maintenance, handoff continuity, and affected-scenario reconciliation become standing milestone/workflow obligations rather than a one-time PRE-RSM-7 exercise. Source07 receives exact CIC commands only after those physical scripts exist. CIC alignment and closure still require independent review and truthful current-state alignment before separate RSM-7 owner authorization.
+
 ## RSM-7 — Canonical Project / Scene Document Foundation
 **Current control boundary:** `RSM-7 = NEXT ROADMAP MILESTONE / NOT STARTED / NOT AUTHORIZED`; live activation belongs to Source 02/08 and separate owner authority. Roadmap/source alignment by itself never activates RSM-7 implementation.  
 **Purpose:** Define the first versioned project, scene, entity, component-envelope, and asset-reference documents.  

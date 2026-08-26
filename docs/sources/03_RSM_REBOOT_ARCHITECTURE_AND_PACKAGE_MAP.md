@@ -3414,6 +3414,41 @@ Deferred future topology
 
 ---
 
+## 43.1 Context Integrity Development-Tooling Boundary
+
+CIC is a RetroStage-owned, development-only architecture boundary. It is not a runtime/product package and it grants no canonical mutation authority.
+
+```text
+canonical Sources + physical repository/tool truth + reviewed task/authorization state
+        ↓ read-only deterministic derivation
+Context Compiler / closure / validation / continuity tooling
+        ↓
+derived context packs, task projections, evidence pointers and recovery indices
+```
+
+Generated artifacts never outrank canonical Sources, Git/repository bytes, accepted evidence, or explicit owner authority. The compiler must not install packages, execute arbitrary project content, make ambient network calls, stage/commit/push, or mutate canonical files.
+
+The architecture distinguishes:
+
+- rebuildable local cache: content-addressed, fingerprinted, isolated from governed worktree evidence, discardable on corruption/schema mismatch;
+- reviewed durable metadata: provenance-bound semantic relations, carry-forward invariants, scenario/oracle intent, acceptance briefs, and progression lineage;
+- reviewed durable evidence: accepted test/experiential results, closure/handoff generations, recovery manifests, and CIC proof;
+- task-local CTX projections: derived/referenced lifecycle roles, not 29 mandatory duplicated files and never self-authoritative inputs.
+
+Physical import/consumer/package facts are derived from repository truth wherever possible. Durable registries contain only non-inferable reviewed semantics/oracles and bind stable owner, provenance, generation and aggregate identities; unowned or stale rows are `INVALID`, and no full manual import/consumer/dependency mirror may override physical evidence. Closure witnesses cover negative knowledge and dynamic channels such as IPC, command/event IDs, schema/migration registries, capability/resolver registrations, save/export reachability, and generated-code lineage.
+
+Stable semantic context entities use deterministic owner-scoped identities appropriate to their class, never casual display labels, paths, array indices, or transient renderer/runtime IDs. A rename or move that preserves semantic continuity requires an explicit remap, alias, or supersession record; removal uses a tombstone or superseded state when historical continuity requires it. Duplicate or ambiguous identity and remap/alias cycles fail closed as `CONTEXT_IDENTITY_COLLISION`.
+
+Context generations use coherent start/end input witnesses, global and task-material fingerprints, deterministic UTF-8/LF serialization, stable Git-relative identities, and acyclic manifests. Pack/registry/root activation is immutable-generation plus compare-and-swap; partial/mixed generations never become active. Authorized working-set checkpoints and immediate file preimages protect legitimate edits without accepting unexplained drift.
+
+The durable CTX-26/27/28 progression root must have one exact physical root and active-root locator, one explicit owner/mutation authority, single-winner CAS promotion, retention/supersession, and governed backup/restore. A chat copy is convenience only. CTX-17 recovery bundles use reviewed size/retention classes: bounded text/patch bytes may be captured, while large binary/media/build material defaults to hash plus governed pointer/backup; exceptions require explicit owner/reviewer authority and cleanup/supersession policy.
+
+Evidence uses stable ID, content hash, classification, governed locator and availability. Required missing/corrupt bytes fail closed; relocation of identical bytes does not change semantic identity. Clean-clone/restore and bounded deterministic scale fixtures must prove the architecture before CIC closure.
+
+No new production or development dependency is admitted by this boundary. Source07 remains unchanged until physical CIC scripts exist, and Source02/08 remain the lifecycle authority; this architecture text does not activate CIC or RSM-7.
+
+---
+
 ## 44. Immediate Handoff
 
 Current architecture handoff:

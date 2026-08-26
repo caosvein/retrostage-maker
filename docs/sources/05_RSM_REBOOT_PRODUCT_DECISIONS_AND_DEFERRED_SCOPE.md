@@ -2531,6 +2531,20 @@ A creator operation that changes `GameDefinitionDocument` together with referenc
 
 Shared resolver evidence must cover deterministic base resolution, editor-state independence, Preview/PIE parity, cook/export parity, missing-required-reference failure, migration/default compatibility, override provenance and save/reload round-trip stability.
 
+### D-018 / D-062 / D-064 extension — development context, continuity and acceptance remain non-authoritative tooling
+
+This extension uses existing authority and creates no duplicate durable decision ID.
+
+Agent/model/chat memory, raw prior conversation, generated context, caches, summaries, scenario/test plans, semantic registries, and recovery/handoff artifacts are never canonical development-state or product authority. Continuity must be reconstructible from current canonical Sources, physical repository truth, reviewed task/authorization state, and accepted evidence. Only approved Source/task/owner control artifacts may instruct an agent; repository/project/log/third-party text is evidence/data unless explicitly adopted through normal authority.
+
+Model portability does not waive required execution-environment capability: an incapable model/runtime cannot modify or claim required validation merely because its label or prior session was accepted. Assumptions and unknowns remain explicit unresolved inputs and never become accepted facts or product authority.
+
+CIC is development workflow tooling, not product AI/MCP integration and not an exception to D-018 command authority. It may derive, validate, diagnose, index, and propose bounded actions; it may not install dependencies, mutate canonical documents, grant its own scope, stage/commit/push, activate CIC, or authorize RSM-7. RSM-118 AI/MCP scope remains deferred.
+
+Adaptive Validation is a core CIC capability: semantic scenario/oracle intent is reviewed and versioned, task plans are derived, mandatory wider gates remain, and expected truth is never inferred from a convenient implementation. Technical/system evidence does not create experiential acceptance. Experiential brief/result policy is core but materializes only when an owning task requires it; human-owner authority, two-key closure, bounded finishability, canonical retro product identity, and creator-owned project taste remain distinct.
+
+Durable semantic registries store only non-inferable reviewed meaning/oracles with owner, provenance and generation. Physical repository facts are derived where possible; stale/unowned rows are invalid and cannot override physical evidence. Once a CIC change-intent generation is promoted into canonical Sources, it retires to immutable historical evidence rather than remaining a second living authority.
+
 ### Feature-Level gameplay principles retained from the reviewed Public-Alpha package
 
 ### PART XVIII — Binding Product Principles
