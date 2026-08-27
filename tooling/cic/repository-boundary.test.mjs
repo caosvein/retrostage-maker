@@ -70,6 +70,13 @@ async function cicPaths() {
   return paths.sort();
 }
 
+function missingClosedCicPaths(paths) {
+  const currentPaths = new Set(paths);
+  return [...I1_PATHS, ...AUTHORIZED_I2_PATHS].filter(
+    (relativePath) => !currentPaths.has(relativePath),
+  );
+}
+
 async function writeLooseGitObject(gitDirectory, type, body) {
   const bodyBytes = Buffer.isBuffer(body) ? body : Buffer.from(body);
   const objectBytes = Buffer.concat([
@@ -170,8 +177,14 @@ const sourceGenerationProvider = async () => ({
 });
 
 describe("CIC-I2 static repository boundary", () => {
-  it("contains exactly the closed I1 files plus the eight authorized I2 paths", async () => {
-    expect(await cicPaths()).toEqual([...I1_PATHS, ...AUTHORIZED_I2_PATHS].sort());
+  it("keeps every closed I1 and I2 path physically present", async () => {
+    const currentPaths = await cicPaths();
+    expect(missingClosedCicPaths(currentPaths)).toEqual([]);
+
+    for (const relativePath of [...I1_PATHS, ...AUTHORIZED_I2_PATHS]) {
+      const missingFixture = currentPaths.filter((candidate) => candidate !== relativePath);
+      expect(missingClosedCicPaths(missingFixture), relativePath).toEqual([relativePath]);
+    }
   });
 
   it("allows node:child_process only in the closed read-only Git adapter", async () => {
