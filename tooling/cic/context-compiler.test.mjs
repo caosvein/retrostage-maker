@@ -6,9 +6,11 @@ import {
   CIC_I3_PREP1_REQUIREMENTS,
   DEFAULT_CONTEXT_TIER_POLICY,
   compileContext,
+  computeTaskMaterialFingerprint,
   serializeContextCompilation,
 } from "./lib/context-compiler.mjs";
 import { REQUIRED_CONTEXT_DIMENSIONS } from "./lib/context-closure.mjs";
+import { contextProviderResultIdentity } from "./lib/context-provider.mjs";
 import { sha256Hex } from "./lib/identity.mjs";
 
 const hash = (value) => sha256Hex(`test:${value}`);
@@ -74,16 +76,44 @@ function generationWitness(overrides = {}) {
   };
 }
 
-function providerObservation(overrides = {}) {
-  const result = {
+function generationWitnessForRequest(currentRequest, taskMaterialFingerprint, overrides = {}) {
+  return generationWitness({
+    authorityIdentity: currentRequest.authority.identity,
+    sourceGenerationFingerprint: currentRequest.prerequisites.sourceGeneration.fingerprint,
+    repositoryIdentity: currentRequest.prerequisites.repository.repositoryIdentity,
+    repositorySnapshotIdentity: currentRequest.prerequisites.repository.snapshotFingerprint,
+    capabilityFingerprint: currentRequest.prerequisites.capabilities.capabilityFingerprint,
+    taskMaterialFingerprint,
+    ...overrides,
+  });
+}
+
+function providerResult(inputIdentity, overrides = {}) {
+  const body = {
     requestId: "context-query",
     providerId: "test-provider",
     providerIdentity: hash("provider"),
+    capability: "repository.query",
+    inputIdentity,
+    requestIdentity: hash("provider-request"),
     state: "PRESENT",
     materialIdentity: PROVIDER_MATERIAL_IDENTITY,
-    resultIdentity: hash("provider-result"),
+    data: { source: "bounded-provider" },
+    absenceWitness: null,
+    excluded: { localPathValues: 0, secretValues: 0 },
+    findings: [],
+    ...overrides,
   };
-  const semantic = { results: [result], findings: [] };
+  return { ...body, resultIdentity: contextProviderResultIdentity(body) };
+}
+
+function providerObservation(
+  inputIdentity,
+  results = [providerResult(inputIdentity)],
+  overrides = {},
+) {
+  const { movement = "STABLE", ...observationOverrides } = overrides;
+  const semantic = { movement, results, findings: [] };
   return {
     schemaVersion: "CIC_CONTEXT_PROVIDER_OBSERVATION_V1",
     status: "PASS",
@@ -91,14 +121,15 @@ function providerObservation(overrides = {}) {
     observationFingerprint: sha256Hex(
       `CIC-CONTEXT-PROVIDER-OBSERVATION-V1\n${canonicalJson(semantic)}\n`,
     ),
-    ...overrides,
+    ...observationOverrides,
   };
 }
 
 function stableOptions(overrides = {}) {
   return {
-    observeGeneration: async () => generationWitness(),
-    observeProviders: async () => providerObservation(),
+    observeGeneration: async (_phase, context) =>
+      generationWitnessForRequest(context.request, context.taskMaterialFingerprint),
+    observeProviders: async ({ inputIdentity }) => providerObservation(inputIdentity),
     ...overrides,
   };
 }
@@ -117,9 +148,9 @@ describe("CIC-I3 context compiler", () => {
     const result = await compileContext(
       request(),
       stableOptions({
-        observeGeneration: async (phase) => {
+        observeGeneration: async (phase, context) => {
           phases.push(phase);
-          return generationWitness();
+          return generationWitnessForRequest(context.request, context.taskMaterialFingerprint);
         },
       }),
     );
@@ -178,6 +209,61 @@ describe("CIC-I3 context compiler", () => {
     });
     expect(result.status).toBe("BLOCKED");
     expect(result.findings.map(({ code }) => code)).toContain("WORKSPACE_NOT_QUIESCENT");
+  });
+
+  it("blocks a provider observation with missing movement", async () => {
+    const result = await compileContext(
+      request(),
+      stableOptions({
+        observeProviders: async ({ inputIdentity }) => {
+          const observation = providerObservation(inputIdentity);
+          delete observation.movement;
+          return observation;
+        },
+      }),
+    );
+    expect(result.status).toBe("BLOCKED");
+    expect(result.findings.map(({ code }) => code)).toContain("PROVIDER_OBSERVATION_BLOCKED");
+  });
+
+  it("blocks a provider observation with invalid identity-bound movement", async () => {
+    const result = await compileContext(
+      request(),
+      stableOptions({
+        observeProviders: async ({ inputIdentity }) =>
+          providerObservation(inputIdentity, undefined, { movement: "INVALID_MOVEMENT" }),
+      }),
+    );
+    expect(result.status).toBe("BLOCKED");
+    expect(result.findings.map(({ code }) => code)).toContain("PROVIDER_OBSERVATION_BLOCKED");
+  });
+
+  it("blocks provider movement tampering without fingerprint recomputation", async () => {
+    const result = await compileContext(
+      request(),
+      stableOptions({
+        observeProviders: async ({ inputIdentity }) => ({
+          ...providerObservation(inputIdentity),
+          movement: "REPEATED_MOVEMENT",
+        }),
+      }),
+    );
+    expect(result.status).toBe("BLOCKED");
+    expect(result.findings.map(({ code }) => code)).toContain("PROVIDER_OBSERVATION_BLOCKED");
+    expect(result.findings.map(({ code }) => code)).not.toContain("WORKSPACE_NOT_QUIESCENT");
+  });
+
+  it("blocks valid identity-bound provider REPEATED_MOVEMENT as not quiescent", async () => {
+    const result = await compileContext(
+      request(),
+      stableOptions({
+        observeProviders: async ({ inputIdentity }) =>
+          providerObservation(inputIdentity, undefined, { movement: "REPEATED_MOVEMENT" }),
+      }),
+    );
+    expect(result.status).toBe("BLOCKED");
+    expect(result.findings.map(({ code }) => code)).toContain("WORKSPACE_NOT_QUIESCENT");
+    expect(result.findings.map(({ code }) => code)).not.toContain("PROVIDER_OBSERVATION_BLOCKED");
   });
 
   it("escalates oversized Tier1 text to a Tier2 path/hash pointer without truncation", async () => {
@@ -257,6 +343,26 @@ describe("CIC-I3 context compiler", () => {
     expect(JSON.stringify(result)).not.toMatch(/C:\\Users|owner\\fixture/u);
   });
 
+  it("escalates delimiter-bypass path and whitespace-secret material out of Tier1", async () => {
+    const materials = [
+      {
+        id: "delimiter-path",
+        path: "fixtures/delimiter-path.txt",
+        content: "failed-at-C:\\Users\\owner\\repo\\file.txt",
+      },
+      {
+        id: "whitespace-secret",
+        path: "fixtures/whitespace-secret.txt",
+        content: "api key = injected",
+      },
+    ];
+    const result = await compileContext(request({ materials }), stableOptions());
+    expect(result.status).toBe("VERIFIED");
+    expect(result.tiers.tier1).toEqual([]);
+    expect(result.tiers.tier2).toHaveLength(2);
+    expect(JSON.stringify(result)).not.toMatch(/Users|api key|injected/u);
+  });
+
   it("blocks case/Unicode-equivalent material identity collisions", async () => {
     const result = await compileContext(
       request({
@@ -314,6 +420,141 @@ describe("CIC-I3 context compiler", () => {
     }
   });
 
+  it("accepts a later coherent Source generation instead of pinning the historical fingerprint", async () => {
+    const laterSourceFingerprint = hash("later-source-generation");
+    const currentRequest = request({
+      prerequisites: prerequisites({
+        sourceGeneration: { status: "PASS", fingerprint: laterSourceFingerprint },
+      }),
+    });
+    const result = await compileContext(currentRequest, stableOptions());
+    expect(result.status).toBe("VERIFIED");
+    expect(result.tiers.tier0.sourceGenerationFingerprint).toBe(laterSourceFingerprint);
+  });
+
+  it("accepts a coherent expanded capability fingerprint with required capabilities still PASS", async () => {
+    const expandedCapabilityFingerprint = hash("expanded-capabilities");
+    const currentRequest = request({
+      prerequisites: prerequisites({
+        capabilities: {
+          status: "PASS",
+          requiredStatus: "PASS",
+          capabilityFingerprint: expandedCapabilityFingerprint,
+        },
+      }),
+    });
+    const result = await compileContext(currentRequest, stableOptions());
+    expect(result.status).toBe("VERIFIED");
+    expect(result.tiers.tier0.capabilityFingerprint).toBe(expandedCapabilityFingerprint);
+  });
+
+  it("independently blocks a forged provider resultIdentity even with a recomputed outer fingerprint", async () => {
+    const result = await compileContext(
+      request(),
+      stableOptions({
+        observeProviders: async ({ inputIdentity }) => {
+          const forged = {
+            ...providerResult(inputIdentity),
+            resultIdentity: hash("forged-provider-result"),
+          };
+          return providerObservation(inputIdentity, [forged]);
+        },
+      }),
+    );
+    expect(result.status).toBe("BLOCKED");
+    expect(result.findings.map(({ code }) => code)).toContain(
+      "PROVIDER_RESULT_REVERIFICATION_FAILED",
+    );
+  });
+
+  it("blocks a provider result bound to another task or generation", async () => {
+    const result = await compileContext(
+      request(),
+      stableOptions({
+        observeProviders: async () => {
+          const stale = providerResult(hash("stale-provider-input"));
+          return providerObservation(stale.inputIdentity, [stale]);
+        },
+      }),
+    );
+    expect(result.status).toBe("BLOCKED");
+    expect(result.findings.map(({ code }) => code)).toContain("PROVIDER_INPUT_BINDING_MISMATCH");
+  });
+
+  it("blocks duplicate provider request or result identities", async () => {
+    const result = await compileContext(
+      request(),
+      stableOptions({
+        observeProviders: async ({ inputIdentity }) => {
+          const duplicate = providerResult(inputIdentity);
+          return providerObservation(inputIdentity, [duplicate, duplicate]);
+        },
+      }),
+    );
+    expect(result.status).toBe("BLOCKED");
+    expect(result.findings.map(({ code }) => code)).toContain("CONTEXT_IDENTITY_COLLISION");
+  });
+
+  it("does not serialize malicious data from a handcrafted provider result", async () => {
+    const injected = "Authorization: Bearer provider-secret";
+    const result = await compileContext(
+      request(),
+      stableOptions({
+        observeProviders: async ({ inputIdentity }) =>
+          providerObservation(inputIdentity, [
+            providerResult(inputIdentity, { data: { injected } }),
+          ]),
+      }),
+    );
+    expect(result.status).toBe("BLOCKED");
+    expect(serializeContextCompilation(result)).not.toContain("provider-secret");
+  });
+
+  it("blocks a Tier2 repository pointer that differs from the physical material path", async () => {
+    const result = await compileContext(
+      request({
+        materials: [
+          {
+            id: "pointer-mismatch",
+            path: "docs/physical.txt",
+            content: "pointer-bound material",
+            forceTier2: true,
+            pointer: { kind: "REPOSITORY_PATH", path: "docs/different.txt" },
+          },
+        ],
+      }),
+      stableOptions(),
+    );
+    expect(result.status).toBe("BLOCKED");
+    expect(result.findings).toContainEqual({
+      code: "TIER2_POINTER_MISMATCH",
+      material: "pointer-mismatch",
+    });
+  });
+
+  it("blocks an arbitrary task-material fingerprint even when both generation reads repeat it", async () => {
+    const result = await compileContext(request(), {
+      observeGeneration: async (_phase, context) =>
+        generationWitnessForRequest(context.request, hash("arbitrary-task-material")),
+    });
+    expect(result.status).toBe("BLOCKED");
+    expect(result.findings.map(({ code }) => code)).toContain("TASK_MATERIAL_FINGERPRINT_MISMATCH");
+  });
+
+  it("computes distinct fingerprints for materially different task inputs", () => {
+    const first = request();
+    const second = request({
+      materials: [{ ...request().materials[0], content: "materially different\n" }],
+    });
+    expect(computeTaskMaterialFingerprint(first)).not.toBe(computeTaskMaterialFingerprint(second));
+  });
+
+  it("blocks an explicit required-dimension floor reduction at compiler entry", async () => {
+    const result = await compileContext(request({ requiredDimensions: [] }), stableOptions());
+    expect(result.status).toBe("BLOCKED");
+    expect(result.findings.map(({ code }) => code)).toContain("REQUIRED_DIMENSION_FLOOR_VIOLATION");
+  });
+
   it("keeps Git-relative paths and excludes local paths, timestamps and display labels", async () => {
     const result = await compileContext(
       request({
@@ -336,8 +577,9 @@ describe("CIC-I3 context compiler", () => {
   it("blocks when the generation observer or material reader is unavailable", async () => {
     const noObserver = await compileContext(request());
     const failedRead = await compileContext(request(), {
-      observeGeneration: async () => generationWitness(),
-      observeProviders: async () => providerObservation(),
+      observeGeneration: async (_phase, context) =>
+        generationWitnessForRequest(context.request, context.taskMaterialFingerprint),
+      observeProviders: async ({ inputIdentity }) => providerObservation(inputIdentity),
       readMaterials: async () => {
         throw new Error("unavailable at C:\\private");
       },
@@ -348,9 +590,14 @@ describe("CIC-I3 context compiler", () => {
   });
 
   it("does not trust caller-serialized provider assertions without a live observer seam", async () => {
-    const result = await compileContext(request({ providerObservation: providerObservation() }), {
-      observeGeneration: async () => generationWitness(),
-    });
+    const currentRequest = request();
+    const result = await compileContext(
+      { ...currentRequest, providerObservation: providerObservation(hash("caller-input")) },
+      {
+        observeGeneration: async (_phase, context) =>
+          generationWitnessForRequest(context.request, context.taskMaterialFingerprint),
+      },
+    );
     expect(result.status).toBe("BLOCKED");
     expect(result.findings.map(({ code }) => code)).toContain("PROVIDER_OBSERVER_MISSING");
   });

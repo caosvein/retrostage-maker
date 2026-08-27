@@ -1,5 +1,13 @@
 import { canonicalJson } from "./canonical-json.mjs";
-import { evaluateContextClosure } from "./context-closure.mjs";
+import { evaluateContextClosure, REQUIRED_CONTEXT_DIMENSIONS } from "./context-closure.mjs";
+import {
+  CONTEXT_PROVIDER_MOVEMENTS,
+  containsNonPortableContextText,
+  contextProviderResultIdentity,
+  isPortableContextIdentifier,
+  normalizeNegativeKnowledgeWitness,
+  portableProviderData,
+} from "./context-provider.mjs";
 import { normalizeRepoRelativePath, sha256Hex } from "./identity.mjs";
 import { TextEncoder } from "node:util";
 
@@ -16,11 +24,21 @@ export const DEFAULT_CONTEXT_TIER_POLICY = Object.freeze({
 });
 
 const IDENTITY_PATTERN = /^[0-9A-F]{64}$/u;
-const PORTABLE_IDENTIFIER_PATTERN = /^[A-Za-z0-9][A-Za-z0-9._:/-]*$/u;
-const SECRET_MATERIAL_PATTERN =
-  /(?:-----BEGIN [A-Z ]*PRIVATE KEY-----|\bBearer\s+\S+|\b(?:password|secret|token)\s*[:=]\s*\S+)/iu;
-const LOCAL_PATH_MATERIAL_PATTERN =
-  /(?:^|[\s"'=:(])(?:[A-Za-z]:[\\/]|\\\\|\/(?:home|Users|tmp|var)\/)/u;
+const PROVIDER_RESULT_KEYS = Object.freeze([
+  "absenceWitness",
+  "capability",
+  "data",
+  "excluded",
+  "findings",
+  "inputIdentity",
+  "materialIdentity",
+  "providerId",
+  "providerIdentity",
+  "requestId",
+  "requestIdentity",
+  "resultIdentity",
+  "state",
+]);
 
 function compareText(left, right) {
   return left < right ? -1 : left > right ? 1 : 0;
@@ -35,12 +53,7 @@ function identity(value) {
 }
 
 function portableIdentifier(value) {
-  return (
-    typeof value === "string" &&
-    PORTABLE_IDENTIFIER_PATTERN.test(value) &&
-    !SECRET_MATERIAL_PATTERN.test(value) &&
-    !/^(?:[A-Za-z]:[\\/]|\\\\|\/)/u.test(value)
-  );
+  return isPortableContextIdentifier(value);
 }
 
 function normalizeRequirements(requirements) {
@@ -56,10 +69,7 @@ function prerequisiteFindings(prerequisites, requirements) {
   const source = prerequisites?.sourceGeneration;
   const repository = prerequisites?.repository;
   const capabilities = prerequisites?.capabilities;
-  if (
-    source?.status !== "PASS" ||
-    source.fingerprint !== requirements.sourceGenerationFingerprint
-  ) {
+  if (source?.status !== "PASS" || !identity(source.fingerprint)) {
     findings.push(finding("SOURCE_GENERATION_PREREQUISITE_BLOCKED"));
   }
   if (
@@ -73,7 +83,7 @@ function prerequisiteFindings(prerequisites, requirements) {
   }
   if (
     capabilities?.status !== "PASS" ||
-    capabilities.capabilityFingerprint !== requirements.capabilityFingerprint ||
+    !identity(capabilities.capabilityFingerprint) ||
     capabilities.requiredStatus !== "PASS"
   ) {
     findings.push(finding("REQUIRED_CAPABILITIES_BLOCKED"));
@@ -125,18 +135,32 @@ function semanticCollisionKey(value) {
 
 function normalizePointer(rawPointer, repositoryPath) {
   if (rawPointer?.kind === "GOVERNED") {
-    if (!identity(rawPointer.identity) || !portableIdentifier(rawPointer.locator)) return null;
-    return { kind: "GOVERNED", identity: rawPointer.identity, locator: rawPointer.locator };
+    if (!identity(rawPointer.identity) || !portableIdentifier(rawPointer.locator)) {
+      return { status: "INVALID", pointer: null };
+    }
+    return {
+      status: "VALID",
+      pointer: { kind: "GOVERNED", identity: rawPointer.identity, locator: rawPointer.locator },
+    };
   }
   if (rawPointer?.kind === "REPOSITORY_PATH") {
     try {
-      return { kind: "REPOSITORY_PATH", path: normalizeRepoRelativePath(rawPointer.path) };
+      const pointerPath = normalizeRepoRelativePath(rawPointer.path);
+      if (repositoryPath === null || pointerPath !== repositoryPath) {
+        return { status: "MISMATCH", pointer: null };
+      }
+      return { status: "VALID", pointer: { kind: "REPOSITORY_PATH", path: pointerPath } };
     } catch {
-      return null;
+      return { status: "INVALID", pointer: null };
     }
   }
-  if (repositoryPath !== null) return { kind: "REPOSITORY_PATH", path: repositoryPath };
-  return null;
+  if (repositoryPath !== null) {
+    return {
+      status: "VALID",
+      pointer: { kind: "REPOSITORY_PATH", path: repositoryPath },
+    };
+  }
+  return { status: "INVALID", pointer: null };
 }
 
 function materialBytes(rawMaterial) {
@@ -152,6 +176,7 @@ function materialBytes(rawMaterial) {
 function buildTiers(rawMaterials, policy, findings) {
   const tier1 = [];
   const tier2 = [];
+  const materialFacts = [];
   const collisionKeys = new Set();
   const generationIdentities = new Set();
 
@@ -217,9 +242,7 @@ function buildTiers(rawMaterials, policy, findings) {
       generationIdentity: rawMaterial.generationIdentity ?? null,
     };
     const nonPortableContent =
-      observed.content !== null &&
-      (SECRET_MATERIAL_PATTERN.test(observed.content) ||
-        LOCAL_PATH_MATERIAL_PATTERN.test(observed.content));
+      observed.content !== null && containsNonPortableContextText(observed.content);
     const requiresTier2 =
       rawMaterial.forceTier2 === true ||
       observed.content === null ||
@@ -227,11 +250,16 @@ function buildTiers(rawMaterials, policy, findings) {
       observed.bytes.byteLength > policy.tier1MaxMaterialBytes;
     if (!requiresTier2) {
       tier1.push({ ...base, encoding: "utf8", content: observed.content });
+      materialFacts.push({ ...base, placement: "TIER1", pointer: null });
       continue;
     }
 
-    const pointer = normalizePointer(rawMaterial.pointer, repositoryPath);
-    if (!policy.allowTier2 || pointer === null) {
+    const normalizedPointer = normalizePointer(rawMaterial.pointer, repositoryPath);
+    if (normalizedPointer.status === "MISMATCH") {
+      findings.push(finding("TIER2_POINTER_MISMATCH", materialId));
+      continue;
+    }
+    if (!policy.allowTier2 || normalizedPointer.status !== "VALID") {
       findings.push(
         finding(
           observed.bytes.byteLength > policy.tier1MaxMaterialBytes
@@ -242,11 +270,235 @@ function buildTiers(rawMaterials, policy, findings) {
       );
       continue;
     }
-    tier2.push({ ...base, pointer, embedded: false });
+    tier2.push({ ...base, pointer: normalizedPointer.pointer, embedded: false });
+    materialFacts.push({
+      ...base,
+      placement: "TIER2",
+      pointer: normalizedPointer.pointer,
+    });
   }
 
   if (generationIdentities.size > 1) findings.push(finding("CONTEXT_GENERATION_RACE"));
-  return { tier1, tier2 };
+  return { tier1, tier2, materialFacts };
+}
+
+function effectiveRequiredDimensions(requiredDimensions) {
+  const additions = Array.isArray(requiredDimensions)
+    ? requiredDimensions.filter(portableIdentifier)
+    : [];
+  return [...new Set([...REQUIRED_CONTEXT_DIMENSIONS, ...additions])].sort(compareText);
+}
+
+function normalizeDimensionIntent(rawDimension) {
+  const state = typeof rawDimension?.state === "string" ? rawDimension.state : null;
+  const reason =
+    state === "NOT_APPLICABLE_WITH_REASON" &&
+    typeof rawDimension?.reason === "string" &&
+    !containsNonPortableContextText(rawDimension.reason.trim())
+      ? rawDimension.reason.trim()
+      : null;
+  return {
+    dimension: portableIdentifier(rawDimension?.dimension) ? rawDimension.dimension : null,
+    state,
+    materialIdentities: Array.isArray(rawDimension?.materialIdentities)
+      ? rawDimension.materialIdentities.filter(identity).sort(compareText)
+      : [],
+    reason,
+    absenceWitness:
+      state === "ABSENT_PROVEN"
+        ? normalizeNegativeKnowledgeWitness(rawDimension?.absenceWitness)
+        : null,
+  };
+}
+
+function taskMaterialFingerprintFromFacts(request, policy, materialFacts) {
+  const semantic = {
+    authorityIdentity: request?.authority?.identity ?? null,
+    taskIdentity: request?.task?.identity ?? null,
+    requiredDimensions: effectiveRequiredDimensions(request?.requiredDimensions),
+    dimensions: (request?.dimensions ?? [])
+      .map(normalizeDimensionIntent)
+      .sort((left, right) => compareText(left.dimension ?? "", right.dimension ?? "")),
+    tierPolicy: policy,
+    materials: materialFacts,
+  };
+  return sha256Hex(`CIC-CONTEXT-TASK-MATERIAL-V1\n${canonicalJson(semantic)}\n`);
+}
+
+export function computeTaskMaterialFingerprint(request, rawMaterials = request?.materials ?? []) {
+  const policy = normalizePolicy(request?.tierPolicy);
+  const findings = [];
+  const { materialFacts } = buildTiers(rawMaterials, policy, findings);
+  if (findings.length !== 0) throw new TypeError("task materials are not deterministically usable");
+  return taskMaterialFingerprintFromFacts(request, policy, materialFacts);
+}
+
+function providerInputIdentity(generationStart, taskMaterialFingerprint) {
+  const semantic = {
+    authorityIdentity: generationStart.authorityIdentity,
+    sourceGenerationFingerprint: generationStart.sourceGenerationFingerprint,
+    repositoryIdentity: generationStart.repositoryIdentity,
+    repositorySnapshotIdentity: generationStart.repositorySnapshotIdentity,
+    capabilityFingerprint: generationStart.capabilityFingerprint,
+    taskMaterialFingerprint,
+  };
+  return sha256Hex(`CIC-CONTEXT-PROVIDER-INPUT-V1\n${canonicalJson(semantic)}\n`);
+}
+
+function isPlainObject(value) {
+  if (value === null || typeof value !== "object" || Array.isArray(value)) return false;
+  const prototype = Object.getPrototypeOf(value);
+  return prototype === Object.prototype || prototype === null;
+}
+
+function providerResultBody(result) {
+  const {
+    requestId,
+    providerId,
+    providerIdentity,
+    capability,
+    inputIdentity,
+    requestIdentity,
+    state,
+    materialIdentity,
+    data,
+    absenceWitness,
+    excluded,
+    findings,
+  } = result;
+  return {
+    requestId,
+    providerId,
+    providerIdentity,
+    capability,
+    inputIdentity,
+    requestIdentity,
+    state,
+    materialIdentity,
+    data,
+    absenceWitness,
+    excluded,
+    findings,
+  };
+}
+
+function normalizeProviderResult(result, expectedInputIdentity) {
+  if (
+    !isPlainObject(result) ||
+    Object.keys(result).sort(compareText).join("\0") !==
+      [...PROVIDER_RESULT_KEYS].sort(compareText).join("\0") ||
+    !portableIdentifier(result.requestId) ||
+    !portableIdentifier(result.providerId) ||
+    !portableIdentifier(result.capability) ||
+    !identity(result.providerIdentity) ||
+    !identity(result.inputIdentity) ||
+    !identity(result.requestIdentity) ||
+    !identity(result.materialIdentity) ||
+    !identity(result.resultIdentity) ||
+    !new Set(["PRESENT", "ABSENT_PROVEN"]).has(result.state) ||
+    !isPlainObject(result.excluded) ||
+    Object.keys(result.excluded).sort(compareText).join("\0") !== "localPathValues\0secretValues" ||
+    !Number.isSafeInteger(result.excluded.localPathValues) ||
+    result.excluded.localPathValues < 0 ||
+    !Number.isSafeInteger(result.excluded.secretValues) ||
+    result.excluded.secretValues < 0 ||
+    !Array.isArray(result.findings) ||
+    result.findings.length !== 0
+  ) {
+    return { status: "INVALID", result: null };
+  }
+  if (result.inputIdentity !== expectedInputIdentity) {
+    return { status: "STALE_INPUT", result: null };
+  }
+
+  let portable;
+  try {
+    portable = portableProviderData(result.data);
+    if (
+      portable.excluded.localPathValues !== 0 ||
+      portable.excluded.secretValues !== 0 ||
+      canonicalJson(portable.data) !== canonicalJson(result.data)
+    ) {
+      return { status: "INVALID", result: null };
+    }
+  } catch {
+    return { status: "INVALID", result: null };
+  }
+
+  const absenceWitness = normalizeNegativeKnowledgeWitness(result.absenceWitness);
+  if (
+    (result.state === "PRESENT" && result.absenceWitness !== null) ||
+    (result.state === "ABSENT_PROVEN" &&
+      (absenceWitness === null || absenceWitness.providerIdentity !== result.providerIdentity))
+  ) {
+    return { status: "INVALID", result: null };
+  }
+
+  const normalized = {
+    ...providerResultBody(result),
+    data: portable.data,
+    absenceWitness: result.state === "ABSENT_PROVEN" ? absenceWitness : null,
+  };
+  if (contextProviderResultIdentity(normalized) !== result.resultIdentity) {
+    return { status: "INVALID", result: null };
+  }
+  return { status: "VALID", result: { ...normalized, resultIdentity: result.resultIdentity } };
+}
+
+function verifyProviderObservation(rawObservation, expectedInputIdentity, findings) {
+  if (
+    !isPlainObject(rawObservation) ||
+    rawObservation.schemaVersion !== "CIC_CONTEXT_PROVIDER_OBSERVATION_V1" ||
+    rawObservation.status !== "PASS" ||
+    !CONTEXT_PROVIDER_MOVEMENTS.includes(rawObservation.movement) ||
+    !Array.isArray(rawObservation.results) ||
+    !Array.isArray(rawObservation.findings) ||
+    rawObservation.findings.length !== 0 ||
+    !identity(rawObservation.observationFingerprint)
+  ) {
+    findings.push(finding("PROVIDER_OBSERVATION_BLOCKED"));
+    return null;
+  }
+
+  const results = [];
+  const requestIdentities = new Set();
+  const resultIdentities = new Set();
+  for (const rawResult of rawObservation.results) {
+    const verified = normalizeProviderResult(rawResult, expectedInputIdentity);
+    if (verified.status === "STALE_INPUT") {
+      findings.push(finding("PROVIDER_INPUT_BINDING_MISMATCH"));
+      return null;
+    }
+    if (verified.status !== "VALID") {
+      findings.push(finding("PROVIDER_RESULT_REVERIFICATION_FAILED"));
+      return null;
+    }
+    if (
+      requestIdentities.has(verified.result.requestIdentity) ||
+      resultIdentities.has(verified.result.resultIdentity)
+    ) {
+      findings.push(finding("CONTEXT_IDENTITY_COLLISION"));
+      return null;
+    }
+    requestIdentities.add(verified.result.requestIdentity);
+    resultIdentities.add(verified.result.resultIdentity);
+    results.push(verified.result);
+  }
+
+  const semantic = { movement: rawObservation.movement, results, findings: [] };
+  const expectedFingerprint = sha256Hex(
+    `CIC-CONTEXT-PROVIDER-OBSERVATION-V1\n${canonicalJson(semantic)}\n`,
+  );
+  if (rawObservation.observationFingerprint !== expectedFingerprint) {
+    findings.push(finding("PROVIDER_OBSERVATION_BLOCKED"));
+    return null;
+  }
+  return {
+    schemaVersion: "CIC_CONTEXT_PROVIDER_OBSERVATION_V1",
+    status: "PASS",
+    ...semantic,
+    observationFingerprint: expectedFingerprint,
+  };
 }
 
 function blockedResult({ findings, closure, generation, tiers, tier0 }) {
@@ -285,13 +537,34 @@ export async function compileContext(
   if (!identity(request?.authority?.identity)) findings.push(finding("AUTHORITY_IDENTITY_INVALID"));
   if (!identity(request?.task?.identity)) findings.push(finding("TASK_IDENTITY_INVALID"));
 
+  let rawMaterials = [];
+  try {
+    rawMaterials = await readMaterials(request?.materials ?? []);
+    if (!Array.isArray(rawMaterials)) throw new TypeError("materials must be an array");
+  } catch {
+    findings.push(finding("REQUIRED_MATERIAL_READ_FAILED"));
+  }
+  const preparedTiers = buildTiers(rawMaterials, policy, findings);
+  const tiers = { tier1: preparedTiers.tier1, tier2: preparedTiers.tier2 };
+  const expectedTaskMaterialFingerprint = taskMaterialFingerprintFromFacts(
+    request,
+    policy,
+    preparedTiers.materialFacts,
+  );
+
   let generationStart = null;
   let generationEnd = null;
   if (typeof observeGeneration !== "function") {
     findings.push(finding("GENERATION_OBSERVER_MISSING"));
   } else {
     try {
-      generationStart = normalizeGenerationWitness(await observeGeneration("GEN_START"));
+      generationStart = normalizeGenerationWitness(
+        await observeGeneration("GEN_START", {
+          request,
+          materials: rawMaterials,
+          taskMaterialFingerprint: expectedTaskMaterialFingerprint,
+        }),
+      );
     } catch {
       findings.push(finding("GENERATION_OBSERVATION_FAILED"));
     }
@@ -299,35 +572,37 @@ export async function compileContext(
 
   let providerObservation = null;
   if (generationStart !== null) {
-    if (typeof observeProviders !== "function") {
+    const startMatchesCurrent =
+      generationStart.authorityIdentity === request?.authority?.identity &&
+      generationStart.sourceGenerationFingerprint ===
+        request?.prerequisites?.sourceGeneration?.fingerprint &&
+      generationStart.repositoryIdentity ===
+        request?.prerequisites?.repository?.repositoryIdentity &&
+      generationStart.repositorySnapshotIdentity ===
+        request?.prerequisites?.repository?.snapshotFingerprint &&
+      generationStart.capabilityFingerprint ===
+        request?.prerequisites?.capabilities?.capabilityFingerprint &&
+      generationStart.taskMaterialFingerprint === expectedTaskMaterialFingerprint;
+    if (!startMatchesCurrent) {
+      providerObservation = null;
+    } else if (typeof observeProviders !== "function") {
       findings.push(finding("PROVIDER_OBSERVER_MISSING"));
     } else {
       try {
-        providerObservation = await observeProviders();
-        const providerSemantic = {
-          results: providerObservation?.results,
-          findings: providerObservation?.findings,
-        };
-        const expectedFingerprint = sha256Hex(
-          `CIC-CONTEXT-PROVIDER-OBSERVATION-V1\n${canonicalJson(providerSemantic)}\n`,
+        const expectedProviderInputIdentity = providerInputIdentity(
+          generationStart,
+          expectedTaskMaterialFingerprint,
         );
-        if (
-          providerObservation?.schemaVersion !== "CIC_CONTEXT_PROVIDER_OBSERVATION_V1" ||
-          providerObservation.status !== "PASS" ||
-          providerObservation.observationFingerprint !== expectedFingerprint ||
-          !Array.isArray(providerObservation.results) ||
-          !Array.isArray(providerObservation.findings) ||
-          providerObservation.findings.length !== 0 ||
-          providerObservation.results.some(
-            (result) =>
-              result.state === "UNKNOWN" ||
-              !identity(result.providerIdentity) ||
-              !identity(result.materialIdentity) ||
-              !identity(result.resultIdentity),
-          )
-        ) {
-          findings.push(finding("PROVIDER_OBSERVATION_BLOCKED"));
-        }
+        const rawProviderObservation = await observeProviders({
+          inputIdentity: expectedProviderInputIdentity,
+          taskMaterialFingerprint: expectedTaskMaterialFingerprint,
+          generationWitness: generationStart,
+        });
+        providerObservation = verifyProviderObservation(
+          rawProviderObservation,
+          expectedProviderInputIdentity,
+          findings,
+        );
       } catch {
         providerObservation = null;
         findings.push(finding("PROVIDER_OBSERVATION_FAILED"));
@@ -335,16 +610,6 @@ export async function compileContext(
     }
   }
 
-  let rawMaterials = [];
-  if (generationStart !== null) {
-    try {
-      rawMaterials = await readMaterials(request?.materials ?? []);
-      if (!Array.isArray(rawMaterials)) throw new TypeError("materials must be an array");
-    } catch {
-      findings.push(finding("REQUIRED_MATERIAL_READ_FAILED"));
-    }
-  }
-  const tiers = buildTiers(rawMaterials, policy, findings);
   const resolvedMaterialIdentities = new Set([
     ...tiers.tier1.map(({ sha256 }) => sha256),
     ...tiers.tier2.map(({ sha256 }) => sha256),
@@ -360,16 +625,6 @@ export async function compileContext(
     ) {
       findings.push(finding("REQUIRED_MATERIAL_UNRESOLVED", dimension.dimension ?? null));
     }
-    if (
-      dimension.state === "ABSENT_PROVEN" &&
-      !(providerObservation?.results ?? []).some(
-        (result) =>
-          result.state === "ABSENT_PROVEN" &&
-          result.providerIdentity === dimension.absenceWitness?.providerIdentity,
-      )
-    ) {
-      findings.push(finding("NEGATIVE_KNOWLEDGE_UNDER_PROVEN", dimension.dimension ?? null));
-    }
   }
 
   const tier0 = {
@@ -380,6 +635,11 @@ export async function compileContext(
     repositoryIdentity: request?.prerequisites?.repository?.repositoryIdentity ?? null,
     repositorySnapshotIdentity: request?.prerequisites?.repository?.snapshotFingerprint ?? null,
     capabilityFingerprint: request?.prerequisites?.capabilities?.capabilityFingerprint ?? null,
+    taskMaterialFingerprint: expectedTaskMaterialFingerprint,
+    providerInputIdentity:
+      generationStart === null
+        ? null
+        : providerInputIdentity(generationStart, expectedTaskMaterialFingerprint),
     providerObservationFingerprint: providerObservation?.observationFingerprint ?? null,
     tierPolicy: policy,
   };
@@ -389,7 +649,13 @@ export async function compileContext(
 
   if (generationStart !== null && typeof observeGeneration === "function") {
     try {
-      generationEnd = normalizeGenerationWitness(await observeGeneration("GEN_END"));
+      generationEnd = normalizeGenerationWitness(
+        await observeGeneration("GEN_END", {
+          request,
+          materials: rawMaterials,
+          taskMaterialFingerprint: expectedTaskMaterialFingerprint,
+        }),
+      );
     } catch {
       findings.push(finding("GENERATION_OBSERVATION_FAILED"));
     }
@@ -423,6 +689,13 @@ export async function compileContext(
     );
   if (generationWitnessMismatch) {
     findings.push(finding("GENERATION_WITNESS_MISMATCH"));
+  }
+  if (
+    [generationStart, generationEnd]
+      .filter((value) => value !== null)
+      .some((witness) => witness.taskMaterialFingerprint !== expectedTaskMaterialFingerprint)
+  ) {
+    findings.push(finding("TASK_MATERIAL_FINGERPRINT_MISMATCH"));
   }
 
   const providerResults = providerObservation?.results ?? [];

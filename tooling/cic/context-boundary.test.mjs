@@ -8,6 +8,7 @@ import { run } from "./compile-context.mjs";
 import { canonicalJson } from "./lib/canonical-json.mjs";
 import { CIC_I3_PREP1_REQUIREMENTS, serializeContextCompilation } from "./lib/context-compiler.mjs";
 import { REQUIRED_CONTEXT_DIMENSIONS } from "./lib/context-closure.mjs";
+import { contextProviderResultIdentity } from "./lib/context-provider.mjs";
 import { sha256Hex } from "./lib/identity.mjs";
 
 const CIC_ROOT = path.dirname(fileURLToPath(import.meta.url));
@@ -72,28 +73,35 @@ function completeRequest() {
   };
 }
 
-function witness() {
+function witness(context) {
   return {
-    authorityIdentity: hash("authority"),
-    sourceGenerationFingerprint: CIC_I3_PREP1_REQUIREMENTS.sourceGenerationFingerprint,
-    repositoryIdentity: CIC_I3_PREP1_REQUIREMENTS.repositoryIdentity,
-    repositorySnapshotIdentity: hash("snapshot"),
-    capabilityFingerprint: CIC_I3_PREP1_REQUIREMENTS.capabilityFingerprint,
-    taskMaterialFingerprint: hash("task-material"),
+    authorityIdentity: context.request.authority.identity,
+    sourceGenerationFingerprint: context.request.prerequisites.sourceGeneration.fingerprint,
+    repositoryIdentity: context.request.prerequisites.repository.repositoryIdentity,
+    repositorySnapshotIdentity: context.request.prerequisites.repository.snapshotFingerprint,
+    capabilityFingerprint: context.request.prerequisites.capabilities.capabilityFingerprint,
+    taskMaterialFingerprint: context.taskMaterialFingerprint,
     movement: "STABLE",
   };
 }
 
-function providerObservation() {
-  const result = {
+function providerObservation(inputIdentity) {
+  const body = {
     requestId: "context-query",
     providerId: "test-provider",
     providerIdentity: hash("provider"),
+    capability: "repository.query",
+    inputIdentity,
+    requestIdentity: hash("provider-request"),
     state: "PRESENT",
     materialIdentity: PROVIDER_MATERIAL_IDENTITY,
-    resultIdentity: hash("provider-result"),
+    data: { source: "bounded-provider" },
+    absenceWitness: null,
+    excluded: { localPathValues: 0, secretValues: 0 },
+    findings: [],
   };
-  const semantic = { results: [result], findings: [] };
+  const result = { ...body, resultIdentity: contextProviderResultIdentity(body) };
+  const semantic = { movement: "STABLE", results: [result], findings: [] };
   return {
     schemaVersion: "CIC_CONTEXT_PROVIDER_OBSERVATION_V1",
     status: "PASS",
@@ -105,6 +113,19 @@ function providerObservation() {
 }
 
 describe("CIC-I3 development and side-effect boundary", () => {
+  it("binds explicit STABLE movement in the successful provider boundary fixture", () => {
+    const observation = providerObservation(hash("boundary-provider-input"));
+    const semantic = {
+      movement: observation.movement,
+      results: observation.results,
+      findings: observation.findings,
+    };
+    expect(observation.movement).toBe("STABLE");
+    expect(observation.observationFingerprint).toBe(
+      sha256Hex(`CIC-CONTEXT-PROVIDER-OBSERVATION-V1\n${canonicalJson(semantic)}\n`),
+    );
+  });
+
   it("contains exactly the eight authorized I3 candidate paths", async () => {
     const files = (await readdir(CIC_ROOT, { withFileTypes: true }))
       .filter((entry) => entry.isFile() && entry.name.startsWith("context-"))
@@ -170,15 +191,15 @@ describe("CIC-I3 development and side-effect boundary", () => {
     const first = await run(["--json"], REPOSITORY_ROOT, {
       request: completeRequest(),
       compilerOptions: {
-        observeGeneration: async () => witness(),
-        observeProviders: async () => providerObservation(),
+        observeGeneration: async (_phase, context) => witness(context),
+        observeProviders: async ({ inputIdentity }) => providerObservation(inputIdentity),
       },
     });
     const second = await run(["--json"], REPOSITORY_ROOT, {
       request: completeRequest(),
       compilerOptions: {
-        observeGeneration: async () => witness(),
-        observeProviders: async () => providerObservation(),
+        observeGeneration: async (_phase, context) => witness(context),
+        observeProviders: async ({ inputIdentity }) => providerObservation(inputIdentity),
       },
     });
     expect(first).toMatchObject({ exitCode: 0, stderr: "" });

@@ -1,12 +1,16 @@
 import { lstat, readFile, realpath } from "node:fs/promises";
 import path from "node:path";
 import process from "node:process";
-import { TextDecoder, TextEncoder } from "node:util";
+import { TextDecoder } from "node:util";
 import { fileURLToPath } from "node:url";
 
 import { canonicalJson } from "./lib/canonical-json.mjs";
-import { compileContext, serializeContextCompilation } from "./lib/context-compiler.mjs";
-import { normalizeRepoRelativePath, sha256Hex } from "./lib/identity.mjs";
+import {
+  compileContext,
+  computeTaskMaterialFingerprint,
+  serializeContextCompilation,
+} from "./lib/context-compiler.mjs";
+import { normalizeRepoRelativePath } from "./lib/identity.mjs";
 import { verifyRepositoryIdentity } from "./lib/repository-identity.mjs";
 import { verifySourceGeneration } from "./lib/source-generation.mjs";
 
@@ -64,27 +68,6 @@ async function readPhysicalMaterials(repositoryRoot, descriptors) {
     materials.push({ ...descriptor, path: normalized, content });
   }
   return materials;
-}
-
-async function taskMaterialFingerprint(repositoryRoot, request) {
-  const materials = await readPhysicalMaterials(repositoryRoot, request.materials ?? []);
-  const witness = {
-    taskIdentity: request.task?.identity ?? null,
-    materials: materials
-      .map(({ id, path: relativePath, content }) => ({
-        id,
-        path: relativePath,
-        bytes:
-          typeof content === "string"
-            ? new TextEncoder().encode(content).byteLength
-            : content.byteLength,
-        sha256: sha256Hex(
-          typeof content === "string" ? new TextEncoder().encode(content) : content,
-        ),
-      }))
-      .sort((left, right) => (left.id < right.id ? -1 : left.id > right.id ? 1 : 0)),
-  };
-  return sha256Hex(`CIC-CONTEXT-TASK-MATERIAL-V1\n${canonicalJson(witness)}\n`);
 }
 
 async function physicalPrerequisites(repositoryRoot) {
@@ -146,14 +129,17 @@ export async function run(
         ...compilerOptions,
         readMaterials: (materials) => readPhysicalMaterials(repositoryRoot, materials),
         observeGeneration: async () => {
-          const current = await physicalPrerequisites(repositoryRoot);
+          const [current, materials] = await Promise.all([
+            physicalPrerequisites(repositoryRoot),
+            readPhysicalMaterials(repositoryRoot, request.materials ?? []),
+          ]);
           return {
             authorityIdentity: request.authority?.identity,
             sourceGenerationFingerprint: current.sourceGeneration.fingerprint,
             repositoryIdentity: current.repository.repositoryIdentity,
             repositorySnapshotIdentity: current.repository.snapshotFingerprint,
             capabilityFingerprint: current.capabilities.capabilityFingerprint,
-            taskMaterialFingerprint: await taskMaterialFingerprint(repositoryRoot, request),
+            taskMaterialFingerprint: computeTaskMaterialFingerprint(request, materials),
             movement: "STABLE",
           };
         },

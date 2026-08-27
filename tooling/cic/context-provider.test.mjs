@@ -1,7 +1,9 @@
 import { describe, expect, it } from "vitest";
 
+import { canonicalJson } from "./lib/canonical-json.mjs";
 import {
   CONTEXT_OBSERVATION_STATES,
+  containsNonPortableContextText,
   defineContextProvider,
   observeContextProviders,
   portableProviderData,
@@ -32,29 +34,51 @@ function request(overrides = {}) {
 }
 
 describe("CIC-I3 context provider", () => {
+  it("emits explicit STABLE movement and binds it into the observation fingerprint", async () => {
+    const result = await observeContextProviders({
+      providers: [
+        provider(async () => ({
+          state: "PRESENT",
+          materialIdentity: hash("movement-result"),
+          data: {},
+        })),
+      ],
+      requests: [request()],
+    });
+    const semantic = {
+      movement: "STABLE",
+      results: result.results,
+      findings: result.findings,
+    };
+    expect(result.movement).toBe("STABLE");
+    expect(result.observationFingerprint).toBe(
+      sha256Hex(`CIC-CONTEXT-PROVIDER-OBSERVATION-V1\n${canonicalJson(semantic)}\n`),
+    );
+  });
+
   it("preserves PRESENT, ABSENT_PROVEN and UNKNOWN as distinct states", async () => {
     const states = CONTEXT_OBSERVATION_STATES;
     for (const state of states) {
+      let fixture;
+      fixture = provider(async () => ({
+        state,
+        materialIdentity: hash(state),
+        data: { state },
+        absenceWitness:
+          state === "ABSENT_PROVEN"
+            ? {
+                result: "ABSENT_PROVEN",
+                providerIdentity: fixture.providerIdentity,
+                indexIdentity: hash("index"),
+                queryClass: "owners",
+                scopeIdentity: hash("scope"),
+                generationIdentity: hash("generation"),
+              }
+            : undefined,
+        reasonCode: state === "UNKNOWN" ? "INDEX_UNAVAILABLE" : undefined,
+      }));
       const result = await observeContextProviders({
-        providers: [
-          provider(async () => ({
-            state,
-            materialIdentity: hash(state),
-            data: { state },
-            absenceWitness:
-              state === "ABSENT_PROVEN"
-                ? {
-                    result: "ABSENT_PROVEN",
-                    providerIdentity: hash("provider"),
-                    indexIdentity: hash("index"),
-                    queryClass: "owners",
-                    scopeIdentity: hash("scope"),
-                    generationIdentity: hash("generation"),
-                  }
-                : undefined,
-            reasonCode: state === "UNKNOWN" ? "INDEX_UNAVAILABLE" : undefined,
-          })),
-        ],
+        providers: [fixture],
         requests: [request()],
       });
       expect(result.results[0].state).toBe(state);
@@ -147,6 +171,109 @@ describe("CIC-I3 context provider", () => {
       state: "UNKNOWN",
       findings: [{ code: "PROVIDER_RESULT_INVALID", requestId: "owners-query" }],
     });
+  });
+
+  it("blocks ABSENT_PROVEN without an exact provider-bound negative witness", async () => {
+    const fixture = provider(async () => ({
+      state: "ABSENT_PROVEN",
+      materialIdentity: hash("absence"),
+      data: null,
+      absenceWitness: {
+        result: "ABSENT_PROVEN",
+        providerIdentity: hash("another-provider"),
+        indexIdentity: hash("index"),
+        queryClass: "owners",
+        scopeIdentity: hash("scope"),
+        generationIdentity: hash("generation"),
+      },
+    }));
+    const result = await observeContextProviders({ providers: [fixture], requests: [request()] });
+    expect(result.status).toBe("BLOCKED");
+    expect(result.results[0]).toMatchObject({
+      state: "UNKNOWN",
+      findings: [{ code: "NEGATIVE_KNOWLEDGE_WITNESS_INVALID", requestId: "owners-query" }],
+    });
+  });
+
+  it("removes embedded local paths and auth material without treating URLs as local paths", async () => {
+    let fixture;
+    fixture = provider(async () => ({
+      state: "PRESENT",
+      materialIdentity: hash("portable-result"),
+      data: {
+        windows: "diagnostic at C:\\Users\\owner\\repo",
+        paths: [
+          "from /home/owner/repo",
+          "from /Users/owner/repo",
+          "from /root/repo",
+          "from /tmp/repo",
+          "from /var/repo",
+          "from /mnt/repo",
+          "from /private/repo",
+        ],
+        auth: "Authorization: Basic injected",
+        api: "api_key=injected",
+        safeUrl: "https://example.test/home/portable",
+      },
+    }));
+    const result = await observeContextProviders({ providers: [fixture], requests: [request()] });
+    const serialized = JSON.stringify(result);
+    expect(result.status).toBe("PASS");
+    expect(result.results[0].data.safeUrl).toBe("https://example.test/home/portable");
+    expect(serialized).not.toMatch(/C:\\\\Users|\/home\/owner|\/root\/repo|injected/u);
+    expect(result.results[0].excluded).toEqual({ localPathValues: 8, secretValues: 2 });
+  });
+
+  it("excludes a Windows user path without relying on a preceding delimiter", () => {
+    const injected = "failed-at-C:\\Users\\owner\\repo\\file.txt";
+    const result = portableProviderData({ diagnostic: injected });
+    expect(containsNonPortableContextText(injected)).toBe(true);
+    expect(result).toEqual({
+      data: { diagnostic: "[LOCAL_PATH_EXCLUDED]" },
+      excluded: { localPathValues: 1, secretValues: 0 },
+    });
+    expect(JSON.stringify(result)).not.toContain(injected);
+  });
+
+  it("excludes a POSIX user path without relying on a preceding delimiter", () => {
+    const injected = "failed-/home/owner/repo/file";
+    const result = portableProviderData({ diagnostic: injected });
+    expect(containsNonPortableContextText(injected)).toBe(true);
+    expect(result).toEqual({
+      data: { diagnostic: "[LOCAL_PATH_EXCLUDED]" },
+      excluded: { localPathValues: 1, secretValues: 0 },
+    });
+    expect(JSON.stringify(result)).not.toContain(injected);
+  });
+
+  it("excludes whitespace-separated API and client secret assignments", () => {
+    for (const injected of [
+      "api key = injected",
+      "API KEY: injected",
+      "client secret = injected",
+      "access token = injected",
+    ]) {
+      const result = portableProviderData({ diagnostic: injected });
+      expect(containsNonPortableContextText(injected)).toBe(true);
+      expect(result).toEqual({
+        data: { diagnostic: "[SECRET_EXCLUDED]" },
+        excluded: { localPathValues: 0, secretValues: 1 },
+      });
+      expect(JSON.stringify(result)).not.toContain("injected");
+    }
+  });
+
+  it("keeps ordinary HTTP URLs with local-path-like segments portable", () => {
+    for (const url of [
+      "https://example.test/home/portable",
+      "https://example.test/Users/portable",
+    ]) {
+      expect(containsNonPortableContextText(url)).toBe(false);
+      expect(portableProviderData({ url })).toEqual({
+        data: { url },
+        excluded: { localPathValues: 0, secretValues: 0 },
+      });
+    }
   });
 
   it("blocks duplicate provider or request identities", async () => {

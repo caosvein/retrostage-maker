@@ -1,5 +1,10 @@
 import { canonicalJson } from "./canonical-json.mjs";
 import { sha256Hex } from "./identity.mjs";
+import {
+  containsNonPortableContextText,
+  isPortableContextIdentifier,
+  normalizeNegativeKnowledgeWitness,
+} from "./context-provider.mjs";
 
 export const REQUIRED_CONTEXT_DIMENSIONS = Object.freeze([
   "architecture-boundaries",
@@ -24,8 +29,6 @@ export const CONTEXT_DIMENSION_STATES = Object.freeze([
 
 const DIMENSION_STATE_SET = new Set(CONTEXT_DIMENSION_STATES);
 const IDENTITY_PATTERN = /^[0-9A-F]{64}$/u;
-const NON_PORTABLE_REASON_PATTERN =
-  /(?:^(?:[A-Za-z]:[\\/]|\\\\|\/)|-----BEGIN [A-Z ]*PRIVATE KEY-----|\bBearer\s+\S+|\b(?:password|secret|token)\s*[:=]\s*\S+)/iu;
 
 function compareText(left, right) {
   return left < right ? -1 : left > right ? 1 : 0;
@@ -57,21 +60,7 @@ function identitiesValid(values) {
 }
 
 export function validateNegativeKnowledgeWitness(witness) {
-  if (witness === null || typeof witness !== "object" || Array.isArray(witness)) return false;
-  return (
-    witness.result === "ABSENT_PROVEN" &&
-    [
-      witness.providerIdentity,
-      witness.indexIdentity,
-      witness.queryClass,
-      witness.scopeIdentity,
-      witness.generationIdentity,
-    ].every(nonempty) &&
-    IDENTITY_PATTERN.test(witness.providerIdentity) &&
-    IDENTITY_PATTERN.test(witness.indexIdentity) &&
-    IDENTITY_PATTERN.test(witness.scopeIdentity) &&
-    IDENTITY_PATTERN.test(witness.generationIdentity)
-  );
+  return normalizeNegativeKnowledgeWitness(witness) !== null;
 }
 
 function normalizeDimension(dimension) {
@@ -86,10 +75,13 @@ function normalizeDimension(dimension) {
       ? [...dimension.materialIdentities].sort(compareText)
       : [],
     reason:
-      suppliedReason !== null && !NON_PORTABLE_REASON_PATTERN.test(suppliedReason)
+      suppliedReason !== null && !containsNonPortableContextText(suppliedReason)
         ? suppliedReason
         : null,
-    absenceWitness: dimension.state === "ABSENT_PROVEN" ? (dimension.absenceWitness ?? null) : null,
+    absenceWitness:
+      dimension.state === "ABSENT_PROVEN"
+        ? normalizeNegativeKnowledgeWitness(dimension.absenceWitness)
+        : null,
   };
   if (normalized.reason !== null && normalized.reason.length !== 0) {
     normalized.reasonIdentity = sha256Hex(`CIC-CONTEXT-NOT-APPLICABLE-V1\n${normalized.reason}\n`);
@@ -99,7 +91,7 @@ function normalizeDimension(dimension) {
 
 export function evaluateContextClosure({
   dimensions = [],
-  requiredDimensions = REQUIRED_CONTEXT_DIMENSIONS,
+  requiredDimensions,
   prerequisiteStatus = "PASS",
   providerResults = [],
   inheritedFindings = [],
@@ -107,11 +99,48 @@ export function evaluateContextClosure({
   const findings = inheritedFindings.map(inheritedFinding);
   if (prerequisiteStatus !== "PASS") findings.push(finding("I1_I2_PREREQUISITE_BLOCKED"));
 
+  const suppliedRequiredDimensions = Array.isArray(requiredDimensions)
+    ? requiredDimensions.filter(isPortableContextIdentifier)
+    : [];
+  if (
+    requiredDimensions !== undefined &&
+    (!Array.isArray(requiredDimensions) ||
+      suppliedRequiredDimensions.length !== requiredDimensions.length ||
+      REQUIRED_CONTEXT_DIMENSIONS.some(
+        (requiredDimension) => !suppliedRequiredDimensions.includes(requiredDimension),
+      ))
+  ) {
+    findings.push(finding("REQUIRED_DIMENSION_FLOOR_VIOLATION"));
+  }
+  const required = [
+    ...new Set([...REQUIRED_CONTEXT_DIMENSIONS, ...suppliedRequiredDimensions]),
+  ].sort(compareText);
+
+  const validProviderAbsenceWitnesses = new Set();
+  for (const result of providerResults) {
+    if (result?.state === "ABSENT_PROVEN") {
+      const witness = normalizeNegativeKnowledgeWitness(result.absenceWitness);
+      if (witness === null || witness.providerIdentity !== result.providerIdentity) {
+        findings.push(finding("NEGATIVE_KNOWLEDGE_UNDER_PROVEN"));
+      } else {
+        validProviderAbsenceWitnesses.add(canonicalJson(witness));
+      }
+    }
+  }
+
   const normalizedDimensions = [];
   const seenDimensions = new Set();
   for (const rawDimension of dimensions) {
-    if (!nonempty(rawDimension?.dimension) || seenDimensions.has(rawDimension.dimension)) {
-      findings.push(finding("CONTEXT_IDENTITY_COLLISION", rawDimension?.dimension ?? null));
+    if (
+      !isPortableContextIdentifier(rawDimension?.dimension) ||
+      seenDimensions.has(rawDimension.dimension)
+    ) {
+      findings.push(
+        finding(
+          "CONTEXT_IDENTITY_COLLISION",
+          isPortableContextIdentifier(rawDimension?.dimension) ? rawDimension.dimension : null,
+        ),
+      );
       continue;
     }
     seenDimensions.add(rawDimension.dimension);
@@ -125,7 +154,8 @@ export function evaluateContextClosure({
       findings.push(finding("REQUIRED_MATERIAL_MISSING", dimension.dimension));
     } else if (
       dimension.state === "ABSENT_PROVEN" &&
-      !validateNegativeKnowledgeWitness(dimension.absenceWitness)
+      (dimension.absenceWitness === null ||
+        !validProviderAbsenceWitnesses.has(canonicalJson(dimension.absenceWitness)))
     ) {
       findings.push(finding("NEGATIVE_KNOWLEDGE_UNDER_PROVEN", dimension.dimension));
     } else if (dimension.state === "NOT_APPLICABLE_WITH_REASON" && !nonempty(dimension.reason)) {
@@ -133,7 +163,6 @@ export function evaluateContextClosure({
     }
   }
 
-  const required = [...new Set(requiredDimensions)].sort(compareText);
   for (const requiredDimension of required) {
     if (!seenDimensions.has(requiredDimension)) {
       findings.push(finding("REQUIRED_DIMENSION_MISSING", requiredDimension));
@@ -141,10 +170,10 @@ export function evaluateContextClosure({
   }
 
   for (const result of providerResults) {
-    if (result.state === "UNKNOWN") {
+    if (result?.state === "UNKNOWN") {
       findings.push(finding("PROVIDER_RESULT_UNKNOWN"));
     }
-    if (Array.isArray(result.findings)) {
+    if (Array.isArray(result?.findings)) {
       findings.push(...result.findings.map(({ code }) => finding(code)));
     }
   }

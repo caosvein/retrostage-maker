@@ -74,9 +74,136 @@ describe("CIC-I3 context closure", () => {
       state: "ABSENT_PROVEN",
       absenceWitness: witness(),
     };
-    const result = evaluateContextClosure({ dimensions });
+    const result = evaluateContextClosure({
+      dimensions,
+      providerResults: [
+        {
+          state: "ABSENT_PROVEN",
+          providerIdentity: witness().providerIdentity,
+          absenceWitness: witness(),
+          findings: [],
+        },
+      ],
+    });
     expect(validateNegativeKnowledgeWitness(witness())).toBe(true);
     expect(result.status).toBe("COMPLETE");
+  });
+
+  it("blocks an explicit empty required-dimension floor override", () => {
+    const result = evaluateContextClosure({
+      dimensions: completeDimensions(),
+      requiredDimensions: [],
+    });
+    expect(result.status).toBe("BLOCKED");
+    expect(result.findings).toContainEqual({ code: "REQUIRED_DIMENSION_FLOOR_VIOLATION" });
+    expect(result.requiredDimensions).toEqual(REQUIRED_CONTEXT_DIMENSIONS);
+  });
+
+  it("blocks a partial required-dimension floor override", () => {
+    const result = evaluateContextClosure({
+      dimensions: completeDimensions(),
+      requiredDimensions: REQUIRED_CONTEXT_DIMENSIONS.slice(1),
+    });
+    expect(result.status).toBe("BLOCKED");
+    expect(result.findings.map(({ code }) => code)).toContain("REQUIRED_DIMENSION_FLOOR_VIOLATION");
+  });
+
+  it("accepts the exact required-dimension floor", () => {
+    const result = evaluateContextClosure({
+      dimensions: completeDimensions(),
+      requiredDimensions: REQUIRED_CONTEXT_DIMENSIONS,
+    });
+    expect(result.status).toBe("COMPLETE");
+  });
+
+  it("preserves the floor and additionally requires a caller-supplied dimension", () => {
+    const extra = "authorized-extra-context";
+    const accepted = evaluateContextClosure({
+      dimensions: [
+        ...completeDimensions(),
+        { dimension: extra, state: "PRESENT", materialIdentities: [hash(extra)] },
+      ],
+      requiredDimensions: [...REQUIRED_CONTEXT_DIMENSIONS, extra],
+    });
+    const missingExtra = evaluateContextClosure({
+      dimensions: completeDimensions(),
+      requiredDimensions: [...REQUIRED_CONTEXT_DIMENSIONS, extra],
+    });
+    expect(accepted.status).toBe("COMPLETE");
+    expect(accepted.requiredDimensions).toContain(extra);
+    expect(missingExtra.findings).toContainEqual({
+      code: "REQUIRED_DIMENSION_MISSING",
+      dimension: extra,
+    });
+  });
+
+  it("blocks a dimension witness that differs from its provider result witness", () => {
+    const dimensions = completeDimensions();
+    dimensions[0] = {
+      dimension: dimensions[0].dimension,
+      state: "ABSENT_PROVEN",
+      absenceWitness: witness(),
+    };
+    const result = evaluateContextClosure({
+      dimensions,
+      providerResults: [
+        {
+          state: "ABSENT_PROVEN",
+          providerIdentity: witness().providerIdentity,
+          absenceWitness: witness({ indexIdentity: hash("other-index") }),
+          findings: [],
+        },
+      ],
+    });
+    expect(result.status).toBe("BLOCKED");
+    expect(result.findings).toContainEqual({
+      code: "NEGATIVE_KNOWLEDGE_UNDER_PROVEN",
+      dimension: dimensions[0].dimension,
+    });
+  });
+
+  it("rejects witness extras and embedded non-portable not-applicable reasons", () => {
+    expect(validateNegativeKnowledgeWitness(witness({ token: "do-not-serialize" }))).toBe(false);
+    for (const reason of [
+      "diagnostic at /root/private",
+      "diagnostic at /mnt/private",
+      "Authorization: Bearer do-not-serialize",
+      "client_secret=do-not-serialize",
+    ]) {
+      const dimensions = completeDimensions();
+      dimensions[0] = {
+        dimension: dimensions[0].dimension,
+        state: "NOT_APPLICABLE_WITH_REASON",
+        reason,
+      };
+      const result = evaluateContextClosure({ dimensions });
+      expect(result.status).toBe("BLOCKED");
+      expect(JSON.stringify(result)).not.toContain("do-not-serialize");
+      expect(JSON.stringify(result)).not.toContain("/root/private");
+    }
+  });
+
+  it("blocks delimiter-bypass local paths and whitespace secrets in N/A reasons", () => {
+    for (const reason of [
+      "failed-at-C:\\Users\\owner\\repo\\file.txt",
+      "failed-/home/owner/repo/file",
+      "api key = injected",
+      "client secret = injected",
+    ]) {
+      const dimensions = completeDimensions();
+      dimensions[0] = {
+        dimension: dimensions[0].dimension,
+        state: "NOT_APPLICABLE_WITH_REASON",
+        reason,
+      };
+      const result = evaluateContextClosure({ dimensions });
+      expect(result.status).toBe("BLOCKED");
+      expect(result.findings).toContainEqual({
+        code: "NOT_APPLICABLE_REASON_INVALID",
+        dimension: dimensions[0].dimension,
+      });
+      expect(JSON.stringify(result)).not.toContain(reason);
+    }
   });
 
   it("blocks unbounded or unresolved absence", () => {
