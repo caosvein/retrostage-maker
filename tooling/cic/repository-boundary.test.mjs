@@ -154,7 +154,14 @@ async function createPhysicalRepositoryFixture(repositoryRoot, { signed = false 
     singleEntryIndex(filenameBytes, blobId, baselineBytes.byteLength),
   );
   await writeFile(path.join(repositoryRoot, filename), worktreeBytes);
-  return { commitId, config, configPath: path.join(gitDirectory, "config"), gitDirectory, subject };
+  return {
+    commitId,
+    config,
+    configPath: path.join(gitDirectory, "config"),
+    gitDirectory,
+    subject,
+    treeId,
+  };
 }
 
 const sourceGenerationProvider = async () => ({
@@ -593,14 +600,54 @@ describe("CIC-I2 static repository boundary", () => {
     }
   }, 15_000);
 
-  it("disables replacement overlays while preserving raw current HEAD identity", () => {
-    const runner = createReadonlyGitRunner(REPOSITORY_ROOT);
-    expect(
-      Buffer.from(runReadonlyGitOperation(REPOSITORY_ROOT, "version").stdout).toString("utf8"),
-    ).toMatch(/^git version /u);
-    expect(Buffer.from(runner.run("replaceRefs").stdout).toString("utf8")).toBe("");
-    expect(Buffer.from(runner.run("headTree").stdout).toString("utf8").trim()).toBe(
-      "037906ea83082dbbac49b24b4896d3a81b8e73bb",
-    );
-  });
+  it("disables replacement overlays while preserving raw fixture HEAD identity", async () => {
+    const temporaryRoot = await mkdtemp(path.join(os.tmpdir(), "cic-i2-replace-overlay-"));
+    try {
+      const fixture = await createPhysicalRepositoryFixture(temporaryRoot);
+      const replacementBlobId = await writeLooseGitObject(
+        fixture.gitDirectory,
+        "blob",
+        Buffer.from("replacement\n", "utf8"),
+      );
+      const replacementTreeBody = Buffer.concat([
+        Buffer.from("100644 replacement.txt\0", "utf8"),
+        Buffer.from(replacementBlobId, "hex"),
+      ]);
+      const replacementTreeId = await writeLooseGitObject(
+        fixture.gitDirectory,
+        "tree",
+        replacementTreeBody,
+      );
+      const replacementCommitBody = [
+        `tree ${replacementTreeId}`,
+        "author CIC <cic@example.invalid> 2 +0000",
+        "committer CIC <cic@example.invalid> 2 +0000",
+        "",
+        "replacement subject",
+        "",
+      ].join("\n");
+      const replacementCommitId = await writeLooseGitObject(
+        fixture.gitDirectory,
+        "commit",
+        replacementCommitBody,
+      );
+      const replaceDirectory = path.join(fixture.gitDirectory, "refs", "replace");
+      await mkdir(replaceDirectory, { recursive: true });
+      await writeFile(path.join(replaceDirectory, fixture.commitId), `${replacementCommitId}\n`);
+
+      const runner = createReadonlyGitRunner(temporaryRoot);
+      expect(
+        Buffer.from(runReadonlyGitOperation(temporaryRoot, "version").stdout).toString("utf8"),
+      ).toMatch(/^git version /u);
+      expect(Buffer.from(runner.run("replaceRefs").stdout).toString("utf8")).toContain(
+        `refs/replace/${fixture.commitId}`,
+      );
+      expect(Buffer.from(runner.run("head").stdout).toString("utf8").trim()).toBe(fixture.commitId);
+      expect(Buffer.from(runner.run("headTree").stdout).toString("utf8").trim()).toBe(
+        fixture.treeId,
+      );
+    } finally {
+      await rm(temporaryRoot, { recursive: true, force: true });
+    }
+  }, 15_000);
 });

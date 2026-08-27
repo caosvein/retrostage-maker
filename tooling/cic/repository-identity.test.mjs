@@ -16,6 +16,7 @@ import {
   repositoryIdentity,
   verifyRepositoryIdentity,
 } from "./lib/repository-identity.mjs";
+import { createReadonlyGitRunner } from "./lib/readonly-git.mjs";
 import { formatJsonResult, run } from "./verify-repository-identity.mjs";
 
 const REPOSITORY_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
@@ -179,7 +180,15 @@ async function observed(repositoryRoot = REPOSITORY_ROOT, overrides = {}, calls 
 }
 
 describe("CIC-I2 repository and worktree identity", () => {
-  it("passes the current physical repository with exact published identity", async () => {
+  it("passes the current physical repository with canonical identity and raw HEAD coherence", async () => {
+    const rawRunner = createReadonlyGitRunner(REPOSITORY_ROOT);
+    const rawHead = rawRunner.run("head");
+    const rawTree = rawRunner.run("headTree");
+    expect(rawHead.exitCode).toBe(0);
+    expect(rawTree.exitCode).toBe(0);
+    const currentHead = Buffer.from(rawHead.stdout).toString("utf8").trim();
+    const currentTree = Buffer.from(rawTree.stdout).toString("utf8").trim();
+
     const outcome = await run([], REPOSITORY_ROOT);
     expect(outcome).toMatchObject({ exitCode: 0, stderr: "" });
     expect(outcome.stdout).toContain(REPOSITORY_IDENTITY);
@@ -194,8 +203,8 @@ describe("CIC-I2 repository and worktree identity", () => {
       },
       sourceGeneration: { status: "PASS", fingerprint: SOURCE_FINGERPRINT },
       head: {
-        commit: HEAD,
-        tree: TREE,
+        commit: currentHead,
+        tree: currentTree,
         branch: { state: "SYMBOLIC", ref: "refs/heads/main" },
       },
       view: {
@@ -208,6 +217,9 @@ describe("CIC-I2 repository and worktree identity", () => {
         complete: true,
       },
     });
+    expect(result.worktree.linkedWorktrees).toEqual(
+      expect.arrayContaining([expect.objectContaining({ head: currentHead })]),
+    );
   }, 15_000);
 
   it("normalizes HTTPS, SSH and scp remotes to one credential-free identity", () => {
