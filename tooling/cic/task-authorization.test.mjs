@@ -168,6 +168,16 @@ beforeAll(async () => {
     ],
     { windowsHide: true },
   );
+  const physicalHeadCommit = (
+    await runFile(GIT_EXECUTABLE, ["-C", worktreeRoot, "rev-parse", "--verify", "HEAD"], {
+      windowsHide: true,
+    })
+  ).stdout.trim();
+  const physicalHeadTree = (
+    await runFile(GIT_EXECUTABLE, ["-C", worktreeRoot, "rev-parse", "--verify", "HEAD^{tree}"], {
+      windowsHide: true,
+    })
+  ).stdout.trim();
   await mkdir(stateRoot, { recursive: true });
   const portableWorktreeIdentity = hash("worktree");
   const authorityIdentity = hash("owner-authority");
@@ -207,6 +217,8 @@ beforeAll(async () => {
     worktreeRoot,
     stateRoot,
     portableWorktreeIdentity,
+    physicalHeadCommit,
+    physicalHeadTree,
     authorityIdentity,
     task,
     domainInput,
@@ -252,8 +264,8 @@ describe.sequential("CIC-I4 task authorization, checkpoint, and lease lifecycle"
       sourceGenerationFingerprint:
         "6785498B15F1E37163EB8C2E2FE2406F830CD68F99D18397CE157CA3A581BA55",
       repositoryIdentity: REPOSITORY_IDENTITY,
-      repositoryHeadCommit: "baa3d2d048c65e89ee14a5582bfa31d8101b6558",
-      repositoryHeadTree: "c47edfd598330087e3d68fa786f1e2b643a0d28b",
+      repositoryHeadCommit: fixture.physicalHeadCommit,
+      repositoryHeadTree: fixture.physicalHeadTree,
       portableWorktreeIdentity: fixture.portableWorktreeIdentity,
       localWorktreeBindingIdentity: fixture.domain.localWorktreeBindingIdentity,
       portableStateDomainIdentity: fixture.domain.portableStateDomainIdentity,
