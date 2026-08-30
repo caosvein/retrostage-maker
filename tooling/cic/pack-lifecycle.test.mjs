@@ -1,5 +1,5 @@
 import { execFile } from "node:child_process";
-import { mkdir, mkdtemp, open, readFile, unlink, writeFile } from "node:fs/promises";
+import { mkdir, mkdtemp, open, readFile, realpath, unlink, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import process from "node:process";
@@ -171,7 +171,8 @@ async function supersede(reason) {
 
 beforeAll(async () => {
   await acquireSerializationLock();
-  const temporary = await mkdtemp(path.join(tmpdir(), "cic-i4-pack-"));
+  const temporaryAlias = await mkdtemp(path.join(tmpdir(), "cic-i4-pack-"));
+  const temporary = await realpath(temporaryAlias);
   const worktreeRoot = path.join(temporary, "worktree");
   const stateRoot = path.join(temporary, "state");
   await runFile(

@@ -1,5 +1,14 @@
 import { execFile } from "node:child_process";
-import { mkdir, mkdtemp, open, readFile, readdir, symlink, unlink } from "node:fs/promises";
+import {
+  mkdir,
+  mkdtemp,
+  open,
+  readFile,
+  readdir,
+  realpath,
+  symlink,
+  unlink,
+} from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import process from "node:process";
@@ -110,7 +119,8 @@ async function acquireSerializationLock() {
 
 beforeAll(async () => {
   await acquireSerializationLock();
-  const temporary = await mkdtemp(path.join(tmpdir(), "cic-i4-boundary-"));
+  const temporaryAlias = await mkdtemp(path.join(tmpdir(), "cic-i4-boundary-"));
+  const temporary = await realpath(temporaryAlias);
   const stateRoot = path.join(temporary, "state");
   const worktreeRoot = REPOSITORY_ROOT;
   await mkdir(stateRoot, { recursive: true });

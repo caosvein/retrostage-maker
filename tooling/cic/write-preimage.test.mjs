@@ -1,5 +1,14 @@
 import { execFile } from "node:child_process";
-import { mkdir, mkdtemp, open, readFile, rename, unlink, writeFile } from "node:fs/promises";
+import {
+  mkdir,
+  mkdtemp,
+  open,
+  readFile,
+  realpath,
+  rename,
+  unlink,
+  writeFile,
+} from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import process from "node:process";
@@ -81,7 +90,8 @@ async function currentTruth() {
 
 beforeAll(async () => {
   await acquireSerializationLock();
-  const temporary = await mkdtemp(path.join(tmpdir(), "cic-i4-preimage-"));
+  const temporaryAlias = await mkdtemp(path.join(tmpdir(), "cic-i4-preimage-"));
+  const temporary = await realpath(temporaryAlias);
   const worktreeRoot = path.join(temporary, "worktree");
   const stateRoot = path.join(temporary, "state");
   await runFile(
