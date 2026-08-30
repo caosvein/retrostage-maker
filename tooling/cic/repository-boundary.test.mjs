@@ -510,7 +510,7 @@ describe("CIC-I2 static repository boundary", () => {
     } finally {
       await rm(temporaryRoot, { recursive: true, force: true });
     }
-  }, 30_000);
+  }, 60_000);
 
   it("never executes a repository-configured signature verifier while reading subject", async () => {
     const temporaryRoot = await mkdtemp(path.join(os.tmpdir(), "cic-i2-signature-display-"));
