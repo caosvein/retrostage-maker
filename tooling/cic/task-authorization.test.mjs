@@ -76,6 +76,8 @@ async function acquireSerializationLock() {
   throw new Error("CIC_I4_TEST_SERIALIZATION_TIMEOUT");
 }
 
+await acquireSerializationLock();
+
 function truthRequest(_current) {
   return {
     materials: [],
@@ -156,7 +158,6 @@ async function revoke(current, authorization, reason) {
 }
 
 beforeAll(async () => {
-  await acquireSerializationLock();
   const temporaryAlias = await mkdtemp(path.join(tmpdir(), "cic-i4-task-"));
   const temporary = await realpath(temporaryAlias);
   const worktreeRoot = path.join(temporary, "worktree");
