@@ -81,7 +81,7 @@ function normalizePolicy(extension) {
 async function readPhysicalMaterials(materials, worktreeRoot) {
   if (!Array.isArray(materials)) fail("AUTHORIZATION_INVALID");
   const root = await realpath(worktreeRoot);
-  const result = [];
+  const observed = [];
   for (const raw of materials) {
     requirePlainObject(raw, "task material");
     const materialPath = normalizeRepoRelativePath(raw.path);
@@ -92,21 +92,41 @@ async function readPhysicalMaterials(materials, worktreeRoot) {
     const stats = await lstat(resolved);
     if (!stats.isFile() || stats.isSymbolicLink()) fail("REQUIRED_MATERIAL_READ_FAILED");
     const bytes = await readFile(resolved);
-    result.push({
+    observed.push({
       id: requirePortableId(raw.id, "material id"),
       path: materialPath,
       content: bytes,
       bytes: bytes.byteLength,
       sha256: sha256Hex(bytes),
-      generationIdentity: semanticIdentity("CIC-I4-MATERIAL-GENERATION-V1", {
-        path: materialPath,
-        bytes: bytes.byteLength,
-        sha256: sha256Hex(bytes),
-      }),
       pointer: { kind: "REPOSITORY_PATH", path: materialPath },
     });
   }
-  return result;
+  const sorted = observed.sort((left, right) => {
+    const leftFact = canonicalJson({
+      id: left.id,
+      path: left.path,
+      bytes: left.bytes,
+      sha256: left.sha256,
+    });
+    const rightFact = canonicalJson({
+      id: right.id,
+      path: right.path,
+      bytes: right.bytes,
+      sha256: right.sha256,
+    });
+    return leftFact < rightFact ? -1 : leftFact > rightFact ? 1 : 0;
+  });
+  if (sorted.length === 0) return sorted;
+
+  const generationIdentity = semanticIdentity("CIC-I4-MATERIAL-SET-GENERATION-V1", {
+    materials: sorted.map(({ id, path: materialPath, bytes, sha256 }) => ({
+      id,
+      path: materialPath,
+      bytes,
+      sha256,
+    })),
+  });
+  return sorted.map((material) => ({ ...material, generationIdentity }));
 }
 
 function normalizeProviderRequests(requests) {

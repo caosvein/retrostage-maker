@@ -1,3 +1,4 @@
+import { Buffer } from "node:buffer";
 import { execFile } from "node:child_process";
 import {
   mkdir,
@@ -751,4 +752,175 @@ describe.sequential("CIC-I4 task authorization, checkpoint, and lease lifecycle"
       }),
     ).rejects.toMatchObject({ code: "AUTHORIZATION_INVALID" });
   }, 60_000);
+
+  it("binds one stable physical observation to a shared material-set generation", async () => {
+    const alphaPath = path.join(fixture.worktreeRoot, "multi-alpha.txt");
+    const betaPath = path.join(fixture.worktreeRoot, "multi-beta.txt");
+    const gammaPath = path.join(fixture.worktreeRoot, "multi-gamma.txt");
+    const alphaBytes = "alpha-material\n";
+    const betaBytes = "beta-material\n";
+    const gammaBytes = alphaBytes;
+    await Promise.all([
+      writeFile(alphaPath, alphaBytes),
+      writeFile(betaPath, betaBytes),
+      writeFile(gammaPath, gammaBytes),
+    ]);
+
+    const multiTask = defineTaskContract({
+      taskIdentity: hash("multi-material-task"),
+      taskName: "i4-multi-material-current-truth",
+      repositoryIdentity: REPOSITORY_IDENTITY,
+      portableWorktreeIdentity: fixture.portableWorktreeIdentity,
+      scope: ["multi-alpha.txt", "multi-beta.txt", "multi-gamma.txt"],
+      owners: ["owner-a"],
+      semanticOwners,
+      contextIntent: contextIntent("multi-material"),
+    });
+    const multiDomainInput = {
+      repositoryRoot: fixture.worktreeRoot,
+      worktreeRoot: fixture.worktreeRoot,
+      stateRoot: path.join(fixture.temporary, "multi-state"),
+      repositoryIdentity: REPOSITORY_IDENTITY,
+      taskIdentity: multiTask.taskIdentity,
+      portableWorktreeIdentity: fixture.portableWorktreeIdentity,
+    };
+    await mkdir(multiDomainInput.stateRoot, { recursive: true });
+    const multiDomainCandidate = await inspectStateDomainCandidate(multiDomainInput);
+    const multiDomain = await recordStateDomainBinding({
+      ...multiDomainInput,
+      expectedLocalStateStoreBindingIdentity: multiDomainCandidate.localStateStoreBindingIdentity,
+    });
+    await recordTaskContract(multiDomainInput, multiTask);
+
+    const alpha = { id: "material-alpha", path: "multi-alpha.txt" };
+    const beta = { id: "material-beta", path: "multi-beta.txt" };
+    const gamma = { id: "material-gamma", path: "multi-gamma.txt" };
+    const observe = (materials) =>
+      observeCurrentTruth({
+        ...multiDomainInput,
+        taskContractIdentity: multiTask.taskContractIdentity,
+        authorityIdentity: fixture.authorityIdentity,
+        materials,
+      });
+    const materialFacts = (truth) => [
+      ...truth.contextCompilation.tiers.tier1,
+      ...truth.contextCompilation.tiers.tier2,
+    ];
+    const sharedGeneration = (truth) => {
+      const generations = new Set(
+        materialFacts(truth).map(({ generationIdentity }) => generationIdentity),
+      );
+      expect(generations.size).toBe(1);
+      const [generationIdentity] = generations;
+      expect(generationIdentity).toMatch(/^[0-9A-F]{64}$/u);
+      return generationIdentity;
+    };
+
+    try {
+      const baseline = await observe([alpha, beta]);
+      expect(baseline.contextCompilation.status).toBe("VERIFIED");
+      expect(materialFacts(baseline)).toMatchObject([
+        {
+          id: alpha.id,
+          path: alpha.path,
+          bytes: Buffer.byteLength(alphaBytes),
+          sha256: sha256Hex(alphaBytes),
+        },
+        {
+          id: beta.id,
+          path: beta.path,
+          bytes: Buffer.byteLength(betaBytes),
+          sha256: sha256Hex(betaBytes),
+        },
+      ]);
+      const baselineGeneration = sharedGeneration(baseline);
+
+      const reversed = await observe([beta, alpha]);
+      expect(sharedGeneration(reversed)).toBe(baselineGeneration);
+      expect(reversed.context.taskMaterialFingerprint).toBe(
+        baseline.context.taskMaterialFingerprint,
+      );
+      expect(reversed.currentTruthIdentity).toBe(baseline.currentTruthIdentity);
+
+      const zero = await observe([]);
+      expect(zero.contextCompilation.status).toBe("VERIFIED");
+      expect(materialFacts(zero)).toEqual([]);
+
+      const single = await observe([alpha]);
+      const singleFact = materialFacts(single)[0];
+      const oldSingleGeneration = sha256Hex(
+        `CIC-I4-MATERIAL-GENERATION-V1\n${canonicalJson({
+          path: singleFact.path,
+          bytes: singleFact.bytes,
+          sha256: singleFact.sha256,
+        })}\n`,
+      );
+      expect(singleFact.generationIdentity).not.toBe(oldSingleGeneration);
+      expect(singleFact.generationIdentity).not.toBe(baselineGeneration);
+
+      const renamedId = await observe([{ ...alpha, id: "material-alpha-renamed" }, beta]);
+      expect(sharedGeneration(renamedId)).not.toBe(baselineGeneration);
+
+      const changedPath = await observe([{ ...alpha, path: gamma.path }, beta]);
+      expect(sharedGeneration(changedPath)).not.toBe(baselineGeneration);
+
+      const added = await observe([alpha, beta, gamma]);
+      expect(sharedGeneration(added)).not.toBe(baselineGeneration);
+
+      await writeFile(alphaPath, "alpha-material-changed\n");
+      const changedAlpha = await observe([alpha, beta]);
+      expect(sharedGeneration(changedAlpha)).not.toBe(baselineGeneration);
+      expect(changedAlpha.currentTruthIdentity).not.toBe(baseline.currentTruthIdentity);
+      await writeFile(alphaPath, alphaBytes);
+
+      await writeFile(betaPath, "beta-material-changed\n");
+      const changedBeta = await observe([alpha, beta]);
+      expect(sharedGeneration(changedBeta)).not.toBe(baselineGeneration);
+      expect(changedBeta.currentTruthIdentity).not.toBe(baseline.currentTruthIdentity);
+      await writeFile(betaPath, betaBytes);
+
+      const restored = await observe([alpha, beta]);
+      expect(restored.currentTruthIdentity).toBe(baseline.currentTruthIdentity);
+      const decision = defineOwnerDecision({
+        decisionKind: "AUTHORIZE",
+        taskIdentity: multiTask.taskIdentity,
+        taskContractIdentity: multiTask.taskContractIdentity,
+        repositoryIdentity: REPOSITORY_IDENTITY,
+        portableWorktreeIdentity: fixture.portableWorktreeIdentity,
+        portableStateDomainIdentity: multiDomain.portableStateDomainIdentity,
+        localStateStoreBindingIdentity: multiDomain.localStateStoreBindingIdentity,
+        localWorktreeBindingIdentity: multiDomain.localWorktreeBindingIdentity,
+        contextIntentIdentity: multiTask.contextIntent.contextIntentIdentity,
+        authorityIdentity: fixture.authorityIdentity,
+        currentTruthIdentity: restored.currentTruthIdentity,
+        actions: I4_ACTION_FLAGS,
+        scope: multiTask.scope,
+        owners: multiTask.owners,
+        semanticOwners: multiTask.semanticOwners,
+        reasonClassification: "multi-material-current-truth",
+        reviewedEvidenceIdentities: [hash("multi-material-evidence")],
+        expectedAuthorizationHeadIdentity: null,
+        expectedHeadState: null,
+        expectedHeadGeneration: 0,
+        expectedCurrentAuthorizationIdentity: null,
+      });
+      await recordOwnerDecision(multiDomainInput, decision);
+      const admitted = await admitAuthorization({
+        domainInput: multiDomainInput,
+        ownerDecisionIdentity: decision.ownerDecisionIdentity,
+        currentTruthRequest: { materials: [alpha, beta] },
+      });
+
+      await writeFile(alphaPath, "alpha-material-stale\n");
+      await expect(
+        verifyAuthorization({
+          domainInput: multiDomainInput,
+          authorizationIdentity: admitted.authorization.authorizationIdentity,
+          currentTruthRequest: { materials: [alpha, beta] },
+        }),
+      ).rejects.toMatchObject({ code: "AUTHORIZATION_STALE" });
+    } finally {
+      await Promise.all([unlink(alphaPath), unlink(betaPath), unlink(gammaPath)]);
+    }
+  }, 600_000);
 });
