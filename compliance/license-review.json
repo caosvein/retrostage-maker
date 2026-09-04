@@ -2702,12 +2702,12 @@
       "classification": "AUTOMATICALLY_ADMISSIBLE",
       "distributionScope": "RSM-5-I1 DEVELOPMENT / SECURE ELECTRON SHELL CANDIDATE / NOT FINAL RELEASE",
       "evidenceSource": "Installed package.json plus physical top-level license/notice files",
-      "identity": "@xmldom/xmldom@0.9.10",
+      "identity": "@xmldom/xmldom@0.9.12",
       "license": "MIT",
       "licenseFiles": [
         {
           "name": "LICENSE",
-          "path": "node_modules/.pnpm/@xmldom+xmldom@0.9.10/node_modules/@xmldom/xmldom/LICENSE",
+          "path": "node_modules/.pnpm/@xmldom+xmldom@0.9.12/node_modules/@xmldom/xmldom/LICENSE",
           "sha256": "4DA724FC305D81606B245B324D4D2586916B9D248B23D82183DF753ACE0FDF71"
         }
       ],
@@ -2720,7 +2720,7 @@
       "packagedArtifactDisposition": null,
       "prohibited": false,
       "safeNoticeSourceUrl": "https://github.com/xmldom/xmldom.git",
-      "version": "0.9.10"
+      "version": "0.9.12"
     },
     {
       "author": "Feross Aboukhadijeh <feross@feross.org> (http://feross.org/)",
@@ -5910,12 +5910,12 @@
       "classification": "AUTOMATICALLY_ADMISSIBLE",
       "distributionScope": "RSM-5-I1 DEVELOPMENT / SECURE ELECTRON SHELL CANDIDATE / NOT FINAL RELEASE",
       "evidenceSource": "Installed package.json plus physical top-level license/notice files",
-      "identity": "fast-uri@3.1.5",
+      "identity": "fast-uri@3.1.6",
       "license": "BSD-3-Clause",
       "licenseFiles": [
         {
           "name": "LICENSE",
-          "path": "node_modules/.pnpm/fast-uri@3.1.5/node_modules/fast-uri/LICENSE",
+          "path": "node_modules/.pnpm/fast-uri@3.1.6/node_modules/fast-uri/LICENSE",
           "sha256": "B010B0DFDFDB23D7396E03B82CD4621FC9BB8F95D6B0AEA70B9C24E12074C786"
         }
       ],
@@ -5928,7 +5928,7 @@
       "packagedArtifactDisposition": null,
       "prohibited": false,
       "safeNoticeSourceUrl": "https://github.com/fastify/fast-uri.git",
-      "version": "3.1.5"
+      "version": "3.1.6"
     },
     {
       "author": "Matteo Collina <hello@matteocollina.com>",

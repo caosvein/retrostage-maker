@@ -5707,17 +5707,17 @@
       "version": "1.14.1"
     },
     {
-      "bom-ref": "pkg:npm/%40xmldom/xmldom@0.9.10",
+      "bom-ref": "pkg:npm/%40xmldom/xmldom@0.9.12",
       "externalReferences": [
         {
           "hashes": [
             {
               "alg": "SHA-512",
-              "content": "03d80ea8b762e9c57889b6b3023710b9f1a3d01d72fef0ea62b72e3fa77feb1f0fdbb8114bceb8dc38fda357442ad07a3bb7f0c5bd858019894b6997ee0a6f77"
+              "content": "e405e3adc302953af23def4b819af2829075963eecd12f44d3e5be0076952805721da9da7caf3a88f4af1b9c47552a7f8c2f951f5517bb44c0126636efdc47ec"
             }
           ],
           "type": "distribution",
-          "url": "https://registry.npmjs.org/@xmldom/xmldom/-/xmldom-0.9.10.tgz"
+          "url": "https://registry.npmjs.org/@xmldom/xmldom/-/xmldom-0.9.12.tgz"
         }
       ],
       "group": "@xmldom",
@@ -5728,10 +5728,10 @@
           "value": "true"
         }
       ],
-      "purl": "pkg:npm/%40xmldom/xmldom@0.9.10",
+      "purl": "pkg:npm/%40xmldom/xmldom@0.9.12",
       "scope": "excluded",
       "type": "library",
-      "version": "0.9.10"
+      "version": "0.9.12"
     },
     {
       "bom-ref": "pkg:npm/%40xtuc/ieee754@1.2.0",
@@ -9057,17 +9057,17 @@
       "version": "2.0.6"
     },
     {
-      "bom-ref": "pkg:npm/fast-uri@3.1.5",
+      "bom-ref": "pkg:npm/fast-uri@3.1.6",
       "externalReferences": [
         {
           "hashes": [
             {
               "alg": "SHA-512",
-              "content": "807c00d4ef4b0c870aba730a84e6d2fc78a6c2d7a13b59cf50408a02ee53a4a81a3b5f5f716125e1b96259ed635b1545bc85f3b498e34382fc5d0d4453d7fb27"
+              "content": "ec871a975bc510caf4a276d5cc40c8ade336d88e24856f9fcf240fc2f005581a758b076c852651b0be238d1bcf1bd24fd6e8aa30746da3e614e91dbf0b30f3e5"
             }
           ],
           "type": "distribution",
-          "url": "https://registry.npmjs.org/fast-uri/-/fast-uri-3.1.5.tgz"
+          "url": "https://registry.npmjs.org/fast-uri/-/fast-uri-3.1.6.tgz"
         }
       ],
       "name": "fast-uri",
@@ -9077,10 +9077,10 @@
           "value": "true"
         }
       ],
-      "purl": "pkg:npm/fast-uri@3.1.5",
+      "purl": "pkg:npm/fast-uri@3.1.6",
       "scope": "excluded",
       "type": "library",
-      "version": "3.1.5"
+      "version": "3.1.6"
     },
     {
       "bom-ref": "pkg:npm/fastq@1.20.1",
@@ -19080,7 +19080,7 @@
     },
     {
       "dependsOn": [],
-      "ref": "pkg:npm/%40xmldom/xmldom@0.9.10"
+      "ref": "pkg:npm/%40xmldom/xmldom@0.9.12"
     },
     {
       "dependsOn": [],
@@ -19150,7 +19150,7 @@
     {
       "dependsOn": [
         "pkg:npm/fast-deep-equal@3.1.3",
-        "pkg:npm/fast-uri@3.1.5",
+        "pkg:npm/fast-uri@3.1.6",
         "pkg:npm/json-schema-traverse@1.0.0",
         "pkg:npm/require-from-string@2.0.2"
       ],
@@ -19802,7 +19802,7 @@
     },
     {
       "dependsOn": [],
-      "ref": "pkg:npm/fast-uri@3.1.5"
+      "ref": "pkg:npm/fast-uri@3.1.6"
     },
     {
       "dependsOn": [
@@ -20860,7 +20860,7 @@
     },
     {
       "dependsOn": [
-        "pkg:npm/%40xmldom/xmldom@0.9.10",
+        "pkg:npm/%40xmldom/xmldom@0.9.12",
         "pkg:npm/base64-js@1.5.1",
         "pkg:npm/xmlbuilder@15.1.1"
       ],
