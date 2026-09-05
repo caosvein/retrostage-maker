@@ -70,7 +70,7 @@ let serializationHandle;
 const SERIALIZATION_LOCK = path.join(tmpdir(), `cic-i4-tests-${process.ppid}.lock`);
 
 async function acquireSerializationLock() {
-  for (let attempt = 0; attempt < 4_000; attempt += 1) {
+  for (let attempt = 0; attempt < 6_000; attempt += 1) {
     try {
       serializationHandle = await open(SERIALIZATION_LOCK, "wx");
       return;

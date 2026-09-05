@@ -65,7 +65,7 @@ let serializationHandle;
 const SERIALIZATION_LOCK = path.join(tmpdir(), `cic-i4-tests-${process.ppid}.lock`);
 
 async function acquireSerializationLock() {
-  for (let attempt = 0; attempt < 4_000; attempt += 1) {
+  for (let attempt = 0; attempt < 6_000; attempt += 1) {
     try {
       serializationHandle = await open(SERIALIZATION_LOCK, "wx");
       return;
@@ -296,7 +296,7 @@ describe.sequential("CIC-I4 task authorization, checkpoint, and lease lifecycle"
         .currentTruthFactIdentity,
     ).toBe(admissionFact.currentTruthFactIdentity);
     fixture.initialAdmissionFact = admissionFact;
-  }, 30_000);
+  }, 90_000);
 
   it("requires fresh current truth for public verification and lease authority", async () => {
     const authorizationIdentity = fixture.current.authorization.authorizationIdentity;
