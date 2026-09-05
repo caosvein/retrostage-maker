@@ -2545,6 +2545,10 @@ Adaptive Validation is a core CIC capability: semantic scenario/oracle intent is
 
 Durable semantic registries store only non-inferable reviewed meaning/oracles with owner, provenance and generation. Physical repository facts are derived where possible; stale/unowned rows are invalid and cannot override physical evidence. Once a CIC change-intent generation is promoted into canonical Sources, it retires to immutable historical evidence rather than remaining a second living authority.
 
+For CIC I6–I12, the existing development-context and continuity decision area adopts PRE-I6 workflow relief: orchestration and context are compressed without weakening any material gate. Natural diagnose/repair/revalidate micro-states stay inside one bounded logical task when scope and authority do not change; independent final-candidate review and every Stage, admission, validation, Commit, Push, remote, and hosted-CI predicate remain intact. Full workflow redesign is deferred until Post-I12.
+
+This extension creates no duplicate durable decision ID and no new authority. CIC itself may not grant its own scope, stage, commit, push, activate itself, or authorize RSM-7; owner authorization, currentness, publication, dependency, schema, persistence, security, and Source-authority gates retain their existing meaning.
+
 ### Feature-Level gameplay principles retained from the reviewed Public-Alpha package
 
 ### PART XVIII — Binding Product Principles

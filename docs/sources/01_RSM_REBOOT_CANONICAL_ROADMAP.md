@@ -335,7 +335,7 @@ Unless a milestone explicitly narrows the requirement, closure requires:
 ### PRE-RSM-7 Context Integrity Control — non-numbered standing engineering control
 
 **Type:** `ENGINEERING GOVERNANCE / NOT PRODUCT IMPLEMENTATION / NOT A NUMBERED MILESTONE`  
-**Lifecycle boundary:** `CIC SOURCE-ALIGNMENT = NEXT PRE-RSM-7 CONTROL / QUEUED`; CIC is `NOT ACTIVATED / NOT IMPLEMENTED / NOT AUTHORIZED`, and RSM-7 remains `NEXT / NOT STARTED / NOT AUTHORIZED` until separate owner authority is granted.
+**Lifecycle boundary:** CIC is a non-numbered PRE-RSM-7 standing engineering control; exact slice completion, current control state, and next activation belong to Source 02/08. CIC closure never authorizes RSM-7, which remains `NEXT / NOT STARTED / NOT AUTHORIZED` until separate owner authority is granted.
 
 Before RSM-7 production work may start, the Context Integrity Control (CIC) must establish and independently prove a deterministic, model/vendor-agnostic development-context and continuity system derived from canonical Sources, physical repository truth, reviewed task/authorization state, and durable evidence. Generated context, chat history, model memory, caches, registries, and handoff prose remain derived and never become canonical authority.
 

@@ -4,12 +4,12 @@
 **Role:** Authoritative current-state snapshot for the RetroStage Maker reboot  
 **Project:** RetroStage Maker  
 **Source generation:** Reboot / clean-start  
-**Snapshot date:** 2026-08-25  
+**Snapshot date:** 2026-09-05  
 **Snapshot timezone:** Europe/Istanbul  
 **Document state:** `LIVE SNAPSHOT / RSM-6 MILESTONE CLOSED-PASS / GATE B ACTIVE-CURRENT`  
 **Current product gate:** `Gate B — ACTIVE / CURRENT`  
 **Current milestone/control:** `RSM-6 — MILESTONE CLOSED / PASS; RSM-7 — NEXT / NOT STARTED / NOT AUTHORIZED`  
-**Current task:** `CIC SOURCE-ALIGNMENT SEMANTIC REBASE / INDEPENDENT REVIEW PREPARATION — NEXT PRE-RSM-7 CONTROL / QUEUED / NOT ACTIVATED / NOT AUTHORIZED`  
+**Current task:** `PRE-I6 WORKFLOW RELIEF — SOURCE CANDIDATE / BECOMES ACCEPTED-APPLIED ONLY AFTER INDEPENDENT ACCEPTANCE AND PUBLICATION; CIC I6 — NEXT / NOT STARTED / SEPARATE OWNER ACTIVATION REQUIRED`  
 **Repository:** `PRESENT — C:\RetroStage\retrostage-maker`  
 **Remote origin:** `https://github.com/caosvein/retrostage-maker.git`  
 **Primary branch:** `main`  
@@ -27,9 +27,15 @@
 **Accepted Wave2 natural CI:** `32830026684 / 97746392474 / attempt 1 / push / main / completed / success`  
 **Accepted Wave2 mirror convergence:** `Google Drive Sources 11/11 exact / PASS; ChatGPT Project Sources 11/11 exact / PASS`  
 **Accepted Wave2 final completeness audit:** `PASS`  
+**CIC I5-A:** `CLOSED / PASS / PUBLISHED / HOSTED-VALIDATED`  
+**CIC I5-B:** `CLOSED / PASS / PUBLISHED / HOSTED-VALIDATED`  
+**CIC I5-C:** `CLOSED / PASS / PUBLISHED / HOSTED-VALIDATED`  
+**CIC I5:** `COMPLETE`  
+**Accepted I5-C closure baseline:** `3386d486d15e7b35130e4ed9728f6f6ed2a8f076`  
+**Accepted I5-C natural hosted CI:** `33958972802 / run 52 / attempt 1 / push / main / completed / success`  
 **RSM-3 decision:** `CLOSED`  
 **Independently accepted/closed reboot product capabilities:** `RSM-5 secure Electron shell; RSM-6 I1-I8 renderer foundation and V1 validation`  
-**Immediate next control step:** `CIC SOURCE-ALIGNMENT SEMANTIC REBASE / INDEPENDENT REVIEW PREPARATION — NEXT PRE-RSM-7 CONTROL / QUEUED / NOT ACTIVATED / NOT AUTHORIZED`
+**Immediate next control step:** `Independently accept and publish the PRE-I6 workflow-relief Source generation; then CIC I6 remains NEXT / NOT STARTED until separate owner activation`
 
 ---
 
@@ -43,7 +49,7 @@ The POST-RSM-6 / PRE-RSM-7 `COMPLETENESS-FIX2` source alignment remains historic
 
 The `PRE-RSM-7 SOURCE ALIGNMENT WAVE2 CREATOR-APPEAL / SICE V4` control is `CLOSED / PASS`. Its exact Source generation was published at commit `4e5c337445f712a5feeab2f2c2167783086766d9`; natural CI run `32830026684`, job `97746392474`, attempt 1 completed successfully for the push to `main`. Google Drive Sources and ChatGPT Project Sources each converge `11/11 exact / PASS`, and the final completeness audit is `PASS`.
 
-The next PRE-RSM-7 control is `CIC SOURCE-ALIGNMENT SEMANTIC REBASE / INDEPENDENT REVIEW PREPARATION`. `CIC = QUEUED / NOT ACTIVATED / NOT IMPLEMENTED / NOT AUTHORIZED`; `CIC semantic rebase = NOT YET COMPLETED`; `CIC candidate embedded Source baseline = STALE / MUST NOT BE APPLIED DIRECTLY`. This closure does not integrate CIC architecture, CTX roles, workflow rules or other CIC semantics. RSM-7 remains `NEXT / NOT STARTED / NOT AUTHORIZED` pending a separate owner authorization.
+CIC I5 is complete: I5-A, I5-B, and I5-C are each `CLOSED / PASS / PUBLISHED / HOSTED-VALIDATED`. The accepted I5-C closure baseline is `3386d486d15e7b35130e4ed9728f6f6ed2a8f076`; natural CI run `33958972802`, run 52, attempt 1, event `push`, completed successfully. The PRE-I6 workflow relief recorded by this Source candidate becomes `ACCEPTED / APPLIED` only after independent acceptance and publication of this exact Source generation. CIC I6 is `NEXT / NOT STARTED / SEPARATE OWNER ACTIVATION REQUIRED`; full workflow simplification remains deferred until Post-I12. RSM-7 remains `NOT STARTED / NOT AUTHORIZED` pending separate owner authorization.
 
 ---
 
@@ -83,7 +89,13 @@ The next PRE-RSM-7 control is `CIC SOURCE-ALIGNMENT SEMANTIC REBASE / INDEPENDEN
 | POST-RSM-6 / PRE-RSM-7 COMPLETENESS-FIX2 | `ACCEPTED / PUBLISHED` | Exact Source alignment published at `070d7aa562f3cac0923e766e616d8b9318b0aad3`; natural CI `32694913531 / 97335115697 / attempt 1 / success` |
 | PRE-RSM-7 final-handoff baseline | `ACCEPTED / PUBLISHED / MIRROR-CONVERGED PASS` | Commit `24ed950aa098f92d761eebc96695f5b7c956c44b`; natural CI `32703866935 / 97360749452 / attempt 1 / success`; baseline mirror convergence independently verified |
 | PRE-RSM-7 SOURCE ALIGNMENT WAVE2 CREATOR-APPEAL / SICE V4 | `CLOSED / PASS` | Published at `4e5c337445f712a5feeab2f2c2167783086766d9`; natural CI `32830026684 / 97746392474 / attempt 1 / success`; external Source mirrors `11/11 exact / PASS` each; final completeness audit `PASS` |
-| CIC SOURCE-ALIGNMENT | `NEXT PRE-RSM-7 CONTROL / SEMANTIC REBASE / INDEPENDENT REVIEW PREPARATION / QUEUED / NOT ACTIVATED / NOT IMPLEMENTED / NOT AUTHORIZED` | CIC semantic rebase is not yet completed; CIC candidate embedded Source baseline is stale and must not be applied directly; no CIC architecture or CTX semantics are integrated by this closure |
+| CIC I5-A | `CLOSED / PASS / PUBLISHED / HOSTED-VALIDATED` | Published semantic authority/registry/provider foundation passed natural hosted validation |
+| CIC I5-B | `CLOSED / PASS / PUBLISHED / HOSTED-VALIDATED` | Published FAST/SHADOW semantic closure foundation passed natural hosted validation |
+| CIC I5-C | `CLOSED / PASS / PUBLISHED / HOSTED-VALIDATED` | Closure baseline `3386d486d15e7b35130e4ed9728f6f6ed2a8f076`; natural CI `33958972802 / run 52 / attempt 1 / push / success` |
+| CIC I5 | `COMPLETE` | I5-A, I5-B, and I5-C are closed and published |
+| PRE-I6 WORKFLOW RELIEF | `SOURCE CANDIDATE / ACCEPTED-APPLIED UPON INDEPENDENT ACCEPTANCE AND PUBLICATION` | Orchestration/context compression only; no gate or CIC authority change |
+| CIC I6 | `NEXT / NOT STARTED / SEPARATE OWNER ACTIVATION REQUIRED` | This Source candidate does not start I6 |
+| POST-I12 FULL WORKFLOW SIMPLIFICATION | `DEFERRED` | Broader workflow redesign remains outside PRE-I6 scope |
 | RSM-7 | `NEXT MILESTONE / NOT STARTED / NOT AUTHORIZED` | Canonical project/scene document implementation has not begun |
 
 ---
@@ -350,9 +362,14 @@ Wave2 natural CI = 32830026684 / 97746392474 / attempt 1 / push / main / complet
 Wave2 Google Drive Sources mirror = 11/11 exact / PASS
 Wave2 ChatGPT Project Sources mirror = 11/11 exact / PASS
 Wave2 final completeness audit = PASS
-current/next PRE-RSM-7 control = CIC SOURCE-ALIGNMENT SEMANTIC REBASE / INDEPENDENT REVIEW PREPARATION
-CIC = QUEUED / NOT ACTIVATED / NOT IMPLEMENTED / NOT AUTHORIZED
-CIC semantic rebase = NOT YET COMPLETED
-CIC candidate embedded Source baseline = STALE / MUST NOT BE APPLIED DIRECTLY
+CIC I5-A = CLOSED / PASS / PUBLISHED / HOSTED-VALIDATED
+CIC I5-B = CLOSED / PASS / PUBLISHED / HOSTED-VALIDATED
+CIC I5-C = CLOSED / PASS / PUBLISHED / HOSTED-VALIDATED
+CIC I5 = COMPLETE
+accepted I5-C closure baseline = 3386d486d15e7b35130e4ed9728f6f6ed2a8f076
+accepted I5-C natural CI = 33958972802 / run 52 / attempt 1 / push / main / success
+PRE-I6 workflow relief = ACCEPTED / APPLIED only upon independent acceptance and publication of this Source generation
+CIC I6 = NEXT / NOT STARTED / SEPARATE OWNER ACTIVATION REQUIRED
+full Post-I12 workflow simplification = DEFERRED
 RSM-7 = NEXT / NOT STARTED / NOT AUTHORIZED
 ```

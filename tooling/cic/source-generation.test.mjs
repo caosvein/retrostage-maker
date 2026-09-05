@@ -17,7 +17,7 @@ import { formatJsonResult, run } from "./verify-source-generation.mjs";
 const CIC_DIRECTORY = path.dirname(fileURLToPath(import.meta.url));
 const REPOSITORY_ROOT = path.resolve(CIC_DIRECTORY, "..", "..");
 const SOURCE_ROOT = path.join(REPOSITORY_ROOT, "docs", "sources");
-const EXPECTED_FINGERPRINT = "6785498B15F1E37163EB8C2E2FE2406F830CD68F99D18397CE157CA3A581BA55";
+const EXPECTED_FINGERPRINT = "2F7795D1C2D95F8E34028EF88CE634251142238623BED1CE418191F9EE43AB75";
 const temporaryRoots = [];
 
 async function createFixture(order = [...EXPECTED_SOURCE_IDS]) {
@@ -57,7 +57,7 @@ async function createChangedValidFixture() {
   await writeFile(sourcePath, changedBytes);
   const changedHash = sha256Hex(changedBytes);
   await rewriteManifest(root, (text) =>
-    text.replace("B2DEA251DD2DDAE33A51F56F34A1085575D1A0EAC96AAE4B63A16336A561B660", changedHash),
+    text.replace("C307F9FF4B45B21508DEE48AF1ECAFF99A0F0235CE212DB5C735DE7DB69D1501", changedHash),
   );
   return root;
 }
@@ -286,9 +286,9 @@ describe("CIC-I1 source generation foundation", () => {
     const sourceBytes = await readFile(
       path.join(SOURCE_ROOT, "01_RSM_REBOOT_CANONICAL_ROADMAP.md"),
     );
-    expect(gitBlobSha1(sourceBytes)).toBe("1b62df9e3c467c3b99d3ce7dd63123633860041e");
+    expect(gitBlobSha1(sourceBytes)).toBe("ec52876d0ba3f7032b03d205d07f46e866c1ce28");
     expect(sha256Hex(sourceBytes)).toBe(
-      "B2DEA251DD2DDAE33A51F56F34A1085575D1A0EAC96AAE4B63A16336A561B660",
+      "C307F9FF4B45B21508DEE48AF1ECAFF99A0F0235CE212DB5C735DE7DB69D1501",
     );
     expect(normalizeRepoRelativePath(".\\docs\\sources\\SOURCE-MANIFEST.tsv")).toBe(
       "docs/sources/SOURCE-MANIFEST.tsv",

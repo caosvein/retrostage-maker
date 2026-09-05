@@ -2210,7 +2210,7 @@ Verify authority and baseline
 
 ## 63.1 Standing Context Integrity, Adaptive Validation, and Continuity Contract
 
-This section is the primary canonical workflow owner for the PRE-RSM-7 Context Integrity Control (CIC) and its post-closure standing obligations. It defines required behavior; it does not claim that CIC is implemented or active. CIC activation, implementation, commit/push authority, and RSM-7 authorization remain separate owner-controlled gates.
+This section is the primary canonical workflow owner for the PRE-RSM-7 Context Integrity Control (CIC) and its post-closure standing obligations. It defines required behavior; exact physical CIC slice completion and current activation state belong to Source02/08. Commit/push authority and RSM-7 authorization remain separate owner-controlled gates.
 
 ### Authority, provenance, and closure
 
@@ -2322,6 +2322,34 @@ Findings reopen only bounded affected ownership: implementation/semantic defect,
 - **H-105 — physical-first lineage:** consolidation/handoff companions are physically present and verified or explicitly unavailable/not-required/historical/stale. Declared hash mismatch, missing sidecar, or stale delta is recorded and may not silently become current authority.
 - **H-106 — bounded scale fixture:** the late-roadmap fixture uses a fixed reviewed generator profile, versioned deterministic seed/identity, explicit corpus bound and termination condition, and no RSM-95/RSM-115 product implementation. Unbounded recursive generation is forbidden.
 - **H-107 — repository truth and registry discipline:** derive physical truth wherever possible. Durable semantic registries contain only non-inferable reviewed intent/oracles with owner, provenance and generation; unowned/stale rows are `INVALID`, and manually mirrored import/consumer/dependency rows never override physical repository evidence.
+
+### PRE-I6 orchestration-compression contract
+
+For CIC I6–I12, natural `IMPLEMENT → diagnose → repair → format/lint/typecheck/test → revalidate` iterations remain inside one bounded Codex task/session while task identity, scope, authority, branch/worktree, Source generation, and material current truth do not require a new authority decision. One logical engineering task uses one primary Input package; attempts and ordinary DIAG/FIX/FORMAT/LINT/RETEST micro-states are subordinate evidence, not separate top-level governance tasks. A material scope, authority, architecture, dependency, schema, persistence, security, or Source-authority boundary still stops the task and uses the existing reauthorization/admission rules.
+
+A deliberate independent final-candidate review remains a real boundary and cannot be collapsed into the implementing Codex agent. Only after that review passes may one bounded owner promotion authorization cover the known Stage → admission/authorization → Commit → Push chain. That compound authorization remains task-specific, scope-bound, branch/currentness-bound, action-bound, and fail-closed; it never makes a later gate executable early and never replaces a fresh current-truth check required by an underlying gate.
+
+`PROMOTE` is orchestration shorthand only. In PRE-I6 it is not a new CIC authority or architecture layer, service locator, database, cache authority, workflow engine, or physical command, and it does not replace Stage, admission, validation, Commit verification, Push/remote verification, or hosted CI. Every underlying gate remains individually observable in evidence, and one mutation authority remains unchanged.
+
+The compressed promotion sequence preserves these stop points:
+
+```text
+staged mismatch                 → STOP before commit
+admission failure               → STOP before commit
+validation failure              → STOP before commit
+post-commit mismatch            → STOP before push
+push or remote ambiguity        → STOP
+hosted-CI failure               → NOT COMPLETE
+scope drift                     → STOP / existing reauthorization semantics
+Source-generation/current drift → existing stale/currentness blocker
+dependency/schema/security/persistence authority change → existing explicit gates
+```
+
+Hosted-CI diagnosis and repair normally remain one logical correction task when scope and authority do not change. A changed correction candidate still requires the existing independent review plus currentness and authorization semantics before promotion. Reusing unchanged discovery or evidence inside one bounded task avoids redundant orchestration but never authorizes skipping a mandatory material gate.
+
+Routine evidence may be compact only where no existing durable semantic artifact is required. When a conversation boundary is genuinely necessary, a compact deterministic continuity checkpoint replaces narrative replay and points to current Sources, physical repository truth, authorization, changed paths, reusable evidence, stale evidence, next action, and forbidden actions. Context economy and Governance Amplification Ratio are workflow-quality diagnostics only; they are never canonical authority or acceptance truth.
+
+Full baseline fingerprint/cache authority, broader evidence-architecture redesign, risk-based gate simplification, and wider workflow-state-machine simplification remain deferred until Post-I12. PRE-I6 compresses orchestration only and does not change Adaptive Validation, progression/recovery, publication correctness, or CIC I6–I12 acceptance semantics.
 
 ### Closure and standing maintenance
 
