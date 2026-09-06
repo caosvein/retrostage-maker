@@ -32,8 +32,11 @@ const DECLARATION_SCHEMA = "CIC_SEMANTIC_DECLARATION_V1";
 const NEGATIVE_WITNESS_MATERIAL_SCHEMA = "CIC_SEMANTIC_NEGATIVE_WITNESS_MATERIAL_V1";
 const RESULT_SCHEMA = "CIC_SEMANTIC_CLOSURE_RESULT_V1";
 const WITNESS_SCHEMA = "CIC_SEMANTIC_CLOSURE_WITNESS_V1";
+const WITNESS_IDENTITY_SCHEMA = "CIC_I5_C_SEMANTIC_CLOSURE_WITNESS_V1";
 const AUTHORITY_SCOPE = "READ_ONLY_SEMANTIC_COMPLETENESS";
 const IDENTITY = /^[0-9A-F]{64}$/u;
+const CONTENT_IDENTITY = /^(?:[0-9a-f]{40}|[0-9A-F]{64})$/u;
+const WITNESS_INVALID = "SEMANTIC_CLOSURE_WITNESS_INVALID";
 const LIMITS = Object.freeze({
   declarationBytes: 512 * 1024,
   negativeWitnessBytes: 16 * 1024,
@@ -42,8 +45,55 @@ const LIMITS = Object.freeze({
   capabilities: 128,
   records: 1024,
   dependencies: 256,
+  dependencyEdges: 8192,
+  evidence: 4096,
   requestedRoots: 128,
 });
+
+const PASS_WITNESS_KEYS = Object.freeze([
+  "absentProven",
+  "authorityScope",
+  "authorizationHeadGeneration",
+  "authorizationHeadIdentity",
+  "authorizationIdentity",
+  "authorizationState",
+  "authorizedSemanticOwnerSet",
+  "closureMembers",
+  "closureWitnessIdentity",
+  "comparisonIdentity",
+  "consultedOwnerIdentities",
+  "consultedProviderIdentities",
+  "contextGenerationIdentity",
+  "currentTruthIdentity",
+  "effectiveCheckpointContentIdentity",
+  "effectiveCheckpointRecordIdentity",
+  "fastWitnessIdentity",
+  "findings",
+  "followedDependencyEdges",
+  "mutationAuthorization",
+  "normalizedFastComparisonIdentity",
+  "normalizedShadowComparisonIdentity",
+  "ownerProviderConflicts",
+  "projectionSetIdentity",
+  "registryIdentity",
+  "repositoryHeadCommit",
+  "repositoryHeadTree",
+  "repositoryIdentity",
+  "repositorySnapshotIdentity",
+  "requestedRoots",
+  "schemaVersion",
+  "semanticDeclarationBytes",
+  "semanticDeclarationMaterialIdentity",
+  "semanticDeclarationSha256",
+  "shadowWitnessIdentity",
+  "sourceGenerationFingerprint",
+  "status",
+  "taskContractIdentity",
+  "taskIdentity",
+  "taskMaterialFingerprint",
+  "unknownKeys",
+  "unresolvedKeys",
+]);
 
 const MATERIAL_COMPARISON_FIELDS = Object.freeze([
   "status",
@@ -731,6 +781,222 @@ function normalizedArray(value, objects = false) {
     compare(objects ? canonicalJson(left) : left, objects ? canonicalJson(right) : right),
   );
   return copies;
+}
+
+function witnessContentIdentity(value) {
+  if (typeof value !== "string" || !CONTENT_IDENTITY.test(value)) fail(WITNESS_INVALID);
+  return value;
+}
+
+function witnessNumber(value, minimum = 0, maximum = Number.MAX_SAFE_INTEGER) {
+  if (!Number.isSafeInteger(value) || value < minimum || value > maximum) {
+    fail(WITNESS_INVALID);
+  }
+  return value;
+}
+
+function witnessIdentityList(value, maximum, allowEmpty = true) {
+  const result = boundedArray(value, maximum, WITNESS_INVALID)
+    .map((entry) => identity(entry, WITNESS_INVALID))
+    .sort(compare);
+  if ((!allowEmpty && result.length === 0) || new Set(result).size !== result.length) {
+    fail(WITNESS_INVALID);
+  }
+  return result;
+}
+
+function normalizeWitnessEdge(value) {
+  exactKeys(
+    value,
+    [
+      "edgeIdentity",
+      "originEvidenceIdentities",
+      "originOwnerIdentity",
+      "originProjectionIdentity",
+      "originProviderBindingIdentity",
+      "originProviderIdentity",
+      "originProviderInputIdentity",
+      "originSupportingEvidenceIdentities",
+      "sourceSemanticKey",
+      "targetSemanticKey",
+    ],
+    WITNESS_INVALID,
+  );
+  const body = {
+    sourceSemanticKey: portable(value.sourceSemanticKey, WITNESS_INVALID),
+    targetSemanticKey: portable(value.targetSemanticKey, WITNESS_INVALID),
+    originOwnerIdentity: identity(value.originOwnerIdentity, WITNESS_INVALID),
+    originProviderIdentity: identity(value.originProviderIdentity, WITNESS_INVALID),
+    originProviderBindingIdentity: identity(value.originProviderBindingIdentity, WITNESS_INVALID),
+    originProviderInputIdentity: identity(value.originProviderInputIdentity, WITNESS_INVALID),
+    originProjectionIdentity: identity(value.originProjectionIdentity, WITNESS_INVALID),
+    originEvidenceIdentities: witnessIdentityList(value.originEvidenceIdentities, LIMITS.evidence),
+    originSupportingEvidenceIdentities: witnessIdentityList(
+      value.originSupportingEvidenceIdentities,
+      LIMITS.evidence,
+    ),
+  };
+  const edgeIdentity = identity(value.edgeIdentity, WITNESS_INVALID);
+  if (edgeIdentity !== semanticIdentity("CIC_SEMANTIC_DEPENDENCY_EDGE_V1", body)) {
+    fail(WITNESS_INVALID);
+  }
+  return { ...body, edgeIdentity };
+}
+
+function normalizeWitnessEdges(value) {
+  const edges = boundedArray(value, LIMITS.dependencyEdges, WITNESS_INVALID)
+    .map(normalizeWitnessEdge)
+    .sort((left, right) => compare(canonicalJson(left), canonicalJson(right)));
+  if (new Set(edges.map(({ edgeIdentity }) => edgeIdentity)).size !== edges.length) {
+    fail(WITNESS_INVALID);
+  }
+  return edges;
+}
+
+function normalizeWitnessFindings(value) {
+  const findings = boundedArray(value, LIMITS.dependencyEdges, WITNESS_INVALID)
+    .map((entry) => {
+      exactKeys(entry, ["code", "semanticKey"], WITNESS_INVALID);
+      return {
+        code: portable(entry.code, WITNESS_INVALID),
+        semanticKey:
+          entry.semanticKey === null ? null : portable(entry.semanticKey, WITNESS_INVALID),
+      };
+    })
+    .sort((left, right) => compare(canonicalJson(left), canonicalJson(right)));
+  if (new Set(findings.map((entry) => canonicalJson(entry))).size !== findings.length) {
+    fail(WITNESS_INVALID);
+  }
+  return findings;
+}
+
+function normalizePassWitness(record) {
+  exactKeys(record, PASS_WITNESS_KEYS, WITNESS_INVALID);
+  if (
+    record.schemaVersion !== WITNESS_SCHEMA ||
+    record.status !== "PASS" ||
+    record.authorityScope !== AUTHORITY_SCOPE ||
+    record.authorizationState !== "ACTIVE" ||
+    record.mutationAuthorization !== false
+  ) {
+    fail(WITNESS_INVALID);
+  }
+  const body = {
+    schemaVersion: WITNESS_SCHEMA,
+    status: "PASS",
+    authorityScope: AUTHORITY_SCOPE,
+    sourceGenerationFingerprint: identity(record.sourceGenerationFingerprint, WITNESS_INVALID),
+    repositoryIdentity: identity(record.repositoryIdentity, WITNESS_INVALID),
+    repositorySnapshotIdentity: identity(record.repositorySnapshotIdentity, WITNESS_INVALID),
+    repositoryHeadCommit: witnessContentIdentity(record.repositoryHeadCommit),
+    repositoryHeadTree: witnessContentIdentity(record.repositoryHeadTree),
+    taskIdentity: identity(record.taskIdentity, WITNESS_INVALID),
+    taskContractIdentity: identity(record.taskContractIdentity, WITNESS_INVALID),
+    authorizationIdentity: identity(record.authorizationIdentity, WITNESS_INVALID),
+    authorizationHeadIdentity: identity(record.authorizationHeadIdentity, WITNESS_INVALID),
+    authorizationHeadGeneration: witnessNumber(record.authorizationHeadGeneration, 1),
+    authorizationState: "ACTIVE",
+    currentTruthIdentity: identity(record.currentTruthIdentity, WITNESS_INVALID),
+    contextGenerationIdentity: identity(record.contextGenerationIdentity, WITNESS_INVALID),
+    taskMaterialFingerprint: identity(record.taskMaterialFingerprint, WITNESS_INVALID),
+    effectiveCheckpointRecordIdentity: identity(
+      record.effectiveCheckpointRecordIdentity,
+      WITNESS_INVALID,
+    ),
+    effectiveCheckpointContentIdentity: identity(
+      record.effectiveCheckpointContentIdentity,
+      WITNESS_INVALID,
+    ),
+    authorizedSemanticOwnerSet: witnessIdentityList(
+      record.authorizedSemanticOwnerSet,
+      LIMITS.owners,
+      false,
+    ),
+    semanticDeclarationMaterialIdentity: identity(
+      record.semanticDeclarationMaterialIdentity,
+      WITNESS_INVALID,
+    ),
+    semanticDeclarationBytes: witnessNumber(
+      record.semanticDeclarationBytes,
+      0,
+      LIMITS.declarationBytes,
+    ),
+    semanticDeclarationSha256: identity(record.semanticDeclarationSha256, WITNESS_INVALID),
+    registryIdentity: identity(record.registryIdentity, WITNESS_INVALID),
+    projectionSetIdentity: identity(record.projectionSetIdentity, WITNESS_INVALID),
+    normalizedFastComparisonIdentity: identity(
+      record.normalizedFastComparisonIdentity,
+      WITNESS_INVALID,
+    ),
+    normalizedShadowComparisonIdentity: identity(
+      record.normalizedShadowComparisonIdentity,
+      WITNESS_INVALID,
+    ),
+    fastWitnessIdentity: identity(record.fastWitnessIdentity, WITNESS_INVALID),
+    shadowWitnessIdentity: identity(record.shadowWitnessIdentity, WITNESS_INVALID),
+    comparisonIdentity: identity(record.comparisonIdentity, WITNESS_INVALID),
+    requestedRoots: uniquePortable(
+      record.requestedRoots,
+      LIMITS.requestedRoots,
+      WITNESS_INVALID,
+      false,
+    ),
+    closureMembers: uniquePortable(record.closureMembers, LIMITS.records, WITNESS_INVALID),
+    absentProven: uniquePortable(record.absentProven, LIMITS.records, WITNESS_INVALID),
+    unknownKeys: uniquePortable(record.unknownKeys, LIMITS.records, WITNESS_INVALID),
+    unresolvedKeys: uniquePortable(record.unresolvedKeys, LIMITS.records, WITNESS_INVALID),
+    ownerProviderConflicts: uniquePortable(
+      record.ownerProviderConflicts,
+      LIMITS.records,
+      WITNESS_INVALID,
+    ),
+    consultedOwnerIdentities: witnessIdentityList(record.consultedOwnerIdentities, LIMITS.owners),
+    consultedProviderIdentities: witnessIdentityList(
+      record.consultedProviderIdentities,
+      LIMITS.providers,
+    ),
+    followedDependencyEdges: normalizeWitnessEdges(record.followedDependencyEdges),
+    findings: normalizeWitnessFindings(record.findings),
+    mutationAuthorization: false,
+  };
+  if (
+    body.unknownKeys.length !== 0 ||
+    body.unresolvedKeys.length !== 0 ||
+    body.ownerProviderConflicts.length !== 0 ||
+    body.findings.length !== 0
+  ) {
+    fail(WITNESS_INVALID);
+  }
+  const presentKeys = new Set([...body.closureMembers, ...body.absentProven]);
+  if (
+    presentKeys.size !== body.closureMembers.length + body.absentProven.length ||
+    body.requestedRoots.some((semanticKey) => !presentKeys.has(semanticKey)) ||
+    body.consultedOwnerIdentities.some(
+      (ownerIdentity) => !body.authorizedSemanticOwnerSet.includes(ownerIdentity),
+    ) ||
+    body.followedDependencyEdges.some(
+      (edge) =>
+        !body.closureMembers.includes(edge.sourceSemanticKey) ||
+        !presentKeys.has(edge.targetSemanticKey) ||
+        !body.consultedOwnerIdentities.includes(edge.originOwnerIdentity) ||
+        !body.consultedProviderIdentities.includes(edge.originProviderIdentity),
+    )
+  ) {
+    fail(WITNESS_INVALID);
+  }
+  const closureWitnessIdentity = identity(record.closureWitnessIdentity, WITNESS_INVALID);
+  if (closureWitnessIdentity !== semanticIdentity(WITNESS_IDENTITY_SCHEMA, body)) {
+    fail(WITNESS_INVALID);
+  }
+  return deepFreeze({ ...body, closureWitnessIdentity });
+}
+
+export function verifySemanticClosureWitness(record) {
+  try {
+    return normalizePassWitness(record);
+  } catch {
+    fail(WITNESS_INVALID);
+  }
 }
 
 function normalizeSemanticClosureWitness(witness) {

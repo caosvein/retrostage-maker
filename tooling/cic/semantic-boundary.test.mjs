@@ -34,6 +34,7 @@ import {
   parseSemanticDeclaration,
   physicalBindingSnapshot,
   verifySemanticClosure,
+  verifySemanticClosureWitness,
 } from "./lib/semantic-closure.mjs";
 import { defineSemanticOwnerRegistration } from "./lib/semantic-registry.mjs";
 import {
@@ -56,6 +57,7 @@ const PHYSICAL_TEST_TIMEOUT_MS = 90_000;
 
 let serializationHandle;
 let fixture;
+let physicalClosureWitness;
 
 async function acquireSerializationLock() {
   for (let attempt = 0; attempt < 6_000; attempt += 1) {
@@ -74,6 +76,15 @@ await acquireSerializationLock();
 
 const semanticIdentity = (schema, body) =>
   sha256Hex(`${schema.replaceAll("_", "-")}\n${canonicalJson(body)}\n`);
+
+function resealClosureWitness(witness, overrides = {}) {
+  const body = { ...structuredClone(witness), ...overrides };
+  delete body.closureWitnessIdentity;
+  return {
+    ...body,
+    closureWitnessIdentity: semanticIdentity("CIC_I5_C_SEMANTIC_CLOSURE_WITNESS_V1", body),
+  };
+}
 
 function presentRecord(semanticKey, materialId, dependencies = []) {
   return {
@@ -522,6 +533,10 @@ async function createPhysicalFixture() {
 
 beforeAll(async () => {
   fixture = await createPhysicalFixture();
+  physicalClosureWitness = await verifySemanticClosure(fixture.requests.mixed);
+  if (physicalClosureWitness.status !== "PASS") {
+    throw new Error("SEMANTIC_CLOSURE_PASS_FIXTURE_UNAVAILABLE");
+  }
 }, 900_000);
 
 afterAll(async () => {
@@ -542,6 +557,45 @@ describe.sequential("CIC-I5-C semantic closure physical boundary", () => {
     expect(
       first.providers[0].capabilityRecords[0].records.map(({ presenceState }) => presenceState),
     ).toEqual(["ABSENT_PROVEN", "PRESENT"]);
+  });
+
+  test("structurally verifies content identity and deeply freezes a physical PASS witness", () => {
+    const verified = verifySemanticClosureWitness(physicalClosureWitness);
+    expect(verified).toEqual(physicalClosureWitness);
+    expect(Object.isFrozen(verified)).toBe(true);
+    expect(Object.isFrozen(verified.followedDependencyEdges)).toBe(true);
+    expect(Object.isFrozen(verified.followedDependencyEdges[0])).toBe(true);
+  });
+
+  test("rejects aggregate-identity tamper with one stable fail-closed code", () => {
+    const tampered = structuredClone(physicalClosureWitness);
+    tampered.repositorySnapshotIdentity = hash("tampered-snapshot");
+    expect(() => verifySemanticClosureWitness(tampered)).toThrowError(
+      /SEMANTIC_CLOSURE_WITNESS_INVALID/u,
+    );
+  });
+
+  test("rejects extra and missing PASS witness keys", () => {
+    const extra = { ...physicalClosureWitness, claimedImpactAuthority: true };
+    const missing = structuredClone(physicalClosureWitness);
+    delete missing.currentTruthIdentity;
+    for (const invalid of [extra, missing]) {
+      expect(() => verifySemanticClosureWitness(invalid)).toThrowError(
+        /SEMANTIC_CLOSURE_WITNESS_INVALID/u,
+      );
+    }
+  });
+
+  test("rejects self-consistent unresolved and non-PASS witness claims", () => {
+    const unresolved = resealClosureWitness(physicalClosureWitness, {
+      unresolvedKeys: ["component.unresolved"],
+    });
+    const blocked = resealClosureWitness(physicalClosureWitness, { status: "BLOCKED" });
+    for (const invalid of [unresolved, blocked]) {
+      expect(() => verifySemanticClosureWitness(invalid)).toThrowError(
+        /SEMANTIC_CLOSURE_WITNESS_INVALID/u,
+      );
+    }
   });
 
   test("rejects fabricated caller authority, bound provider, projection, witness, and PASS claims", async () => {
