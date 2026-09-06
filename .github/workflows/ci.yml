@@ -88,8 +88,29 @@ jobs:
         shell: pwsh
         run: pnpm install --frozen-lockfile
 
+      - name: Verify hosted validation heap envelope
+        shell: pwsh
+        env:
+          NODE_OPTIONS: --max-old-space-size=2560
+        run: |
+          $heapLimitBytesText = node -e 'console.log(require("node:v8").getHeapStatistics().heap_size_limit)'
+          if ($LASTEXITCODE -ne 0) {
+            throw "Unable to observe the effective V8 heap limit."
+          }
+          [long]$heapLimitBytes = 0
+          if (-not [long]::TryParse($heapLimitBytesText, [ref]$heapLimitBytes)) {
+            throw "Effective V8 heap limit is not an integer byte count."
+          }
+          $heapLimitMiB = [math]::Floor($heapLimitBytes / 1MB)
+          "Effective V8 heap limit: $heapLimitMiB MiB"
+          if ($heapLimitMiB -lt 2560) {
+            throw "Effective V8 heap limit is below the required minimum. required=2560 MiB actual=$heapLimitMiB MiB"
+          }
+
       - name: Validate the empty foundation
         shell: pwsh
+        env:
+          NODE_OPTIONS: --max-old-space-size=2560
         run: pnpm run validate
 
       - name: Verify deterministic compliance artifacts
