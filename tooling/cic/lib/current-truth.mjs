@@ -1,5 +1,6 @@
 import { lstat, readFile, realpath } from "node:fs/promises";
 import path from "node:path";
+import process from "node:process";
 
 import { canonicalJson } from "./canonical-json.mjs";
 import { REQUIRED_CONTEXT_DIMENSIONS } from "./context-closure.mjs";
@@ -54,6 +55,78 @@ const FORBIDDEN_CALLER_KEYS = new Set([
   "repositoryObservation",
   "sourceObservation",
 ]);
+
+const I4_TEST_GENERATION_PHASE = "AFTER_GEN_START_OBSERVATION";
+let i4TestGenerationPhaseBarrier = null;
+
+export function installI4GenerationPhaseBarrierForTest() {
+  if (process.env.VITEST !== "true") {
+    throw new Error("CIC_I4_TEST_GENERATION_BARRIER_UNAVAILABLE");
+  }
+  if (i4TestGenerationPhaseBarrier !== null) {
+    throw new Error("CIC_I4_TEST_GENERATION_BARRIER_ALREADY_INSTALLED");
+  }
+
+  let markReached;
+  let releaseBarrier;
+  const reached = new Promise((resolve) => {
+    markReached = resolve;
+  });
+  const released = new Promise((resolve) => {
+    releaseBarrier = resolve;
+  });
+  const barrier = {
+    consumed: false,
+    markReached,
+    phase: I4_TEST_GENERATION_PHASE,
+    reached,
+    releaseBarrier,
+    released,
+    releasedOnce: false,
+  };
+  i4TestGenerationPhaseBarrier = barrier;
+
+  return Object.freeze({
+    phase: barrier.phase,
+    reached: barrier.reached,
+    release() {
+      if (
+        i4TestGenerationPhaseBarrier !== barrier ||
+        barrier.consumed !== true ||
+        barrier.releasedOnce
+      ) {
+        throw new Error("CIC_I4_TEST_GENERATION_BARRIER_RELEASE_INVALID");
+      }
+      barrier.releasedOnce = true;
+      barrier.releaseBarrier();
+    },
+    clear() {
+      if (i4TestGenerationPhaseBarrier === barrier) {
+        i4TestGenerationPhaseBarrier = null;
+      }
+      if (!barrier.releasedOnce) {
+        barrier.releasedOnce = true;
+        barrier.releaseBarrier();
+      }
+    },
+  });
+}
+
+async function crossI4TestGenerationPhaseBarrier(phase) {
+  const barrier = i4TestGenerationPhaseBarrier;
+  if (barrier === null) return;
+  if (
+    process.env.VITEST !== "true" ||
+    phase !== "GEN_START" ||
+    barrier.phase !== I4_TEST_GENERATION_PHASE ||
+    barrier.consumed
+  ) {
+    throw new Error("CIC_I4_TEST_GENERATION_BARRIER_CONSUMPTION_INVALID");
+  }
+  barrier.consumed = true;
+  barrier.markReached();
+  await barrier.released;
+}
 
 function rejectExecutableOrAuthorityInjection(value, ancestors = new Set()) {
   if (typeof value === "function" || typeof value === "symbol") fail("AUTHORIZATION_INVALID");
@@ -334,6 +407,9 @@ export async function observeCurrentTruth(input) {
     observeGeneration: async (phase) => {
       const observed = await observePhysicalGeneration(input, domain, contextRequest);
       phaseObservations.push({ phase, observed });
+      if (phase === "GEN_START" && i4TestGenerationPhaseBarrier !== null) {
+        await crossI4TestGenerationPhaseBarrier(phase);
+      }
       return observed.generation;
     },
     observeProviders: async ({ inputIdentity }) =>

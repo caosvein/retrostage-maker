@@ -19,7 +19,10 @@ import { promisify, TextEncoder } from "node:util";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
 import { canonicalJson } from "./lib/canonical-json.mjs";
-import { observeCurrentTruth } from "./lib/current-truth.mjs";
+import {
+  installI4GenerationPhaseBarrierForTest,
+  observeCurrentTruth,
+} from "./lib/current-truth.mjs";
 import { REQUIRED_CONTEXT_DIMENSIONS } from "./lib/context-closure.mjs";
 import { sha256Hex } from "./lib/identity.mjs";
 import {
@@ -228,27 +231,29 @@ describe.sequential("CIC-I4 immediate physical write-preimage seals", () => {
   it("blocks physical material and repository-snapshot movement between generation phases", async () => {
     const materialPath = path.join(fixture.worktreeRoot, "moving-material.txt");
     await writeFile(materialPath, "generation-start\n");
-    const movement = runFile(
-      process.execPath,
-      [
-        "-e",
-        "setTimeout(() => require('node:fs').writeFileSync(process.argv[1], 'generation-end\\n'), 3000)",
-        materialPath,
-      ],
-      { windowsHide: true },
-    );
+    const barrier = installI4GenerationPhaseBarrierForTest();
     try {
-      await expect(
-        observeCurrentTruth({
-          ...fixture.domainInput,
-          taskContractIdentity: fixture.task.taskContractIdentity,
-          authorityIdentity: fixture.authorityIdentity,
-          materials: [{ id: "moving-material", path: "moving-material.txt" }],
-        }),
-      ).rejects.toMatchObject({ code: "CONTEXT_GENERATION_RACE" });
-      await movement;
+      expect(barrier.phase).toBe("AFTER_GEN_START_OBSERVATION");
+      expect(() => installI4GenerationPhaseBarrierForTest()).toThrowError(
+        "CIC_I4_TEST_GENERATION_BARRIER_ALREADY_INSTALLED",
+      );
+      expect(await readFile(materialPath, "utf8")).toBe("generation-start\n");
+      const observation = observeCurrentTruth({
+        ...fixture.domainInput,
+        taskContractIdentity: fixture.task.taskContractIdentity,
+        authorityIdentity: fixture.authorityIdentity,
+        materials: [{ id: "moving-material", path: "moving-material.txt" }],
+      });
+      const assertion = expect(observation).rejects.toMatchObject({
+        code: "CONTEXT_GENERATION_RACE",
+      });
+      await barrier.reached;
+      await writeFile(materialPath, "generation-end\n");
+      expect(await readFile(materialPath, "utf8")).toBe("generation-end\n");
+      barrier.release();
+      await assertion;
     } finally {
-      await movement;
+      barrier.clear();
       await unlink(materialPath);
     }
   }, 30_000);
