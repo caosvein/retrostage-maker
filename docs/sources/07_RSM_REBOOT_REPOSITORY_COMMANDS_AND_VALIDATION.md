@@ -3,15 +3,15 @@
 **Document ID:** `07_RSM_REBOOT_REPOSITORY_COMMANDS_AND_VALIDATION`  
 **Role:** Authoritative operating command and validation source derived from physical RSM-3-I4 execution  
 **Project:** RetroStage Maker  
-**Observation date:** 2026-08-10  
+**Observation date:** 2026-09-07  
 **Timezone:** Europe/Istanbul  
-**State:** `AUTHORITATIVE REPOSITORY COMMAND SOURCE / RSM-3 CLOSED / PRODUCT STRATEGY PASS / RSM-4 BASELINE INPUT`
+**State:** `AUTHORITATIVE REPOSITORY COMMAND SOURCE / RSM-3 CLOSED / CIC COMMAND ENTRY POINTS PHYSICALLY ALIGNED THROUGH I8`
 
 ---
 
 ## 1. Scope
 
-This source records commands and operations physically executed during the accepted-candidate FIX2 commit and the RSM-3-I4 RETRY2 physical proof. It covers repository identity, ordinary push, GitHub-hosted CI, fresh Windows clone, LF checkout verification, frozen install, validation, local and external backup, manifest verification, and isolated restore.
+This source records commands and operations physically executed during the accepted-candidate FIX2 commit and the RSM-3-I4 RETRY2 physical proof. It covers repository identity, ordinary push, GitHub-hosted CI, fresh Windows clone, LF checkout verification, frozen install, validation, local and external backup, manifest verification, and isolated restore. It also records the CIC command entry points physically present at the accepted I8 HEAD; only top-level executable scripts are commands.
 
 It does not close RSM-3-I4, authorize RSM-3-V1, start RSM-4, or authorize product implementation.
 
@@ -419,4 +419,35 @@ Never:
 
 ---
 
-`SOURCE 07 = AUTHORITATIVE REPOSITORY COMMAND SOURCE / RSM-3 CLOSED / PRODUCT STRATEGY PASS / RSM-4 BASELINE INPUT`
+`SOURCE 07 = AUTHORITATIVE REPOSITORY COMMAND SOURCE / RSM-3 CLOSED / CIC COMMAND ENTRY POINTS PHYSICALLY ALIGNED THROUGH I8`
+
+---
+
+## 13. Physical CIC Command Entry Points Through I8
+
+The following command entry points exist physically at accepted HEAD `ab195046c575b7724239c3b4c156cd17804bc434`. Their accepted semantics do not grant Source mutation, Stage, Commit, Push, hosted-CI dispatch, or publication authority. Files under `tooling/cic/lib/**`, `.test.mjs` files, `PROMOTE`, and hypothetical I9–I12 entry points are not standalone commands.
+
+### Read-only compilation and verification
+
+```powershell
+node tooling/cic/compile-context.mjs --json <repository-relative-request.json>
+node tooling/cic/verify-repository-identity.mjs
+node tooling/cic/verify-repository-identity.mjs --json
+node tooling/cic/verify-semantic-closure.mjs --json <repository-relative-request.json>
+node tooling/cic/verify-source-generation.mjs
+node tooling/cic/verify-source-generation.mjs --json
+node tooling/cic/verify-validation-evidence.mjs <evidence.json> <current-facts.json>
+node tooling/cic/verify-validation-evidence.mjs --json <evidence.json> <current-facts.json>
+```
+
+`compile-context.mjs` reads the bounded request and current physical facts to produce or verify context output. The repository-identity, semantic-closure, Source-generation, and validation-evidence entry points evaluate current facts and report results; they do not mint mutation or publication authority.
+
+### Governed derived-state lifecycle commands
+
+```powershell
+node tooling/cic/manage-pack-lifecycle.mjs <activate|generate|inspect|invalidate|verify> <input.json>
+node tooling/cic/manage-progression.mjs <construct-root|create-recovery-capsule|inspect-active|promote-root|recover-current|verify-recovery-capsule|verify-root> <input.json>
+node tooling/cic/manage-task-lifecycle.mjs <accept-successor-checkpoint|acquire-lease|admit-authorization|inspect-state-domain|record-owner-decision|record-state-domain-binding|record-task-contract|release-lease|revoke-authorization|seal-write-preimage|verify-authorization> <input.json>
+```
+
+These lifecycle entry points may write only the derived CIC state explicitly governed by their accepted contracts and input authority. They are not a second repository or Source authority, do not execute Git publication, and do not turn reviewed evidence or orchestration shorthand into mutation permission.
