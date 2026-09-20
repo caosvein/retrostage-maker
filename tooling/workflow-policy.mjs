@@ -16,7 +16,7 @@ export const EXPECTED_DIRECT_DEV_DEPENDENCIES = Object.freeze({
   prettier: "3.5.2",
   typescript: "6.0.3",
   "typescript-eslint": "8.66.0",
-  vitest: "3.2.6",
+  vitest: "4.1.11",
 });
 
 export const EXPECTED_APPLICATION_DEV_DEPENDENCIES = Object.freeze({
@@ -449,6 +449,7 @@ function validateRepositoryAndDependencies(rootPath, repositoryPaths, issues) {
     "ignoreScripts: true",
     'savePrefix: ""',
     "  - electron@43.4.0",
+    "overrides:\n  js-yaml: 4.3.2",
     "  tar: 7.5.22",
     '  "eslint@9.21.0>@eslint/plugin-kit": 0.3.4',
   ]) {
@@ -465,6 +466,8 @@ function validateRepositoryAndDependencies(rootPath, repositoryPaths, issues) {
     issues.push(issue("EXOTIC_SOURCE_SET_INVALID", [...exoticSources].join(",") || "ABSENT"));
   }
   for (const fragment of [
+    "overrides:\n  js-yaml: 4.3.2",
+    "js-yaml@4.3.2:",
     "eslint@9.21.0>@eslint/plugin-kit: 0.3.4",
     "'@eslint/plugin-kit@0.3.4':",
     "tar@7.5.22:",

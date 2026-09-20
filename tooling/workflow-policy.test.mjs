@@ -105,12 +105,12 @@ function createFixture(activeTaskCount = 0) {
   write(
     root,
     "pnpm-workspace.yaml",
-    `packages:\n  - "packages/*"\n  - "apps/*"\n\nautoInstallPeers: false\nblockExoticSubdeps: false\nstrictPeerDependencies: true\nignoreScripts: true\nsavePrefix: ""\nminimumReleaseAgeExclude:\n  - electron@43.4.0\noverrides:\n  tar: 7.5.22\n  "eslint@9.21.0>@eslint/plugin-kit": 0.3.4\n`,
+    `packages:\n  - "packages/*"\n  - "apps/*"\n\nautoInstallPeers: false\nblockExoticSubdeps: false\nstrictPeerDependencies: true\nignoreScripts: true\nsavePrefix: ""\nminimumReleaseAgeExclude:\n  - electron@43.4.0\noverrides:\n  js-yaml: 4.3.2\n  tar: 7.5.22\n  "eslint@9.21.0>@eslint/plugin-kit": 0.3.4\n`,
   );
   write(
     root,
     "pnpm-lock.yaml",
-    `lockfileVersion: '9.0'\noverrides:\n  eslint@9.21.0>@eslint/plugin-kit: 0.3.4\n  tar: 7.5.22\npackages:\n  '@eslint/plugin-kit@0.3.4': {}\n  '@electron/node-gyp@https://codeload.github.com/electron/node-gyp/tar.gz/06b29aafb7708acef8b3669835c8a7857ebc92d2': {}\n  electron@43.4.0: {}\n  tar@7.5.22: {}\n`,
+    `lockfileVersion: '9.0'\noverrides:\n  js-yaml: 4.3.2\n  eslint@9.21.0>@eslint/plugin-kit: 0.3.4\n  tar: 7.5.22\npackages:\n  '@eslint/plugin-kit@0.3.4': {}\n  '@electron/node-gyp@https://codeload.github.com/electron/node-gyp/tar.gz/06b29aafb7708acef8b3669835c8a7857ebc92d2': {}\n  electron@43.4.0: {}\n  js-yaml@4.3.2: {}\n  tar@7.5.22: {}\n`,
   );
   for (const [packagePath, name] of [
     ["packages/core", "@retrostage/core"],
@@ -373,12 +373,27 @@ describe("RSM-4 workflow policy", () => {
     const fixture = createFixture();
     const packagePath = path.join(fixture.root, "package.json");
     const packageJson = JSON.parse(readFileSync(packagePath, "utf8"));
-    packageJson.devDependencies.vitest = "3.2.5";
+    packageJson.devDependencies.vitest = "4.1.10";
     packageJson.devDependencies.vite = "8.2.0";
     write(fixture.root, "package.json", `${JSON.stringify(packageJson, null, 2)}\n`);
     const codes = issueCodes(validateFixture(fixture));
     expect(codes).toContain("REPOSITORY_POLICY_ROOT_DIRECT_DEPENDENCY_MISSING_OR_INEXACT");
     expect(codes).toContain("REPOSITORY_POLICY_ROOT_DIRECT_UNAUTHORIZED_DEPENDENCY");
+  });
+
+  it("fails closed when the js-yaml override or lock identity is missing or drifted", () => {
+    for (const [relativePath, accepted, rejected, expectedCode] of [
+      ["pnpm-workspace.yaml", "  js-yaml: 4.3.2\n", "", "WORKSPACE_POLICY_DRIFT"],
+      ["pnpm-workspace.yaml", "js-yaml: 4.3.2", "js-yaml: 4.3.1", "WORKSPACE_POLICY_DRIFT"],
+      ["pnpm-lock.yaml", "  js-yaml: 4.3.2\n", "", "LOCK_IDENTITY_MISSING"],
+      ["pnpm-lock.yaml", "js-yaml@4.3.2:", "js-yaml@4.3.1:", "LOCK_IDENTITY_MISSING"],
+    ]) {
+      const fixture = createFixture();
+      const fixturePath = path.join(fixture.root, relativePath);
+      const content = readFileSync(fixturePath, "utf8").replace(accepted, rejected);
+      write(fixture.root, relativePath, content);
+      expect(issueCodes(validateFixture(fixture))).toContain(expectedCode);
+    }
   });
 
   it("fails closed on plugin-vite, Vite downgrade, tar drift, a second exotic and missing security control", () => {

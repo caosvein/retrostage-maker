@@ -42,12 +42,16 @@ const EXPECTED_ROOT_DIRECT_DEPENDENCIES = Object.freeze({
   prettier: "3.5.2",
   typescript: "6.0.3",
   "typescript-eslint": "8.66.0",
-  vitest: "3.2.6",
+  vitest: "4.1.11",
 });
 const EXPECTED_APPLICATION_DIRECT_DEPENDENCIES = Object.freeze({
   "@electron-forge/core": "7.11.2",
   electron: "43.4.0",
   vite: "8.2.1",
+});
+const DEPENDENCY_SECURITY_ADMISSION = Object.freeze({
+  rootTestRunner: "vitest@4.1.11",
+  workspaceOverride: "js-yaml@4.3.2",
 });
 const APPROVED_NODE_GYP_SOURCES = new Set([
   "https://codeload.github.com/electron/node-gyp/tar.gz/06b29aafb7708acef8b3669835c8a7857ebc92d2",
@@ -91,7 +95,7 @@ function normalizeNoticeTextLineEndings(value) {
 
 function encodeTerminalSpacesInEscapedNoticeHtml(value) {
   let representedHtml = value;
-  for (const heading of ["typescript 5.4.5", "typescript 6.0.3"]) {
+  for (const heading of ["convert-source-map 2.0.0", "typescript 5.4.5", "typescript 6.0.3"]) {
     const headingMarker = `<h2>${heading}</h2>`;
     const headingIndex = representedHtml.indexOf(headingMarker);
     if (headingIndex === -1 || representedHtml.indexOf(headingMarker, headingIndex + 1) !== -1) {
@@ -196,6 +200,7 @@ function assertDependencyBaseline() {
     "ignoreScripts: true",
     'savePrefix: ""',
     "  - electron@43.4.0",
+    "overrides:\n  js-yaml: 4.3.2",
     "  tar: 7.5.22",
     '  "eslint@9.21.0>@eslint/plugin-kit": 0.3.4',
   ]) {
@@ -204,6 +209,8 @@ function assertDependencyBaseline() {
 
   const lock = readFileSync(path.join(REPOSITORY_ROOT, "pnpm-lock.yaml"), "utf8");
   for (const fragment of [
+    "overrides:\n  js-yaml: 4.3.2",
+    "js-yaml@4.3.2:",
     "eslint@9.21.0>@eslint/plugin-kit: 0.3.4",
     "'@eslint/plugin-kit@0.3.4':",
     "tar@7.5.22:",
@@ -879,6 +886,7 @@ function buildSecurityFindings(snapshotHost) {
     schemaVersion: 1,
     baselineHost: BASELINE_HOST,
     snapshotHost,
+    dependencySecurityAdmission: DEPENDENCY_SECURITY_ADMISSION,
     auditCommand: "pnpm audit --json",
     blockingThreshold: "high",
     summary: {
@@ -995,6 +1003,7 @@ This directory is the deterministic RSM-5-I1 secure Electron shell compliance ba
 - Notice fallbacks require an approved safe source link; native/WASM records carry explicit provenance, runtime, packaged-role, and removal contracts.
 - MPL-covered Lightning CSS is physically verified as build-only and absent from the current Forge unpackaged application; license review and notices retain the exact absence/source-availability evidence and require a future artifact-specific recheck.
 - Candidate readiness requires the complete current audit to remain zero at every severity; the parent-scoped plugin-kit remediation stays visible in \`security-findings.json\`.
+- Dependency-security admission requires exact \`vitest@4.1.11\` and the exact workspace override \`js-yaml@4.3.2\`; the lock graph must contain the matching js-yaml package identity.
 - Electron acquisition remains explicit while lifecycle scripts stay disabled. The sole lock-pinned exotic source is \`@electron/node-gyp\` commit \`06b29aafb7708acef8b3669835c8a7857ebc92d2\`, and \`tar@7.5.22\` remains exact.
 - Electron and Chromium bundled license files are physically verified in the acquired distribution and Forge unpackaged application.
 - Dependency Review Action is deferred because the current private user-owned repository is not platform-eligible.
@@ -1091,6 +1100,7 @@ export function generateCompliance(destinationPath) {
     schemaVersion: 1,
     baselineHost: BASELINE_HOST,
     snapshotHost,
+    dependencySecurityAdmission: DEPENDENCY_SECURITY_ADMISSION,
     distributionScope: DISTRIBUTION_SCOPE,
     scanExtension: ".wasm",
     count: wasmArtifacts.length,

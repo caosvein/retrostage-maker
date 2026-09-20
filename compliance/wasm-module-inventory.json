@@ -132,6 +132,10 @@
     "platform": "win32"
   },
   "count": 6,
+  "dependencySecurityAdmission": {
+    "rootTestRunner": "vitest@4.1.11",
+    "workspaceOverride": "js-yaml@4.3.2"
+  },
   "distributionScope": "RSM-5-I1 DEVELOPMENT / SECURE ELECTRON SHELL CANDIDATE / NOT FINAL RELEASE",
   "scanExtension": ".wasm",
   "schemaVersion": 1,

@@ -11,6 +11,7 @@ This directory is the deterministic RSM-5-I1 secure Electron shell compliance ba
 - Notice fallbacks require an approved safe source link; native/WASM records carry explicit provenance, runtime, packaged-role, and removal contracts.
 - MPL-covered Lightning CSS is physically verified as build-only and absent from the current Forge unpackaged application; license review and notices retain the exact absence/source-availability evidence and require a future artifact-specific recheck.
 - Candidate readiness requires the complete current audit to remain zero at every severity; the parent-scoped plugin-kit remediation stays visible in `security-findings.json`.
+- Dependency-security admission requires exact `vitest@4.1.11` and the exact workspace override `js-yaml@4.3.2`; the lock graph must contain the matching js-yaml package identity.
 - Electron acquisition remains explicit while lifecycle scripts stay disabled. The sole lock-pinned exotic source is `@electron/node-gyp` commit `06b29aafb7708acef8b3669835c8a7857ebc92d2`, and `tar@7.5.22` remains exact.
 - Electron and Chromium bundled license files are physically verified in the acquired distribution and Forge unpackaged application.
 - Dependency Review Action is deferred because the current private user-owned repository is not platform-eligible.

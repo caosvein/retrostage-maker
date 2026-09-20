@@ -12,6 +12,10 @@
     "severity": "low",
     "state": "REMEDIATED_NOT_PRESENT_IN_CURRENT_AUDIT"
   },
+  "dependencySecurityAdmission": {
+    "rootTestRunner": "vitest@4.1.11",
+    "workspaceOverride": "js-yaml@4.3.2"
+  },
   "findings": [],
   "schemaVersion": 1,
   "snapshotHost": {

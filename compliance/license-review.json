@@ -665,25 +665,6 @@
       "version": "1.2.2"
     },
     {
-      "author": "",
-      "classification": "AUTOMATICALLY_ADMISSIBLE",
-      "distributionScope": "RSM-5-I1 DEVELOPMENT / SECURE ELECTRON SHELL CANDIDATE / NOT FINAL RELEASE",
-      "evidenceSource": "Installed package.json plus physical top-level license/notice files",
-      "identity": "@esbuild/win32-x64@0.25.12",
-      "license": "MIT",
-      "licenseFiles": [],
-      "manualReviewRequired": false,
-      "name": "@esbuild/win32-x64",
-      "notes": "Preserve applicable license and copyright material when distributing this development/bootstrap dependency.",
-      "noticeFiles": [],
-      "ownerCommercialDisposition": "NOT APPLICABLE",
-      "ownerExactException": false,
-      "packagedArtifactDisposition": null,
-      "prohibited": false,
-      "safeNoticeSourceUrl": "https://github.com/evanw/esbuild.git",
-      "version": "0.25.12"
-    },
-    {
       "author": "Toru Nagashima",
       "classification": "AUTOMATICALLY_ADMISSIBLE",
       "distributionScope": "RSM-5-I1 DEVELOPMENT / SECURE ELECTRON SHELL CANDIDATE / NOT FINAL RELEASE",
@@ -1485,44 +1466,6 @@
       "version": "1.0.1"
     },
     {
-      "author": "Lukas Taegert-Atkinson",
-      "classification": "AUTOMATICALLY_ADMISSIBLE",
-      "distributionScope": "RSM-5-I1 DEVELOPMENT / SECURE ELECTRON SHELL CANDIDATE / NOT FINAL RELEASE",
-      "evidenceSource": "Installed package.json plus physical top-level license/notice files",
-      "identity": "@rollup/rollup-win32-x64-gnu@4.62.4",
-      "license": "MIT",
-      "licenseFiles": [],
-      "manualReviewRequired": false,
-      "name": "@rollup/rollup-win32-x64-gnu",
-      "notes": "Preserve applicable license and copyright material when distributing this development/bootstrap dependency.",
-      "noticeFiles": [],
-      "ownerCommercialDisposition": "NOT APPLICABLE",
-      "ownerExactException": false,
-      "packagedArtifactDisposition": null,
-      "prohibited": false,
-      "safeNoticeSourceUrl": "https://github.com/rollup/rollup.git",
-      "version": "4.62.4"
-    },
-    {
-      "author": "Lukas Taegert-Atkinson",
-      "classification": "AUTOMATICALLY_ADMISSIBLE",
-      "distributionScope": "RSM-5-I1 DEVELOPMENT / SECURE ELECTRON SHELL CANDIDATE / NOT FINAL RELEASE",
-      "evidenceSource": "Installed package.json plus physical top-level license/notice files",
-      "identity": "@rollup/rollup-win32-x64-msvc@4.62.4",
-      "license": "MIT",
-      "licenseFiles": [],
-      "manualReviewRequired": false,
-      "name": "@rollup/rollup-win32-x64-msvc",
-      "notes": "Preserve applicable license and copyright material when distributing this development/bootstrap dependency.",
-      "noticeFiles": [],
-      "ownerCommercialDisposition": "NOT APPLICABLE",
-      "ownerExactException": false,
-      "packagedArtifactDisposition": null,
-      "prohibited": false,
-      "safeNoticeSourceUrl": "https://github.com/rollup/rollup.git",
-      "version": "4.62.4"
-    },
-    {
       "author": "Sindre Sorhus <sindresorhus@gmail.com> (https://sindresorhus.com/)",
       "classification": "AUTOMATICALLY_ADMISSIBLE",
       "distributionScope": "RSM-5-I1 DEVELOPMENT / SECURE ELECTRON SHELL CANDIDATE / NOT FINAL RELEASE",
@@ -1546,6 +1489,31 @@
       "prohibited": false,
       "safeNoticeSourceUrl": "https://github.com/sindresorhus/is",
       "version": "4.6.0"
+    },
+    {
+      "author": "Colin McDonnell",
+      "classification": "AUTOMATICALLY_ADMISSIBLE",
+      "distributionScope": "RSM-5-I1 DEVELOPMENT / SECURE ELECTRON SHELL CANDIDATE / NOT FINAL RELEASE",
+      "evidenceSource": "Installed package.json plus physical top-level license/notice files",
+      "identity": "@standard-schema/spec@1.1.0",
+      "license": "MIT",
+      "licenseFiles": [
+        {
+          "name": "LICENSE",
+          "path": "node_modules/.pnpm/@standard-schema+spec@1.1.0/node_modules/@standard-schema/spec/LICENSE",
+          "sha256": "653B779005A3A4D64A7288C940F7B9A0E8F0B1E0375F6AA6AF9473CAF131E564"
+        }
+      ],
+      "manualReviewRequired": false,
+      "name": "@standard-schema/spec",
+      "notes": "Preserve applicable license and copyright material when distributing this development/bootstrap dependency.",
+      "noticeFiles": [],
+      "ownerCommercialDisposition": "NOT APPLICABLE",
+      "ownerExactException": false,
+      "packagedArtifactDisposition": null,
+      "prohibited": false,
+      "safeNoticeSourceUrl": "https://github.com/standard-schema/standard-schema",
+      "version": "1.1.0"
     },
     {
       "author": "Szymon Marczak",
@@ -2102,13 +2070,13 @@
       "classification": "AUTOMATICALLY_ADMISSIBLE",
       "distributionScope": "RSM-5-I1 DEVELOPMENT / SECURE ELECTRON SHELL CANDIDATE / NOT FINAL RELEASE",
       "evidenceSource": "Installed package.json plus physical top-level license/notice files",
-      "identity": "@vitest/expect@3.2.6",
+      "identity": "@vitest/expect@4.1.11",
       "license": "MIT",
       "licenseFiles": [
         {
           "name": "LICENSE",
-          "path": "node_modules/.pnpm/@vitest+expect@3.2.6/node_modules/@vitest/expect/LICENSE",
-          "sha256": "DDC110F3B89CC397CEE99D3D64C4F746928B7A3BAC02FED15101EB4D367079F6"
+          "path": "node_modules/.pnpm/@vitest+expect@4.1.11/node_modules/@vitest/expect/LICENSE",
+          "sha256": "04575FC5BFAE19A9B63100F8691F901A2E15A399011AC02DB435A9EF27295551"
         }
       ],
       "manualReviewRequired": false,
@@ -2120,20 +2088,20 @@
       "packagedArtifactDisposition": null,
       "prohibited": false,
       "safeNoticeSourceUrl": "https://github.com/vitest-dev/vitest.git",
-      "version": "3.2.6"
+      "version": "4.1.11"
     },
     {
       "author": "",
       "classification": "AUTOMATICALLY_ADMISSIBLE",
       "distributionScope": "RSM-5-I1 DEVELOPMENT / SECURE ELECTRON SHELL CANDIDATE / NOT FINAL RELEASE",
       "evidenceSource": "Installed package.json plus physical top-level license/notice files",
-      "identity": "@vitest/mocker@3.2.6",
+      "identity": "@vitest/mocker@4.1.11",
       "license": "MIT",
       "licenseFiles": [
         {
           "name": "LICENSE",
-          "path": "node_modules/.pnpm/@vitest+mocker@3.2.6_vite@6_ce481aeb1aca58f9afc83a6251f9825d/node_modules/@vitest/mocker/LICENSE",
-          "sha256": "DDC110F3B89CC397CEE99D3D64C4F746928B7A3BAC02FED15101EB4D367079F6"
+          "path": "node_modules/.pnpm/@vitest+mocker@4.1.11_vite@_673e567cb83db2539be8d5993ca2ec32/node_modules/@vitest/mocker/LICENSE",
+          "sha256": "04575FC5BFAE19A9B63100F8691F901A2E15A399011AC02DB435A9EF27295551"
         }
       ],
       "manualReviewRequired": false,
@@ -2145,20 +2113,20 @@
       "packagedArtifactDisposition": null,
       "prohibited": false,
       "safeNoticeSourceUrl": "https://github.com/vitest-dev/vitest.git",
-      "version": "3.2.6"
+      "version": "4.1.11"
     },
     {
       "author": "",
       "classification": "AUTOMATICALLY_ADMISSIBLE",
       "distributionScope": "RSM-5-I1 DEVELOPMENT / SECURE ELECTRON SHELL CANDIDATE / NOT FINAL RELEASE",
       "evidenceSource": "Installed package.json plus physical top-level license/notice files",
-      "identity": "@vitest/pretty-format@3.2.6",
+      "identity": "@vitest/pretty-format@4.1.11",
       "license": "MIT",
       "licenseFiles": [
         {
           "name": "LICENSE",
-          "path": "node_modules/.pnpm/@vitest+pretty-format@3.2.6/node_modules/@vitest/pretty-format/LICENSE",
-          "sha256": "DDC110F3B89CC397CEE99D3D64C4F746928B7A3BAC02FED15101EB4D367079F6"
+          "path": "node_modules/.pnpm/@vitest+pretty-format@4.1.11/node_modules/@vitest/pretty-format/LICENSE",
+          "sha256": "04575FC5BFAE19A9B63100F8691F901A2E15A399011AC02DB435A9EF27295551"
         }
       ],
       "manualReviewRequired": false,
@@ -2170,45 +2138,20 @@
       "packagedArtifactDisposition": null,
       "prohibited": false,
       "safeNoticeSourceUrl": "https://github.com/vitest-dev/vitest.git",
-      "version": "3.2.6"
+      "version": "4.1.11"
     },
     {
       "author": "",
       "classification": "AUTOMATICALLY_ADMISSIBLE",
       "distributionScope": "RSM-5-I1 DEVELOPMENT / SECURE ELECTRON SHELL CANDIDATE / NOT FINAL RELEASE",
       "evidenceSource": "Installed package.json plus physical top-level license/notice files",
-      "identity": "@vitest/pretty-format@3.2.7",
+      "identity": "@vitest/runner@4.1.11",
       "license": "MIT",
       "licenseFiles": [
         {
           "name": "LICENSE",
-          "path": "node_modules/.pnpm/@vitest+pretty-format@3.2.7/node_modules/@vitest/pretty-format/LICENSE",
-          "sha256": "DDC110F3B89CC397CEE99D3D64C4F746928B7A3BAC02FED15101EB4D367079F6"
-        }
-      ],
-      "manualReviewRequired": false,
-      "name": "@vitest/pretty-format",
-      "notes": "Preserve applicable license and copyright material when distributing this development/bootstrap dependency.",
-      "noticeFiles": [],
-      "ownerCommercialDisposition": "NOT APPLICABLE",
-      "ownerExactException": false,
-      "packagedArtifactDisposition": null,
-      "prohibited": false,
-      "safeNoticeSourceUrl": "https://github.com/vitest-dev/vitest.git",
-      "version": "3.2.7"
-    },
-    {
-      "author": "",
-      "classification": "AUTOMATICALLY_ADMISSIBLE",
-      "distributionScope": "RSM-5-I1 DEVELOPMENT / SECURE ELECTRON SHELL CANDIDATE / NOT FINAL RELEASE",
-      "evidenceSource": "Installed package.json plus physical top-level license/notice files",
-      "identity": "@vitest/runner@3.2.6",
-      "license": "MIT",
-      "licenseFiles": [
-        {
-          "name": "LICENSE",
-          "path": "node_modules/.pnpm/@vitest+runner@3.2.6/node_modules/@vitest/runner/LICENSE",
-          "sha256": "DDC110F3B89CC397CEE99D3D64C4F746928B7A3BAC02FED15101EB4D367079F6"
+          "path": "node_modules/.pnpm/@vitest+runner@4.1.11/node_modules/@vitest/runner/LICENSE",
+          "sha256": "04575FC5BFAE19A9B63100F8691F901A2E15A399011AC02DB435A9EF27295551"
         }
       ],
       "manualReviewRequired": false,
@@ -2220,20 +2163,20 @@
       "packagedArtifactDisposition": null,
       "prohibited": false,
       "safeNoticeSourceUrl": "https://github.com/vitest-dev/vitest.git",
-      "version": "3.2.6"
+      "version": "4.1.11"
     },
     {
       "author": "",
       "classification": "AUTOMATICALLY_ADMISSIBLE",
       "distributionScope": "RSM-5-I1 DEVELOPMENT / SECURE ELECTRON SHELL CANDIDATE / NOT FINAL RELEASE",
       "evidenceSource": "Installed package.json plus physical top-level license/notice files",
-      "identity": "@vitest/snapshot@3.2.6",
+      "identity": "@vitest/snapshot@4.1.11",
       "license": "MIT",
       "licenseFiles": [
         {
           "name": "LICENSE",
-          "path": "node_modules/.pnpm/@vitest+snapshot@3.2.6/node_modules/@vitest/snapshot/LICENSE",
-          "sha256": "DDC110F3B89CC397CEE99D3D64C4F746928B7A3BAC02FED15101EB4D367079F6"
+          "path": "node_modules/.pnpm/@vitest+snapshot@4.1.11/node_modules/@vitest/snapshot/LICENSE",
+          "sha256": "04575FC5BFAE19A9B63100F8691F901A2E15A399011AC02DB435A9EF27295551"
         }
       ],
       "manualReviewRequired": false,
@@ -2245,20 +2188,20 @@
       "packagedArtifactDisposition": null,
       "prohibited": false,
       "safeNoticeSourceUrl": "https://github.com/vitest-dev/vitest.git",
-      "version": "3.2.6"
+      "version": "4.1.11"
     },
     {
       "author": "",
       "classification": "AUTOMATICALLY_ADMISSIBLE",
       "distributionScope": "RSM-5-I1 DEVELOPMENT / SECURE ELECTRON SHELL CANDIDATE / NOT FINAL RELEASE",
       "evidenceSource": "Installed package.json plus physical top-level license/notice files",
-      "identity": "@vitest/spy@3.2.6",
+      "identity": "@vitest/spy@4.1.11",
       "license": "MIT",
       "licenseFiles": [
         {
           "name": "LICENSE",
-          "path": "node_modules/.pnpm/@vitest+spy@3.2.6/node_modules/@vitest/spy/LICENSE",
-          "sha256": "DDC110F3B89CC397CEE99D3D64C4F746928B7A3BAC02FED15101EB4D367079F6"
+          "path": "node_modules/.pnpm/@vitest+spy@4.1.11/node_modules/@vitest/spy/LICENSE",
+          "sha256": "04575FC5BFAE19A9B63100F8691F901A2E15A399011AC02DB435A9EF27295551"
         }
       ],
       "manualReviewRequired": false,
@@ -2270,20 +2213,20 @@
       "packagedArtifactDisposition": null,
       "prohibited": false,
       "safeNoticeSourceUrl": "https://github.com/vitest-dev/vitest.git",
-      "version": "3.2.6"
+      "version": "4.1.11"
     },
     {
       "author": "",
       "classification": "AUTOMATICALLY_ADMISSIBLE",
       "distributionScope": "RSM-5-I1 DEVELOPMENT / SECURE ELECTRON SHELL CANDIDATE / NOT FINAL RELEASE",
       "evidenceSource": "Installed package.json plus physical top-level license/notice files",
-      "identity": "@vitest/utils@3.2.6",
+      "identity": "@vitest/utils@4.1.11",
       "license": "MIT",
       "licenseFiles": [
         {
           "name": "LICENSE",
-          "path": "node_modules/.pnpm/@vitest+utils@3.2.6/node_modules/@vitest/utils/LICENSE",
-          "sha256": "DDC110F3B89CC397CEE99D3D64C4F746928B7A3BAC02FED15101EB4D367079F6"
+          "path": "node_modules/.pnpm/@vitest+utils@4.1.11/node_modules/@vitest/utils/LICENSE",
+          "sha256": "04575FC5BFAE19A9B63100F8691F901A2E15A399011AC02DB435A9EF27295551"
         }
       ],
       "manualReviewRequired": false,
@@ -2295,7 +2238,7 @@
       "packagedArtifactDisposition": null,
       "prohibited": false,
       "safeNoticeSourceUrl": "https://github.com/vitest-dev/vitest.git",
-      "version": "3.2.6"
+      "version": "4.1.11"
     },
     {
       "author": "Joran Dirk Greef",
@@ -3692,31 +3635,6 @@
       "version": "5.7.1"
     },
     {
-      "author": "egoist <0x142857@gmail.com>",
-      "classification": "AUTOMATICALLY_ADMISSIBLE",
-      "distributionScope": "RSM-5-I1 DEVELOPMENT / SECURE ELECTRON SHELL CANDIDATE / NOT FINAL RELEASE",
-      "evidenceSource": "Installed package.json plus physical top-level license/notice files",
-      "identity": "cac@6.7.14",
-      "license": "MIT",
-      "licenseFiles": [
-        {
-          "name": "LICENSE",
-          "path": "node_modules/.pnpm/cac@6.7.14/node_modules/cac/LICENSE",
-          "sha256": "709131D7AF352B81204ADA2A3D812E245A83576E327B364F92BA24C578BA9408"
-        }
-      ],
-      "manualReviewRequired": false,
-      "name": "cac",
-      "notes": "Preserve applicable license and copyright material when distributing this development/bootstrap dependency.",
-      "noticeFiles": [],
-      "ownerCommercialDisposition": "NOT APPLICABLE",
-      "ownerExactException": false,
-      "packagedArtifactDisposition": null,
-      "prohibited": false,
-      "safeNoticeSourceUrl": "https://github.com/egoist/cac",
-      "version": "6.7.14"
-    },
-    {
       "author": "GitHub Inc.",
       "classification": "AUTOMATICALLY_ADMISSIBLE",
       "distributionScope": "RSM-5-I1 DEVELOPMENT / SECURE ELECTRON SHELL CANDIDATE / NOT FINAL RELEASE",
@@ -3846,12 +3764,12 @@
       "classification": "AUTOMATICALLY_ADMISSIBLE",
       "distributionScope": "RSM-5-I1 DEVELOPMENT / SECURE ELECTRON SHELL CANDIDATE / NOT FINAL RELEASE",
       "evidenceSource": "Installed package.json plus physical top-level license/notice files",
-      "identity": "chai@5.3.3",
+      "identity": "chai@6.2.2",
       "license": "MIT",
       "licenseFiles": [
         {
           "name": "LICENSE",
-          "path": "node_modules/.pnpm/chai@5.3.3/node_modules/chai/LICENSE",
+          "path": "node_modules/.pnpm/chai@6.2.2/node_modules/chai/LICENSE",
           "sha256": "B181DA80336FF9DD1043FC8BE1A764D7382363433319AA872E4D2CB5CE2A3066"
         }
       ],
@@ -3864,7 +3782,7 @@
       "packagedArtifactDisposition": null,
       "prohibited": false,
       "safeNoticeSourceUrl": "https://github.com/chaijs/chai",
-      "version": "5.3.3"
+      "version": "6.2.2"
     },
     {
       "author": "",
@@ -3890,31 +3808,6 @@
       "prohibited": false,
       "safeNoticeSourceUrl": "https://github.com/chalk/chalk",
       "version": "4.1.2"
-    },
-    {
-      "author": "Jake Luer <jake@alogicalparadox.com> (http://alogicalparadox.com)",
-      "classification": "AUTOMATICALLY_ADMISSIBLE",
-      "distributionScope": "RSM-5-I1 DEVELOPMENT / SECURE ELECTRON SHELL CANDIDATE / NOT FINAL RELEASE",
-      "evidenceSource": "Installed package.json plus physical top-level license/notice files",
-      "identity": "check-error@2.1.3",
-      "license": "MIT",
-      "licenseFiles": [
-        {
-          "name": "LICENSE",
-          "path": "node_modules/.pnpm/check-error@2.1.3/node_modules/check-error/LICENSE",
-          "sha256": "E5AEE0714B6ECC416454B968D1017570EF609F20D8722AB84B07ACD550B78198"
-        }
-      ],
-      "manualReviewRequired": false,
-      "name": "check-error",
-      "notes": "Preserve applicable license and copyright material when distributing this development/bootstrap dependency.",
-      "noticeFiles": [],
-      "ownerCommercialDisposition": "NOT APPLICABLE",
-      "ownerExactException": false,
-      "packagedArtifactDisposition": null,
-      "prohibited": false,
-      "safeNoticeSourceUrl": "",
-      "version": "2.1.3"
     },
     {
       "author": "Isaac Z. Schlueter <i@izs.me> (http://blog.izs.me/)",
@@ -4411,6 +4304,31 @@
       "version": "0.0.1"
     },
     {
+      "author": "Thorsten Lorenz <thlorenz@gmx.de> (http://thlorenz.com/)",
+      "classification": "AUTOMATICALLY_ADMISSIBLE",
+      "distributionScope": "RSM-5-I1 DEVELOPMENT / SECURE ELECTRON SHELL CANDIDATE / NOT FINAL RELEASE",
+      "evidenceSource": "Installed package.json plus physical top-level license/notice files",
+      "identity": "convert-source-map@2.0.0",
+      "license": "MIT",
+      "licenseFiles": [
+        {
+          "name": "LICENSE",
+          "path": "node_modules/.pnpm/convert-source-map@2.0.0/node_modules/convert-source-map/LICENSE",
+          "sha256": "1FA6EE8BB95A81AE3D73A5BD074A3AC380FFEC13697051063CA1A601921B91DB"
+        }
+      ],
+      "manualReviewRequired": false,
+      "name": "convert-source-map",
+      "notes": "Preserve applicable license and copyright material when distributing this development/bootstrap dependency.",
+      "noticeFiles": [],
+      "ownerCommercialDisposition": "NOT APPLICABLE",
+      "ownerExactException": false,
+      "packagedArtifactDisposition": null,
+      "prohibited": false,
+      "safeNoticeSourceUrl": "https://github.com/thlorenz/convert-source-map.git",
+      "version": "2.0.0"
+    },
+    {
       "author": "",
       "classification": "AUTOMATICALLY_ADMISSIBLE",
       "distributionScope": "RSM-5-I1 DEVELOPMENT / SECURE ELECTRON SHELL CANDIDATE / NOT FINAL RELEASE",
@@ -4553,31 +4471,6 @@
       "prohibited": false,
       "safeNoticeSourceUrl": "https://github.com/sindresorhus/decompress-response",
       "version": "6.0.0"
-    },
-    {
-      "author": "Jake Luer <jake@alogicalparadox.com>",
-      "classification": "AUTOMATICALLY_ADMISSIBLE",
-      "distributionScope": "RSM-5-I1 DEVELOPMENT / SECURE ELECTRON SHELL CANDIDATE / NOT FINAL RELEASE",
-      "evidenceSource": "Installed package.json plus physical top-level license/notice files",
-      "identity": "deep-eql@5.0.2",
-      "license": "MIT",
-      "licenseFiles": [
-        {
-          "name": "LICENSE",
-          "path": "node_modules/.pnpm/deep-eql@5.0.2/node_modules/deep-eql/LICENSE",
-          "sha256": "E5AEE0714B6ECC416454B968D1017570EF609F20D8722AB84B07ACD550B78198"
-        }
-      ],
-      "manualReviewRequired": false,
-      "name": "deep-eql",
-      "notes": "Preserve applicable license and copyright material when distributing this development/bootstrap dependency.",
-      "noticeFiles": [],
-      "ownerCommercialDisposition": "NOT APPLICABLE",
-      "ownerExactException": false,
-      "packagedArtifactDisposition": null,
-      "prohibited": false,
-      "safeNoticeSourceUrl": "",
-      "version": "5.0.2"
     },
     {
       "author": "Thorsten Lorenz <thlorenz@gmx.de> (http://thlorenz.com/)",
@@ -5147,31 +5040,6 @@
       "classification": "AUTOMATICALLY_ADMISSIBLE",
       "distributionScope": "RSM-5-I1 DEVELOPMENT / SECURE ELECTRON SHELL CANDIDATE / NOT FINAL RELEASE",
       "evidenceSource": "Installed package.json plus physical top-level license/notice files",
-      "identity": "es-module-lexer@1.7.0",
-      "license": "MIT",
-      "licenseFiles": [
-        {
-          "name": "LICENSE",
-          "path": "node_modules/.pnpm/es-module-lexer@1.7.0/node_modules/es-module-lexer/LICENSE",
-          "sha256": "FECC38B5E10D889686B3862E7ADE17E8B3E5C94B24B7256B05A354D8524B3274"
-        }
-      ],
-      "manualReviewRequired": false,
-      "name": "es-module-lexer",
-      "notes": "Preserve applicable license and copyright material when distributing this development/bootstrap dependency.",
-      "noticeFiles": [],
-      "ownerCommercialDisposition": "NOT APPLICABLE",
-      "ownerExactException": false,
-      "packagedArtifactDisposition": null,
-      "prohibited": false,
-      "safeNoticeSourceUrl": "https://github.com/guybedford/es-module-lexer.git",
-      "version": "1.7.0"
-    },
-    {
-      "author": "Guy Bedford",
-      "classification": "AUTOMATICALLY_ADMISSIBLE",
-      "distributionScope": "RSM-5-I1 DEVELOPMENT / SECURE ELECTRON SHELL CANDIDATE / NOT FINAL RELEASE",
-      "evidenceSource": "Installed package.json plus physical top-level license/notice files",
       "identity": "es-module-lexer@2.3.1",
       "license": "MIT",
       "licenseFiles": [
@@ -5216,31 +5084,6 @@
       "prohibited": false,
       "safeNoticeSourceUrl": "https://github.com/bjyoungblood/es6-error.git",
       "version": "4.1.1"
-    },
-    {
-      "author": "",
-      "classification": "AUTOMATICALLY_ADMISSIBLE",
-      "distributionScope": "RSM-5-I1 DEVELOPMENT / SECURE ELECTRON SHELL CANDIDATE / NOT FINAL RELEASE",
-      "evidenceSource": "Installed package.json plus physical top-level license/notice files",
-      "identity": "esbuild@0.25.12",
-      "license": "MIT",
-      "licenseFiles": [
-        {
-          "name": "LICENSE.md",
-          "path": "node_modules/.pnpm/esbuild@0.25.12/node_modules/esbuild/LICENSE.md",
-          "sha256": "B40EC5BAEC7BB34FA5B1C09521FA3CD52D5FAD7ADAFED74932A2010D3612A681"
-        }
-      ],
-      "manualReviewRequired": false,
-      "name": "esbuild",
-      "notes": "Preserve applicable license and copyright material when distributing this development/bootstrap dependency.",
-      "noticeFiles": [],
-      "ownerCommercialDisposition": "NOT APPLICABLE",
-      "ownerExactException": false,
-      "packagedArtifactDisposition": null,
-      "prohibited": false,
-      "safeNoticeSourceUrl": "https://github.com/evanw/esbuild.git",
-      "version": "0.25.12"
     },
     {
       "author": "Luke Edwards <luke.edwards05@gmail.com> (https://lukeed.com/)",
@@ -7857,41 +7700,16 @@
       "version": "2.7.0"
     },
     {
-      "author": "Simon Lydell",
-      "classification": "AUTOMATICALLY_ADMISSIBLE",
-      "distributionScope": "RSM-5-I1 DEVELOPMENT / SECURE ELECTRON SHELL CANDIDATE / NOT FINAL RELEASE",
-      "evidenceSource": "Installed package.json plus physical top-level license/notice files",
-      "identity": "js-tokens@9.0.1",
-      "license": "MIT",
-      "licenseFiles": [
-        {
-          "name": "LICENSE",
-          "path": "node_modules/.pnpm/js-tokens@9.0.1/node_modules/js-tokens/LICENSE",
-          "sha256": "33038D552D766F4501D8DA25B66053ED217C61274FFCE1C6BEE413BB037C259C"
-        }
-      ],
-      "manualReviewRequired": false,
-      "name": "js-tokens",
-      "notes": "Preserve applicable license and copyright material when distributing this development/bootstrap dependency.",
-      "noticeFiles": [],
-      "ownerCommercialDisposition": "NOT APPLICABLE",
-      "ownerExactException": false,
-      "packagedArtifactDisposition": null,
-      "prohibited": false,
-      "safeNoticeSourceUrl": "https://github.com/lydell/js-tokens",
-      "version": "9.0.1"
-    },
-    {
       "author": "Vladimir Zapparov <dervus.grim@gmail.com>",
       "classification": "AUTOMATICALLY_ADMISSIBLE",
       "distributionScope": "RSM-5-I1 DEVELOPMENT / SECURE ELECTRON SHELL CANDIDATE / NOT FINAL RELEASE",
       "evidenceSource": "Installed package.json plus physical top-level license/notice files",
-      "identity": "js-yaml@4.3.1",
+      "identity": "js-yaml@4.3.2",
       "license": "MIT",
       "licenseFiles": [
         {
           "name": "LICENSE",
-          "path": "node_modules/.pnpm/js-yaml@4.3.1/node_modules/js-yaml/LICENSE",
+          "path": "node_modules/.pnpm/js-yaml@4.3.2/node_modules/js-yaml/LICENSE",
           "sha256": "A07BC24468B9654CE76A547D47A2DB282D07733B715DB4C73A98BD63961F9550"
         }
       ],
@@ -7904,7 +7722,7 @@
       "packagedArtifactDisposition": null,
       "prohibited": false,
       "safeNoticeSourceUrl": "https://github.com/nodeca/js-yaml",
-      "version": "4.3.1"
+      "version": "4.3.2"
     },
     {
       "author": "Dominic Tarr <dominic.tarr@gmail.com> (http://dominictarr.com)",
@@ -8508,31 +8326,6 @@
       "prohibited": false,
       "safeNoticeSourceUrl": "https://github.com/sindresorhus/log-update",
       "version": "5.0.1"
-    },
-    {
-      "author": "Veselin Todorov <hi@vesln.com>",
-      "classification": "AUTOMATICALLY_ADMISSIBLE",
-      "distributionScope": "RSM-5-I1 DEVELOPMENT / SECURE ELECTRON SHELL CANDIDATE / NOT FINAL RELEASE",
-      "evidenceSource": "Installed package.json plus physical top-level license/notice files",
-      "identity": "loupe@3.2.1",
-      "license": "MIT",
-      "licenseFiles": [
-        {
-          "name": "LICENSE",
-          "path": "node_modules/.pnpm/loupe@3.2.1/node_modules/loupe/LICENSE",
-          "sha256": "592141F7B861426CEEFF937D85AD04ADA5F66E386C5A8696ED1BD680F2CDB552"
-        }
-      ],
-      "manualReviewRequired": false,
-      "name": "loupe",
-      "notes": "Preserve applicable license and copyright material when distributing this development/bootstrap dependency.",
-      "noticeFiles": [],
-      "ownerCommercialDisposition": "NOT APPLICABLE",
-      "ownerExactException": false,
-      "packagedArtifactDisposition": null,
-      "prohibited": false,
-      "safeNoticeSourceUrl": "https://github.com/chaijs/loupe",
-      "version": "3.2.1"
     },
     {
       "author": "Sindre Sorhus <sindresorhus@gmail.com>",
@@ -9723,6 +9516,31 @@
       "version": "1.1.1"
     },
     {
+      "author": "Kevin Deng <sxzz@sxzz.moe>",
+      "classification": "AUTOMATICALLY_ADMISSIBLE",
+      "distributionScope": "RSM-5-I1 DEVELOPMENT / SECURE ELECTRON SHELL CANDIDATE / NOT FINAL RELEASE",
+      "evidenceSource": "Installed package.json plus physical top-level license/notice files",
+      "identity": "obug@2.2.1",
+      "license": "MIT",
+      "licenseFiles": [
+        {
+          "name": "LICENSE",
+          "path": "node_modules/.pnpm/obug@2.2.1/node_modules/obug/LICENSE",
+          "sha256": "EE48679D379CA6B4493D5E231094D85F818DD9BE40B1A4F234FB7FF657EE35D9"
+        }
+      ],
+      "manualReviewRequired": false,
+      "name": "obug",
+      "notes": "Preserve applicable license and copyright material when distributing this development/bootstrap dependency.",
+      "noticeFiles": [],
+      "ownerCommercialDisposition": "NOT APPLICABLE",
+      "ownerExactException": false,
+      "packagedArtifactDisposition": null,
+      "prohibited": false,
+      "safeNoticeSourceUrl": "https://github.com/sxzz/obug.git",
+      "version": "2.2.1"
+    },
+    {
       "author": "Isaac Z. Schlueter <i@izs.me> (http://blog.izs.me/)",
       "classification": "AUTOMATICALLY_ADMISSIBLE",
       "distributionScope": "RSM-5-I1 DEVELOPMENT / SECURE ELECTRON SHELL CANDIDATE / NOT FINAL RELEASE",
@@ -10396,31 +10214,6 @@
       "prohibited": false,
       "safeNoticeSourceUrl": "https://github.com/unjs/pathe",
       "version": "2.0.3"
-    },
-    {
-      "author": "Veselin Todorov <hi@vesln.com>",
-      "classification": "AUTOMATICALLY_ADMISSIBLE",
-      "distributionScope": "RSM-5-I1 DEVELOPMENT / SECURE ELECTRON SHELL CANDIDATE / NOT FINAL RELEASE",
-      "evidenceSource": "Installed package.json plus physical top-level license/notice files",
-      "identity": "pathval@2.0.1",
-      "license": "MIT",
-      "licenseFiles": [
-        {
-          "name": "LICENSE",
-          "path": "node_modules/.pnpm/pathval@2.0.1/node_modules/pathval/LICENSE",
-          "sha256": "5D45910E7ED82FECC3E29B40A5B3A17CEB609FDA19F860AA2EC180D87F4F9D4A"
-        }
-      ],
-      "manualReviewRequired": false,
-      "name": "pathval",
-      "notes": "Preserve applicable license and copyright material when distributing this development/bootstrap dependency.",
-      "noticeFiles": [],
-      "ownerCommercialDisposition": "NOT APPLICABLE",
-      "ownerExactException": false,
-      "packagedArtifactDisposition": null,
-      "prohibited": false,
-      "safeNoticeSourceUrl": "https://github.com/chaijs/pathval",
-      "version": "2.0.1"
     },
     {
       "author": "jet",
@@ -11442,31 +11235,6 @@
       "version": "1.2.3"
     },
     {
-      "author": "Rich Harris",
-      "classification": "AUTOMATICALLY_ADMISSIBLE",
-      "distributionScope": "RSM-5-I1 DEVELOPMENT / SECURE ELECTRON SHELL CANDIDATE / NOT FINAL RELEASE",
-      "evidenceSource": "Installed package.json plus physical top-level license/notice files",
-      "identity": "rollup@4.62.4",
-      "license": "MIT",
-      "licenseFiles": [
-        {
-          "name": "LICENSE.md",
-          "path": "node_modules/.pnpm/rollup@4.62.4/node_modules/rollup/LICENSE.md",
-          "sha256": "FA1BD040C5BDEEFE65B3821CEBF474F2733CE65DF13089BD151DDA1778E62FE8"
-        }
-      ],
-      "manualReviewRequired": false,
-      "name": "rollup",
-      "notes": "Preserve applicable license and copyright material when distributing this development/bootstrap dependency.",
-      "noticeFiles": [],
-      "ownerCommercialDisposition": "NOT APPLICABLE",
-      "ownerExactException": false,
-      "packagedArtifactDisposition": null,
-      "prohibited": false,
-      "safeNoticeSourceUrl": "https://github.com/rollup/rollup.git",
-      "version": "4.62.4"
-    },
-    {
       "author": "Feross Aboukhadijeh <feross@feross.org> (https://feross.org/)",
       "classification": "AUTOMATICALLY_ADMISSIBLE",
       "distributionScope": "RSM-5-I1 DEVELOPMENT / SECURE ELECTRON SHELL CANDIDATE / NOT FINAL RELEASE",
@@ -12247,12 +12015,12 @@
       "classification": "AUTOMATICALLY_ADMISSIBLE",
       "distributionScope": "RSM-5-I1 DEVELOPMENT / SECURE ELECTRON SHELL CANDIDATE / NOT FINAL RELEASE",
       "evidenceSource": "Installed package.json plus physical top-level license/notice files",
-      "identity": "std-env@3.10.0",
+      "identity": "std-env@4.2.0",
       "license": "MIT",
       "licenseFiles": [
         {
           "name": "LICENCE",
-          "path": "node_modules/.pnpm/std-env@3.10.0/node_modules/std-env/LICENCE",
+          "path": "node_modules/.pnpm/std-env@4.2.0/node_modules/std-env/LICENCE",
           "sha256": "A6F36438E46FB911859F3B9C4CAD045BA64E1AF3D8F4512C60258FA2D7552D28"
         }
       ],
@@ -12265,7 +12033,7 @@
       "packagedArtifactDisposition": null,
       "prohibited": false,
       "safeNoticeSourceUrl": "https://github.com/unjs/std-env",
-      "version": "3.10.0"
+      "version": "4.2.0"
     },
     {
       "author": "",
@@ -12491,31 +12259,6 @@
       "prohibited": false,
       "safeNoticeSourceUrl": "https://github.com/sindresorhus/strip-json-comments",
       "version": "5.0.3"
-    },
-    {
-      "author": "Anthony Fu <anthonyfu117@hotmail.com>",
-      "classification": "AUTOMATICALLY_ADMISSIBLE",
-      "distributionScope": "RSM-5-I1 DEVELOPMENT / SECURE ELECTRON SHELL CANDIDATE / NOT FINAL RELEASE",
-      "evidenceSource": "Installed package.json plus physical top-level license/notice files",
-      "identity": "strip-literal@3.1.0",
-      "license": "MIT",
-      "licenseFiles": [
-        {
-          "name": "LICENSE",
-          "path": "node_modules/.pnpm/strip-literal@3.1.0/node_modules/strip-literal/LICENSE",
-          "sha256": "AF32EFDD008A371C77B13EEF5010C81D6C5C2F67C054B6BB74317E13AC38C171"
-        }
-      ],
-      "manualReviewRequired": false,
-      "name": "strip-literal",
-      "notes": "Preserve applicable license and copyright material when distributing this development/bootstrap dependency.",
-      "noticeFiles": [],
-      "ownerCommercialDisposition": "NOT APPLICABLE",
-      "ownerExactException": false,
-      "packagedArtifactDisposition": null,
-      "prohibited": false,
-      "safeNoticeSourceUrl": "https://github.com/antfu/strip-literal.git",
-      "version": "3.1.0"
     },
     {
       "author": "Sindre Sorhus <sindresorhus@gmail.com>",
@@ -12772,12 +12515,12 @@
       "classification": "AUTOMATICALLY_ADMISSIBLE",
       "distributionScope": "RSM-5-I1 DEVELOPMENT / SECURE ELECTRON SHELL CANDIDATE / NOT FINAL RELEASE",
       "evidenceSource": "Installed package.json plus physical top-level license/notice files",
-      "identity": "tinyexec@0.3.2",
+      "identity": "tinyexec@1.3.1",
       "license": "MIT",
       "licenseFiles": [
         {
           "name": "LICENSE",
-          "path": "node_modules/.pnpm/tinyexec@0.3.2/node_modules/tinyexec/LICENSE",
+          "path": "node_modules/.pnpm/tinyexec@1.3.1/node_modules/tinyexec/LICENSE",
           "sha256": "F95F668FE64081DDB4153B322E34FDD719B991285ED08177D5AD7133B7988D92"
         }
       ],
@@ -12790,7 +12533,7 @@
       "packagedArtifactDisposition": null,
       "prohibited": false,
       "safeNoticeSourceUrl": "https://github.com/tinylibs/tinyexec.git",
-      "version": "0.3.2"
+      "version": "1.3.1"
     },
     {
       "author": "Superchupu",
@@ -12822,37 +12565,12 @@
       "classification": "AUTOMATICALLY_ADMISSIBLE",
       "distributionScope": "RSM-5-I1 DEVELOPMENT / SECURE ELECTRON SHELL CANDIDATE / NOT FINAL RELEASE",
       "evidenceSource": "Installed package.json plus physical top-level license/notice files",
-      "identity": "tinypool@1.1.1",
-      "license": "MIT",
-      "licenseFiles": [
-        {
-          "name": "LICENSE",
-          "path": "node_modules/.pnpm/tinypool@1.1.1/node_modules/tinypool/LICENSE",
-          "sha256": "0D506CA1B2ADC4EE63A9E2384A85D6CF9F014B4CF3D00C162CD60216450324FA"
-        }
-      ],
-      "manualReviewRequired": false,
-      "name": "tinypool",
-      "notes": "Preserve applicable license and copyright material when distributing this development/bootstrap dependency.",
-      "noticeFiles": [],
-      "ownerCommercialDisposition": "NOT APPLICABLE",
-      "ownerExactException": false,
-      "packagedArtifactDisposition": null,
-      "prohibited": false,
-      "safeNoticeSourceUrl": "https://github.com/tinylibs/tinypool.git",
-      "version": "1.1.1"
-    },
-    {
-      "author": "",
-      "classification": "AUTOMATICALLY_ADMISSIBLE",
-      "distributionScope": "RSM-5-I1 DEVELOPMENT / SECURE ELECTRON SHELL CANDIDATE / NOT FINAL RELEASE",
-      "evidenceSource": "Installed package.json plus physical top-level license/notice files",
-      "identity": "tinyrainbow@2.0.0",
+      "identity": "tinyrainbow@3.1.1",
       "license": "MIT",
       "licenseFiles": [
         {
           "name": "LICENCE",
-          "path": "node_modules/.pnpm/tinyrainbow@2.0.0/node_modules/tinyrainbow/LICENCE",
+          "path": "node_modules/.pnpm/tinyrainbow@3.1.1/node_modules/tinyrainbow/LICENCE",
           "sha256": "CEBC084D54E6DD99E53292DDB4BC1CDB63D9BFCD9CE438FE3AA6EB106D79E2EA"
         }
       ],
@@ -12865,32 +12583,7 @@
       "packagedArtifactDisposition": null,
       "prohibited": false,
       "safeNoticeSourceUrl": "https://github.com/tinylibs/tinyrainbow.git",
-      "version": "2.0.0"
-    },
-    {
-      "author": "",
-      "classification": "AUTOMATICALLY_ADMISSIBLE",
-      "distributionScope": "RSM-5-I1 DEVELOPMENT / SECURE ELECTRON SHELL CANDIDATE / NOT FINAL RELEASE",
-      "evidenceSource": "Installed package.json plus physical top-level license/notice files",
-      "identity": "tinyspy@4.0.4",
-      "license": "MIT",
-      "licenseFiles": [
-        {
-          "name": "LICENCE",
-          "path": "node_modules/.pnpm/tinyspy@4.0.4/node_modules/tinyspy/LICENCE",
-          "sha256": "CEBC084D54E6DD99E53292DDB4BC1CDB63D9BFCD9CE438FE3AA6EB106D79E2EA"
-        }
-      ],
-      "manualReviewRequired": false,
-      "name": "tinyspy",
-      "notes": "Preserve applicable license and copyright material when distributing this development/bootstrap dependency.",
-      "noticeFiles": [],
-      "ownerCommercialDisposition": "NOT APPLICABLE",
-      "ownerExactException": false,
-      "packagedArtifactDisposition": null,
-      "prohibited": false,
-      "safeNoticeSourceUrl": "https://github.com/tinylibs/tinyspy.git",
-      "version": "4.0.4"
+      "version": "3.1.1"
     },
     {
       "author": "Jon Schlinkert (https://github.com/jonschlinkert)",
@@ -13512,56 +13205,6 @@
       "version": "3.0.4"
     },
     {
-      "author": "Anthony Fu <anthonyfu117@hotmail.com>",
-      "classification": "AUTOMATICALLY_ADMISSIBLE",
-      "distributionScope": "RSM-5-I1 DEVELOPMENT / SECURE ELECTRON SHELL CANDIDATE / NOT FINAL RELEASE",
-      "evidenceSource": "Installed package.json plus physical top-level license/notice files",
-      "identity": "vite-node@3.2.4",
-      "license": "MIT",
-      "licenseFiles": [
-        {
-          "name": "LICENSE",
-          "path": "node_modules/.pnpm/vite-node@3.2.4_@types+node_21525a18ddaf8d1518767a42024adf19/node_modules/vite-node/LICENSE",
-          "sha256": "DDC110F3B89CC397CEE99D3D64C4F746928B7A3BAC02FED15101EB4D367079F6"
-        }
-      ],
-      "manualReviewRequired": false,
-      "name": "vite-node",
-      "notes": "Preserve applicable license and copyright material when distributing this development/bootstrap dependency.",
-      "noticeFiles": [],
-      "ownerCommercialDisposition": "NOT APPLICABLE",
-      "ownerExactException": false,
-      "packagedArtifactDisposition": null,
-      "prohibited": false,
-      "safeNoticeSourceUrl": "https://github.com/vitest-dev/vitest.git",
-      "version": "3.2.4"
-    },
-    {
-      "author": "Evan You",
-      "classification": "AUTOMATICALLY_ADMISSIBLE",
-      "distributionScope": "RSM-5-I1 DEVELOPMENT / SECURE ELECTRON SHELL CANDIDATE / NOT FINAL RELEASE",
-      "evidenceSource": "Installed package.json plus physical top-level license/notice files",
-      "identity": "vite@6.4.3",
-      "license": "MIT",
-      "licenseFiles": [
-        {
-          "name": "LICENSE.md",
-          "path": "node_modules/.pnpm/vite@6.4.3_@types+node@26.2_aec9e81c273ed7a113812e52b57eb027/node_modules/vite/LICENSE.md",
-          "sha256": "008938A3441801CA3960F8E3CCB4C0738E7996442A53063141D57D3769A7344D"
-        }
-      ],
-      "manualReviewRequired": false,
-      "name": "vite",
-      "notes": "Preserve applicable license and copyright material when distributing this development/bootstrap dependency.",
-      "noticeFiles": [],
-      "ownerCommercialDisposition": "NOT APPLICABLE",
-      "ownerExactException": false,
-      "packagedArtifactDisposition": null,
-      "prohibited": false,
-      "safeNoticeSourceUrl": "https://github.com/vitejs/vite.git",
-      "version": "6.4.3"
-    },
-    {
       "author": "Evan You",
       "classification": "AUTOMATICALLY_ADMISSIBLE",
       "distributionScope": "RSM-5-I1 DEVELOPMENT / SECURE ELECTRON SHELL CANDIDATE / NOT FINAL RELEASE",
@@ -13591,13 +13234,13 @@
       "classification": "AUTOMATICALLY_ADMISSIBLE",
       "distributionScope": "RSM-5-I1 DEVELOPMENT / SECURE ELECTRON SHELL CANDIDATE / NOT FINAL RELEASE",
       "evidenceSource": "Installed package.json plus physical top-level license/notice files",
-      "identity": "vitest@3.2.6",
+      "identity": "vitest@4.1.11",
       "license": "MIT",
       "licenseFiles": [
         {
           "name": "LICENSE.md",
-          "path": "node_modules/.pnpm/vitest@3.2.6_@types+node@26_be9ac79070ac62a314a2e35b70928625/node_modules/vitest/LICENSE.md",
-          "sha256": "6B861D7554FBC8488A08EE59E613BD488785A2E27BD87B80142E5125ABEC6F4C"
+          "path": "node_modules/.pnpm/vitest@4.1.11_@types+node@2_5f63187e867855969df236aad9cc299b/node_modules/vitest/LICENSE.md",
+          "sha256": "881D660C26831481B697E39724D4A35C9F86E07B67156D4AEB693A0B39910435"
         }
       ],
       "manualReviewRequired": false,
@@ -13609,7 +13252,7 @@
       "packagedArtifactDisposition": null,
       "prohibited": false,
       "safeNoticeSourceUrl": "https://github.com/vitest-dev/vitest.git",
-      "version": "3.2.6"
+      "version": "4.1.11"
     },
     {
       "author": "Isaac Z. Schlueter <i@izs.me> (https://izs.me)",
@@ -14308,9 +13951,9 @@
     "platform": "win32"
   },
   "summary": {
-    "automaticallyAdmissible": 558,
+    "automaticallyAdmissible": 543,
     "ownerApprovedExact": 14,
-    "packageCount": 572,
+    "packageCount": 557,
     "prohibited": 0,
     "unapprovedManualReview": 0,
     "unknownNoLicense": 0

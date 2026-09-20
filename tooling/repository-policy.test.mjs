@@ -9,7 +9,7 @@ const rootDependencies = {
   prettier: "3.5.2",
   typescript: "6.0.3",
   "typescript-eslint": "8.66.0",
-  vitest: "3.2.6",
+  vitest: "4.1.11",
 };
 const applicationDependencies = {
   "@retrostage/renderer-babylon9": "workspace:*",
@@ -135,6 +135,13 @@ function snapshot(overrides = {}) {
 describe("RSM-6-ADMIT1 repository policy", () => {
   it("accepts the exact I8 Electron viewport topology and dependency sets", () => {
     expect(validateRepositoryBootstrap(snapshot())).toEqual([]);
+  });
+
+  it("rejects an inexact root Vitest identity", () => {
+    const issues = validateRepositoryBootstrap(
+      snapshot({ directDevDependencies: { ...rootDependencies, vitest: "4.1.10" } }),
+    );
+    expect(issues.map(({ code }) => code)).toContain("ROOT_DIRECT_DEPENDENCY_MISSING_OR_INEXACT");
   });
 
   it("rejects unexpected app topology and later product paths", () => {

@@ -221,28 +221,6 @@
       "version": "1.2.2"
     },
     {
-      "abiRuntimeRequirements": "STANDALONE_PLATFORM_EXECUTABLE / NODE ABI NOT APPLICABLE",
-      "architecture": "x64",
-      "artifactType": ".exe",
-      "buildProvenance": "PUBLISHED_NPM_PACKAGE_CONTENT / LOCAL BUILD PROVENANCE NOT ESTABLISHED",
-      "distributionScope": "RSM-5-I1 DEVELOPMENT / SECURE ELECTRON SHELL CANDIDATE / NOT FINAL RELEASE",
-      "license": "MIT",
-      "licenseNoticeLocations": [
-        "APPROVED_BOOTSTRAP_SOURCE_LINK: https://github.com/evanw/esbuild.git"
-      ],
-      "owningPackage": "@esbuild/win32-x64",
-      "packagedRole": "DEVELOPMENT_BUILD_TOOL_ONLY / NOT EDITOR_OR_PLAYER_PACKAGED",
-      "packageReleaseUrl": "https://www.npmjs.com/package/%40esbuild%2Fwin32-x64/v/0.25.12",
-      "platform": "win32",
-      "provenanceSourceIdentity": "@esbuild/win32-x64@0.25.12",
-      "relativeArtifactPath": "node_modules/.pnpm/@esbuild+win32-x64@0.25.12/node_modules/@esbuild/win32-x64/esbuild.exe",
-      "replacementRemovalProcedure": "Remove or update owning tool dependency @esbuild/win32-x64@0.25.12 or its transitive parent; review pnpm-lock.yaml changes; regenerate compliance artifacts; run full validation. Do not delete the artifact directly from node_modules.",
-      "sha256": "CAE1BBC86F4DF800B01D99E28AEA0A154B02243DE6797E98F48A9B88A64A7BE0",
-      "sourceCodeAvailability": "UPSTREAM_REPOSITORY_DECLARED",
-      "sourceRepository": "https://github.com/evanw/esbuild.git",
-      "version": "0.25.12"
-    },
-    {
       "abiRuntimeRequirements": "NODE_NATIVE_ADDON / EXACT N-API OR NODE ABI LEVEL NOT ESTABLISHED BY INSTALLED PACKAGE METADATA",
       "architecture": "x64",
       "artifactType": ".node",
@@ -307,50 +285,6 @@
       "sourceCodeAvailability": "UPSTREAM_REPOSITORY_DECLARED",
       "sourceRepository": "https://github.com/rolldown/rolldown.git",
       "version": "1.2.3"
-    },
-    {
-      "abiRuntimeRequirements": "NODE_NATIVE_ADDON / EXACT N-API OR NODE ABI LEVEL NOT ESTABLISHED BY INSTALLED PACKAGE METADATA",
-      "architecture": "x64",
-      "artifactType": ".node",
-      "buildProvenance": "PUBLISHED_NPM_PACKAGE_CONTENT / LOCAL BUILD PROVENANCE NOT ESTABLISHED",
-      "distributionScope": "RSM-5-I1 DEVELOPMENT / SECURE ELECTRON SHELL CANDIDATE / NOT FINAL RELEASE",
-      "license": "MIT",
-      "licenseNoticeLocations": [
-        "APPROVED_BOOTSTRAP_SOURCE_LINK: https://github.com/rollup/rollup.git"
-      ],
-      "owningPackage": "@rollup/rollup-win32-x64-gnu",
-      "packagedRole": "DEVELOPMENT_BUILD_TOOL_ONLY / NOT EDITOR_OR_PLAYER_PACKAGED",
-      "packageReleaseUrl": "https://www.npmjs.com/package/%40rollup%2Frollup-win32-x64-gnu/v/4.62.4",
-      "platform": "win32",
-      "provenanceSourceIdentity": "@rollup/rollup-win32-x64-gnu@4.62.4",
-      "relativeArtifactPath": "node_modules/.pnpm/@rollup+rollup-win32-x64-gnu@4.62.4/node_modules/@rollup/rollup-win32-x64-gnu/rollup.win32-x64-gnu.node",
-      "replacementRemovalProcedure": "Remove or update owning tool dependency @rollup/rollup-win32-x64-gnu@4.62.4 or its transitive parent; review pnpm-lock.yaml changes; regenerate compliance artifacts; run full validation. Do not delete the artifact directly from node_modules.",
-      "sha256": "BEA28DAA1BFE05F96CB21C3A86B6922C310409D1FB491680EE6E1315DDFD6DBD",
-      "sourceCodeAvailability": "UPSTREAM_REPOSITORY_DECLARED",
-      "sourceRepository": "https://github.com/rollup/rollup.git",
-      "version": "4.62.4"
-    },
-    {
-      "abiRuntimeRequirements": "NODE_NATIVE_ADDON / EXACT N-API OR NODE ABI LEVEL NOT ESTABLISHED BY INSTALLED PACKAGE METADATA",
-      "architecture": "x64",
-      "artifactType": ".node",
-      "buildProvenance": "PUBLISHED_NPM_PACKAGE_CONTENT / LOCAL BUILD PROVENANCE NOT ESTABLISHED",
-      "distributionScope": "RSM-5-I1 DEVELOPMENT / SECURE ELECTRON SHELL CANDIDATE / NOT FINAL RELEASE",
-      "license": "MIT",
-      "licenseNoticeLocations": [
-        "APPROVED_BOOTSTRAP_SOURCE_LINK: https://github.com/rollup/rollup.git"
-      ],
-      "owningPackage": "@rollup/rollup-win32-x64-msvc",
-      "packagedRole": "DEVELOPMENT_BUILD_TOOL_ONLY / NOT EDITOR_OR_PLAYER_PACKAGED",
-      "packageReleaseUrl": "https://www.npmjs.com/package/%40rollup%2Frollup-win32-x64-msvc/v/4.62.4",
-      "platform": "win32",
-      "provenanceSourceIdentity": "@rollup/rollup-win32-x64-msvc@4.62.4",
-      "relativeArtifactPath": "node_modules/.pnpm/@rollup+rollup-win32-x64-msvc@4.62.4/node_modules/@rollup/rollup-win32-x64-msvc/rollup.win32-x64-msvc.node",
-      "replacementRemovalProcedure": "Remove or update owning tool dependency @rollup/rollup-win32-x64-msvc@4.62.4 or its transitive parent; review pnpm-lock.yaml changes; regenerate compliance artifacts; run full validation. Do not delete the artifact directly from node_modules.",
-      "sha256": "397EF6F183536E03ADB15653ACC34660245881A74B3C248DB06DF8FF3C4C6B49",
-      "sourceCodeAvailability": "UPSTREAM_REPOSITORY_DECLARED",
-      "sourceRepository": "https://github.com/rollup/rollup.git",
-      "version": "4.62.4"
     },
     {
       "abiRuntimeRequirements": "PLATFORM_NATIVE_LIBRARY / EXACT ABI LEVEL NOT ESTABLISHED BY INSTALLED PACKAGE METADATA",
@@ -775,7 +709,7 @@
     "architecture": "x64",
     "platform": "win32"
   },
-  "count": 35,
+  "count": 32,
   "distributionScope": "RSM-5-I1 DEVELOPMENT / SECURE ELECTRON SHELL CANDIDATE / NOT FINAL RELEASE",
   "scanExtensions": [
     ".node",

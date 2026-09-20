@@ -21,7 +21,7 @@ const expectedDirectDevDependencies = new Map<string, string>([
   ["prettier", "3.5.2"],
   ["typescript", "6.0.3"],
   ["typescript-eslint", "8.66.0"],
-  ["vitest", "3.2.6"],
+  ["vitest", "4.1.11"],
 ]);
 
 const expectedApplicationDevDependencies = new Map<string, string>([
