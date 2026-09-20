@@ -59,8 +59,6 @@ import {
 const REPOSITORY_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
 const REPOSITORY_IDENTITY = "D1847AD57E4D92862E32419FFDF36061BD30AA2B37ECA74E28E3036B9CC1A40A";
 const SOURCE_GENERATION = "4246D938415B805FB6E662EE2D477D441D30CDEE4AFEC63495C59A021AFA0D42";
-const HEAD = "01fe5e3a29ca47a39301da8f33a5976fd20a00db";
-const TREE = "898138f646d87bf38977c4de32cd908ece9f8085";
 const GIT_EXECUTABLE = path.join(process.env.ProgramFiles, "Git", "cmd", "git.exe");
 const runFile = promisify(execFile);
 const hash = (value) => sha256Hex(`cic-i9-restore-test:${value}`);
@@ -432,7 +430,11 @@ beforeAll(async () => {
   ];
   manifest = await captureGovernedRestoreSet({
     backupRoot,
-    repository: { repositoryIdentity: REPOSITORY_IDENTITY, head: HEAD, tree: TREE },
+    repository: {
+      repositoryIdentity: REPOSITORY_IDENTITY,
+      head: canonicalBefore.head.commit,
+      tree: canonicalBefore.head.tree,
+    },
     sourceGeneration: SOURCE_GENERATION,
     capsuleIdentity: capsule.capsuleIdentity,
     sources,
@@ -498,7 +500,10 @@ describe.sequential("CIC I9 governed restore set and clean-clone drill", () => {
     expect(proof.fsck.stderr).toBe("");
     expect(proof.cloneRepository).toMatchObject({
       status: "PASS",
-      head: { commit: HEAD, tree: TREE },
+      head: {
+        commit: canonicalBefore.head.commit,
+        tree: canonicalBefore.head.tree,
+      },
       errors: [],
     });
     expect(proof.cloneSource).toMatchObject({
@@ -558,7 +563,7 @@ describe.sequential("CIC I9 governed restore set and clean-clone drill", () => {
 
   it("I9-S06 fails closed on an incomplete shallow repository view", async () => {
     const shallowRoot = await copyScratch(cleanClone, "fault-incomplete-repository");
-    await writeFile(path.join(shallowRoot, ".git", "shallow"), `${HEAD}\n`);
+    await writeFile(path.join(shallowRoot, ".git", "shallow"), `${canonicalBefore.head.commit}\n`);
     const result = await verifyRepositoryIdentity(shallowRoot);
     expect(result.status).toBe("BLOCKED");
     expect(result.errors.map(({ code }) => code)).toContain("REPOSITORY_SHALLOW_VIEW");
@@ -677,11 +682,12 @@ describe.sequential("CIC I9 governed restore set and clean-clone drill", () => {
     expect(canonicalAfter.snapshotFingerprint).toBe(canonicalBefore.snapshotFingerprint);
     expect(canonicalAfter.head).toEqual(canonicalBefore.head);
     expect(canonicalAfter.sourceGeneration.fingerprint).toBe(SOURCE_GENERATION);
-    expect(canonicalAfter.worktree.staged.bytes).toBe(0);
+    expect(canonicalAfter.worktree.staged.bytes).toBe(canonicalBefore.worktree.staged.bytes);
+    expect(canonicalAfter.worktree.staged.sha256).toBe(canonicalBefore.worktree.staged.sha256);
     expect(canonicalAfter.worktree.unstaged.bytes).toBe(canonicalBefore.worktree.unstaged.bytes);
     expect(canonicalAfter.worktree.unstaged.sha256).toBe(canonicalBefore.worktree.unstaged.sha256);
-    expect(canonicalAfter.worktree.untracked.entries.map(({ path: itemPath }) => itemPath)).toEqual(
-      expectedCandidatePaths,
+    expect(canonicalAfter.worktree.untracked.entries).toEqual(
+      canonicalBefore.worktree.untracked.entries,
     );
   });
 
