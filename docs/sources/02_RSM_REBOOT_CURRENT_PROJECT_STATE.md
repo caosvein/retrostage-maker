@@ -4,12 +4,12 @@
 **Role:** Authoritative current-state snapshot for the RetroStage Maker reboot  
 **Project:** RetroStage Maker  
 **Source generation:** Reboot / clean-start  
-**Snapshot date:** 2026-09-07  
+**Snapshot date:** 2026-09-21  
 **Snapshot timezone:** Europe/Istanbul  
-**Document state:** `LIVE SNAPSHOT / RSM-6 MILESTONE CLOSED-PASS / CIC I6-I8 CLOSED-PASS-PUBLISHED-HOSTED-VALIDATED / GATE B ACTIVE-CURRENT`  
+**Document state:** `LIVE SNAPSHOT / RSM-6 MILESTONE CLOSED-PASS / CIC I6-I9 CLOSED-PASS-PUBLISHED-HOSTED-VALIDATED / GATE B ACTIVE-CURRENT`  
 **Current product gate:** `Gate B — ACTIVE / CURRENT`  
 **Current milestone/control:** `RSM-6 — MILESTONE CLOSED / PASS; RSM-7 — NEXT / NOT STARTED / NOT AUTHORIZED`  
-**Current task:** `PRE-I9 SOURCE ALIGNMENT / I11-LITE ADOPTION — CURRENT SOURCE CANDIDATE / BECOMES ACCEPTED-APPLIED AFTER INDEPENDENT ACCEPTANCE AND PUBLICATION; CIC I9 — NEXT / NOT STARTED / SEPARATE OWNER ACTIVATION REQUIRED`  
+**Current task:** `PRE-I10 TRUTHFUL SOURCE ALIGNMENT / CIC I9 CLOSE1 — THIS TASK; CIC I10 — NEXT / NOT STARTED / SEPARATE OWNER ACTIVATION REQUIRED`  
 **Repository:** `PRESENT — C:\RetroStage\retrostage-maker`  
 **Remote origin:** `https://github.com/caosvein/retrostage-maker.git`  
 **Primary branch:** `main`  
@@ -36,9 +36,14 @@
 **CIC I6:** `CLOSED / PASS / PUBLISHED / HOSTED-VALIDATED — 7736ae00c4fe2d7aea987eff66781af22fb31903 / tree ce6ccd0ac112683005f8ddb6a66bb3629f8c52d9 / CI 34024104016 run 56 attempt 1 success`  
 **CIC I7:** `CLOSED / PASS / PUBLISHED / HOSTED-VALIDATED — c5d657158f04d9d5a18799888c0f990c9efb27c2 / tree 7aa9017f13c8320dbd308497fab01e25daa9e462 / CI 34092415407 run 58 attempt 1 success`  
 **CIC I8:** `CLOSED / PASS / PUBLISHED / HOSTED-VALIDATED — ab195046c575b7724239c3b4c156cd17804bc434 / tree 073d0d38a17ed7b9e2282158036f50b8e4e4ce8b / CI 34148738076 run 59 attempt 1 success / validation job 101826287952 success`  
+**CIC I9:** `CLOSED / PASS / PUBLISHED / HOSTED-VALIDATED`  
+**Accepted I9 closure/publication HEAD:** `8bda5b00dfc5fa310c1f7a3b74b874e60258c8dc`  
+**Accepted I9 tree:** `d05b92a98e50f72e8b7eec1ac04f8e67b8982ae3`  
+**Accepted I9 natural hosted CI:** `35544038260 / run 63 / job 106166682348 / attempt 1 / push / main / success`  
+**Accepted I9 correction candidate:** `BBBD4D67194826EE317C6F5215CD21F9A442163E12301101890825B25AE841E1`  
 **RSM-3 decision:** `CLOSED`  
 **Independently accepted/closed reboot product capabilities:** `RSM-5 secure Electron shell; RSM-6 I1-I8 renderer foundation and V1 validation`  
-**Immediate next control step:** `Independently review and publish this exact PRE-I9 Source alignment / I11-Lite adoption generation; CIC I9 then remains NEXT / NOT STARTED until separate owner activation`
+**Immediate next control step:** `Independently review and publish this exact PRE-I10 truthful Source alignment; CIC I10 remains NEXT / NOT STARTED / SEPARATE OWNER ACTIVATION REQUIRED`
 
 ---
 
@@ -52,7 +57,7 @@ The POST-RSM-6 / PRE-RSM-7 `COMPLETENESS-FIX2` source alignment remains historic
 
 The `PRE-RSM-7 SOURCE ALIGNMENT WAVE2 CREATOR-APPEAL / SICE V4` control is `CLOSED / PASS`. Its exact Source generation was published at commit `4e5c337445f712a5feeab2f2c2167783086766d9`; natural CI run `32830026684`, job `97746392474`, attempt 1 completed successfully for the push to `main`. Google Drive Sources and ChatGPT Project Sources each converge `11/11 exact / PASS`, and the final completeness audit is `PASS`.
 
-CIC I5 is complete. CIC I6, I7, and I8 are each `CLOSED / PASS / PUBLISHED / HOSTED-VALIDATED`. Their accepted publication commits and trees are respectively `7736ae00c4fe2d7aea987eff66781af22fb31903` / `ce6ccd0ac112683005f8ddb6a66bb3629f8c52d9`, `c5d657158f04d9d5a18799888c0f990c9efb27c2` / `7aa9017f13c8320dbd308497fab01e25daa9e462`, and `ab195046c575b7724239c3b4c156cd17804bc434` / `073d0d38a17ed7b9e2282158036f50b8e4e4ce8b`. The corresponding natural hosted CI runs `34024104016` (run 56), `34092415407` (run 58), and `34148738076` (run 59) each passed on attempt 1 for `push` to `main`; I8 validation job `101826287952` passed. This PRE-I9 Source alignment and I11-Lite adoption is a candidate until independent acceptance and publication. CIC I9 is `NEXT / NOT STARTED / SEPARATE OWNER ACTIVATION REQUIRED`; I10, I11-Lite, and I12 are `LOCKED`; full workflow/risk simplification remains deferred until Post-I12. RSM-7 remains `NOT STARTED / NOT AUTHORIZED`.
+CIC I5 is complete. CIC I6, I7, I8, and I9 are each `CLOSED / PASS / PUBLISHED / HOSTED-VALIDATED`. I9 closed at HEAD `8bda5b00dfc5fa310c1f7a3b74b874e60258c8dc`, tree `d05b92a98e50f72e8b7eec1ac04f8e67b8982ae3`, with correction candidate `BBBD4D67194826EE317C6F5215CD21F9A442163E12301101890825B25AE841E1` and natural CI `35544038260 / run 63 / job 106166682348 / attempt 1 / push / main / success`. The earlier staged-state validation failure and natural hosted run `35537782250` failure remain historical evidence; the accepted correction and distinct hosted success are current. This PRE-I10 truthful Source alignment is the current task. CIC I10 is `NEXT / NOT STARTED / SEPARATE OWNER ACTIVATION REQUIRED`; I11-Lite and I12 are `LOCKED`; full workflow/risk simplification remains deferred until Post-I12. RSM-7 remains `NOT STARTED / NOT AUTHORIZED`.
 
 ---
 
@@ -100,9 +105,9 @@ CIC I5 is complete. CIC I6, I7, and I8 are each `CLOSED / PASS / PUBLISHED / HOS
 | CIC I6 | `CLOSED / PASS / PUBLISHED / HOSTED-VALIDATED` | Commit `7736ae00c4fe2d7aea987eff66781af22fb31903`; tree `ce6ccd0ac112683005f8ddb6a66bb3629f8c52d9`; natural CI `34024104016 / run 56 / attempt 1 / success` |
 | CIC I7 | `CLOSED / PASS / PUBLISHED / HOSTED-VALIDATED` | Commit `c5d657158f04d9d5a18799888c0f990c9efb27c2`; tree `7aa9017f13c8320dbd308497fab01e25daa9e462`; natural CI `34092415407 / run 58 / attempt 1 / success` |
 | CIC I8 | `CLOSED / PASS / PUBLISHED / HOSTED-VALIDATED` | Commit `ab195046c575b7724239c3b4c156cd17804bc434`; tree `073d0d38a17ed7b9e2282158036f50b8e4e4ce8b`; natural CI `34148738076 / run 59 / attempt 1 / success`; validation job `101826287952 / success` |
-| PRE-I9 SOURCE ALIGNMENT / I11-LITE ADOPTION | `CURRENT SOURCE CANDIDATE / BECOMES ACCEPTED-APPLIED AFTER INDEPENDENT ACCEPTANCE AND PUBLICATION` | This exact generation remains a candidate until both gates pass |
-| CIC I9 | `NEXT / NOT STARTED / SEPARATE OWNER ACTIVATION REQUIRED` | This Source candidate does not start I9 |
-| CIC I10 | `LOCKED` | No execution authority |
+| PRE-I10 / CIC I9 CLOSE1 TRUTHFUL SOURCE ALIGNMENT | `THIS TASK / SOURCE CANDIDATE` | Records accepted I9 publication without activating I10 |
+| CIC I9 | `CLOSED / PASS / PUBLISHED / HOSTED-VALIDATED` | Accepted HEAD/tree/CI/candidate are recorded above; historical failures remain evidence, not current blockers |
+| CIC I10 | `NEXT / NOT STARTED / SEPARATE OWNER ACTIVATION REQUIRED` | No execution authority is granted by this alignment |
 | CIC I11-LITE | `LOCKED` | Continuity semantics adopted; execution remains unauthorized |
 | CIC I12 | `LOCKED` | No execution authority |
 | POST-I12 WORKFLOW / RISK SIMPLIFICATION | `DEFERRED` | Broader workflow redesign and risk-based gate simplification remain outside this task |
@@ -347,7 +352,7 @@ The exact admitted renderer dependency graph is `@babylonjs/core@9.21.2` and `@b
 ## 10. Current Handoff
 
 ```text
-snapshot date = 2026-09-07
+snapshot date = 2026-09-21
 Gate A = PASS / CLOSED
 Gate B = ACTIVE / CURRENT
 RSM-4 = CLOSED
@@ -382,9 +387,13 @@ PRE-I6 workflow relief = CLOSED / ACTIVE DISCIPLINE
 CIC I6 = CLOSED / PASS / PUBLISHED / HOSTED-VALIDATED — 7736ae00c4fe2d7aea987eff66781af22fb31903 / tree ce6ccd0ac112683005f8ddb6a66bb3629f8c52d9 / CI 34024104016 run 56 attempt 1 success
 CIC I7 = CLOSED / PASS / PUBLISHED / HOSTED-VALIDATED — c5d657158f04d9d5a18799888c0f990c9efb27c2 / tree 7aa9017f13c8320dbd308497fab01e25daa9e462 / CI 34092415407 run 58 attempt 1 success
 CIC I8 = CLOSED / PASS / PUBLISHED / HOSTED-VALIDATED — ab195046c575b7724239c3b4c156cd17804bc434 / tree 073d0d38a17ed7b9e2282158036f50b8e4e4ce8b / CI 34148738076 run 59 attempt 1 success / validation job 101826287952 success
-PRE-I9 SOURCE ALIGNMENT / I11-LITE ADOPTION = CURRENT SOURCE CANDIDATE / BECOMES ACCEPTED-APPLIED AFTER INDEPENDENT ACCEPTANCE AND PUBLICATION
-CIC I9 = NEXT / NOT STARTED / SEPARATE OWNER ACTIVATION REQUIRED
-CIC I10 = LOCKED
+PRE-I10 truthful alignment / CIC I9 CLOSE1 = THIS TASK
+CIC I9 = CLOSED / PASS / PUBLISHED / HOSTED-VALIDATED
+accepted I9 closure/publication HEAD = 8bda5b00dfc5fa310c1f7a3b74b874e60258c8dc
+accepted I9 tree = d05b92a98e50f72e8b7eec1ac04f8e67b8982ae3
+accepted I9 natural CI = 35544038260 / run 63 / job 106166682348 / attempt 1 / push / main / success
+accepted I9 correction candidate = BBBD4D67194826EE317C6F5215CD21F9A442163E12301101890825B25AE841E1
+CIC I10 = NEXT / NOT STARTED / SEPARATE OWNER ACTIVATION REQUIRED
 CIC I11-Lite = LOCKED
 CIC I12 = LOCKED
 full Post-I12 workflow / risk simplification = DEFERRED
