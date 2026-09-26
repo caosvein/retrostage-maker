@@ -20,7 +20,11 @@ import { promisify } from "node:util";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
 import { canonicalJson } from "./lib/canonical-json.mjs";
-import { observeCurrentTruth } from "./lib/current-truth.mjs";
+import {
+  createMirrorCurrentnessReport,
+  observeCurrentTruth,
+  verifyMirrorCurrentnessReport,
+} from "./lib/current-truth.mjs";
 import { REQUIRED_CONTEXT_DIMENSIONS } from "./lib/context-closure.mjs";
 import { sha256Hex } from "./lib/identity.mjs";
 import {
@@ -39,7 +43,11 @@ import {
   verifyCurrentTruthFact,
   verifyMutationLease,
 } from "./lib/task-authorization.mjs";
-import { inspectStateDomainCandidate, recordStateDomainBinding } from "./lib/state-domain.mjs";
+import {
+  inspectStateDomainCandidate,
+  recordStateDomainBinding,
+  semanticIdentity,
+} from "./lib/state-domain.mjs";
 
 const REPOSITORY_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
 const REPOSITORY_IDENTITY = "D1847AD57E4D92862E32419FFDF36061BD30AA2B37ECA74E28E3036B9CC1A40A";
@@ -923,4 +931,284 @@ describe.sequential("CIC-I4 task authorization, checkpoint, and lease lifecycle"
       await Promise.all([unlink(alphaPath), unlink(betaPath), unlink(gammaPath)]);
     }
   }, 600_000);
+});
+
+function mirrorCurrentnessFixture() {
+  const governedSourceFiles = [
+    {
+      path: "docs/sources/00_RSM_REBOOT_PROJECT_CHARTER.md",
+      bytes: 43146,
+      sha256: hash("source-00"),
+    },
+    {
+      path: "docs/sources/08_RSM_REBOOT_CURRENT_MILESTONE.md",
+      bytes: 27913,
+      sha256: hash("source-08"),
+    },
+  ];
+  const governedMirrors = [
+    { mirrorId: "chatgpt-project-sources", locatorIdentity: hash("chatgpt-locator") },
+    { mirrorId: "google-drive-sources", locatorIdentity: hash("drive-locator") },
+  ];
+  const sourceGenerationFingerprint = hash("source-generation");
+  return {
+    currentTruthIdentity: hash("current-truth"),
+    sourceGenerationFingerprint,
+    sourceManifestIdentity: hash("source-manifest"),
+    governedSourceFiles,
+    governedMirrors,
+    mirrorObservations: governedMirrors.map((mirror) => ({
+      ...mirror,
+      availability: "AVAILABLE",
+      observedGenerationFingerprint: sourceGenerationFingerprint,
+      files: governedSourceFiles.map((file) => ({ ...file })),
+    })),
+  };
+}
+
+function mirrorCurrentnessExpectation(input) {
+  const expected = globalThis.structuredClone(input);
+  delete expected.mirrorObservations;
+  return expected;
+}
+
+function resealMirrorReport(report) {
+  const resealed = globalThis.structuredClone(report);
+  delete resealed.reportIdentity;
+  return {
+    ...resealed,
+    reportIdentity: semanticIdentity("CIC-MIRROR-CURRENTNESS-REPORT-V1", resealed),
+  };
+}
+
+describe("CIC Slice4 derived mirror currentness", () => {
+  it("reports exact governed mirrors as converged with order-independent identities", () => {
+    const input = mirrorCurrentnessFixture();
+    const report = createMirrorCurrentnessReport(input);
+    const reordered = createMirrorCurrentnessReport({
+      ...input,
+      governedSourceFiles: [...input.governedSourceFiles].reverse(),
+      governedMirrors: [...input.governedMirrors].reverse(),
+      mirrorObservations: [...input.mirrorObservations]
+        .reverse()
+        .map((observation) => ({ ...observation, files: [...observation.files].reverse() })),
+    });
+
+    expect(report.disposition).toBe("CONVERGED");
+    expect(report.mirrors.map(({ state }) => state)).toEqual(["CURRENT", "CURRENT"]);
+    expect(report.reasonCodes).toEqual([]);
+    expect(report.reportIdentity).toBe(reordered.reportIdentity);
+    expect(report).toMatchObject({
+      factAuthority: "DERIVED_NON_AUTHORITATIVE",
+      mutationAuthorization: false,
+      mirrorWriteAuthorization: false,
+      sourceWriteAuthorization: false,
+      publicationAuthorization: false,
+      ownerAuthorization: false,
+      targetedPruning: "OFF",
+    });
+    expect(verifyMirrorCurrentnessReport(report, mirrorCurrentnessExpectation(input))).toEqual({
+      status: "PASS",
+      disposition: "CONVERGED",
+      reportIdentity: report.reportIdentity,
+    });
+  });
+
+  it("classifies unavailable, stale, divergent, partial, and locator-mismatched mirrors", () => {
+    const fixture = mirrorCurrentnessFixture();
+    const cases = [
+      {
+        name: "missing",
+        mutate(input) {
+          input.mirrorObservations.pop();
+        },
+        mirrorId: "google-drive-sources",
+        state: "UNAVAILABLE",
+      },
+      {
+        name: "explicit unavailable",
+        mutate(input) {
+          input.mirrorObservations[0].availability = "UNAVAILABLE";
+          input.mirrorObservations[0].observedGenerationFingerprint = null;
+          input.mirrorObservations[0].files = [];
+        },
+        mirrorId: "chatgpt-project-sources",
+        state: "UNAVAILABLE",
+      },
+      {
+        name: "stale generation",
+        mutate(input) {
+          input.mirrorObservations[0].observedGenerationFingerprint = hash("stale-generation");
+        },
+        mirrorId: "chatgpt-project-sources",
+        state: "STALE",
+      },
+      {
+        name: "divergent byte count",
+        mutate(input) {
+          input.mirrorObservations[0].files[0].bytes += 1;
+        },
+        mirrorId: "chatgpt-project-sources",
+        state: "DIVERGENT",
+      },
+      {
+        name: "divergent hash",
+        mutate(input) {
+          input.mirrorObservations[0].files[0].sha256 = hash("single-byte-divergence");
+        },
+        mirrorId: "chatgpt-project-sources",
+        state: "DIVERGENT",
+      },
+      {
+        name: "missing file",
+        mutate(input) {
+          input.mirrorObservations[0].files.pop();
+        },
+        mirrorId: "chatgpt-project-sources",
+        state: "PARTIAL",
+      },
+      {
+        name: "extra file",
+        mutate(input) {
+          input.mirrorObservations[0].files.push({
+            path: "docs/sources/extra.md",
+            bytes: 1,
+            sha256: hash("extra-file"),
+          });
+        },
+        mirrorId: "chatgpt-project-sources",
+        state: "PARTIAL",
+      },
+      {
+        name: "locator mismatch",
+        mutate(input) {
+          input.mirrorObservations[0].locatorIdentity = hash("wrong-locator");
+        },
+        mirrorId: "chatgpt-project-sources",
+        state: "LOCATOR_MISMATCH",
+      },
+    ];
+
+    for (const scenario of cases) {
+      const input = globalThis.structuredClone(fixture);
+      scenario.mutate(input);
+      const report = createMirrorCurrentnessReport(input);
+      expect(report.disposition, scenario.name).toBe("BLOCKED");
+      expect(report.mirrors.find(({ mirrorId }) => mirrorId === scenario.mirrorId)?.state).toBe(
+        scenario.state,
+      );
+      expect(
+        verifyMirrorCurrentnessReport(report, mirrorCurrentnessExpectation(fixture)).status,
+        scenario.name,
+      ).toBe("PASS");
+    }
+  });
+
+  it("fails closed on duplicate or unknown mirror and file observations", () => {
+    const duplicateMirror = mirrorCurrentnessFixture();
+    duplicateMirror.mirrorObservations.push(
+      globalThis.structuredClone(duplicateMirror.mirrorObservations[0]),
+    );
+    expect(() => createMirrorCurrentnessReport(duplicateMirror)).toThrowError(
+      expect.objectContaining({ code: "MIRROR_CURRENTNESS_DUPLICATE_MIRROR" }),
+    );
+
+    const duplicateFile = mirrorCurrentnessFixture();
+    duplicateFile.mirrorObservations[0].files.push(
+      globalThis.structuredClone(duplicateFile.mirrorObservations[0].files[0]),
+    );
+    expect(() => createMirrorCurrentnessReport(duplicateFile)).toThrowError(
+      expect.objectContaining({ code: "MIRROR_CURRENTNESS_DUPLICATE_FILE" }),
+    );
+
+    const unknownMirror = mirrorCurrentnessFixture();
+    unknownMirror.mirrorObservations.push({
+      ...globalThis.structuredClone(unknownMirror.mirrorObservations[0]),
+      mirrorId: "unknown-mirror",
+    });
+    expect(() => createMirrorCurrentnessReport(unknownMirror)).toThrowError(
+      expect.objectContaining({ code: "MIRROR_CURRENTNESS_UNKNOWN_MIRROR" }),
+    );
+  });
+
+  it("rejects stale expected bindings and semantically false resealed reports", () => {
+    const input = mirrorCurrentnessFixture();
+    const converged = createMirrorCurrentnessReport(input);
+    const expected = mirrorCurrentnessExpectation(input);
+    const drifts = [
+      { ...expected, currentTruthIdentity: hash("changed-current-truth") },
+      { ...expected, sourceGenerationFingerprint: hash("changed-generation") },
+      { ...expected, sourceManifestIdentity: hash("changed-manifest") },
+      {
+        ...expected,
+        governedSourceFiles: expected.governedSourceFiles.map((file, index) =>
+          index === 0 ? { ...file, bytes: file.bytes + 1 } : file,
+        ),
+      },
+      {
+        ...expected,
+        governedMirrors: expected.governedMirrors.map((mirror, index) =>
+          index === 0 ? { ...mirror, locatorIdentity: hash("changed-mirror-set") } : mirror,
+        ),
+      },
+    ];
+    for (const drift of drifts) {
+      expect(() => verifyMirrorCurrentnessReport(converged, drift)).toThrowError(
+        expect.objectContaining({ code: "MIRROR_CURRENTNESS_BINDING_STALE" }),
+      );
+    }
+
+    const blockedInput = mirrorCurrentnessFixture();
+    blockedInput.mirrorObservations[0].files[0].sha256 = hash("divergent");
+    const blocked = createMirrorCurrentnessReport(blockedInput);
+    const falseCurrent = globalThis.structuredClone(blocked);
+    falseCurrent.mirrors[0].state = "CURRENT";
+    falseCurrent.mirrors[0].reasonCodes = [];
+    expect(() =>
+      verifyMirrorCurrentnessReport(
+        resealMirrorReport(falseCurrent),
+        mirrorCurrentnessExpectation(blockedInput),
+      ),
+    ).toThrowError(expect.objectContaining({ code: "MIRROR_CURRENTNESS_SEMANTIC_MISMATCH" }));
+
+    const falseConverged = globalThis.structuredClone(blocked);
+    falseConverged.disposition = "CONVERGED";
+    falseConverged.reasonCodes = [];
+    expect(() =>
+      verifyMirrorCurrentnessReport(
+        resealMirrorReport(falseConverged),
+        mirrorCurrentnessExpectation(blockedInput),
+      ),
+    ).toThrowError(expect.objectContaining({ code: "MIRROR_CURRENTNESS_SEMANTIC_MISMATCH" }));
+  });
+
+  it("rejects secret, raw locator, executable, and cyclic injection without leaking contents", () => {
+    const input = mirrorCurrentnessFixture();
+    const rawUrl = { ...input, url: "https://mirror.invalid/source" };
+    expect(() => createMirrorCurrentnessReport(rawUrl)).toThrowError(
+      expect.objectContaining({ code: "MIRROR_CURRENTNESS_SENSITIVE_FIELD_REJECTED" }),
+    );
+
+    const credential = mirrorCurrentnessFixture();
+    credential.governedMirrors[0].token = "not-a-real-token";
+    expect(() => createMirrorCurrentnessReport(credential)).toThrowError(
+      expect.objectContaining({ code: "MIRROR_CURRENTNESS_SENSITIVE_FIELD_REJECTED" }),
+    );
+
+    const executable = mirrorCurrentnessFixture();
+    executable.mirrorObservations[0].execute = () => "forbidden";
+    expect(() => createMirrorCurrentnessReport(executable)).toThrowError(
+      expect.objectContaining({ code: "MIRROR_CURRENTNESS_INJECTION_REJECTED" }),
+    );
+
+    const cyclic = mirrorCurrentnessFixture();
+    cyclic.self = cyclic;
+    expect(() => createMirrorCurrentnessReport(cyclic)).toThrowError(
+      expect.objectContaining({ code: "MIRROR_CURRENTNESS_INJECTION_REJECTED" }),
+    );
+
+    const serialized = canonicalJson(createMirrorCurrentnessReport(input));
+    expect(serialized).not.toMatch(/https?:|file:|password|credential|cookie|secret|token/iu);
+    expect(serialized).not.toContain('"content"');
+  });
 });

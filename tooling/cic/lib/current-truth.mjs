@@ -37,6 +37,428 @@ export const I4_BASE_POLICY = Object.freeze({
   ]),
 });
 
+const MIRROR_CURRENTNESS_SCHEMA_VERSION = "CIC_MIRROR_CURRENTNESS_V1";
+
+const MIRROR_CURRENTNESS_AUTHORITY = Object.freeze({
+  factAuthority: "DERIVED_NON_AUTHORITATIVE",
+  mutationAuthorization: false,
+  mirrorWriteAuthorization: false,
+  sourceWriteAuthorization: false,
+  publicationAuthorization: false,
+  ownerAuthorization: false,
+  targetedPruning: "OFF",
+});
+
+const MIRROR_STATES = new Set([
+  "CURRENT",
+  "UNAVAILABLE",
+  "STALE",
+  "DIVERGENT",
+  "PARTIAL",
+  "LOCATOR_MISMATCH",
+]);
+
+const SENSITIVE_MIRROR_KEYS = new Set([
+  "url",
+  "uri",
+  "locator",
+  "rawlocator",
+  "credential",
+  "credentials",
+  "token",
+  "accesstoken",
+  "refreshtoken",
+  "apikey",
+  "password",
+  "cookie",
+  "cookies",
+  "authorization",
+  "authorizationheader",
+  "secret",
+  "secretvalue",
+  "content",
+  "contents",
+]);
+
+function mirrorCurrentnessFail(code = "MIRROR_CURRENTNESS_INVALID") {
+  fail(code);
+}
+
+function requireExactKeys(value, keys) {
+  requirePlainObject(value, "mirror-currentness object");
+  if (Object.keys(value).sort().join("\0") !== [...keys].sort().join("\0")) {
+    mirrorCurrentnessFail();
+  }
+}
+
+function rejectMirrorSecretsOrExecutables(value, ancestors = new Set()) {
+  if (typeof value === "function" || typeof value === "symbol" || typeof value === "bigint") {
+    mirrorCurrentnessFail("MIRROR_CURRENTNESS_INJECTION_REJECTED");
+  }
+  if (typeof value === "string") {
+    if (/(?:[a-z][a-z0-9+.-]*:\/\/|^file:|^[a-z]:[\\/]|^\\\\|^\/|\bbearer\s+)/iu.test(value)) {
+      mirrorCurrentnessFail("MIRROR_CURRENTNESS_SENSITIVE_VALUE_REJECTED");
+    }
+    return;
+  }
+  if (value === null || typeof value !== "object") return;
+  if (ancestors.has(value)) mirrorCurrentnessFail("MIRROR_CURRENTNESS_INJECTION_REJECTED");
+  ancestors.add(value);
+  try {
+    for (const [key, entry] of Object.entries(value)) {
+      const normalizedKey = key.replaceAll(/[^a-z0-9]/giu, "").toLowerCase();
+      if (SENSITIVE_MIRROR_KEYS.has(normalizedKey)) {
+        mirrorCurrentnessFail("MIRROR_CURRENTNESS_SENSITIVE_FIELD_REJECTED");
+      }
+      rejectMirrorSecretsOrExecutables(entry, ancestors);
+    }
+  } finally {
+    ancestors.delete(value);
+  }
+}
+
+function requireByteCount(value) {
+  if (!Number.isSafeInteger(value) || value < 0) mirrorCurrentnessFail();
+  return value;
+}
+
+function normalizeMirrorFile(raw) {
+  requireExactKeys(raw, ["path", "bytes", "sha256"]);
+  return {
+    path: normalizeRepoRelativePath(raw.path),
+    bytes: requireByteCount(raw.bytes),
+    sha256: requireIdentity(raw.sha256, "mirror file SHA-256"),
+  };
+}
+
+function normalizeMirrorFiles(files, { allowEmpty = true } = {}) {
+  if (!Array.isArray(files) || (!allowEmpty && files.length === 0)) mirrorCurrentnessFail();
+  const normalized = files
+    .map(normalizeMirrorFile)
+    .sort((left, right) => left.path.localeCompare(right.path));
+  if (new Set(normalized.map(({ path: filePath }) => filePath)).size !== normalized.length) {
+    mirrorCurrentnessFail("MIRROR_CURRENTNESS_DUPLICATE_FILE");
+  }
+  return normalized;
+}
+
+function normalizeGovernedMirrors(mirrors) {
+  if (!Array.isArray(mirrors) || mirrors.length === 0) mirrorCurrentnessFail();
+  const normalized = mirrors
+    .map((mirror) => {
+      requireExactKeys(mirror, ["mirrorId", "locatorIdentity"]);
+      return {
+        mirrorId: requirePortableId(mirror.mirrorId, "mirror id"),
+        locatorIdentity: requireIdentity(mirror.locatorIdentity, "mirror locator identity"),
+      };
+    })
+    .sort((left, right) => left.mirrorId.localeCompare(right.mirrorId));
+  if (new Set(normalized.map(({ mirrorId }) => mirrorId)).size !== normalized.length) {
+    mirrorCurrentnessFail("MIRROR_CURRENTNESS_DUPLICATE_MIRROR");
+  }
+  return normalized;
+}
+
+function normalizeMirrorObservation(raw) {
+  requireExactKeys(raw, [
+    "mirrorId",
+    "locatorIdentity",
+    "availability",
+    "observedGenerationFingerprint",
+    "files",
+  ]);
+  if (!new Set(["AVAILABLE", "UNAVAILABLE"]).has(raw.availability)) {
+    mirrorCurrentnessFail();
+  }
+  const observedGenerationFingerprint =
+    raw.observedGenerationFingerprint === null
+      ? null
+      : requireIdentity(raw.observedGenerationFingerprint, "observed Source generation");
+  if (raw.availability === "AVAILABLE" && observedGenerationFingerprint === null) {
+    mirrorCurrentnessFail();
+  }
+  return {
+    mirrorId: requirePortableId(raw.mirrorId, "observed mirror id"),
+    locatorIdentity: requireIdentity(raw.locatorIdentity, "observed locator identity"),
+    availability: raw.availability,
+    observedGenerationFingerprint,
+    files: normalizeMirrorFiles(raw.files),
+  };
+}
+
+function classifyMirror(governedMirror, observation, expectedGeneration, governedFiles) {
+  if (observation === null || observation.availability === "UNAVAILABLE") {
+    return { state: "UNAVAILABLE", reasonCodes: ["MIRROR_UNAVAILABLE"] };
+  }
+  if (observation.locatorIdentity !== governedMirror.locatorIdentity) {
+    return { state: "LOCATOR_MISMATCH", reasonCodes: ["MIRROR_LOCATOR_MISMATCH"] };
+  }
+  if (observation.observedGenerationFingerprint !== expectedGeneration) {
+    return { state: "STALE", reasonCodes: ["MIRROR_GENERATION_STALE"] };
+  }
+  const expectedPaths = governedFiles.map(({ path: filePath }) => filePath);
+  const observedPaths = observation.files.map(({ path: filePath }) => filePath);
+  if (canonicalJson(expectedPaths) !== canonicalJson(observedPaths)) {
+    return { state: "PARTIAL", reasonCodes: ["MIRROR_FILE_SET_PARTIAL"] };
+  }
+  if (
+    observation.files.some((file, index) => {
+      const expected = governedFiles[index];
+      return file.bytes !== expected.bytes || file.sha256 !== expected.sha256;
+    })
+  ) {
+    return { state: "DIVERGENT", reasonCodes: ["MIRROR_FILE_DIVERGENT"] };
+  }
+  return { state: "CURRENT", reasonCodes: [] };
+}
+
+function buildMirrorResult(governedMirror, observation, expectedGeneration, governedFiles) {
+  const facts =
+    observation === null
+      ? {
+          mirrorId: governedMirror.mirrorId,
+          locatorIdentity: null,
+          availability: "UNAVAILABLE",
+          observedGenerationFingerprint: null,
+          files: [],
+        }
+      : observation;
+  const classification = classifyMirror(
+    governedMirror,
+    observation,
+    expectedGeneration,
+    governedFiles,
+  );
+  const observationIdentity = semanticIdentity("CIC-MIRROR-OBSERVATION-V1", facts);
+  return { ...facts, ...classification, observationIdentity };
+}
+
+function mirrorReportBody(bindings, governedSourceFiles, governedMirrors, mirrors) {
+  const reasonCodes = [
+    ...new Set(mirrors.flatMap(({ reasonCodes: mirrorReasons }) => mirrorReasons)),
+  ].sort();
+  return {
+    schemaVersion: MIRROR_CURRENTNESS_SCHEMA_VERSION,
+    ...MIRROR_CURRENTNESS_AUTHORITY,
+    bindings,
+    governedSourceFiles,
+    governedMirrors,
+    mirrors,
+    disposition: mirrors.every(({ state }) => state === "CURRENT") ? "CONVERGED" : "BLOCKED",
+    reasonCodes,
+  };
+}
+
+function normalizeMirrorReportEntry(raw) {
+  requireExactKeys(raw, [
+    "mirrorId",
+    "locatorIdentity",
+    "availability",
+    "observedGenerationFingerprint",
+    "files",
+    "state",
+    "reasonCodes",
+    "observationIdentity",
+  ]);
+  if (!MIRROR_STATES.has(raw.state) || !Array.isArray(raw.reasonCodes)) {
+    mirrorCurrentnessFail();
+  }
+  const facts = {
+    mirrorId: requirePortableId(raw.mirrorId, "report mirror id"),
+    locatorIdentity:
+      raw.locatorIdentity === null
+        ? null
+        : requireIdentity(raw.locatorIdentity, "report locator identity"),
+    availability: raw.availability,
+    observedGenerationFingerprint:
+      raw.observedGenerationFingerprint === null
+        ? null
+        : requireIdentity(raw.observedGenerationFingerprint, "report Source generation"),
+    files: normalizeMirrorFiles(raw.files),
+  };
+  if (!new Set(["AVAILABLE", "UNAVAILABLE"]).has(facts.availability)) {
+    mirrorCurrentnessFail();
+  }
+  if (
+    raw.observationIdentity !== semanticIdentity("CIC-MIRROR-OBSERVATION-V1", facts) ||
+    raw.reasonCodes.some((code) => typeof code !== "string")
+  ) {
+    mirrorCurrentnessFail();
+  }
+  return {
+    ...facts,
+    state: raw.state,
+    reasonCodes: [...raw.reasonCodes],
+    observationIdentity: raw.observationIdentity,
+  };
+}
+
+export function createMirrorCurrentnessReport(input) {
+  rejectMirrorSecretsOrExecutables(input);
+  requireExactKeys(input, [
+    "currentTruthIdentity",
+    "sourceGenerationFingerprint",
+    "sourceManifestIdentity",
+    "governedSourceFiles",
+    "governedMirrors",
+    "mirrorObservations",
+  ]);
+  const currentTruthIdentity = requireIdentity(
+    input.currentTruthIdentity,
+    "current-truth identity",
+  );
+  const sourceGenerationFingerprint = requireIdentity(
+    input.sourceGenerationFingerprint,
+    "Source generation",
+  );
+  const sourceManifestIdentity = requireIdentity(
+    input.sourceManifestIdentity,
+    "SOURCE-MANIFEST identity",
+  );
+  const governedSourceFiles = normalizeMirrorFiles(input.governedSourceFiles, {
+    allowEmpty: false,
+  });
+  const governedMirrors = normalizeGovernedMirrors(input.governedMirrors);
+  if (!Array.isArray(input.mirrorObservations)) mirrorCurrentnessFail();
+  const observations = input.mirrorObservations.map(normalizeMirrorObservation);
+  if (new Set(observations.map(({ mirrorId }) => mirrorId)).size !== observations.length) {
+    mirrorCurrentnessFail("MIRROR_CURRENTNESS_DUPLICATE_MIRROR");
+  }
+  const governedIds = new Set(governedMirrors.map(({ mirrorId }) => mirrorId));
+  if (observations.some(({ mirrorId }) => !governedIds.has(mirrorId))) {
+    mirrorCurrentnessFail("MIRROR_CURRENTNESS_UNKNOWN_MIRROR");
+  }
+  const observationById = new Map(
+    observations.map((observation) => [observation.mirrorId, observation]),
+  );
+  const bindings = {
+    currentTruthIdentity,
+    sourceGenerationFingerprint,
+    sourceManifestIdentity,
+    governedSourceFileCatalogIdentity: semanticIdentity(
+      "CIC-GOVERNED-SOURCE-FILE-CATALOG-V1",
+      governedSourceFiles,
+    ),
+    governedMirrorSetIdentity: semanticIdentity("CIC-GOVERNED-MIRROR-SET-V1", governedMirrors),
+  };
+  const mirrors = governedMirrors.map((governedMirror) =>
+    buildMirrorResult(
+      governedMirror,
+      observationById.get(governedMirror.mirrorId) ?? null,
+      sourceGenerationFingerprint,
+      governedSourceFiles,
+    ),
+  );
+  const body = mirrorReportBody(bindings, governedSourceFiles, governedMirrors, mirrors);
+  return {
+    ...body,
+    reportIdentity: semanticIdentity("CIC-MIRROR-CURRENTNESS-REPORT-V1", body),
+  };
+}
+
+export function verifyMirrorCurrentnessReport(report, expected) {
+  rejectMirrorSecretsOrExecutables(report);
+  rejectMirrorSecretsOrExecutables(expected);
+  requireExactKeys(report, [
+    "schemaVersion",
+    "factAuthority",
+    "mutationAuthorization",
+    "mirrorWriteAuthorization",
+    "sourceWriteAuthorization",
+    "publicationAuthorization",
+    "ownerAuthorization",
+    "targetedPruning",
+    "bindings",
+    "governedSourceFiles",
+    "governedMirrors",
+    "mirrors",
+    "disposition",
+    "reasonCodes",
+    "reportIdentity",
+  ]);
+  requireExactKeys(expected, [
+    "currentTruthIdentity",
+    "sourceGenerationFingerprint",
+    "sourceManifestIdentity",
+    "governedSourceFiles",
+    "governedMirrors",
+  ]);
+  if (
+    report.schemaVersion !== MIRROR_CURRENTNESS_SCHEMA_VERSION ||
+    Object.entries(MIRROR_CURRENTNESS_AUTHORITY).some(([key, value]) => report[key] !== value) ||
+    !new Set(["CONVERGED", "BLOCKED"]).has(report.disposition) ||
+    !Array.isArray(report.reasonCodes) ||
+    !Array.isArray(report.mirrors)
+  ) {
+    mirrorCurrentnessFail();
+  }
+  const governedSourceFiles = normalizeMirrorFiles(expected.governedSourceFiles, {
+    allowEmpty: false,
+  });
+  const governedMirrors = normalizeGovernedMirrors(expected.governedMirrors);
+  const expectedBindings = {
+    currentTruthIdentity: requireIdentity(expected.currentTruthIdentity, "expected current truth"),
+    sourceGenerationFingerprint: requireIdentity(
+      expected.sourceGenerationFingerprint,
+      "expected Source generation",
+    ),
+    sourceManifestIdentity: requireIdentity(
+      expected.sourceManifestIdentity,
+      "expected SOURCE-MANIFEST",
+    ),
+    governedSourceFileCatalogIdentity: semanticIdentity(
+      "CIC-GOVERNED-SOURCE-FILE-CATALOG-V1",
+      governedSourceFiles,
+    ),
+    governedMirrorSetIdentity: semanticIdentity("CIC-GOVERNED-MIRROR-SET-V1", governedMirrors),
+  };
+  if (
+    canonicalJson(report.bindings) !== canonicalJson(expectedBindings) ||
+    canonicalJson(report.governedSourceFiles) !== canonicalJson(governedSourceFiles) ||
+    canonicalJson(report.governedMirrors) !== canonicalJson(governedMirrors) ||
+    report.mirrors.length !== governedMirrors.length
+  ) {
+    mirrorCurrentnessFail("MIRROR_CURRENTNESS_BINDING_STALE");
+  }
+  const normalizedEntries = report.mirrors.map(normalizeMirrorReportEntry);
+  const reportById = new Map(normalizedEntries.map((entry) => [entry.mirrorId, entry]));
+  if (reportById.size !== normalizedEntries.length) {
+    mirrorCurrentnessFail("MIRROR_CURRENTNESS_DUPLICATE_MIRROR");
+  }
+  const mirrors = governedMirrors.map((governedMirror) => {
+    const supplied = reportById.get(governedMirror.mirrorId);
+    if (supplied === undefined) mirrorCurrentnessFail();
+    const facts = {
+      mirrorId: supplied.mirrorId,
+      locatorIdentity: supplied.locatorIdentity,
+      availability: supplied.availability,
+      observedGenerationFingerprint: supplied.observedGenerationFingerprint,
+      files: supplied.files,
+    };
+    const observation = supplied.locatorIdentity === null ? null : facts;
+    return buildMirrorResult(
+      governedMirror,
+      observation,
+      expectedBindings.sourceGenerationFingerprint,
+      governedSourceFiles,
+    );
+  });
+  const body = mirrorReportBody(expectedBindings, governedSourceFiles, governedMirrors, mirrors);
+  const suppliedBody = { ...report };
+  delete suppliedBody.reportIdentity;
+  if (
+    canonicalJson(suppliedBody) !== canonicalJson(body) ||
+    report.reportIdentity !== semanticIdentity("CIC-MIRROR-CURRENTNESS-REPORT-V1", body)
+  ) {
+    mirrorCurrentnessFail("MIRROR_CURRENTNESS_SEMANTIC_MISMATCH");
+  }
+  return Object.freeze({
+    status: "PASS",
+    disposition: body.disposition,
+    reportIdentity: report.reportIdentity,
+  });
+}
+
 const FORBIDDEN_CALLER_KEYS = new Set([
   "capabilities",
   "contextCompilation",
