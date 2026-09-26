@@ -13,6 +13,13 @@ export const PUSH_AUTHORIZATION_SCHEMA = "CIC_EXTERNAL_PUSH_AUTHORIZATION_V1";
 export const INDEPENDENT_REVIEW_SCHEMA = "CIC_EXTERNAL_INDEPENDENT_REVIEW_V1";
 export const SOURCE_PROMOTION_AUTHORIZATION_SCHEMA =
   "CIC_EXTERNAL_SOURCE_PROMOTION_AUTHORIZATION_V1";
+export const EVIDENCE_ENTRY_SCHEMA = "CIC_CONTENT_ADDRESSED_EVIDENCE_ENTRY_V1";
+export const EVIDENCE_BUNDLE_PROFILE_SCHEMA = "CIC_NON_CIRCULAR_EVIDENCE_BUNDLE_PROFILE_V1";
+const EVIDENCE_BUNDLE_VERIFICATION_SCHEMA = "CIC_NON_CIRCULAR_EVIDENCE_BUNDLE_VERIFICATION_V1";
+export const INVOCATION_RECORD_SCHEMA = "CIC_DETERMINISTIC_INVOCATION_RECORD_V1";
+export const INVOCATION_LEDGER_SCHEMA = "CIC_APPEND_ONLY_INVOCATION_LEDGER_V2";
+const INVOCATION_LEDGER_EXTENSION_VERIFICATION_SCHEMA =
+  "CIC_INVOCATION_LEDGER_EXTENSION_VERIFICATION_V1";
 
 const SHA256_PATTERN = /^[0-9A-F]{64}$/u;
 const GIT_SHA_PATTERN = /^[0-9a-f]{40}$/u;
@@ -379,6 +386,868 @@ export function verifyPackageManifest(manifestInput, observedInput) {
     schemaVersion: PACKAGE_MANIFEST_VERIFICATION_SCHEMA,
     ...body,
     verificationIdentity: semanticIdentity(PACKAGE_MANIFEST_VERIFICATION_SCHEMA, body),
+  });
+}
+
+const EVIDENCE_AVAILABILITY = new Set(["AVAILABLE", "UNAVAILABLE"]);
+const EVIDENCE_DISPOSITIONS = new Set(["EMBEDDED", "REFERENCED"]);
+const EVIDENCE_PAYLOAD_KINDS = new Set(["EVIDENCE", "ARCHIVE"]);
+const EVIDENCE_CURRENTNESS = new Set(["CURRENT", "STALE", "UNKNOWN"]);
+const EVIDENCE_RETENTION_CLASSES = new Set(["STANDARD", "CLOSURE_CRITICAL", "HISTORICAL_FAILURE"]);
+const INVOCATION_DISPOSITIONS = new Set(["EXECUTED", "REUSED"]);
+const INVOCATION_RESULTS = new Set(["PASS", "FAIL", "REUSED"]);
+
+function normalizeOptionalSha256(value, code, label) {
+  return value === null ? null : normalizeSha256(value, code, label);
+}
+
+function normalizeEvidenceLocator(input, code, label) {
+  const value = requireExactKeys(input, ["identity", "scheme", "value"], code, label);
+  const scheme = normalizeRole(value.scheme, code, `${label} scheme`);
+  if (scheme !== "BUNDLE_PATH" && scheme !== "GOVERNED_REFERENCE") {
+    fail(code, `${label} scheme is unsupported`);
+  }
+  return {
+    scheme,
+    value: normalizePortablePath(value.value, code, `${label} value`),
+    identity: normalizeSha256(value.identity, code, `${label} identity`),
+  };
+}
+
+function normalizeEvidenceAvailability(input, payloadSha256, code, label) {
+  const value = requireExactKeys(input, ["disposition", "observedIdentity"], code, label);
+  const disposition = requireText(value.disposition, code, `${label} disposition`, 32);
+  if (!EVIDENCE_AVAILABILITY.has(disposition)) {
+    fail(code, `${label} disposition is invalid`);
+  }
+  const observedIdentity = normalizeOptionalSha256(
+    value.observedIdentity,
+    code,
+    `${label} observed identity`,
+  );
+  if (disposition === "AVAILABLE" && observedIdentity !== payloadSha256) {
+    fail(code, `${label} available identity does not match payload`);
+  }
+  if (disposition === "UNAVAILABLE" && observedIdentity !== null) {
+    fail(code, `${label} unavailable evidence cannot have an observed identity`);
+  }
+  return { disposition, observedIdentity };
+}
+
+function normalizeEvidenceBindings(input, code) {
+  const value = requireExactKeys(
+    input,
+    [
+      "candidateIdentity",
+      "commandIdentity",
+      "environmentIdentity",
+      "head",
+      "repositorySnapshotIdentity",
+      "sourceGeneration",
+      "sourceManifestIdentity",
+      "tree",
+    ],
+    code,
+    "evidence bindings",
+  );
+  return {
+    candidateIdentity: normalizeOptionalSha256(value.candidateIdentity, code, "candidate identity"),
+    sourceGeneration: normalizeOptionalSha256(value.sourceGeneration, code, "Source generation"),
+    sourceManifestIdentity: normalizeOptionalSha256(
+      value.sourceManifestIdentity,
+      code,
+      "Source manifest identity",
+    ),
+    repositorySnapshotIdentity: normalizeOptionalSha256(
+      value.repositorySnapshotIdentity,
+      code,
+      "repository snapshot identity",
+    ),
+    head: value.head === null ? null : normalizeGitSha(value.head, code, "HEAD"),
+    tree: value.tree === null ? null : normalizeGitSha(value.tree, code, "tree"),
+    environmentIdentity: normalizeOptionalSha256(
+      value.environmentIdentity,
+      code,
+      "environment identity",
+    ),
+    commandIdentity: normalizeOptionalSha256(value.commandIdentity, code, "command identity"),
+  };
+}
+
+function normalizeEvidenceCurrentness(input, code) {
+  const value = requireExactKeys(input, ["disposition", "reasonCodes"], code, "currentness");
+  const disposition = requireText(value.disposition, code, "currentness disposition", 32);
+  if (!EVIDENCE_CURRENTNESS.has(disposition) || !Array.isArray(value.reasonCodes)) {
+    fail(code, "currentness is invalid");
+  }
+  const reasonCodes = value.reasonCodes.map((reason, index) =>
+    normalizeRole(reason, code, `currentness reason ${index}`),
+  );
+  reasonCodes.sort();
+  if (new Set(reasonCodes).size !== reasonCodes.length) {
+    fail(code, "currentness reason codes contain a duplicate");
+  }
+  if ((disposition === "CURRENT") !== (reasonCodes.length === 0)) {
+    fail(code, "currentness disposition and reasons are inconsistent");
+  }
+  return { disposition, reasonCodes };
+}
+
+function normalizeEvidenceRelationships(input, code) {
+  const value = requireExactKeys(
+    input,
+    ["companions", "parents", "references"],
+    code,
+    "evidence relationships",
+  );
+  const normalizeEntryIds = (entries, label) => {
+    if (!Array.isArray(entries)) fail(code, `${label} must be an array`);
+    const result = entries.map((entryId, index) =>
+      normalizePortableIdentifier(entryId, code, `${label} ${index}`),
+    );
+    result.sort();
+    if (new Set(result).size !== result.length) fail(code, `${label} contains a duplicate`);
+    return result;
+  };
+  return {
+    parents: normalizeEntryIds(value.parents, "parent entry IDs"),
+    companions: normalizeEntryIds(value.companions, "companion entry IDs"),
+    references: normalizeEntryIds(value.references, "reference entry IDs"),
+  };
+}
+
+function normalizeEvidenceEntryBody(input, code = "EVIDENCE_ENTRY_INVALID") {
+  const value = requireExactKeys(
+    input,
+    [
+      "availability",
+      "bindings",
+      "currentness",
+      "disposition",
+      "entryId",
+      "locator",
+      "payload",
+      "payloadKind",
+      "proofClass",
+      "relationships",
+      "retentionClass",
+      "role",
+    ],
+    code,
+    "evidence entry",
+  );
+  const payload = requireExactKeys(value.payload, ["bytes", "sha256"], code, "evidence payload");
+  const normalizedPayload = {
+    bytes: requireInteger(payload.bytes, code, "payload bytes"),
+    sha256: normalizeSha256(payload.sha256, code, "payload SHA-256"),
+  };
+  const disposition = requireText(value.disposition, code, "embed/reference disposition", 32);
+  const payloadKind = requireText(value.payloadKind, code, "payload kind", 32);
+  const retentionClass = requireText(value.retentionClass, code, "retention class", 64);
+  if (
+    !EVIDENCE_DISPOSITIONS.has(disposition) ||
+    !EVIDENCE_PAYLOAD_KINDS.has(payloadKind) ||
+    !EVIDENCE_RETENTION_CLASSES.has(retentionClass)
+  ) {
+    fail(code, "evidence disposition, payload kind, or retention class is invalid");
+  }
+  const locator = normalizeEvidenceLocator(value.locator, code, "evidence locator");
+  if (
+    (disposition === "EMBEDDED" && locator.scheme !== "BUNDLE_PATH") ||
+    (disposition === "REFERENCED" && locator.scheme !== "GOVERNED_REFERENCE")
+  ) {
+    fail(code, "evidence disposition and locator scheme are inconsistent");
+  }
+  const availability = normalizeEvidenceAvailability(
+    value.availability,
+    normalizedPayload.sha256,
+    code,
+    "evidence availability",
+  );
+  if (disposition === "EMBEDDED" && availability.disposition !== "AVAILABLE") {
+    fail(code, "embedded evidence must be available");
+  }
+  return {
+    entryId: normalizePortableIdentifier(value.entryId, code, "entry ID"),
+    role: normalizeRole(value.role, code, "evidence role"),
+    proofClass: normalizeRole(value.proofClass, code, "proof class"),
+    payloadKind,
+    payload: normalizedPayload,
+    locator,
+    availability,
+    relationships: normalizeEvidenceRelationships(value.relationships, code),
+    bindings: normalizeEvidenceBindings(value.bindings, code),
+    currentness: normalizeEvidenceCurrentness(value.currentness, code),
+    retentionClass,
+    disposition,
+    authority: "EVIDENCE_ONLY",
+    mutationAuthorization: false,
+    targetedPruning: "OFF",
+  };
+}
+
+export function createEvidenceEntry(input) {
+  const body = normalizeEvidenceEntryBody(input);
+  return deepFreeze({
+    schemaVersion: EVIDENCE_ENTRY_SCHEMA,
+    ...body,
+    evidenceIdentity: semanticIdentity(EVIDENCE_ENTRY_SCHEMA, body),
+  });
+}
+
+function normalizeSealedEvidenceEntry(input) {
+  const code = "EVIDENCE_ENTRY_INVALID";
+  const value = requireExactKeys(
+    input,
+    [
+      "authority",
+      "availability",
+      "bindings",
+      "currentness",
+      "disposition",
+      "entryId",
+      "evidenceIdentity",
+      "locator",
+      "mutationAuthorization",
+      "payload",
+      "payloadKind",
+      "proofClass",
+      "relationships",
+      "retentionClass",
+      "role",
+      "schemaVersion",
+      "targetedPruning",
+    ],
+    code,
+    "sealed evidence entry",
+  );
+  if (
+    value.schemaVersion !== EVIDENCE_ENTRY_SCHEMA ||
+    value.authority !== "EVIDENCE_ONLY" ||
+    value.mutationAuthorization !== false ||
+    value.targetedPruning !== "OFF"
+  ) {
+    fail(code, "evidence schema or permanent authority boundary is invalid");
+  }
+  const body = normalizeEvidenceEntryBody({
+    entryId: value.entryId,
+    role: value.role,
+    proofClass: value.proofClass,
+    payloadKind: value.payloadKind,
+    payload: value.payload,
+    locator: value.locator,
+    availability: value.availability,
+    relationships: value.relationships,
+    bindings: value.bindings,
+    currentness: value.currentness,
+    retentionClass: value.retentionClass,
+    disposition: value.disposition,
+  });
+  const evidenceIdentity = normalizeSha256(value.evidenceIdentity, code, "evidence identity");
+  if (evidenceIdentity !== semanticIdentity(EVIDENCE_ENTRY_SCHEMA, body)) {
+    fail("EVIDENCE_ENTRY_MISMATCH", value.entryId);
+  }
+  return { schemaVersion: EVIDENCE_ENTRY_SCHEMA, ...body, evidenceIdentity };
+}
+
+function assertEvidenceGraph(entries, manifestPath, archivePath) {
+  const byId = new Map();
+  const locators = new Set();
+  const evidenceIdentities = new Set();
+  for (const entry of entries) {
+    if (
+      byId.has(entry.entryId) ||
+      locators.has(`${entry.locator.scheme}\0${entry.locator.value}`) ||
+      evidenceIdentities.has(entry.evidenceIdentity)
+    ) {
+      fail("EVIDENCE_BUNDLE_AMBIGUOUS_ENTRY", entry.entryId);
+    }
+    if (entry.locator.scheme === "BUNDLE_PATH" && entry.locator.value === manifestPath) {
+      fail("EVIDENCE_BUNDLE_MANIFEST_SELF_ENTRY", entry.entryId);
+    }
+    if (entry.locator.scheme === "BUNDLE_PATH" && entry.locator.value === archivePath) {
+      fail("EVIDENCE_BUNDLE_ARCHIVE_SELF_ENTRY", entry.entryId);
+    }
+    if (entry.payloadKind === "ARCHIVE" && entry.disposition === "EMBEDDED") {
+      fail("EVIDENCE_BUNDLE_RECURSIVE_ARCHIVE", entry.entryId);
+    }
+    byId.set(entry.entryId, entry);
+    locators.add(`${entry.locator.scheme}\0${entry.locator.value}`);
+    evidenceIdentities.add(entry.evidenceIdentity);
+  }
+
+  const edgesById = new Map();
+  for (const entry of entries) {
+    const edges = [
+      ...entry.relationships.parents,
+      ...entry.relationships.companions,
+      ...entry.relationships.references,
+    ];
+    for (const target of edges) {
+      if (!byId.has(target)) fail("EVIDENCE_BUNDLE_EDGE_MISSING", `${entry.entryId}->${target}`);
+      if (target === entry.entryId) fail("EVIDENCE_BUNDLE_CYCLE", entry.entryId);
+    }
+    edgesById.set(entry.entryId, [...new Set(edges)].sort());
+  }
+
+  const visiting = new Set();
+  const visited = new Set();
+  const visit = (entryId) => {
+    if (visiting.has(entryId)) fail("EVIDENCE_BUNDLE_CYCLE", entryId);
+    if (visited.has(entryId)) return;
+    visiting.add(entryId);
+    for (const target of edgesById.get(entryId)) visit(target);
+    visiting.delete(entryId);
+    visited.add(entryId);
+  };
+  for (const entry of entries) visit(entry.entryId);
+}
+
+function normalizeEvidenceBundleInput(input) {
+  const code = "EVIDENCE_BUNDLE_INVALID";
+  const value = requireExactKeys(
+    input,
+    ["archiveBytes", "archivePath", "entries", "looseEvidenceBytes", "manifestPath"],
+    code,
+    "evidence bundle profile input",
+  );
+  if (!Array.isArray(value.entries) || value.entries.length === 0) {
+    fail(code, "evidence bundle must contain entries");
+  }
+  const manifestPath = normalizePortablePath(value.manifestPath, code, "manifest path");
+  const archivePath = normalizePortablePath(value.archivePath, code, "archive path");
+  if (manifestPath === archivePath) fail(code, "manifest and archive paths must differ");
+  const entries = value.entries.map((entry) => normalizeSealedEvidenceEntry(entry));
+  entries.sort((left, right) => left.entryId.localeCompare(right.entryId));
+  assertEvidenceGraph(entries, manifestPath, archivePath);
+  const uniquePayloads = new Map();
+  for (const entry of entries) {
+    const payloadKey = `${entry.payload.sha256}\0${entry.payload.bytes}`;
+    uniquePayloads.set(payloadKey, entry.payload.bytes);
+  }
+  return {
+    manifestPath,
+    archivePath,
+    entries,
+    metrics: {
+      archiveInclusiveBytes: requireInteger(value.archiveBytes, code, "archive-inclusive bytes"),
+      uniquePayloadBytes: [...uniquePayloads.values()].reduce((sum, bytes) => sum + bytes, 0),
+      looseEvidenceBytes: requireInteger(value.looseEvidenceBytes, code, "loose evidence bytes"),
+    },
+    authority: "EVIDENCE_ONLY",
+    mutationAuthorization: false,
+    targetedPruning: "OFF",
+  };
+}
+
+export function defineEvidenceBundleProfile(input) {
+  const body = normalizeEvidenceBundleInput(input);
+  return deepFreeze({
+    schemaVersion: EVIDENCE_BUNDLE_PROFILE_SCHEMA,
+    ...body,
+    profileIdentity: semanticIdentity(EVIDENCE_BUNDLE_PROFILE_SCHEMA, body),
+  });
+}
+
+function normalizeSealedEvidenceBundleProfile(input) {
+  const code = "EVIDENCE_BUNDLE_INVALID";
+  const value = requireExactKeys(
+    input,
+    [
+      "archivePath",
+      "authority",
+      "entries",
+      "manifestPath",
+      "metrics",
+      "mutationAuthorization",
+      "profileIdentity",
+      "schemaVersion",
+      "targetedPruning",
+    ],
+    code,
+    "sealed evidence bundle profile",
+  );
+  if (
+    value.schemaVersion !== EVIDENCE_BUNDLE_PROFILE_SCHEMA ||
+    value.authority !== "EVIDENCE_ONLY" ||
+    value.mutationAuthorization !== false ||
+    value.targetedPruning !== "OFF"
+  ) {
+    fail(code, "bundle schema or permanent authority boundary is invalid");
+  }
+  const metrics = requireExactKeys(
+    value.metrics,
+    ["archiveInclusiveBytes", "looseEvidenceBytes", "uniquePayloadBytes"],
+    code,
+    "bundle metrics",
+  );
+  const body = normalizeEvidenceBundleInput({
+    manifestPath: value.manifestPath,
+    archivePath: value.archivePath,
+    entries: value.entries,
+    archiveBytes: metrics.archiveInclusiveBytes,
+    looseEvidenceBytes: metrics.looseEvidenceBytes,
+  });
+  if (body.metrics.uniquePayloadBytes !== metrics.uniquePayloadBytes) {
+    fail("EVIDENCE_BUNDLE_PROFILE_MISMATCH", "unique payload metric drift");
+  }
+  const profileIdentity = normalizeSha256(value.profileIdentity, code, "bundle profile identity");
+  if (profileIdentity !== semanticIdentity(EVIDENCE_BUNDLE_PROFILE_SCHEMA, body)) {
+    fail("EVIDENCE_BUNDLE_PROFILE_MISMATCH", "profile identity drift");
+  }
+  return { schemaVersion: EVIDENCE_BUNDLE_PROFILE_SCHEMA, ...body, profileIdentity };
+}
+
+function normalizeEvidenceObservation(input, code, index) {
+  const value = requireExactKeys(
+    input,
+    ["availability", "entryId", "locator", "payload"],
+    code,
+    `evidence observation ${index}`,
+  );
+  const payload = requireExactKeys(
+    value.payload,
+    ["bytes", "sha256"],
+    code,
+    `observed payload ${index}`,
+  );
+  const normalizedPayload = {
+    bytes: requireInteger(payload.bytes, code, `observed payload bytes ${index}`),
+    sha256: normalizeSha256(payload.sha256, code, `observed payload SHA-256 ${index}`),
+  };
+  return {
+    entryId: normalizePortableIdentifier(value.entryId, code, `observed entry ID ${index}`),
+    payload: normalizedPayload,
+    locator: normalizeEvidenceLocator(value.locator, code, `observed locator ${index}`),
+    availability: normalizeEvidenceAvailability(
+      value.availability,
+      normalizedPayload.sha256,
+      code,
+      `observed availability ${index}`,
+    ),
+  };
+}
+
+export function verifyEvidenceBundleProfile(profileInput, observationsInput) {
+  const profile = normalizeSealedEvidenceBundleProfile(profileInput);
+  if (!Array.isArray(observationsInput)) {
+    fail("EVIDENCE_BUNDLE_OBSERVATION_INVALID", "observations must be an array");
+  }
+  const observations = observationsInput.map((entry, index) =>
+    normalizeEvidenceObservation(entry, "EVIDENCE_BUNDLE_OBSERVATION_INVALID", index),
+  );
+  const byId = new Map();
+  for (const observation of observations) {
+    if (byId.has(observation.entryId)) {
+      fail("EVIDENCE_BUNDLE_AMBIGUOUS_OBSERVATION", observation.entryId);
+    }
+    byId.set(observation.entryId, observation);
+  }
+  if (byId.size !== profile.entries.length) {
+    fail("EVIDENCE_BUNDLE_PAYLOAD_MISSING", "observation inventory is not exact");
+  }
+  for (const entry of profile.entries) {
+    const observation = byId.get(entry.entryId);
+    if (observation === undefined) fail("EVIDENCE_BUNDLE_PAYLOAD_MISSING", entry.entryId);
+    if (canonicalJson(observation.locator) !== canonicalJson(entry.locator)) {
+      fail("EVIDENCE_BUNDLE_LOCATOR_DRIFT", entry.entryId);
+    }
+    if (observation.payload.bytes !== entry.payload.bytes) {
+      fail("EVIDENCE_BUNDLE_PAYLOAD_BYTES_MISMATCH", entry.entryId);
+    }
+    if (observation.payload.sha256 !== entry.payload.sha256) {
+      fail("EVIDENCE_BUNDLE_PAYLOAD_HASH_MISMATCH", entry.entryId);
+    }
+    if (
+      entry.disposition === "REFERENCED" &&
+      (entry.availability.disposition !== "AVAILABLE" ||
+        observation.availability.disposition !== "AVAILABLE")
+    ) {
+      fail("EVIDENCE_BUNDLE_REFERENCE_UNAVAILABLE", entry.entryId);
+    }
+    if (observation.availability.disposition !== "AVAILABLE") {
+      fail("EVIDENCE_BUNDLE_PAYLOAD_UNAVAILABLE", entry.entryId);
+    }
+  }
+  const body = {
+    profileIdentity: profile.profileIdentity,
+    entryCount: profile.entries.length,
+    metrics: profile.metrics,
+    disposition: "VERIFIED",
+    authority: "EVIDENCE_ONLY",
+    mutationAuthorization: false,
+    targetedPruning: "OFF",
+  };
+  return deepFreeze({
+    schemaVersion: EVIDENCE_BUNDLE_VERIFICATION_SCHEMA,
+    ...body,
+    verificationIdentity: semanticIdentity(EVIDENCE_BUNDLE_VERIFICATION_SCHEMA, body),
+  });
+}
+
+function normalizeInvocationRecordBody(input, code = "INVOCATION_RECORD_INVALID") {
+  const value = requireExactKeys(
+    input,
+    [
+      "argumentsIdentity",
+      "attempt",
+      "candidateIdentity",
+      "commandIdentity",
+      "cwdIdentity",
+      "disposition",
+      "endedAt",
+      "environmentIdentity",
+      "evidenceIdentity",
+      "exitCode",
+      "firstFailureIdentity",
+      "proofClass",
+      "result",
+      "reusedInvocationIdentity",
+      "startedAt",
+      "taskId",
+      "toolchainIdentity",
+    ],
+    code,
+    "invocation record",
+  );
+  const disposition = requireText(value.disposition, code, "invocation disposition", 32);
+  const result = requireText(value.result, code, "invocation result", 32);
+  if (!INVOCATION_DISPOSITIONS.has(disposition) || !INVOCATION_RESULTS.has(result)) {
+    fail(code, "invocation disposition or result is invalid");
+  }
+  const firstFailureIdentity = normalizeOptionalSha256(
+    value.firstFailureIdentity,
+    code,
+    "first-failure identity",
+  );
+  const reusedInvocationIdentity = normalizeOptionalSha256(
+    value.reusedInvocationIdentity,
+    code,
+    "reused invocation identity",
+  );
+  let exitCode;
+  if (disposition === "EXECUTED") {
+    if (result === "REUSED" || reusedInvocationIdentity !== null) {
+      fail(code, "executed invocation cannot claim reuse");
+    }
+    exitCode = requireInteger(value.exitCode, code, "exit code");
+    if ((result === "PASS") !== (exitCode === 0)) {
+      fail(code, "executed result and exit code are inconsistent");
+    }
+    if (result === "FAIL" && firstFailureIdentity === null) {
+      fail(code, "failed invocation requires first-failure identity");
+    }
+  } else {
+    if (result !== "REUSED" || value.exitCode !== null || reusedInvocationIdentity === null) {
+      fail(code, "reused invocation fields are inconsistent");
+    }
+    exitCode = null;
+  }
+  return {
+    taskId: normalizePortableIdentifier(value.taskId, code, "task ID"),
+    attempt: requireInteger(value.attempt, code, "attempt", 1),
+    proofClass: normalizeRole(value.proofClass, code, "proof class"),
+    commandIdentity: normalizeSha256(value.commandIdentity, code, "command identity"),
+    argumentsIdentity: normalizeSha256(value.argumentsIdentity, code, "arguments identity"),
+    cwdIdentity: normalizeSha256(value.cwdIdentity, code, "cwd identity"),
+    toolchainIdentity: normalizeSha256(value.toolchainIdentity, code, "toolchain identity"),
+    environmentIdentity: normalizeSha256(value.environmentIdentity, code, "environment identity"),
+    candidateIdentity: normalizeSha256(value.candidateIdentity, code, "candidate identity"),
+    evidenceIdentity: normalizeSha256(value.evidenceIdentity, code, "evidence identity"),
+    startedAt: requireText(value.startedAt, code, "start", 128),
+    endedAt: requireText(value.endedAt, code, "end", 128),
+    exitCode,
+    result,
+    firstFailureIdentity,
+    disposition,
+    reusedInvocationIdentity,
+    authority: "EVIDENCE_ONLY",
+    mutationAuthorization: false,
+    targetedPruning: "OFF",
+  };
+}
+
+export function createInvocationRecord(input) {
+  const body = normalizeInvocationRecordBody(input);
+  return deepFreeze({
+    schemaVersion: INVOCATION_RECORD_SCHEMA,
+    ...body,
+    invocationIdentity: semanticIdentity(INVOCATION_RECORD_SCHEMA, body),
+  });
+}
+
+function normalizeSealedInvocationRecord(input) {
+  const code = "INVOCATION_RECORD_INVALID";
+  const value = requireExactKeys(
+    input,
+    [
+      "argumentsIdentity",
+      "attempt",
+      "authority",
+      "candidateIdentity",
+      "commandIdentity",
+      "cwdIdentity",
+      "disposition",
+      "endedAt",
+      "environmentIdentity",
+      "evidenceIdentity",
+      "exitCode",
+      "firstFailureIdentity",
+      "invocationIdentity",
+      "mutationAuthorization",
+      "proofClass",
+      "result",
+      "reusedInvocationIdentity",
+      "schemaVersion",
+      "startedAt",
+      "targetedPruning",
+      "taskId",
+      "toolchainIdentity",
+    ],
+    code,
+    "sealed invocation record",
+  );
+  if (
+    value.schemaVersion !== INVOCATION_RECORD_SCHEMA ||
+    value.authority !== "EVIDENCE_ONLY" ||
+    value.mutationAuthorization !== false ||
+    value.targetedPruning !== "OFF"
+  ) {
+    fail(code, "invocation schema or permanent authority boundary is invalid");
+  }
+  const body = normalizeInvocationRecordBody({
+    taskId: value.taskId,
+    attempt: value.attempt,
+    proofClass: value.proofClass,
+    commandIdentity: value.commandIdentity,
+    argumentsIdentity: value.argumentsIdentity,
+    cwdIdentity: value.cwdIdentity,
+    toolchainIdentity: value.toolchainIdentity,
+    environmentIdentity: value.environmentIdentity,
+    candidateIdentity: value.candidateIdentity,
+    evidenceIdentity: value.evidenceIdentity,
+    startedAt: value.startedAt,
+    endedAt: value.endedAt,
+    exitCode: value.exitCode,
+    result: value.result,
+    firstFailureIdentity: value.firstFailureIdentity,
+    disposition: value.disposition,
+    reusedInvocationIdentity: value.reusedInvocationIdentity,
+  });
+  const invocationIdentity = normalizeSha256(value.invocationIdentity, code, "invocation identity");
+  if (invocationIdentity !== semanticIdentity(INVOCATION_RECORD_SCHEMA, body)) {
+    fail("INVOCATION_RECORD_MISMATCH", `${value.taskId}:${value.attempt}`);
+  }
+  return { schemaVersion: INVOCATION_RECORD_SCHEMA, ...body, invocationIdentity };
+}
+
+function normalizeInvocationLedgerLineage(input, code = "INVOCATION_LEDGER_INVALID") {
+  const value = requireExactKeys(
+    input,
+    ["kind", "parentLedgerIdentity"],
+    code,
+    "invocation ledger lineage",
+  );
+  const kind = requireText(value.kind, code, "invocation ledger lineage kind", 32);
+  if (kind === "ROOT") {
+    if (value.parentLedgerIdentity !== null) {
+      fail(code, "root invocation ledger cannot claim a parent");
+    }
+    return { kind, parentLedgerIdentity: null };
+  }
+  if (kind === "EXTENSION") {
+    return {
+      kind,
+      parentLedgerIdentity: normalizeSha256(
+        value.parentLedgerIdentity,
+        code,
+        "parent invocation ledger identity",
+      ),
+    };
+  }
+  fail(code, "invocation ledger lineage kind is invalid");
+}
+
+function deriveInvocationLedgerBody(recordsInput, lineageInput) {
+  if (!Array.isArray(recordsInput) || recordsInput.length === 0) {
+    fail("INVOCATION_LEDGER_INVALID", "ledger must contain records");
+  }
+  const lineage = normalizeInvocationLedgerLineage(lineageInput);
+  const records = recordsInput.map((record) => normalizeSealedInvocationRecord(record));
+  records.sort((left, right) =>
+    `${left.taskId}\0${left.proofClass}\0${String(left.attempt).padStart(16, "0")}\0${left.invocationIdentity}`.localeCompare(
+      `${right.taskId}\0${right.proofClass}\0${String(right.attempt).padStart(16, "0")}\0${right.invocationIdentity}`,
+    ),
+  );
+  const identities = new Set();
+  const invocationRows = new Set();
+  const byIdentity = new Map();
+  for (const record of records) {
+    const row = `${record.taskId}\0${record.proofClass}\0${record.attempt}`;
+    if (identities.has(record.invocationIdentity)) {
+      fail("INVOCATION_LEDGER_DUPLICATE_IDENTITY", record.invocationIdentity);
+    }
+    if (invocationRows.has(row)) fail("INVOCATION_LEDGER_AMBIGUOUS_ROW", row);
+    identities.add(record.invocationIdentity);
+    invocationRows.add(row);
+    byIdentity.set(record.invocationIdentity, record);
+  }
+
+  const firstFailureByGroup = new Map();
+  for (const record of records) {
+    const group = `${record.taskId}\0${record.proofClass}`;
+    if (record.disposition === "EXECUTED" && record.result === "FAIL") {
+      if (!firstFailureByGroup.has(group)) {
+        firstFailureByGroup.set(group, record.firstFailureIdentity);
+      } else if (record.firstFailureIdentity !== firstFailureByGroup.get(group)) {
+        fail("INVOCATION_LEDGER_FIRST_FAILURE_LINEAGE_MISMATCH", group);
+      }
+    } else if (
+      firstFailureByGroup.has(group) &&
+      record.firstFailureIdentity !== firstFailureByGroup.get(group)
+    ) {
+      fail("INVOCATION_LEDGER_FIRST_FAILURE_LINEAGE_MISMATCH", group);
+    }
+
+    if (record.disposition === "REUSED") {
+      const reused = byIdentity.get(record.reusedInvocationIdentity);
+      if (
+        reused === undefined ||
+        reused.disposition !== "EXECUTED" ||
+        reused.candidateIdentity !== record.candidateIdentity ||
+        reused.proofClass !== record.proofClass ||
+        reused.evidenceIdentity !== record.evidenceIdentity
+      ) {
+        fail("INVOCATION_LEDGER_REUSE_BINDING_MISMATCH", record.invocationIdentity);
+      }
+    }
+  }
+
+  const metrics = {
+    invocationCount: records.length,
+    executedCount: records.filter((record) => record.disposition === "EXECUTED").length,
+    reusedCount: records.filter((record) => record.disposition === "REUSED").length,
+    failedCount: records.filter((record) => record.result === "FAIL").length,
+    firstFailureIdentities: [...new Set(firstFailureByGroup.values())].sort(),
+  };
+  const body = {
+    records,
+    metrics,
+    lineage,
+    appendOnly: true,
+    authority: "EVIDENCE_ONLY",
+    mutationAuthorization: false,
+    targetedPruning: "OFF",
+  };
+  return body;
+}
+
+function sealInvocationLedger(recordsInput, lineageInput) {
+  const body = deriveInvocationLedgerBody(recordsInput, lineageInput);
+  return deepFreeze({
+    schemaVersion: INVOCATION_LEDGER_SCHEMA,
+    ...body,
+    ledgerIdentity: semanticIdentity(INVOCATION_LEDGER_SCHEMA, body),
+  });
+}
+
+export function createInvocationLedger(recordsInput) {
+  return sealInvocationLedger(recordsInput, { kind: "ROOT", parentLedgerIdentity: null });
+}
+
+function normalizeSealedInvocationLedger(input) {
+  const code = "INVOCATION_LEDGER_INVALID";
+  const value = requireExactKeys(
+    input,
+    [
+      "appendOnly",
+      "authority",
+      "ledgerIdentity",
+      "lineage",
+      "metrics",
+      "mutationAuthorization",
+      "records",
+      "schemaVersion",
+      "targetedPruning",
+    ],
+    code,
+    "sealed invocation ledger",
+  );
+  if (
+    value.schemaVersion !== INVOCATION_LEDGER_SCHEMA ||
+    value.appendOnly !== true ||
+    value.authority !== "EVIDENCE_ONLY" ||
+    value.mutationAuthorization !== false ||
+    value.targetedPruning !== "OFF"
+  ) {
+    fail(code, "invocation ledger schema or permanent authority boundary is invalid");
+  }
+  requireExactKeys(
+    value.metrics,
+    ["executedCount", "failedCount", "firstFailureIdentities", "invocationCount", "reusedCount"],
+    code,
+    "invocation ledger metrics",
+  );
+  const body = deriveInvocationLedgerBody(value.records, value.lineage);
+  if (canonicalJson(value.metrics) !== canonicalJson(body.metrics)) {
+    fail("INVOCATION_LEDGER_METRICS_MISMATCH");
+  }
+  const ledgerIdentity = normalizeSha256(value.ledgerIdentity, code, "invocation ledger identity");
+  if (ledgerIdentity !== semanticIdentity(INVOCATION_LEDGER_SCHEMA, body)) {
+    fail("INVOCATION_LEDGER_MISMATCH", ledgerIdentity);
+  }
+  return { schemaVersion: INVOCATION_LEDGER_SCHEMA, ...body, ledgerIdentity };
+}
+
+export function extendInvocationLedger(parentLedgerInput, appendedRecordsInput) {
+  const parent = normalizeSealedInvocationLedger(parentLedgerInput);
+  if (!Array.isArray(appendedRecordsInput) || appendedRecordsInput.length === 0) {
+    fail("INVOCATION_LEDGER_EXTENSION_INVALID", "extension must append records");
+  }
+  return sealInvocationLedger([...parent.records, ...appendedRecordsInput], {
+    kind: "EXTENSION",
+    parentLedgerIdentity: parent.ledgerIdentity,
+  });
+}
+
+export function verifyInvocationLedgerExtension(expectedParentInput, candidateInput) {
+  const expectedParent = normalizeSealedInvocationLedger(expectedParentInput);
+  const candidate = normalizeSealedInvocationLedger(candidateInput);
+  if (candidate.lineage.kind !== "EXTENSION") {
+    fail("INVOCATION_LEDGER_NOT_EXTENSION", candidate.ledgerIdentity);
+  }
+  if (candidate.lineage.parentLedgerIdentity !== expectedParent.ledgerIdentity) {
+    fail("INVOCATION_LEDGER_PARENT_MISMATCH", candidate.lineage.parentLedgerIdentity);
+  }
+  const candidateByIdentity = new Map(
+    candidate.records.map((record) => [record.invocationIdentity, record]),
+  );
+  for (const parentRecord of expectedParent.records) {
+    const retained = candidateByIdentity.get(parentRecord.invocationIdentity);
+    if (retained === undefined) {
+      fail("INVOCATION_LEDGER_PARENT_RECORD_MISSING", parentRecord.invocationIdentity);
+    }
+    if (canonicalJson(retained) !== canonicalJson(parentRecord)) {
+      fail("INVOCATION_LEDGER_PARENT_RECORD_REWRITTEN", parentRecord.invocationIdentity);
+    }
+  }
+  if (candidate.records.length <= expectedParent.records.length) {
+    fail("INVOCATION_LEDGER_EXTENSION_EMPTY", candidate.ledgerIdentity);
+  }
+  const body = {
+    expectedParentLedgerIdentity: expectedParent.ledgerIdentity,
+    candidateLedgerIdentity: candidate.ledgerIdentity,
+    retainedRecordCount: expectedParent.records.length,
+    appendedRecordCount: candidate.records.length - expectedParent.records.length,
+    disposition: "VERIFIED",
+    authority: "EVIDENCE_ONLY",
+    mutationAuthorization: false,
+    targetedPruning: "OFF",
+  };
+  return deepFreeze({
+    schemaVersion: INVOCATION_LEDGER_EXTENSION_VERIFICATION_SCHEMA,
+    ...body,
+    verificationIdentity: semanticIdentity(INVOCATION_LEDGER_EXTENSION_VERIFICATION_SCHEMA, body),
   });
 }
 

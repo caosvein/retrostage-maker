@@ -4,18 +4,29 @@ import { canonicalJson } from "./lib/canonical-json.mjs";
 import { sha256Hex } from "./lib/identity.mjs";
 import {
   COMMIT_AUTHORIZATION_SCHEMA,
+  EVIDENCE_BUNDLE_PROFILE_SCHEMA,
+  EVIDENCE_ENTRY_SCHEMA,
   HOSTED_CI_EVIDENCE_SCHEMA,
   INDEPENDENT_REVIEW_SCHEMA,
+  INVOCATION_LEDGER_SCHEMA,
+  INVOCATION_RECORD_SCHEMA,
   PACKAGE_MANIFEST_SCHEMA,
   PUBLICATION_SNAPSHOT_VERIFICATION_SCHEMA,
   PUSH_AUTHORIZATION_SCHEMA,
   SOURCE_PROMOTION_AUTHORIZATION_SCHEMA,
+  createEvidenceEntry,
   createHostedCiEvidence,
   createHostedCiHistory,
+  createInvocationLedger,
+  createInvocationRecord,
+  defineEvidenceBundleProfile,
   definePackageManifest,
   evaluatePublicationStates,
+  extendInvocationLedger,
   publicationFileInventoryIdentity,
+  verifyEvidenceBundleProfile,
   verifyHostedCiEvidence,
+  verifyInvocationLedgerExtension,
   verifyPackageManifest,
   verifyPublicationSnapshot,
 } from "./lib/publication-gates.mjs";
@@ -265,6 +276,129 @@ function packageFixture() {
   });
   const observed = declarations.map(({ classification: _classification, ...entry }) => entry);
   return { manifest, observed };
+}
+
+function evidenceEntryInput(overrides = {}) {
+  return {
+    entryId: "candidate-postimage",
+    role: "CANDIDATE_POSTIMAGE",
+    proofClass: "EXACT_CODE",
+    payloadKind: "EVIDENCE",
+    payload: { bytes: 1200, sha256: HASH_A },
+    locator: {
+      scheme: "BUNDLE_PATH",
+      value: "candidate/postimage.mjs",
+      identity: HASH_B,
+    },
+    availability: { disposition: "AVAILABLE", observedIdentity: HASH_A },
+    relationships: { parents: [], companions: [], references: [] },
+    bindings: {
+      candidateIdentity: HASH_E,
+      sourceGeneration: HASH_1,
+      sourceManifestIdentity: HASH_2,
+      repositorySnapshotIdentity: HASH_3,
+      head: GIT_C,
+      tree: GIT_B,
+      environmentIdentity: HASH_C,
+      commandIdentity: null,
+    },
+    currentness: { disposition: "CURRENT", reasonCodes: [] },
+    retentionClass: "STANDARD",
+    disposition: "EMBEDDED",
+    ...overrides,
+  };
+}
+
+function evidenceBundleFixture() {
+  const embedded = createEvidenceEntry(evidenceEntryInput());
+  const referenced = createEvidenceEntry(
+    evidenceEntryInput({
+      entryId: "hosted-run",
+      role: "HOSTED_CI_RUN",
+      proofClass: "HOSTED_VALIDATION",
+      payload: { bytes: 400, sha256: HASH_D },
+      locator: {
+        scheme: "GOVERNED_REFERENCE",
+        value: "github/actions/runs/123",
+        identity: HASH_F,
+      },
+      availability: { disposition: "AVAILABLE", observedIdentity: HASH_D },
+      relationships: { parents: [], companions: ["candidate-postimage"], references: [] },
+      retentionClass: "CLOSURE_CRITICAL",
+      disposition: "REFERENCED",
+    }),
+  );
+  const duplicatePayloadReference = createEvidenceEntry(
+    evidenceEntryInput({
+      entryId: "hosted-job",
+      role: "HOSTED_CI_JOB",
+      proofClass: "HOSTED_VALIDATION",
+      payload: { bytes: 400, sha256: HASH_D },
+      locator: {
+        scheme: "GOVERNED_REFERENCE",
+        value: "github/actions/jobs/456",
+        identity: HASH_C,
+      },
+      availability: { disposition: "AVAILABLE", observedIdentity: HASH_D },
+      relationships: { parents: ["hosted-run"], companions: [], references: [] },
+      retentionClass: "CLOSURE_CRITICAL",
+      disposition: "REFERENCED",
+    }),
+  );
+  const profile = defineEvidenceBundleProfile({
+    manifestPath: "09_REVIEW-FILE-MANIFEST.tsv",
+    archivePath: "11_REVIEW-BUNDLE.zip",
+    entries: [duplicatePayloadReference, embedded, referenced],
+    archiveBytes: 2400,
+    looseEvidenceBytes: 2000,
+  });
+  const observations = profile.entries.map((entry) => ({
+    entryId: entry.entryId,
+    payload: clone(entry.payload),
+    locator: clone(entry.locator),
+    availability: clone(entry.availability),
+  }));
+  return { embedded, referenced, duplicatePayloadReference, profile, observations };
+}
+
+function invocationInput(overrides = {}) {
+  return {
+    taskId: "POST-I12-SLICE2",
+    attempt: 1,
+    proofClass: "TARGETED_VALIDATION",
+    commandIdentity: HASH_A,
+    argumentsIdentity: HASH_B,
+    cwdIdentity: HASH_C,
+    toolchainIdentity: HASH_D,
+    environmentIdentity: HASH_1,
+    candidateIdentity: HASH_E,
+    evidenceIdentity: HASH_2,
+    startedAt: "2026-09-26T09:00:00Z",
+    endedAt: "2026-09-26T09:01:00Z",
+    exitCode: 0,
+    result: "PASS",
+    firstFailureIdentity: null,
+    disposition: "EXECUTED",
+    reusedInvocationIdentity: null,
+    ...overrides,
+  };
+}
+
+function resealInvocationLedger(ledger, overrides = {}) {
+  const value = { ...clone(ledger), ...overrides };
+  const { schemaVersion, ...body } = value;
+  delete body.ledgerIdentity;
+  return {
+    schemaVersion,
+    ...body,
+    ledgerIdentity: sha256Hex(`${schemaVersion}\n${canonicalJson(body)}\n`),
+  };
+}
+
+function claimInvocationLedgerExtension(rootLedger, parentLedgerIdentity) {
+  return resealInvocationLedger(rootLedger, {
+    lineage: { kind: "EXTENSION", parentLedgerIdentity },
+  });
 }
 
 describe("publication state separation", () => {
@@ -711,5 +845,565 @@ describe("H-95 exact non-circular package manifest", () => {
     expect(manifest.schemaVersion).toBe(PACKAGE_MANIFEST_SCHEMA);
     expect(manifest.authority).toBe("EVIDENCE_ONLY");
     expect(Object.isFrozen(manifest.companions)).toBe(true);
+  });
+});
+
+describe("POST-I12 Slice2 non-circular evidence profile", () => {
+  it("creates stable content-addressed evidence records with permanent safety markers", () => {
+    const first = createEvidenceEntry(
+      evidenceEntryInput({
+        relationships: {
+          parents: ["parent-b", "parent-a"],
+          companions: ["companion-b", "companion-a"],
+          references: ["reference-b", "reference-a"],
+        },
+      }),
+    );
+    const second = createEvidenceEntry(
+      evidenceEntryInput({
+        relationships: {
+          parents: ["parent-a", "parent-b"],
+          companions: ["companion-a", "companion-b"],
+          references: ["reference-a", "reference-b"],
+        },
+      }),
+    );
+    expect(first.schemaVersion).toBe(EVIDENCE_ENTRY_SCHEMA);
+    expect(first.evidenceIdentity).toBe(second.evidenceIdentity);
+    expect(first).toMatchObject({
+      authority: "EVIDENCE_ONLY",
+      mutationAuthorization: false,
+      targetedPruning: "OFF",
+    });
+    expect(Object.isFrozen(first)).toBe(true);
+  });
+
+  it("verifies exact reconstruction and keeps archive, unique-payload, and loose metrics distinct", () => {
+    const { profile, observations } = evidenceBundleFixture();
+    const result = verifyEvidenceBundleProfile(profile, observations);
+    expect(profile.schemaVersion).toBe(EVIDENCE_BUNDLE_PROFILE_SCHEMA);
+    expect(profile.metrics).toEqual({
+      archiveInclusiveBytes: 2400,
+      uniquePayloadBytes: 1600,
+      looseEvidenceBytes: 2000,
+    });
+    expect(result).toMatchObject({
+      disposition: "VERIFIED",
+      profileIdentity: profile.profileIdentity,
+      entryCount: 3,
+      authority: "EVIDENCE_ONLY",
+      mutationAuthorization: false,
+      targetedPruning: "OFF",
+    });
+  });
+
+  it("derives the same bundle identity for equivalent reordered entries", () => {
+    const fixture = evidenceBundleFixture();
+    const reordered = defineEvidenceBundleProfile({
+      manifestPath: fixture.profile.manifestPath,
+      archivePath: fixture.profile.archivePath,
+      entries: [...fixture.profile.entries].reverse().map(clone),
+      archiveBytes: fixture.profile.metrics.archiveInclusiveBytes,
+      looseEvidenceBytes: fixture.profile.metrics.looseEvidenceBytes,
+    });
+    expect(reordered.profileIdentity).toBe(fixture.profile.profileIdentity);
+  });
+
+  it("fails closed when a required payload observation is missing", () => {
+    const { profile, observations } = evidenceBundleFixture();
+    expectCode(
+      () => verifyEvidenceBundleProfile(profile, observations.slice(1)),
+      "EVIDENCE_BUNDLE_PAYLOAD_MISSING",
+    );
+  });
+
+  it("fails closed on a wrong observed payload SHA-256", () => {
+    const { profile, observations } = evidenceBundleFixture();
+    observations[0].payload.sha256 = HASH_F;
+    observations[0].availability.observedIdentity = HASH_F;
+    expectCode(
+      () => verifyEvidenceBundleProfile(profile, observations),
+      "EVIDENCE_BUNDLE_PAYLOAD_HASH_MISMATCH",
+    );
+  });
+
+  it("fails closed on wrong observed payload bytes", () => {
+    const { profile, observations } = evidenceBundleFixture();
+    observations[0].payload.bytes += 1;
+    expectCode(
+      () => verifyEvidenceBundleProfile(profile, observations),
+      "EVIDENCE_BUNDLE_PAYLOAD_BYTES_MISMATCH",
+    );
+  });
+
+  it("fails closed on governed locator drift", () => {
+    const { profile, observations } = evidenceBundleFixture();
+    observations[0].locator.value = "candidate/drifted.mjs";
+    expectCode(
+      () => verifyEvidenceBundleProfile(profile, observations),
+      "EVIDENCE_BUNDLE_LOCATOR_DRIFT",
+    );
+  });
+
+  it("fails closed when a referenced payload is unavailable", () => {
+    const { profile, observations } = evidenceBundleFixture();
+    const referenced = observations.find((entry) => entry.entryId === "hosted-run");
+    referenced.availability = { disposition: "UNAVAILABLE", observedIdentity: null };
+    expectCode(
+      () => verifyEvidenceBundleProfile(profile, observations),
+      "EVIDENCE_BUNDLE_REFERENCE_UNAVAILABLE",
+    );
+  });
+
+  it("rejects relationship cycles", () => {
+    const first = createEvidenceEntry(
+      evidenceEntryInput({
+        entryId: "cycle-a",
+        locator: { scheme: "BUNDLE_PATH", value: "evidence/a.json", identity: HASH_A },
+        relationships: { parents: [], companions: ["cycle-b"], references: [] },
+      }),
+    );
+    const second = createEvidenceEntry(
+      evidenceEntryInput({
+        entryId: "cycle-b",
+        locator: { scheme: "BUNDLE_PATH", value: "evidence/b.json", identity: HASH_B },
+        relationships: { parents: [], companions: ["cycle-a"], references: [] },
+      }),
+    );
+    expectCode(
+      () =>
+        defineEvidenceBundleProfile({
+          manifestPath: "manifest.tsv",
+          archivePath: "bundle.zip",
+          entries: [first, second],
+          archiveBytes: 1,
+          looseEvidenceBytes: 1,
+        }),
+      "EVIDENCE_BUNDLE_CYCLE",
+    );
+  });
+
+  it("rejects duplicate or ambiguous payload entries", () => {
+    const entry = createEvidenceEntry(evidenceEntryInput());
+    expectCode(
+      () =>
+        defineEvidenceBundleProfile({
+          manifestPath: "manifest.tsv",
+          archivePath: "bundle.zip",
+          entries: [entry, clone(entry)],
+          archiveBytes: 1,
+          looseEvidenceBytes: 1,
+        }),
+      "EVIDENCE_BUNDLE_AMBIGUOUS_ENTRY",
+    );
+  });
+
+  it("rejects manifest self-entry", () => {
+    const entry = createEvidenceEntry(
+      evidenceEntryInput({
+        locator: { scheme: "BUNDLE_PATH", value: "manifest.tsv", identity: HASH_A },
+      }),
+    );
+    expectCode(
+      () =>
+        defineEvidenceBundleProfile({
+          manifestPath: "manifest.tsv",
+          archivePath: "bundle.zip",
+          entries: [entry],
+          archiveBytes: 1,
+          looseEvidenceBytes: 1,
+        }),
+      "EVIDENCE_BUNDLE_MANIFEST_SELF_ENTRY",
+    );
+  });
+
+  it("rejects archive self-entry", () => {
+    const entry = createEvidenceEntry(
+      evidenceEntryInput({
+        locator: { scheme: "BUNDLE_PATH", value: "bundle.zip", identity: HASH_A },
+      }),
+    );
+    expectCode(
+      () =>
+        defineEvidenceBundleProfile({
+          manifestPath: "manifest.tsv",
+          archivePath: "bundle.zip",
+          entries: [entry],
+          archiveBytes: 1,
+          looseEvidenceBytes: 1,
+        }),
+      "EVIDENCE_BUNDLE_ARCHIVE_SELF_ENTRY",
+    );
+  });
+
+  it("rejects recursively embedded parent archives", () => {
+    const entry = createEvidenceEntry(
+      evidenceEntryInput({
+        payloadKind: "ARCHIVE",
+        locator: { scheme: "BUNDLE_PATH", value: "parent.zip", identity: HASH_A },
+      }),
+    );
+    expectCode(
+      () =>
+        defineEvidenceBundleProfile({
+          manifestPath: "manifest.tsv",
+          archivePath: "bundle.zip",
+          entries: [entry],
+          archiveBytes: 1,
+          looseEvidenceBytes: 1,
+        }),
+      "EVIDENCE_BUNDLE_RECURSIVE_ARCHIVE",
+    );
+  });
+
+  it("rejects executable or narrative authority injection", () => {
+    const input = evidenceEntryInput();
+    input.command = "git push origin main";
+    expectCode(() => createEvidenceEntry(input), "EVIDENCE_ENTRY_INVALID");
+  });
+});
+
+describe("POST-I12 Slice2 invocation ledger", () => {
+  it("creates deterministic evidence-only invocation records without reading ambient time", () => {
+    const first = createInvocationRecord(invocationInput());
+    const second = createInvocationRecord(clone(invocationInput()));
+    expect(first.schemaVersion).toBe(INVOCATION_RECORD_SCHEMA);
+    expect(first.invocationIdentity).toBe(second.invocationIdentity);
+    expect(first).toMatchObject({
+      authority: "EVIDENCE_ONLY",
+      mutationAuthorization: false,
+      targetedPruning: "OFF",
+      disposition: "EXECUTED",
+    });
+  });
+
+  it("derives durable EXECUTED and REUSED counts from distinct rows", () => {
+    const executed = createInvocationRecord(invocationInput());
+    const reused = createInvocationRecord(
+      invocationInput({
+        attempt: 2,
+        startedAt: "2026-09-26T10:00:00Z",
+        endedAt: "2026-09-26T10:00:01Z",
+        exitCode: null,
+        result: "REUSED",
+        disposition: "REUSED",
+        reusedInvocationIdentity: executed.invocationIdentity,
+      }),
+    );
+    const first = createInvocationLedger([executed, reused]);
+    const second = createInvocationLedger([reused, executed]);
+    expect(first.schemaVersion).toBe(INVOCATION_LEDGER_SCHEMA);
+    expect(first.ledgerIdentity).toBe(second.ledgerIdentity);
+    expect(first.metrics).toMatchObject({
+      invocationCount: 2,
+      executedCount: 1,
+      reusedCount: 1,
+      failedCount: 0,
+    });
+    expect(first.appendOnly).toBe(true);
+    expect(first.lineage).toEqual({ kind: "ROOT", parentLedgerIdentity: null });
+  });
+
+  it("rejects duplicate invocation identities", () => {
+    const record = createInvocationRecord(invocationInput());
+    expectCode(
+      () => createInvocationLedger([record, clone(record)]),
+      "INVOCATION_LEDGER_DUPLICATE_IDENTITY",
+    );
+  });
+
+  it("rejects ambiguous invocation rows for the same task, proof class, and attempt", () => {
+    const first = createInvocationRecord(invocationInput());
+    const second = createInvocationRecord(invocationInput({ endedAt: "2026-09-26T09:02:00Z" }));
+    expectCode(() => createInvocationLedger([first, second]), "INVOCATION_LEDGER_AMBIGUOUS_ROW");
+  });
+
+  it("rejects a later success that erases first-failure lineage", () => {
+    const failed = createInvocationRecord(
+      invocationInput({
+        exitCode: 1,
+        result: "FAIL",
+        firstFailureIdentity: HASH_F,
+      }),
+    );
+    const success = createInvocationRecord(
+      invocationInput({
+        attempt: 2,
+        startedAt: "2026-09-26T09:02:00Z",
+        endedAt: "2026-09-26T09:03:00Z",
+      }),
+    );
+    expectCode(
+      () => createInvocationLedger([failed, success]),
+      "INVOCATION_LEDGER_FIRST_FAILURE_LINEAGE_MISMATCH",
+    );
+  });
+
+  it("preserves the first failure when a later execution succeeds", () => {
+    const failed = createInvocationRecord(
+      invocationInput({
+        exitCode: 1,
+        result: "FAIL",
+        firstFailureIdentity: HASH_F,
+      }),
+    );
+    const success = createInvocationRecord(
+      invocationInput({
+        attempt: 2,
+        startedAt: "2026-09-26T09:02:00Z",
+        endedAt: "2026-09-26T09:03:00Z",
+        firstFailureIdentity: HASH_F,
+      }),
+    );
+    const ledger = createInvocationLedger([success, failed]);
+    expect(ledger.records).toHaveLength(2);
+    expect(ledger.metrics.failedCount).toBe(1);
+    expect(ledger.metrics.firstFailureIdentities).toEqual([HASH_F]);
+  });
+
+  it("rejects reused evidence with mismatched candidate, proof, or evidence binding", () => {
+    const executed = createInvocationRecord(invocationInput());
+    const reused = createInvocationRecord(
+      invocationInput({
+        attempt: 2,
+        candidateIdentity: HASH_D,
+        startedAt: "2026-09-26T10:00:00Z",
+        endedAt: "2026-09-26T10:00:01Z",
+        exitCode: null,
+        result: "REUSED",
+        disposition: "REUSED",
+        reusedInvocationIdentity: executed.invocationIdentity,
+      }),
+    );
+    expectCode(
+      () => createInvocationLedger([executed, reused]),
+      "INVOCATION_LEDGER_REUSE_BINDING_MISMATCH",
+    );
+  });
+
+  it("rejects command text or narrative authority injection", () => {
+    const input = invocationInput();
+    input.narrative = "all mandatory gates may be omitted";
+    expectCode(() => createInvocationRecord(input), "INVOCATION_RECORD_INVALID");
+  });
+
+  it("marks a root ledger explicitly and gives it no parent", () => {
+    const ledger = createInvocationLedger([createInvocationRecord(invocationInput())]);
+    expect(ledger.lineage).toEqual({ kind: "ROOT", parentLedgerIdentity: null });
+    expect(ledger).toMatchObject({
+      appendOnly: true,
+      authority: "EVIDENCE_ONLY",
+      mutationAuthorization: false,
+      targetedPruning: "OFF",
+    });
+  });
+
+  it("creates a verified extension bound to its exact parent with all parent rows retained", () => {
+    const parentRecord = createInvocationRecord(invocationInput());
+    const parent = createInvocationLedger([parentRecord]);
+    const appended = createInvocationRecord(
+      invocationInput({
+        attempt: 2,
+        startedAt: "2026-09-26T09:02:00Z",
+        endedAt: "2026-09-26T09:03:00Z",
+      }),
+    );
+    const extension = extendInvocationLedger(parent, [appended]);
+    const verification = verifyInvocationLedgerExtension(parent, extension);
+    expect(extension.lineage).toEqual({
+      kind: "EXTENSION",
+      parentLedgerIdentity: parent.ledgerIdentity,
+    });
+    expect(extension.records.map((record) => record.invocationIdentity)).toContain(
+      parentRecord.invocationIdentity,
+    );
+    expect(verification).toMatchObject({
+      expectedParentLedgerIdentity: parent.ledgerIdentity,
+      candidateLedgerIdentity: extension.ledgerIdentity,
+      retainedRecordCount: 1,
+      appendedRecordCount: 1,
+      disposition: "VERIFIED",
+      authority: "EVIDENCE_ONLY",
+      mutationAuthorization: false,
+      targetedPruning: "OFF",
+    });
+  });
+
+  it("rejects an extension claim that deletes a prior successful row", () => {
+    const parentRecord = createInvocationRecord(invocationInput());
+    const parent = createInvocationLedger([parentRecord]);
+    const appended = createInvocationRecord(
+      invocationInput({
+        taskId: "POST-I12-SLICE2-NEXT",
+        startedAt: "2026-09-26T09:02:00Z",
+        endedAt: "2026-09-26T09:03:00Z",
+      }),
+    );
+    const incomplete = claimInvocationLedgerExtension(
+      createInvocationLedger([appended]),
+      parent.ledgerIdentity,
+    );
+    expectCode(
+      () => verifyInvocationLedgerExtension(parent, incomplete),
+      "INVOCATION_LEDGER_PARENT_RECORD_MISSING",
+    );
+  });
+
+  it("rejects an extension claim that deletes a prior failed row", () => {
+    const failed = createInvocationRecord(
+      invocationInput({ exitCode: 1, result: "FAIL", firstFailureIdentity: HASH_F }),
+    );
+    const parent = createInvocationLedger([failed]);
+    const appended = createInvocationRecord(
+      invocationInput({
+        taskId: "POST-I12-SLICE2-NEXT",
+        startedAt: "2026-09-26T09:02:00Z",
+        endedAt: "2026-09-26T09:03:00Z",
+      }),
+    );
+    const incomplete = claimInvocationLedgerExtension(
+      createInvocationLedger([appended]),
+      parent.ledgerIdentity,
+    );
+    expectCode(
+      () => verifyInvocationLedgerExtension(parent, incomplete),
+      "INVOCATION_LEDGER_PARENT_RECORD_MISSING",
+    );
+  });
+
+  it("rejects replacement of a parent row even when the replacement ledger is resealed", () => {
+    const original = createInvocationRecord(invocationInput());
+    const parent = createInvocationLedger([original]);
+    const replacement = createInvocationRecord(
+      invocationInput({ endedAt: "2026-09-26T09:01:01Z" }),
+    );
+    const appended = createInvocationRecord(
+      invocationInput({
+        taskId: "POST-I12-SLICE2-NEXT",
+        startedAt: "2026-09-26T09:02:00Z",
+        endedAt: "2026-09-26T09:03:00Z",
+      }),
+    );
+    const rewritten = claimInvocationLedgerExtension(
+      createInvocationLedger([replacement, appended]),
+      parent.ledgerIdentity,
+    );
+    expectCode(
+      () => verifyInvocationLedgerExtension(parent, rewritten),
+      "INVOCATION_LEDGER_PARENT_RECORD_MISSING",
+    );
+  });
+
+  it("rejects an extension bound to a different parent ledger", () => {
+    const parent = createInvocationLedger([createInvocationRecord(invocationInput())]);
+    const otherParent = createInvocationLedger([
+      createInvocationRecord(invocationInput({ taskId: "POST-I12-SLICE2-OTHER" })),
+    ]);
+    const appended = createInvocationRecord(
+      invocationInput({
+        taskId: "POST-I12-SLICE2-NEXT",
+        startedAt: "2026-09-26T09:02:00Z",
+        endedAt: "2026-09-26T09:03:00Z",
+      }),
+    );
+    const extension = extendInvocationLedger(otherParent, [appended]);
+    expectCode(
+      () => verifyInvocationLedgerExtension(parent, extension),
+      "INVOCATION_LEDGER_PARENT_MISMATCH",
+    );
+  });
+
+  it("rejects an unrelated root as proof of expected-parent continuation", () => {
+    const parent = createInvocationLedger([createInvocationRecord(invocationInput())]);
+    const unrelatedRoot = createInvocationLedger([
+      createInvocationRecord(invocationInput({ taskId: "POST-I12-SLICE2-OTHER" })),
+    ]);
+    expectCode(
+      () => verifyInvocationLedgerExtension(parent, unrelatedRoot),
+      "INVOCATION_LEDGER_NOT_EXTENSION",
+    );
+  });
+
+  it("retains the parent's first-failure identity through a later successful extension", () => {
+    const failed = createInvocationRecord(
+      invocationInput({ exitCode: 1, result: "FAIL", firstFailureIdentity: HASH_F }),
+    );
+    const parent = createInvocationLedger([failed]);
+    const success = createInvocationRecord(
+      invocationInput({
+        attempt: 2,
+        startedAt: "2026-09-26T09:02:00Z",
+        endedAt: "2026-09-26T09:03:00Z",
+        firstFailureIdentity: HASH_F,
+      }),
+    );
+    const extension = extendInvocationLedger(parent, [success]);
+    expect(extension.metrics.firstFailureIdentities).toEqual([HASH_F]);
+    expect(extension.metrics.failedCount).toBe(1);
+    expect(verifyInvocationLedgerExtension(parent, extension).disposition).toBe("VERIFIED");
+  });
+
+  it("derives cumulative metrics from parent and appended rows", () => {
+    const executed = createInvocationRecord(invocationInput());
+    const parent = createInvocationLedger([executed]);
+    const reused = createInvocationRecord(
+      invocationInput({
+        attempt: 2,
+        startedAt: "2026-09-26T10:00:00Z",
+        endedAt: "2026-09-26T10:00:01Z",
+        exitCode: null,
+        result: "REUSED",
+        disposition: "REUSED",
+        reusedInvocationIdentity: executed.invocationIdentity,
+      }),
+    );
+    const extension = extendInvocationLedger(parent, [reused]);
+    expect(extension.metrics).toEqual({
+      invocationCount: 2,
+      executedCount: 1,
+      reusedCount: 1,
+      failedCount: 0,
+      firstFailureIdentities: [],
+    });
+  });
+
+  it("rejects duplicate invocation identity across parent and appended rows", () => {
+    const record = createInvocationRecord(invocationInput());
+    const parent = createInvocationLedger([record]);
+    expectCode(
+      () => extendInvocationLedger(parent, [clone(record)]),
+      "INVOCATION_LEDGER_DUPLICATE_IDENTITY",
+    );
+  });
+
+  it("rejects a task, proof, and attempt collision across parent and appended rows", () => {
+    const parent = createInvocationLedger([createInvocationRecord(invocationInput())]);
+    const collision = createInvocationRecord(invocationInput({ endedAt: "2026-09-26T09:01:01Z" }));
+    expectCode(
+      () => extendInvocationLedger(parent, [collision]),
+      "INVOCATION_LEDGER_AMBIGUOUS_ROW",
+    );
+  });
+
+  it("derives the same extension identity for equivalent reordered appended rows", () => {
+    const parent = createInvocationLedger([createInvocationRecord(invocationInput())]);
+    const second = createInvocationRecord(
+      invocationInput({
+        taskId: "POST-I12-SLICE2-B",
+        startedAt: "2026-09-26T09:02:00Z",
+        endedAt: "2026-09-26T09:03:00Z",
+      }),
+    );
+    const third = createInvocationRecord(
+      invocationInput({
+        taskId: "POST-I12-SLICE2-C",
+        startedAt: "2026-09-26T09:04:00Z",
+        endedAt: "2026-09-26T09:05:00Z",
+      }),
+    );
+    const firstOrder = extendInvocationLedger(parent, [second, third]);
+    const secondOrder = extendInvocationLedger(parent, [third, second]);
+    expect(firstOrder.ledgerIdentity).toBe(secondOrder.ledgerIdentity);
+    expect(firstOrder.records).toEqual(secondOrder.records);
   });
 });
