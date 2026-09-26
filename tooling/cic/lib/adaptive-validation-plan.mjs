@@ -1,3 +1,6 @@
+import { createHash } from "node:crypto";
+import { Buffer } from "node:buffer";
+
 import { canonicalJson } from "./canonical-json.mjs";
 import { normalizeRepoRelativePath, sha256Hex } from "./identity.mjs";
 import { verifySemanticClosureWitness } from "./semantic-closure.mjs";
@@ -14,7 +17,15 @@ export const ADAPTIVE_RISK_ASSESSMENT_SCHEMA = "CIC_ADAPTIVE_RISK_ASSESSMENT_V1"
 export const ADAPTIVE_CAPABILITY_SNAPSHOT_SCHEMA = "CIC_ADAPTIVE_CAPABILITY_SNAPSHOT_V1";
 export const ADAPTIVE_REUSE_WITNESS_SCHEMA = "CIC_ADAPTIVE_REUSE_WITNESS_V1";
 export const ADAPTIVE_VALIDATION_PLAN_SCHEMA = "CIC_ADAPTIVE_VALIDATION_PLAN_V1";
+export const ADAPTIVE_VALIDATION_TOPOLOGY_SCHEMA = "CIC_ADAPTIVE_VALIDATION_TOPOLOGY_V1";
+export const ADAPTIVE_VALIDATION_MATERIALIZATION_SCHEMA =
+  "CIC_ADAPTIVE_VALIDATION_MATERIALIZATION_V1";
 export const ADAPTIVE_VALIDATION_DISPOSITIONS = Object.freeze(["READY", "BLOCKED"]);
+export const ADAPTIVE_VALIDATION_TOPOLOGY_DISPOSITIONS = Object.freeze([
+  "DIRTY_WORKTREE",
+  "DISPOSABLE_MATERIALIZED_COMMIT",
+  "BLOCKED",
+]);
 export const ADAPTIVE_RISK_CLASSES = Object.freeze(["LOW", "MEDIUM", "HIGH", "CRITICAL"]);
 export const TARGETED_PRUNING_POLICY = "OFF";
 
@@ -2261,4 +2272,759 @@ export function verifyAdaptiveValidationPlan(record) {
     fail("ADAPTIVE_VALIDATION_PLAN_IDENTITY_MISMATCH");
   }
   return deepFreeze({ ...body, planIdentity: computed });
+}
+
+const TOPOLOGY_FACT_KEYS = Object.freeze([
+  "affectedClosure",
+  "candidateIdentity",
+  "candidatePaths",
+  "candidateWorktree",
+  "canonicalRepository",
+  "currentTruthIdentity",
+  "parentHead",
+  "parentTree",
+  "physicalImpact",
+  "repositoryIdentity",
+  "repositorySnapshotIdentity",
+  "scenarioCatalog",
+  "sourceGenerationFingerprint",
+  "sourceManifestIdentity",
+]);
+
+const TOPOLOGY_RECORD_KEYS = Object.freeze([
+  ...TOPOLOGY_FACT_KEYS,
+  "affectedClosureIdentity",
+  "catalogGenerationIdentity",
+  "candidatePathSetIdentity",
+  "canonicalRepositoryObservationIdentity",
+  "disposition",
+  "expectedAffectedPathSetIdentity",
+  "factAuthority",
+  "mutationAuthorization",
+  "publicationAuthorization",
+  "physicalDependencySetIdentity",
+  "physicalImpactIdentity",
+  "pushAuthorization",
+  "reasonCodes",
+  "schemaVersion",
+  "targetedPruning",
+  "topologyIdentity",
+]);
+
+const MATERIALIZATION_FACT_KEYS = Object.freeze([
+  "acceptedParentHead",
+  "acceptedParentTree",
+  "candidateIdentity",
+  "candidatePaths",
+  "canonicalRepository",
+  "committedPaths",
+  "currentTruthIdentity",
+  "disposableWorktreeClean",
+  "expectedValidationCommitTree",
+  "extraPaths",
+  "gitObjectEvidence",
+  "publicationAttempted",
+  "pushAttempts",
+  "repositoryIdentity",
+  "repositorySnapshotIdentity",
+  "sourceGenerationFingerprint",
+  "sourceManifestIdentity",
+  "topology",
+  "validationCommit",
+  "validationCommitParent",
+  "validationCommitTree",
+]);
+
+const MATERIALIZATION_RECORD_KEYS = Object.freeze([
+  ...MATERIALIZATION_FACT_KEYS,
+  "factAuthority",
+  "gitObjectAttestationIdentity",
+  "materializationIdentity",
+  "mutationAuthorization",
+  "publicationAuthorization",
+  "pushAuthorization",
+  "reasonCodes",
+  "recursiveTreeDelta",
+  "schemaVersion",
+  "status",
+  "targetedPruning",
+  "validationOnly",
+]);
+
+function nonnegativeInteger(value, code) {
+  if (!Number.isSafeInteger(value) || value < 0) fail(code);
+  return value;
+}
+
+function normalizedCandidatePaths(value, code) {
+  if (!Array.isArray(value) || value.length === 0) fail(code);
+  return value
+    .map((entry) => {
+      exactKeys(entry, ["gitBlob", "path", "sha256"], code);
+      let path;
+      try {
+        path = normalizeRepoRelativePath(entry.path);
+      } catch {
+        fail(code);
+      }
+      return {
+        path,
+        sha256: identity(entry.sha256, code),
+        gitBlob: contentIdentity(entry.gitBlob, code),
+      };
+    })
+    .sort(
+      (left, right) =>
+        compare(left.path, right.path) ||
+        compare(left.sha256, right.sha256) ||
+        compare(left.gitBlob, right.gitBlob),
+    );
+}
+
+function normalizedCommittedPaths(value, code) {
+  if (!Array.isArray(value) || value.length === 0) fail(code);
+  return value
+    .map((entry) => {
+      exactKeys(entry, ["gitBlob", "path"], code);
+      let path;
+      try {
+        path = normalizeRepoRelativePath(entry.path);
+      } catch {
+        fail(code);
+      }
+      return { path, gitBlob: contentIdentity(entry.gitBlob, code) };
+    })
+    .sort((left, right) => compare(left.path, right.path) || compare(left.gitBlob, right.gitBlob));
+}
+
+function normalizedCandidateWorktree(value, code) {
+  exactKeys(
+    value,
+    [
+      "modifiedTrackedPaths",
+      "stagedPaths",
+      "untrackedPaths",
+      "workingSetIdentity",
+      "worktreeIdentity",
+    ],
+    code,
+  );
+  return {
+    workingSetIdentity: identity(value.workingSetIdentity, code),
+    worktreeIdentity: identity(value.worktreeIdentity, code),
+    stagedPaths: repositoryPaths(value.stagedPaths, code),
+    modifiedTrackedPaths: repositoryPaths(value.modifiedTrackedPaths, code),
+    untrackedPaths: repositoryPaths(value.untrackedPaths, code),
+  };
+}
+
+function normalizedClosure(value, code) {
+  if (!Array.isArray(value) || value.length === 0) fail(code);
+  return value
+    .map((entry) => {
+      exactKeys(
+        entry,
+        [
+          "createsLocalClone",
+          "expectsCleanCloneCandidate",
+          "materialIdentity",
+          "materializesCommittedState",
+          "ownershipComplete",
+          "path",
+          "readsCommittedObjects",
+          "readsHead",
+          "readsHeadTree",
+          "readsHistory",
+          "readsLiveWorkingTree",
+        ],
+        code,
+      );
+      let path;
+      try {
+        path = normalizeRepoRelativePath(entry.path);
+      } catch {
+        fail(code);
+      }
+      return {
+        path,
+        materialIdentity: contentIdentity(entry.materialIdentity, code),
+        ownershipComplete: boolean(entry.ownershipComplete, code),
+        readsLiveWorkingTree: boolean(entry.readsLiveWorkingTree, code),
+        readsHead: boolean(entry.readsHead, code),
+        readsHeadTree: boolean(entry.readsHeadTree, code),
+        readsCommittedObjects: boolean(entry.readsCommittedObjects, code),
+        readsHistory: boolean(entry.readsHistory, code),
+        createsLocalClone: boolean(entry.createsLocalClone, code),
+        expectsCleanCloneCandidate: boolean(entry.expectsCleanCloneCandidate, code),
+        materializesCommittedState: boolean(entry.materializesCommittedState, code),
+      };
+    })
+    .sort(
+      (left, right) =>
+        compare(left.path, right.path) || compare(left.materialIdentity, right.materialIdentity),
+    );
+}
+
+function normalizedCanonicalRepository(value, code) {
+  exactKeys(
+    value,
+    [
+      "candidateIdentity",
+      "candidatePaths",
+      "candidateWorktree",
+      "currentTruthIdentity",
+      "head",
+      "repositoryIdentity",
+      "repositorySnapshotIdentity",
+      "sourceGenerationFingerprint",
+      "sourceManifestIdentity",
+      "tree",
+    ],
+    code,
+  );
+  return {
+    head: contentIdentity(value.head, code),
+    tree: contentIdentity(value.tree, code),
+    repositoryIdentity: identity(value.repositoryIdentity, code),
+    repositorySnapshotIdentity: identity(value.repositorySnapshotIdentity, code),
+    currentTruthIdentity: identity(value.currentTruthIdentity, code),
+    sourceGenerationFingerprint: identity(value.sourceGenerationFingerprint, code),
+    sourceManifestIdentity: identity(value.sourceManifestIdentity, code),
+    candidateIdentity: identity(value.candidateIdentity, code),
+    candidatePaths: normalizedCandidatePaths(value.candidatePaths, code),
+    candidateWorktree: normalizedCandidateWorktree(value.candidateWorktree, code),
+  };
+}
+
+function expectedAffectedPaths(physicalImpact) {
+  const affected = new Set(physicalImpact.affectedScenarioIdentities);
+  return [
+    ...new Set(
+      physicalImpact.dependencyClosures
+        .filter(({ scenarioIdentity }) => affected.has(scenarioIdentity))
+        .flatMap(({ paths }) => paths),
+    ),
+  ].sort(compare);
+}
+
+function normalizedTopologyFacts(value) {
+  const code = "ADAPTIVE_VALIDATION_TOPOLOGY_INVALID";
+  exactKeys(value, TOPOLOGY_FACT_KEYS, code);
+  const scenarioCatalog = verifyAdaptiveScenarioCatalog(value.scenarioCatalog);
+  const physicalImpact = verifyAdaptivePhysicalImpact(value.physicalImpact);
+  assertPhysicalImpactDerivation(scenarioCatalog, physicalImpact);
+  return {
+    parentHead: contentIdentity(value.parentHead, code),
+    parentTree: contentIdentity(value.parentTree, code),
+    repositoryIdentity: identity(value.repositoryIdentity, code),
+    repositorySnapshotIdentity: identity(value.repositorySnapshotIdentity, code),
+    currentTruthIdentity: identity(value.currentTruthIdentity, code),
+    sourceGenerationFingerprint: identity(value.sourceGenerationFingerprint, code),
+    sourceManifestIdentity: identity(value.sourceManifestIdentity, code),
+    scenarioCatalog,
+    physicalImpact,
+    candidateIdentity: identity(value.candidateIdentity, code),
+    candidatePaths: normalizedCandidatePaths(value.candidatePaths, code),
+    candidateWorktree: normalizedCandidateWorktree(value.candidateWorktree, code),
+    affectedClosure: normalizedClosure(value.affectedClosure, code),
+    canonicalRepository: normalizedCanonicalRepository(value.canonicalRepository, code),
+  };
+}
+
+function hasDuplicatePaths(entries) {
+  return new Set(entries.map(({ path }) => path)).size !== entries.length;
+}
+
+function topologyReasonCodes(facts) {
+  const reasons = new Set();
+  if (hasDuplicatePaths(facts.candidatePaths)) {
+    reasons.add("CANDIDATE_PATH_FACT_DUPLICATE");
+  }
+  if (hasDuplicatePaths(facts.affectedClosure)) {
+    reasons.add("AFFECTED_CLOSURE_MEMBER_DUPLICATE");
+  }
+  for (const member of facts.affectedClosure) {
+    if (!member.ownershipComplete) reasons.add("TOPOLOGY_OWNERSHIP_INCOMPLETE");
+    const hasPhysicalOwner =
+      member.readsLiveWorkingTree ||
+      member.readsHead ||
+      member.readsHeadTree ||
+      member.readsCommittedObjects ||
+      member.readsHistory ||
+      member.createsLocalClone ||
+      member.expectsCleanCloneCandidate ||
+      member.materializesCommittedState;
+    if (!hasPhysicalOwner) reasons.add("TOPOLOGY_OWNERSHIP_AMBIGUOUS");
+  }
+
+  const expectedPaths = expectedAffectedPaths(facts.physicalImpact);
+  const observedPaths = facts.affectedClosure.map(({ path }) => path).sort(compare);
+  if (canonicalJson(observedPaths) !== canonicalJson(expectedPaths)) {
+    reasons.add("AFFECTED_CLOSURE_PATH_SET_MISMATCH");
+  }
+  const expectedPathSet = new Set(expectedPaths);
+  if (facts.candidatePaths.some(({ path }) => !expectedPathSet.has(path))) {
+    reasons.add("CANDIDATE_OUTSIDE_GOVERNED_AFFECTED_CLOSURE");
+  }
+  if (facts.physicalImpact.unknownScenarioIdentities.length > 0) {
+    reasons.add("PHYSICAL_IMPACT_UNKNOWN");
+  }
+  if (
+    facts.physicalImpact.catalogGenerationIdentity !==
+      facts.scenarioCatalog.catalogGenerationIdentity ||
+    facts.physicalImpact.currentTruthIdentity !== facts.currentTruthIdentity ||
+    facts.physicalImpact.sourceGenerationFingerprint !== facts.sourceGenerationFingerprint ||
+    facts.physicalImpact.repositoryIdentity !== facts.repositoryIdentity ||
+    facts.physicalImpact.repositorySnapshotIdentity !== facts.repositorySnapshotIdentity ||
+    facts.physicalImpact.workingSetIdentity !== facts.candidateWorktree.workingSetIdentity
+  ) {
+    reasons.add("PHYSICAL_IMPACT_CURRENTNESS_BINDING_MISMATCH");
+  }
+
+  const worktreePaths = [
+    ...facts.candidateWorktree.stagedPaths,
+    ...facts.candidateWorktree.modifiedTrackedPaths,
+    ...facts.candidateWorktree.untrackedPaths,
+  ].sort(compare);
+  const candidatePaths = facts.candidatePaths.map(({ path }) => path).sort(compare);
+  if (
+    new Set(worktreePaths).size !== worktreePaths.length ||
+    canonicalJson(worktreePaths) !== canonicalJson(candidatePaths)
+  ) {
+    reasons.add("CANDIDATE_WORKTREE_PATH_SET_MISMATCH");
+  }
+
+  const canonical = facts.canonicalRepository;
+  if (
+    canonical.head !== facts.parentHead ||
+    canonical.tree !== facts.parentTree ||
+    canonical.repositoryIdentity !== facts.repositoryIdentity ||
+    canonical.repositorySnapshotIdentity !== facts.repositorySnapshotIdentity ||
+    canonical.currentTruthIdentity !== facts.currentTruthIdentity ||
+    canonical.sourceGenerationFingerprint !== facts.sourceGenerationFingerprint ||
+    canonical.sourceManifestIdentity !== facts.sourceManifestIdentity ||
+    canonical.candidateIdentity !== facts.candidateIdentity ||
+    canonicalJson(canonical.candidatePaths) !== canonicalJson(facts.candidatePaths) ||
+    canonicalJson(canonical.candidateWorktree) !== canonicalJson(facts.candidateWorktree)
+  ) {
+    reasons.add("CANONICAL_REPOSITORY_CURRENTNESS_MISMATCH");
+  }
+  return [...reasons].sort(compare);
+}
+
+function ownsCommittedTopology(member) {
+  return (
+    member.readsHead ||
+    member.readsHeadTree ||
+    member.readsCommittedObjects ||
+    member.readsHistory ||
+    member.createsLocalClone ||
+    member.expectsCleanCloneCandidate ||
+    member.materializesCommittedState
+  );
+}
+
+function topologyBody(value) {
+  const facts = normalizedTopologyFacts(value);
+  const reasonCodes = topologyReasonCodes(facts);
+  const disposition =
+    reasonCodes.length > 0
+      ? "BLOCKED"
+      : facts.affectedClosure.some(ownsCommittedTopology)
+        ? "DISPOSABLE_MATERIALIZED_COMMIT"
+        : "DIRTY_WORKTREE";
+  return {
+    schemaVersion: ADAPTIVE_VALIDATION_TOPOLOGY_SCHEMA,
+    disposition,
+    reasonCodes,
+    factAuthority: "DERIVED_NON_AUTHORITATIVE",
+    mutationAuthorization: false,
+    publicationAuthorization: false,
+    pushAuthorization: false,
+    targetedPruning: TARGETED_PRUNING_POLICY,
+    ...facts,
+    candidatePathSetIdentity: recordIdentity(
+      "CIC_ADAPTIVE_VALIDATION_CANDIDATE_PATH_SET_V1",
+      facts.candidatePaths,
+    ),
+    affectedClosureIdentity: recordIdentity(
+      "CIC_ADAPTIVE_VALIDATION_AFFECTED_CLOSURE_V1",
+      facts.affectedClosure,
+    ),
+    catalogGenerationIdentity: facts.scenarioCatalog.catalogGenerationIdentity,
+    physicalImpactIdentity: facts.physicalImpact.physicalImpactIdentity,
+    physicalDependencySetIdentity: facts.physicalImpact.physicalDependencySetIdentity,
+    expectedAffectedPathSetIdentity: recordIdentity(
+      "CIC_ADAPTIVE_VALIDATION_EXPECTED_AFFECTED_PATH_SET_V1",
+      expectedAffectedPaths(facts.physicalImpact),
+    ),
+    canonicalRepositoryObservationIdentity: recordIdentity(
+      "CIC_ADAPTIVE_VALIDATION_CANONICAL_REPOSITORY_OBSERVATION_V1",
+      facts.canonicalRepository,
+    ),
+  };
+}
+
+export function deriveAdaptiveValidationTopology(input) {
+  const body = topologyBody(input);
+  return deepFreeze({
+    ...body,
+    topologyIdentity: recordIdentity(ADAPTIVE_VALIDATION_TOPOLOGY_SCHEMA, body),
+  });
+}
+
+export function verifyAdaptiveValidationTopology(record) {
+  const code = "ADAPTIVE_VALIDATION_TOPOLOGY_INVALID";
+  exactKeys(record, TOPOLOGY_RECORD_KEYS, code);
+  if (record.schemaVersion !== ADAPTIVE_VALIDATION_TOPOLOGY_SCHEMA) fail(code);
+  const facts = Object.fromEntries(TOPOLOGY_FACT_KEYS.map((key) => [key, record[key]]));
+  const body = topologyBody(facts);
+  const suppliedBody = { ...record };
+  delete suppliedBody.topologyIdentity;
+  if (canonicalJson(suppliedBody) !== canonicalJson(body)) fail(code);
+  const computed = recordIdentity(ADAPTIVE_VALIDATION_TOPOLOGY_SCHEMA, body);
+  if (identity(record.topologyIdentity, code) !== computed) {
+    fail("ADAPTIVE_VALIDATION_TOPOLOGY_IDENTITY_MISMATCH");
+  }
+  return deepFreeze({ ...body, topologyIdentity: computed });
+}
+
+function base64Bytes(value, code) {
+  if (typeof value !== "string" || value.length === 0) fail(code);
+  const bytes = Buffer.from(value, "base64");
+  if (bytes.byteLength === 0 || bytes.toString("base64") !== value) fail(code);
+  return bytes;
+}
+
+function gitObjectIdentity(type, bytes) {
+  return createHash("sha1")
+    .update(`${type} ${bytes.byteLength}\0`, "utf8")
+    .update(bytes)
+    .digest("hex");
+}
+
+function normalizedGitObjectEvidence(value, code) {
+  exactKeys(value, ["commitRawBase64", "treeObjects"], code);
+  const commitRaw = base64Bytes(value.commitRawBase64, code);
+  if (!Array.isArray(value.treeObjects) || value.treeObjects.length < 2) fail(code);
+  const treeObjects = value.treeObjects
+    .map((entry) => {
+      exactKeys(entry, ["rawBase64"], code);
+      const raw = base64Bytes(entry.rawBase64, code);
+      return { rawBase64: raw.toString("base64"), objectId: gitObjectIdentity("tree", raw) };
+    })
+    .sort((left, right) => compare(left.objectId, right.objectId));
+  if (new Set(treeObjects.map(({ objectId }) => objectId)).size !== treeObjects.length) fail(code);
+  return {
+    commitRawBase64: commitRaw.toString("base64"),
+    treeObjects: treeObjects.map(({ rawBase64 }) => ({ rawBase64 })),
+  };
+}
+
+function parseCommitObject(raw) {
+  const text = raw.toString("utf8");
+  const headerEnd = text.indexOf("\n\n");
+  if (headerEnd < 0) throw new TypeError("GIT_COMMIT_OBJECT_MALFORMED");
+  const headers = text.slice(0, headerEnd).split("\n");
+  const trees = headers.filter((line) => line.startsWith("tree ")).map((line) => line.slice(5));
+  const parents = headers.filter((line) => line.startsWith("parent ")).map((line) => line.slice(7));
+  if (
+    trees.length !== 1 ||
+    parents.length !== 1 ||
+    !/^[0-9a-f]{40}$/u.test(trees[0]) ||
+    !/^[0-9a-f]{40}$/u.test(parents[0])
+  ) {
+    throw new TypeError("GIT_COMMIT_OBJECT_MALFORMED");
+  }
+  return { tree: trees[0], parent: parents[0] };
+}
+
+function treeSortKey(entry) {
+  return Buffer.from(`${entry.name}${entry.mode === "40000" ? "/" : ""}`, "utf8");
+}
+
+function parseTreeObject(raw) {
+  const entries = [];
+  let offset = 0;
+  while (offset < raw.byteLength) {
+    const space = raw.indexOf(0x20, offset);
+    const nul = raw.indexOf(0, space + 1);
+    if (space <= offset || nul <= space + 1 || nul + 21 > raw.byteLength) {
+      throw new TypeError("GIT_TREE_OBJECT_MALFORMED");
+    }
+    const mode = raw.subarray(offset, space).toString("ascii");
+    const nameBytes = raw.subarray(space + 1, nul);
+    const name = nameBytes.toString("utf8");
+    if (
+      !["100644", "100755", "120000", "160000", "40000"].includes(mode) ||
+      name.length === 0 ||
+      name === "." ||
+      name === ".." ||
+      name.includes("/") ||
+      Buffer.from(name, "utf8").compare(nameBytes) !== 0
+    ) {
+      throw new TypeError("GIT_TREE_OBJECT_MALFORMED");
+    }
+    entries.push({
+      mode,
+      name,
+      objectId: raw.subarray(nul + 1, nul + 21).toString("hex"),
+    });
+    offset = nul + 21;
+  }
+  for (let index = 1; index < entries.length; index += 1) {
+    if (Buffer.compare(treeSortKey(entries[index - 1]), treeSortKey(entries[index])) >= 0) {
+      throw new TypeError("GIT_TREE_OBJECT_ORDER_INVALID");
+    }
+  }
+  return entries;
+}
+
+function recursiveGitTreeDelta(parentTree, validationTree, treeMap) {
+  const reasons = new Set();
+  const delta = [];
+  const visit = (parentId, validationId, prefix) => {
+    if (parentId === validationId) return;
+    const parent = treeMap.get(parentId);
+    const validation = treeMap.get(validationId);
+    if (parent === undefined || validation === undefined) {
+      reasons.add("GIT_TREE_OBJECT_EVIDENCE_INCOMPLETE");
+      return;
+    }
+    const parentEntries = new Map(parent.map((entry) => [entry.name, entry]));
+    const validationEntries = new Map(validation.map((entry) => [entry.name, entry]));
+    const names = [...new Set([...parentEntries.keys(), ...validationEntries.keys()])].sort(
+      compare,
+    );
+    for (const name of names) {
+      const before = parentEntries.get(name) ?? null;
+      const after = validationEntries.get(name) ?? null;
+      if (before?.mode === "40000" && after?.mode === "40000") {
+        visit(before.objectId, after.objectId, `${prefix}${name}/`);
+        continue;
+      }
+      if (before?.objectId === after?.objectId && before?.mode === after?.mode) continue;
+      const path = `${prefix}${name}`;
+      if (before?.mode === "40000" || after?.mode === "40000") {
+        reasons.add("GIT_TREE_PATH_TYPE_MISMATCH");
+      }
+      if (before !== null && after !== null && before.mode !== after.mode) {
+        reasons.add("GIT_TREE_PATH_MODE_MISMATCH");
+      }
+      delta.push({
+        path,
+        parentMode: before?.mode ?? null,
+        parentGitObject: before?.objectId ?? null,
+        validationMode: after?.mode ?? null,
+        validationGitObject: after?.objectId ?? null,
+      });
+    }
+  };
+  visit(parentTree, validationTree, "");
+  delta.sort((left, right) => compare(left.path, right.path));
+  return { delta, reasonCodes: [...reasons].sort(compare) };
+}
+
+function attestGitObjectMaterialization(facts) {
+  const reasons = new Set();
+  let recursiveTreeDelta = [];
+  try {
+    const commitRaw = Buffer.from(facts.gitObjectEvidence.commitRawBase64, "base64");
+    const computedCommit = gitObjectIdentity("commit", commitRaw);
+    const commit = parseCommitObject(commitRaw);
+    if (computedCommit !== facts.validationCommit) reasons.add("VALIDATION_COMMIT_OBJECT_MISMATCH");
+    if (commit.parent !== facts.acceptedParentHead)
+      reasons.add("VALIDATION_COMMIT_PARENT_OBJECT_MISMATCH");
+    if (commit.tree !== facts.validationCommitTree)
+      reasons.add("VALIDATION_COMMIT_TREE_OBJECT_MISMATCH");
+
+    const treeMap = new Map();
+    for (const { rawBase64 } of facts.gitObjectEvidence.treeObjects) {
+      const raw = Buffer.from(rawBase64, "base64");
+      const objectId = gitObjectIdentity("tree", raw);
+      treeMap.set(objectId, parseTreeObject(raw));
+    }
+    if (!treeMap.has(facts.acceptedParentTree)) reasons.add("PARENT_TREE_OBJECT_IDENTITY_MISMATCH");
+    if (!treeMap.has(facts.validationCommitTree)) {
+      reasons.add("VALIDATION_TREE_OBJECT_IDENTITY_MISMATCH");
+    }
+    const treeResult = recursiveGitTreeDelta(
+      facts.acceptedParentTree,
+      facts.validationCommitTree,
+      treeMap,
+    );
+    recursiveTreeDelta = treeResult.delta;
+    for (const reason of treeResult.reasonCodes) reasons.add(reason);
+
+    const candidatePaths = facts.candidatePaths.map(({ path }) => path).sort(compare);
+    const deltaPaths = recursiveTreeDelta.map(({ path }) => path).sort(compare);
+    if (canonicalJson(deltaPaths) !== canonicalJson(candidatePaths)) {
+      reasons.add("GIT_TREE_DELTA_PATH_SET_MISMATCH");
+    }
+    const candidateByPath = new Map(facts.candidatePaths.map((entry) => [entry.path, entry]));
+    for (const entry of recursiveTreeDelta) {
+      const candidate = candidateByPath.get(entry.path);
+      if (candidate === undefined) continue;
+      if (entry.validationGitObject !== candidate.gitBlob) {
+        reasons.add("GIT_TREE_CANDIDATE_BLOB_MISMATCH");
+      }
+      if (
+        entry.validationMode === null ||
+        entry.validationMode === "40000" ||
+        entry.validationMode === "160000" ||
+        (entry.parentMode !== null && entry.parentMode !== entry.validationMode)
+      ) {
+        reasons.add("GIT_TREE_CANDIDATE_MODE_OR_TYPE_MISMATCH");
+      }
+    }
+  } catch {
+    reasons.add("GIT_OBJECT_EVIDENCE_INVALID");
+  }
+  const attestation = {
+    commitObjectIdentity: facts.validationCommit,
+    parentTreeIdentity: facts.acceptedParentTree,
+    validationTreeIdentity: facts.validationCommitTree,
+    recursiveTreeDelta,
+    evidenceIdentity: recordIdentity(
+      "CIC_ADAPTIVE_VALIDATION_GIT_OBJECT_EVIDENCE_V1",
+      facts.gitObjectEvidence,
+    ),
+  };
+  return {
+    reasonCodes: [...reasons].sort(compare),
+    recursiveTreeDelta,
+    gitObjectAttestationIdentity: recordIdentity(
+      "CIC_ADAPTIVE_VALIDATION_GIT_OBJECT_ATTESTATION_V1",
+      attestation,
+    ),
+  };
+}
+
+function normalizedMaterializationFacts(value) {
+  const code = "ADAPTIVE_VALIDATION_MATERIALIZATION_INVALID";
+  exactKeys(value, MATERIALIZATION_FACT_KEYS, code);
+  return {
+    topology: verifyAdaptiveValidationTopology(value.topology),
+    acceptedParentHead: contentIdentity(value.acceptedParentHead, code),
+    acceptedParentTree: contentIdentity(value.acceptedParentTree, code),
+    repositoryIdentity: identity(value.repositoryIdentity, code),
+    repositorySnapshotIdentity: identity(value.repositorySnapshotIdentity, code),
+    currentTruthIdentity: identity(value.currentTruthIdentity, code),
+    sourceGenerationFingerprint: identity(value.sourceGenerationFingerprint, code),
+    sourceManifestIdentity: identity(value.sourceManifestIdentity, code),
+    candidateIdentity: identity(value.candidateIdentity, code),
+    candidatePaths: normalizedCandidatePaths(value.candidatePaths, code),
+    canonicalRepository: normalizedCanonicalRepository(value.canonicalRepository, code),
+    validationCommit: contentIdentity(value.validationCommit, code),
+    validationCommitParent: contentIdentity(value.validationCommitParent, code),
+    validationCommitTree: contentIdentity(value.validationCommitTree, code),
+    expectedValidationCommitTree: contentIdentity(value.expectedValidationCommitTree, code),
+    gitObjectEvidence: normalizedGitObjectEvidence(value.gitObjectEvidence, code),
+    committedPaths: normalizedCommittedPaths(value.committedPaths, code),
+    disposableWorktreeClean: boolean(value.disposableWorktreeClean, code),
+    extraPaths: repositoryPaths(value.extraPaths, code),
+    pushAttempts: nonnegativeInteger(value.pushAttempts, code),
+    publicationAttempted: boolean(value.publicationAttempted, code),
+  };
+}
+
+function materializationReasonCodes(facts, attestation) {
+  const reasons = new Set();
+  for (const reason of attestation.reasonCodes) reasons.add(reason);
+  const topology = facts.topology;
+  if (topology.disposition !== "DISPOSABLE_MATERIALIZED_COMMIT") {
+    reasons.add("DISPOSABLE_TOPOLOGY_NOT_REQUIRED");
+  }
+  if (
+    facts.acceptedParentHead !== topology.parentHead ||
+    facts.validationCommitParent !== topology.parentHead
+  ) {
+    reasons.add("VALIDATION_PARENT_MISMATCH");
+  }
+  if (facts.acceptedParentTree !== topology.parentTree) {
+    reasons.add("VALIDATION_PARENT_TREE_MISMATCH");
+  }
+  if (
+    facts.repositoryIdentity !== topology.repositoryIdentity ||
+    facts.repositorySnapshotIdentity !== topology.repositorySnapshotIdentity ||
+    facts.currentTruthIdentity !== topology.currentTruthIdentity
+  ) {
+    reasons.add("REPOSITORY_BINDING_MISMATCH");
+  }
+  if (
+    facts.sourceGenerationFingerprint !== topology.sourceGenerationFingerprint ||
+    facts.sourceManifestIdentity !== topology.sourceManifestIdentity
+  ) {
+    reasons.add("SOURCE_BINDING_MISMATCH");
+  }
+  if (
+    facts.candidateIdentity !== topology.candidateIdentity ||
+    canonicalJson(facts.candidatePaths) !== canonicalJson(topology.candidatePaths)
+  ) {
+    reasons.add("CANDIDATE_BINDING_MISMATCH");
+  }
+  if (canonicalJson(facts.canonicalRepository) !== canonicalJson(topology.canonicalRepository)) {
+    reasons.add("CANONICAL_REPOSITORY_CURRENTNESS_MISMATCH");
+  }
+  if (facts.validationCommit === facts.validationCommitParent) {
+    reasons.add("VALIDATION_COMMIT_NOT_MATERIALIZED");
+  }
+  if (facts.validationCommitTree !== facts.expectedValidationCommitTree) {
+    reasons.add("VALIDATION_COMMIT_TREE_MISMATCH");
+  }
+  const candidateBlobs = topology.candidatePaths
+    .map(({ path, gitBlob }) => ({ path, gitBlob }))
+    .sort((left, right) => compare(left.path, right.path));
+  if (canonicalJson(facts.committedPaths) !== canonicalJson(candidateBlobs)) {
+    reasons.add("COMMITTED_CANDIDATE_PATH_OR_BLOB_MISMATCH");
+  }
+  if (!facts.disposableWorktreeClean) reasons.add("DISPOSABLE_WORKTREE_DIRTY");
+  if (facts.extraPaths.length > 0) reasons.add("EXTRA_COMMITTED_PATH");
+  if (facts.pushAttempts > 0) reasons.add("PUSH_ATTEMPTED");
+  if (facts.publicationAttempted) reasons.add("PUBLICATION_ATTEMPTED");
+  return [...reasons].sort(compare);
+}
+
+function materializationBody(value) {
+  const facts = normalizedMaterializationFacts(value);
+  const attestation = attestGitObjectMaterialization(facts);
+  const reasonCodes = materializationReasonCodes(facts, attestation);
+  return {
+    schemaVersion: ADAPTIVE_VALIDATION_MATERIALIZATION_SCHEMA,
+    status: reasonCodes.length === 0 ? "PASS" : "BLOCKED",
+    reasonCodes,
+    validationOnly: true,
+    factAuthority: "DERIVED_NON_AUTHORITATIVE",
+    mutationAuthorization: false,
+    publicationAuthorization: false,
+    pushAuthorization: false,
+    targetedPruning: TARGETED_PRUNING_POLICY,
+    ...facts,
+    recursiveTreeDelta: attestation.recursiveTreeDelta,
+    gitObjectAttestationIdentity: attestation.gitObjectAttestationIdentity,
+  };
+}
+
+export function defineAdaptiveValidationMaterialization(input) {
+  const body = materializationBody(input);
+  return deepFreeze({
+    ...body,
+    materializationIdentity: recordIdentity(ADAPTIVE_VALIDATION_MATERIALIZATION_SCHEMA, body),
+  });
+}
+
+export function verifyAdaptiveValidationMaterialization(record) {
+  const code = "ADAPTIVE_VALIDATION_MATERIALIZATION_INVALID";
+  exactKeys(record, MATERIALIZATION_RECORD_KEYS, code);
+  if (record.schemaVersion !== ADAPTIVE_VALIDATION_MATERIALIZATION_SCHEMA) fail(code);
+  const facts = Object.fromEntries(MATERIALIZATION_FACT_KEYS.map((key) => [key, record[key]]));
+  const body = materializationBody(facts);
+  const suppliedBody = { ...record };
+  delete suppliedBody.materializationIdentity;
+  if (canonicalJson(suppliedBody) !== canonicalJson(body)) fail(code);
+  const computed = recordIdentity(ADAPTIVE_VALIDATION_MATERIALIZATION_SCHEMA, body);
+  if (identity(record.materializationIdentity, code) !== computed) {
+    fail("ADAPTIVE_VALIDATION_MATERIALIZATION_IDENTITY_MISMATCH");
+  }
+  return deepFreeze({ ...body, materializationIdentity: computed });
 }

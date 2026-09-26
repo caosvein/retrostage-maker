@@ -1,3 +1,10 @@
+import { execFileSync } from "node:child_process";
+import { Buffer } from "node:buffer";
+import { createHash } from "node:crypto";
+import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+
 import { describe, expect, it } from "vitest";
 
 import { canonicalJson } from "./lib/canonical-json.mjs";
@@ -15,7 +22,10 @@ import {
   ADAPTIVE_SCENARIO_REVISION_SCHEMA,
   ADAPTIVE_SEMANTIC_IMPACT_SCHEMA,
   ADAPTIVE_VALIDATION_DISPOSITIONS,
+  ADAPTIVE_VALIDATION_MATERIALIZATION_SCHEMA,
   ADAPTIVE_VALIDATION_PLAN_SCHEMA,
+  ADAPTIVE_VALIDATION_TOPOLOGY_DISPOSITIONS,
+  ADAPTIVE_VALIDATION_TOPOLOGY_SCHEMA,
   TARGETED_PRUNING_POLICY,
   buildAdaptivePhysicalImpact,
   buildAdaptiveScenarioCatalog,
@@ -27,7 +37,9 @@ import {
   defineAdaptiveReuseWitness,
   defineAdaptiveRiskAssessment,
   defineAdaptiveScenarioRevision,
+  defineAdaptiveValidationMaterialization,
   deriveAdaptiveValidationPlan,
+  deriveAdaptiveValidationTopology,
   supersedeAdaptiveOracle,
   supersedeAdaptiveScenarioRevision,
   verifyAdaptiveScenarioCatalog,
@@ -40,7 +52,9 @@ import {
   verifyAdaptiveRiskAssessment,
   verifyAdaptiveCapabilitySnapshot,
   verifyAdaptiveReuseWitness,
+  verifyAdaptiveValidationMaterialization,
   verifyAdaptiveValidationPlan,
+  verifyAdaptiveValidationTopology,
 } from "./lib/adaptive-validation-plan.mjs";
 import { verifySemanticClosureWitness } from "./lib/semantic-closure.mjs";
 
@@ -971,5 +985,815 @@ describe("adaptive validation plan", () => {
     expect(() =>
       deriveAdaptiveValidationPlan({ ...state.input, semanticClosureWitness: malformed }),
     ).toThrow("ADAPTIVE_SEMANTIC_CLOSURE_WITNESS_INVALID");
+  });
+});
+
+function gitObjectSha(type, raw) {
+  return createHash("sha1").update(`${type} ${raw.byteLength}\0`, "utf8").update(raw).digest("hex");
+}
+
+function gitTreeRaw(entries) {
+  return Buffer.concat(
+    [...entries]
+      .sort((left, right) => left.path.localeCompare(right.path, "en"))
+      .map(({ mode = "100644", path, objectId }) =>
+        Buffer.concat([Buffer.from(`${mode} ${path}\0`, "utf8"), Buffer.from(objectId, "hex")]),
+      ),
+  );
+}
+
+function gitCommitRaw(tree, parent, { secondParent = null } = {}) {
+  return Buffer.from(
+    [
+      `tree ${tree}`,
+      `parent ${parent}`,
+      ...(secondParent === null ? [] : [`parent ${secondParent}`]),
+      "author RetroStage Fixture <fixture@invalid> 0 +0000",
+      "committer RetroStage Fixture <fixture@invalid> 0 +0000",
+      "",
+      "validation-only materialization",
+      "",
+    ].join("\n"),
+    "utf8",
+  );
+}
+
+function materialIdentityAsGitObject(value) {
+  return /^[0-9a-f]{40}$/u.test(value)
+    ? value
+    : createHash("sha1").update(value, "utf8").digest("hex");
+}
+
+function topologyOwner(path, materialIdentity, overrides = {}) {
+  return {
+    path,
+    materialIdentity,
+    ownershipComplete: true,
+    readsLiveWorkingTree: true,
+    readsHead: false,
+    readsHeadTree: false,
+    readsCommittedObjects: false,
+    readsHistory: false,
+    createsLocalClone: false,
+    expectsCleanCloneCandidate: false,
+    materializesCommittedState: false,
+    ...overrides,
+  };
+}
+
+function topologyFixture(overrides = {}) {
+  const path = "example-candidate.mjs";
+  const observerPath = "example-live-reader.mjs";
+  const candidatePaths = [{ path, sha256: hash("candidate-postimage"), gitBlob: "c".repeat(40) }];
+  const candidateWorktree = {
+    workingSetIdentity: hash("working-set"),
+    worktreeIdentity: hash("worktree"),
+    stagedPaths: [],
+    modifiedTrackedPaths: [path],
+    untrackedPaths: [],
+  };
+  const repositoryIdentity = hash("topology-repository");
+  const repositorySnapshotIdentity = hash("topology-repository-snapshot");
+  const currentTruthIdentity = hash("topology-current-truth");
+  const sourceGenerationFingerprint = hash("topology-source-generation");
+  const entry = scenario("topology.observer", {
+    implementationPath: path,
+    testFile: observerPath,
+  });
+  const scenarioCatalog = buildAdaptiveScenarioCatalog({
+    ownerIdentity: OWNER,
+    catalogKey: "topology-observer",
+    generation: 1,
+    predecessorCatalogGenerationIdentity: null,
+    provenanceIdentity: hash("topology-catalog-provenance"),
+    scenarioRevisions: [entry.revision],
+    oracles: [entry.oracle],
+    implementationBindings: [entry.binding],
+  });
+  const dependencyClosure = defineAdaptivePhysicalDependencyClosure({
+    scenarioIdentity: entry.revision.scenarioIdentity,
+    scenarioRevisionIdentity: entry.revision.revisionIdentity,
+    implementationBindingIdentity: entry.binding.implementationBindingIdentity,
+    completeness: "COMPLETE",
+    paths: [path, observerPath],
+    materialIdentities: entry.binding.materialIdentities,
+    provenanceIdentity: hash("topology-dependency-provenance"),
+  });
+  const physicalImpact = buildAdaptivePhysicalImpact({
+    catalog: scenarioCatalog,
+    currentTruthIdentity,
+    sourceGenerationFingerprint,
+    repositoryIdentity,
+    repositorySnapshotIdentity,
+    workingSetIdentity: candidateWorktree.workingSetIdentity,
+    dependencyClosures: [dependencyClosure],
+    changedMaterials: [
+      {
+        path,
+        materialIdentities: entry.binding.materialIdentities,
+        changeIdentity: hash("topology-change"),
+      },
+    ],
+  });
+  const affectedClosure = [
+    topologyOwner(path, candidatePaths[0].gitBlob),
+    topologyOwner(observerPath, "1".repeat(40)),
+  ];
+  const parentTreeRaw = gitTreeRaw([
+    { path, objectId: "f".repeat(40) },
+    { path: observerPath, objectId: "1".repeat(40) },
+  ]);
+  const input = {
+    parentHead: "a".repeat(40),
+    parentTree: gitObjectSha("tree", parentTreeRaw),
+    repositoryIdentity,
+    repositorySnapshotIdentity,
+    currentTruthIdentity,
+    sourceGenerationFingerprint,
+    sourceManifestIdentity: hash("topology-source-manifest"),
+    scenarioCatalog,
+    physicalImpact,
+    candidateIdentity: hash("topology-candidate"),
+    candidatePaths,
+    candidateWorktree,
+    affectedClosure,
+  };
+  input.canonicalRepository = {
+    head: input.parentHead,
+    tree: input.parentTree,
+    repositoryIdentity: input.repositoryIdentity,
+    repositorySnapshotIdentity: input.repositorySnapshotIdentity,
+    currentTruthIdentity: input.currentTruthIdentity,
+    sourceGenerationFingerprint: input.sourceGenerationFingerprint,
+    sourceManifestIdentity: input.sourceManifestIdentity,
+    candidateIdentity: input.candidateIdentity,
+    candidatePaths: clone(candidatePaths),
+    candidateWorktree: clone(candidateWorktree),
+  };
+  return { ...input, ...overrides };
+}
+
+function materializationFixture(topology, overrides = {}) {
+  const candidateByPath = new Map(topology.candidatePaths.map((entry) => [entry.path, entry]));
+  const parentEntries = topology.affectedClosure.map((entry) => ({
+    path: entry.path,
+    objectId: candidateByPath.has(entry.path)
+      ? "f".repeat(40)
+      : materialIdentityAsGitObject(entry.materialIdentity),
+  }));
+  const validationEntries = topology.affectedClosure.map((entry) => ({
+    path: entry.path,
+    objectId:
+      candidateByPath.get(entry.path)?.gitBlob ??
+      materialIdentityAsGitObject(entry.materialIdentity),
+  }));
+  const parentTreeRaw = gitTreeRaw(parentEntries);
+  const validationTreeRaw = gitTreeRaw(validationEntries);
+  const validationCommitTree = gitObjectSha("tree", validationTreeRaw);
+  const commitRaw = gitCommitRaw(validationCommitTree, topology.parentHead);
+  return {
+    topology,
+    acceptedParentHead: topology.parentHead,
+    acceptedParentTree: topology.parentTree,
+    repositoryIdentity: topology.repositoryIdentity,
+    repositorySnapshotIdentity: topology.repositorySnapshotIdentity,
+    currentTruthIdentity: topology.currentTruthIdentity,
+    sourceGenerationFingerprint: topology.sourceGenerationFingerprint,
+    sourceManifestIdentity: topology.sourceManifestIdentity,
+    candidateIdentity: topology.candidateIdentity,
+    candidatePaths: clone(topology.candidatePaths),
+    canonicalRepository: clone(topology.canonicalRepository),
+    validationCommit: gitObjectSha("commit", commitRaw),
+    validationCommitParent: topology.parentHead,
+    validationCommitTree,
+    expectedValidationCommitTree: validationCommitTree,
+    gitObjectEvidence: {
+      commitRawBase64: commitRaw.toString("base64"),
+      treeObjects: [parentTreeRaw, validationTreeRaw].map((raw) => ({
+        rawBase64: raw.toString("base64"),
+      })),
+    },
+    committedPaths: topology.candidatePaths.map(({ path, gitBlob }) => ({
+      path,
+      gitBlob,
+    })),
+    disposableWorktreeClean: true,
+    extraPaths: [],
+    pushAttempts: 0,
+    publicationAttempted: false,
+    ...overrides,
+  };
+}
+
+function resealPhysicalImpact(value) {
+  const body = clone(value);
+  delete body.physicalImpactIdentity;
+  return {
+    ...body,
+    physicalImpactIdentity: sha256Hex(
+      `${ADAPTIVE_PHYSICAL_IMPACT_SCHEMA}\n${canonicalJson(body)}\n`,
+    ),
+  };
+}
+
+function materializationWithValidationEntries(topology, validationEntries, options = {}) {
+  const base = materializationFixture(topology);
+  const validationTreeRaw = gitTreeRaw(validationEntries);
+  const validationTree = gitObjectSha("tree", validationTreeRaw);
+  const commitRaw = gitCommitRaw(validationTree, options.commitParent ?? topology.parentHead, {
+    secondParent: options.secondParent ?? null,
+  });
+  const parentTreeObject = base.gitObjectEvidence.treeObjects.find(
+    ({ rawBase64 }) =>
+      gitObjectSha("tree", Buffer.from(rawBase64, "base64")) === topology.parentTree,
+  );
+  return {
+    ...base,
+    validationCommit: gitObjectSha("commit", commitRaw),
+    validationCommitTree: options.assertedTree ?? validationTree,
+    expectedValidationCommitTree: options.expectedTree ?? validationTree,
+    gitObjectEvidence: {
+      commitRawBase64: commitRaw.toString("base64"),
+      treeObjects: [parentTreeObject, { rawBase64: validationTreeRaw.toString("base64") }],
+    },
+  };
+}
+
+function runGit(cwd, ...args) {
+  return execFileSync("git", args, { cwd, encoding: "utf8", windowsHide: true }).trim();
+}
+
+function runGitBytes(cwd, ...args) {
+  return execFileSync("git", args, { cwd, windowsHide: true });
+}
+
+describe("candidate validation topology evidence", () => {
+  it("publishes additive versioned schemas with permanent evidence-only boundaries", () => {
+    expect(ADAPTIVE_VALIDATION_TOPOLOGY_SCHEMA).toBe("CIC_ADAPTIVE_VALIDATION_TOPOLOGY_V1");
+    expect(ADAPTIVE_VALIDATION_MATERIALIZATION_SCHEMA).toBe(
+      "CIC_ADAPTIVE_VALIDATION_MATERIALIZATION_V1",
+    );
+    expect(ADAPTIVE_VALIDATION_TOPOLOGY_DISPOSITIONS).toEqual([
+      "DIRTY_WORKTREE",
+      "DISPOSABLE_MATERIALIZED_COMMIT",
+      "BLOCKED",
+    ]);
+
+    const topology = deriveAdaptiveValidationTopology(topologyFixture());
+    expect(topology).toMatchObject({
+      disposition: "DIRTY_WORKTREE",
+      factAuthority: "DERIVED_NON_AUTHORITATIVE",
+      mutationAuthorization: false,
+      publicationAuthorization: false,
+      pushAuthorization: false,
+      targetedPruning: "OFF",
+    });
+    expect(verifyAdaptiveValidationTopology(topology)).toEqual(topology);
+  });
+
+  it("is order-insensitive and forces committed-state owners into disposable materialization", () => {
+    const base = topologyFixture();
+    const cloneOwner = {
+      ...base.affectedClosure[1],
+      readsLiveWorkingTree: false,
+      readsHead: true,
+      readsHeadTree: true,
+      readsCommittedObjects: true,
+      readsHistory: true,
+      createsLocalClone: true,
+      expectsCleanCloneCandidate: true,
+    };
+    const first = deriveAdaptiveValidationTopology({
+      ...base,
+      affectedClosure: [cloneOwner, base.affectedClosure[0]],
+    });
+    const reordered = deriveAdaptiveValidationTopology({
+      ...base,
+      affectedClosure: [base.affectedClosure[0], cloneOwner],
+    });
+
+    expect(first.disposition).toBe("DISPOSABLE_MATERIALIZED_COMMIT");
+    expect(reordered.topologyIdentity).toBe(first.topologyIdentity);
+    expect(reordered.affectedClosureIdentity).toBe(first.affectedClosureIdentity);
+  });
+
+  it("blocks incomplete, ambiguous, duplicate, and non-current topology facts", () => {
+    const base = topologyFixture();
+    const incomplete = deriveAdaptiveValidationTopology({
+      ...base,
+      affectedClosure: [{ ...base.affectedClosure[0], ownershipComplete: false }],
+    });
+    const ambiguous = deriveAdaptiveValidationTopology({
+      ...base,
+      affectedClosure: [
+        {
+          ...base.affectedClosure[0],
+          readsLiveWorkingTree: false,
+        },
+      ],
+    });
+    const duplicate = deriveAdaptiveValidationTopology({
+      ...base,
+      affectedClosure: [base.affectedClosure[0], clone(base.affectedClosure[0])],
+    });
+    const stale = deriveAdaptiveValidationTopology({
+      ...base,
+      canonicalRepository: {
+        ...base.canonicalRepository,
+        sourceGenerationFingerprint: hash("stale-source-generation"),
+      },
+    });
+
+    expect(incomplete).toMatchObject({
+      disposition: "BLOCKED",
+      reasonCodes: expect.arrayContaining(["TOPOLOGY_OWNERSHIP_INCOMPLETE"]),
+    });
+    expect(ambiguous).toMatchObject({
+      disposition: "BLOCKED",
+      reasonCodes: expect.arrayContaining(["TOPOLOGY_OWNERSHIP_AMBIGUOUS"]),
+    });
+    expect(duplicate).toMatchObject({
+      disposition: "BLOCKED",
+      reasonCodes: expect.arrayContaining(["AFFECTED_CLOSURE_MEMBER_DUPLICATE"]),
+    });
+    expect(stale).toMatchObject({
+      disposition: "BLOCKED",
+      reasonCodes: expect.arrayContaining(["CANONICAL_REPOSITORY_CURRENTNESS_MISMATCH"]),
+    });
+  });
+
+  it("rejects a semantically contradictory topology even after identity resealing", () => {
+    const valid = deriveAdaptiveValidationTopology(topologyFixture());
+    const tampered = clone(valid);
+    tampered.disposition = "DISPOSABLE_MATERIALIZED_COMMIT";
+    delete tampered.topologyIdentity;
+    tampered.topologyIdentity = sha256Hex(
+      `${ADAPTIVE_VALIDATION_TOPOLOGY_SCHEMA}\n${canonicalJson(tampered)}\n`,
+    );
+    expect(() => verifyAdaptiveValidationTopology(tampered)).toThrow(
+      "ADAPTIVE_VALIDATION_TOPOLOGY_INVALID",
+    );
+  });
+
+  it("accepts exact validation-only materialization without granting publication authority", () => {
+    const base = topologyFixture();
+    const topology = deriveAdaptiveValidationTopology({
+      ...base,
+      affectedClosure: base.affectedClosure.map((member, index) =>
+        index === 1
+          ? {
+              ...member,
+              readsLiveWorkingTree: false,
+              readsHead: true,
+              createsLocalClone: true,
+              expectsCleanCloneCandidate: true,
+            }
+          : member,
+      ),
+    });
+    const evidence = defineAdaptiveValidationMaterialization(materializationFixture(topology));
+
+    expect(evidence).toMatchObject({
+      status: "PASS",
+      validationOnly: true,
+      factAuthority: "DERIVED_NON_AUTHORITATIVE",
+      mutationAuthorization: false,
+      publicationAuthorization: false,
+      pushAuthorization: false,
+      targetedPruning: "OFF",
+    });
+    expect(verifyAdaptiveValidationMaterialization(evidence)).toEqual(evidence);
+  });
+
+  it("fails materialization closed for every governed mismatch or prohibited attempt", () => {
+    const base = topologyFixture();
+    const topology = deriveAdaptiveValidationTopology({
+      ...base,
+      affectedClosure: base.affectedClosure.map((member, index) =>
+        index === 1
+          ? { ...member, readsLiveWorkingTree: false, readsCommittedObjects: true }
+          : member,
+      ),
+    });
+    const cases = [
+      { acceptedParentHead: "f".repeat(40) },
+      { acceptedParentTree: "f".repeat(40) },
+      { validationCommitParent: "f".repeat(40) },
+      { validationCommitTree: "f".repeat(40) },
+      { candidateIdentity: hash("wrong-candidate") },
+      { sourceGenerationFingerprint: hash("wrong-source") },
+      {
+        committedPaths: topology.candidatePaths.map(({ path }) => ({
+          path,
+          gitBlob: "f".repeat(40),
+        })),
+      },
+      { committedPaths: [] },
+      { extraPaths: ["tooling/cic/extra.mjs"] },
+      { disposableWorktreeClean: false },
+      { pushAttempts: 1 },
+      { publicationAttempted: true },
+      {
+        canonicalRepository: {
+          ...clone(topology.canonicalRepository),
+          candidateIdentity: hash("wrong-canonical-candidate"),
+        },
+      },
+    ];
+
+    for (const changes of cases) {
+      const input = materializationFixture(topology, changes);
+      if (changes.committedPaths?.length === 0) {
+        expect(() => defineAdaptiveValidationMaterialization(input)).toThrow(
+          "ADAPTIVE_VALIDATION_MATERIALIZATION_INVALID",
+        );
+      } else {
+        expect(defineAdaptiveValidationMaterialization(input).status).toBe("BLOCKED");
+      }
+    }
+  });
+
+  it("binds ownership to the complete governed physical affected closure", () => {
+    const base = topologyFixture();
+    const committed = deriveAdaptiveValidationTopology({
+      ...base,
+      affectedClosure: base.affectedClosure.map((member, index) =>
+        index === 1 ? { ...member, readsLiveWorkingTree: false, readsHistory: true } : member,
+      ),
+    });
+    expect(committed.disposition).toBe("DISPOSABLE_MATERIALIZED_COMMIT");
+
+    for (const affectedClosure of [
+      [base.affectedClosure[0]],
+      [base.affectedClosure[1]],
+      [...base.affectedClosure, topologyOwner("unexpected-owner.mjs", "2".repeat(40))],
+    ]) {
+      const topology = deriveAdaptiveValidationTopology({ ...base, affectedClosure });
+      expect(topology).toMatchObject({
+        disposition: "BLOCKED",
+        reasonCodes: expect.arrayContaining(["AFFECTED_CLOSURE_PATH_SET_MISMATCH"]),
+      });
+    }
+
+    const outsidePath = "outside-candidate.mjs";
+    const outsideCandidate = [
+      {
+        path: outsidePath,
+        sha256: hash("outside-candidate"),
+        gitBlob: "2".repeat(40),
+      },
+    ];
+    const outsideWorktree = {
+      ...base.candidateWorktree,
+      modifiedTrackedPaths: [outsidePath],
+    };
+    const outside = deriveAdaptiveValidationTopology({
+      ...base,
+      candidatePaths: outsideCandidate,
+      candidateWorktree: outsideWorktree,
+      canonicalRepository: {
+        ...base.canonicalRepository,
+        candidatePaths: outsideCandidate,
+        candidateWorktree: outsideWorktree,
+      },
+    });
+    expect(outside.reasonCodes).toContain("CANDIDATE_OUTSIDE_GOVERNED_AFFECTED_CLOSURE");
+  });
+
+  it("fails closed for unknown, contradictory, or stale physical-impact provenance", () => {
+    const base = topologyFixture();
+    const unknownImpact = buildAdaptivePhysicalImpact({
+      catalog: base.scenarioCatalog,
+      currentTruthIdentity: base.currentTruthIdentity,
+      sourceGenerationFingerprint: base.sourceGenerationFingerprint,
+      repositoryIdentity: base.repositoryIdentity,
+      repositorySnapshotIdentity: base.repositorySnapshotIdentity,
+      workingSetIdentity: base.candidateWorktree.workingSetIdentity,
+      dependencyClosures: [],
+      changedMaterials: [],
+    });
+    const unknown = deriveAdaptiveValidationTopology({ ...base, physicalImpact: unknownImpact });
+    expect(unknown).toMatchObject({
+      disposition: "BLOCKED",
+      reasonCodes: expect.arrayContaining(["PHYSICAL_IMPACT_UNKNOWN"]),
+    });
+
+    const contradictory = clone(base.physicalImpact);
+    contradictory.provenUnaffectedScenarioIdentities = [
+      ...contradictory.affectedScenarioIdentities,
+    ];
+    contradictory.affectedScenarioIdentities = [];
+    expect(() =>
+      deriveAdaptiveValidationTopology({
+        ...base,
+        physicalImpact: resealPhysicalImpact(contradictory),
+      }),
+    ).toThrow("ADAPTIVE_PHYSICAL_IMPACT_DERIVATION_MISMATCH");
+
+    const staleCurrentTruth = hash("stale-topology-current-truth");
+    const stale = deriveAdaptiveValidationTopology({
+      ...base,
+      currentTruthIdentity: staleCurrentTruth,
+      canonicalRepository: {
+        ...base.canonicalRepository,
+        currentTruthIdentity: staleCurrentTruth,
+      },
+    });
+    expect(stale.reasonCodes).toContain("PHYSICAL_IMPACT_CURRENTNESS_BINDING_MISMATCH");
+
+    const staleSourceGeneration = hash("stale-topology-source-generation");
+    const staleSource = deriveAdaptiveValidationTopology({
+      ...base,
+      sourceGenerationFingerprint: staleSourceGeneration,
+      canonicalRepository: {
+        ...base.canonicalRepository,
+        sourceGenerationFingerprint: staleSourceGeneration,
+      },
+    });
+    expect(staleSource.reasonCodes).toContain("PHYSICAL_IMPACT_CURRENTNESS_BINDING_MISMATCH");
+
+    const staleRepositoryIdentity = hash("stale-topology-repository");
+    const staleRepository = deriveAdaptiveValidationTopology({
+      ...base,
+      repositoryIdentity: staleRepositoryIdentity,
+      canonicalRepository: {
+        ...base.canonicalRepository,
+        repositoryIdentity: staleRepositoryIdentity,
+      },
+    });
+    expect(staleRepository.reasonCodes).toContain("PHYSICAL_IMPACT_CURRENTNESS_BINDING_MISMATCH");
+
+    const driftedCatalog = buildAdaptiveScenarioCatalog({
+      ownerIdentity: base.scenarioCatalog.ownerIdentity,
+      catalogKey: base.scenarioCatalog.catalogKey,
+      generation: base.scenarioCatalog.generation,
+      predecessorCatalogGenerationIdentity:
+        base.scenarioCatalog.predecessorCatalogGenerationIdentity,
+      provenanceIdentity: hash("drifted-topology-catalog-provenance"),
+      scenarioRevisions: base.scenarioCatalog.scenarioRevisions,
+      oracles: base.scenarioCatalog.oracles,
+      implementationBindings: base.scenarioCatalog.implementationBindings,
+    });
+    const staleCatalog = deriveAdaptiveValidationTopology({
+      ...base,
+      scenarioCatalog: driftedCatalog,
+    });
+    expect(staleCatalog.reasonCodes).toContain("PHYSICAL_IMPACT_CURRENTNESS_BINDING_MISMATCH");
+
+    const staleWorkingSet = hash("stale-topology-working-set");
+    const staleWorktree = { ...base.candidateWorktree, workingSetIdentity: staleWorkingSet };
+    const staleWorking = deriveAdaptiveValidationTopology({
+      ...base,
+      candidateWorktree: staleWorktree,
+      canonicalRepository: {
+        ...base.canonicalRepository,
+        candidateWorktree: staleWorktree,
+      },
+    });
+    expect(staleWorking.reasonCodes).toContain("PHYSICAL_IMPACT_CURRENTNESS_BINDING_MISMATCH");
+  });
+
+  it("cryptographically rejects false validation commit claims", () => {
+    const base = topologyFixture();
+    const topology = deriveAdaptiveValidationTopology({
+      ...base,
+      affectedClosure: base.affectedClosure.map((member, index) =>
+        index === 1
+          ? { ...member, readsLiveWorkingTree: false, readsCommittedObjects: true }
+          : member,
+      ),
+    });
+    const exact = materializationFixture(topology);
+    expect(defineAdaptiveValidationMaterialization(exact).status).toBe("PASS");
+
+    const arbitrary = defineAdaptiveValidationMaterialization({
+      ...exact,
+      validationCommit: "9".repeat(40),
+    });
+    expect(arbitrary.reasonCodes).toContain("VALIDATION_COMMIT_OBJECT_MISMATCH");
+
+    const entries = [
+      { path: "example-candidate.mjs", objectId: "c".repeat(40) },
+      { path: "example-live-reader.mjs", objectId: "1".repeat(40) },
+    ];
+    const wrongParent = defineAdaptiveValidationMaterialization(
+      materializationWithValidationEntries(topology, entries, {
+        commitParent: "8".repeat(40),
+      }),
+    );
+    expect(wrongParent.reasonCodes).toContain("VALIDATION_COMMIT_PARENT_OBJECT_MISMATCH");
+
+    const multiParent = defineAdaptiveValidationMaterialization(
+      materializationWithValidationEntries(topology, entries, {
+        secondParent: "7".repeat(40),
+      }),
+    );
+    expect(multiParent.reasonCodes).toContain("GIT_OBJECT_EVIDENCE_INVALID");
+
+    const resealedWrongTree = defineAdaptiveValidationMaterialization({
+      ...exact,
+      validationCommitTree: "6".repeat(40),
+      expectedValidationCommitTree: "6".repeat(40),
+    });
+    expect(resealedWrongTree.reasonCodes).toEqual(
+      expect.arrayContaining([
+        "VALIDATION_COMMIT_TREE_OBJECT_MISMATCH",
+        "VALIDATION_TREE_OBJECT_IDENTITY_MISMATCH",
+      ]),
+    );
+  });
+
+  it("derives the recursive tree delta and rejects every path/blob/mode contradiction", () => {
+    const base = topologyFixture();
+    const topology = deriveAdaptiveValidationTopology({
+      ...base,
+      affectedClosure: base.affectedClosure.map((member, index) =>
+        index === 1 ? { ...member, readsLiveWorkingTree: false, createsLocalClone: true } : member,
+      ),
+    });
+    const observer = { path: "example-live-reader.mjs", objectId: "1".repeat(40) };
+    const cases = [
+      {
+        entries: [
+          { path: "example-candidate.mjs", objectId: "c".repeat(40) },
+          observer,
+          { path: "extra.mjs", objectId: "2".repeat(40) },
+        ],
+        reason: "GIT_TREE_DELTA_PATH_SET_MISMATCH",
+      },
+      { entries: [observer], reason: "GIT_TREE_CANDIDATE_BLOB_MISMATCH" },
+      {
+        entries: [{ path: "example-candidate.mjs", objectId: "e".repeat(40) }, observer],
+        reason: "GIT_TREE_CANDIDATE_BLOB_MISMATCH",
+      },
+      {
+        entries: [
+          { mode: "100755", path: "example-candidate.mjs", objectId: "c".repeat(40) },
+          observer,
+        ],
+        reason: "GIT_TREE_CANDIDATE_MODE_OR_TYPE_MISMATCH",
+      },
+    ];
+    for (const { entries, reason } of cases) {
+      const evidence = defineAdaptiveValidationMaterialization(
+        materializationWithValidationEntries(topology, entries),
+      );
+      expect(evidence.status).toBe("BLOCKED");
+      expect(evidence.reasonCodes).toContain(reason);
+    }
+
+    const exact = defineAdaptiveValidationMaterialization(materializationFixture(topology));
+    expect(exact.recursiveTreeDelta).toEqual([
+      {
+        path: "example-candidate.mjs",
+        parentMode: "100644",
+        parentGitObject: "f".repeat(40),
+        validationMode: "100644",
+        validationGitObject: "c".repeat(40),
+      },
+    ]);
+  });
+
+  it("physically proves dirty parent truth and exact no-hardlink materialization truth", () => {
+    const root = mkdtempSync(join(tmpdir(), "retrostage-slice3-topology-"));
+    const repository = join(root, "repository");
+    const dirtyObserver = join(root, "dirty-observer");
+    const materializedObserver = join(root, "materialized-observer");
+    try {
+      runGit(root, "init", "--initial-branch=main", repository);
+      runGit(repository, "config", "user.name", "RetroStage Fixture");
+      runGit(repository, "config", "user.email", "fixture@invalid");
+      writeFileSync(join(repository, "example-candidate.mjs"), "parent-generation\n", "utf8");
+      writeFileSync(join(repository, "example-live-reader.mjs"), "local-clone-observer\n", "utf8");
+      runGit(repository, "add", "--", "example-candidate.mjs", "example-live-reader.mjs");
+      runGit(repository, "commit", "-m", "fixture parent");
+
+      const parentHead = runGit(repository, "rev-parse", "HEAD");
+      const parentTree = runGit(repository, "rev-parse", "HEAD^{tree}");
+      const parentCandidateBlob = runGit(repository, "rev-parse", "HEAD:example-candidate.mjs");
+      const observerBlob = runGit(repository, "rev-parse", "HEAD:example-live-reader.mjs");
+
+      writeFileSync(join(repository, "example-candidate.mjs"), "candidate-generation\n", "utf8");
+      const candidateSha256 = sha256Hex(
+        readFileSync(join(repository, "example-candidate.mjs"), "utf8"),
+      );
+      const candidateBlob = runGit(repository, "hash-object", "example-candidate.mjs");
+      runGit(root, "clone", "--local", "--no-hardlinks", repository, dirtyObserver);
+      expect(
+        readFileSync(join(dirtyObserver, "example-candidate.mjs"), "utf8").replace(/\r\n/gu, "\n"),
+      ).toBe("parent-generation\n");
+      expect(runGit(dirtyObserver, "rev-parse", "HEAD:example-candidate.mjs")).toBe(
+        parentCandidateBlob,
+      );
+      expect(candidateBlob).not.toBe(parentCandidateBlob);
+
+      const path = "example-candidate.mjs";
+      const observerPath = "example-live-reader.mjs";
+      const base = topologyFixture();
+      const candidatePaths = [{ path, sha256: candidateSha256, gitBlob: candidateBlob }];
+      const candidateWorktree = {
+        workingSetIdentity: base.physicalImpact.workingSetIdentity,
+        worktreeIdentity: hash("physical-worktree"),
+        stagedPaths: [],
+        modifiedTrackedPaths: [path],
+        untrackedPaths: [],
+      };
+      const topologyInput = {
+        parentHead,
+        parentTree,
+        repositoryIdentity: base.physicalImpact.repositoryIdentity,
+        repositorySnapshotIdentity: base.physicalImpact.repositorySnapshotIdentity,
+        currentTruthIdentity: base.physicalImpact.currentTruthIdentity,
+        sourceGenerationFingerprint: base.physicalImpact.sourceGenerationFingerprint,
+        sourceManifestIdentity: hash("physical-source-manifest"),
+        scenarioCatalog: base.scenarioCatalog,
+        physicalImpact: base.physicalImpact,
+        candidateIdentity: hash("physical-candidate"),
+        candidatePaths,
+        candidateWorktree,
+        affectedClosure: [
+          topologyOwner(path, candidateBlob),
+          {
+            path: observerPath,
+            materialIdentity: observerBlob,
+            ownershipComplete: true,
+            readsLiveWorkingTree: false,
+            readsHead: true,
+            readsHeadTree: true,
+            readsCommittedObjects: true,
+            readsHistory: false,
+            createsLocalClone: true,
+            expectsCleanCloneCandidate: true,
+            materializesCommittedState: true,
+          },
+        ],
+      };
+      topologyInput.canonicalRepository = {
+        head: parentHead,
+        tree: parentTree,
+        repositoryIdentity: topologyInput.repositoryIdentity,
+        repositorySnapshotIdentity: topologyInput.repositorySnapshotIdentity,
+        currentTruthIdentity: topologyInput.currentTruthIdentity,
+        sourceGenerationFingerprint: topologyInput.sourceGenerationFingerprint,
+        sourceManifestIdentity: topologyInput.sourceManifestIdentity,
+        candidateIdentity: topologyInput.candidateIdentity,
+        candidatePaths: clone(candidatePaths),
+        candidateWorktree: clone(candidateWorktree),
+      };
+      const topology = deriveAdaptiveValidationTopology(topologyInput);
+      expect(topology.disposition).toBe("DISPOSABLE_MATERIALIZED_COMMIT");
+
+      runGit(repository, "add", "--", "example-candidate.mjs");
+      runGit(repository, "commit", "-m", "validation-only materialization");
+      const validationCommit = runGit(repository, "rev-parse", "HEAD");
+      const validationTree = runGit(repository, "rev-parse", "HEAD^{tree}");
+      expect(runGit(repository, "rev-parse", "HEAD^")).toBe(parentHead);
+      expect(runGit(repository, "status", "--porcelain=v1", "--untracked-files=all")).toBe("");
+
+      runGit(root, "clone", "--local", "--no-hardlinks", repository, materializedObserver);
+      expect(
+        readFileSync(join(materializedObserver, "example-candidate.mjs"), "utf8").replace(
+          /\r\n/gu,
+          "\n",
+        ),
+      ).toBe("candidate-generation\n");
+      expect(runGit(materializedObserver, "rev-parse", "HEAD:example-candidate.mjs")).toBe(
+        candidateBlob,
+      );
+
+      const commitRaw = runGitBytes(repository, "cat-file", "commit", validationCommit);
+      const parentTreeRaw = runGitBytes(repository, "cat-file", "tree", parentTree);
+      const validationTreeRaw = runGitBytes(repository, "cat-file", "tree", validationTree);
+
+      const evidence = defineAdaptiveValidationMaterialization({
+        ...materializationFixture(topology),
+        validationCommit,
+        validationCommitParent: parentHead,
+        validationCommitTree: validationTree,
+        expectedValidationCommitTree: validationTree,
+        committedPaths: [{ path, gitBlob: candidateBlob }],
+        gitObjectEvidence: {
+          commitRawBase64: commitRaw.toString("base64"),
+          treeObjects: [parentTreeRaw, validationTreeRaw].map((raw) => ({
+            rawBase64: raw.toString("base64"),
+          })),
+        },
+      });
+      expect(evidence.status).toBe("PASS");
+      expect(evidence.publicationAuthorization).toBe(false);
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
+  });
+
+  it("keeps the existing adaptive plan owner and mandatory wider gates compatible", () => {
+    const state = fixture();
+    const plan = deriveAdaptiveValidationPlan(state.input);
+    const topology = deriveAdaptiveValidationTopology(topologyFixture());
+
+    expect(verifyAdaptiveValidationPlan(plan)).toEqual(plan);
+    expect(plan.targetedPruning).toBe("OFF");
+    expect(plan.scheduledGateIds).toEqual(plan.mandatoryWiderGates.map(({ gateId }) => gateId));
+    expect(topology.factAuthority).toBe("DERIVED_NON_AUTHORITATIVE");
   });
 });
