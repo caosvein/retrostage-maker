@@ -222,6 +222,174 @@ function readUtf8(filePath) {
   return readFileSync(filePath, "utf8").replace(/^\uFEFF/u, "");
 }
 
+function countLiteral(text, value) {
+  return text.split(value).length - 1;
+}
+
+const ACCEPTED_VALIDATE_SCRIPT =
+  "pnpm run format:check && pnpm run lint && pnpm run typecheck && pnpm run test && pnpm run arch:check && pnpm run deadcode:check && pnpm run electron:acquire && pnpm run build && pnpm run workflow:check && pnpm run electron:package && pnpm run electron:smoke && pnpm run compliance:check && pnpm run dependency:audit";
+
+function inspectWorkflowPnpmInvocations(workflow) {
+  const facts = { audit: 0, install: 0, runTargets: [] };
+  for (const line of workflow.split(/\r\n|\n|\r/u)) {
+    const tokens = line.match(/[A-Za-z0-9_./:@=-]+/gu) ?? [];
+    const pnpmIndexes = tokens.flatMap((token, index) => {
+      const basename = token.replace(/\\/gu, "/").split("/").at(-1) ?? "";
+      return /^pnpm(?:\.(?:cmd|ps1|exe))?$/iu.test(basename) ? [index] : [];
+    });
+    for (const [position, pnpmIndex] of pnpmIndexes.entries()) {
+      const nextPnpmIndex = pnpmIndexes[position + 1] ?? tokens.length;
+      const commandTokens = tokens
+        .slice(pnpmIndex + 1, nextPnpmIndex)
+        .map((token) => token.toLowerCase());
+      if (commandTokens.includes("install")) facts.install += 1;
+      if (commandTokens.includes("audit")) facts.audit += 1;
+      const runIndex = commandTokens.indexOf("run");
+      if (runIndex < 0) continue;
+      const runTokens = commandTokens.slice(runIndex + 1);
+      for (const target of ["validate", "compliance:check", "dependency:audit", "ci:validate"]) {
+        if (runTokens.includes(target)) facts.runTargets.push(target);
+      }
+    }
+  }
+  return facts;
+}
+
+function validateCanonicalHostedGateOwnership(rootPath, rootPackage, issues) {
+  const workflowPath = path.join(rootPath, ".github", "workflows", "ci.yml");
+  if (!existsSync(workflowPath)) {
+    issues.push(issue("HOSTED_WORKFLOW_MISSING", ".github/workflows/ci.yml"));
+    return;
+  }
+
+  const workflow = readUtf8(workflowPath);
+  const frozenInstall = "pnpm install --frozen-lockfile";
+  const validateCommand = "pnpm run validate";
+  const complianceCommand = "pnpm run compliance:check";
+  const auditCommand = "pnpm run dependency:audit";
+  const ciValidateCommand = "pnpm run ci:validate";
+  const installCount = countLiteral(workflow, frozenInstall);
+  const validateCount = countLiteral(workflow, validateCommand);
+  const complianceCount = countLiteral(workflow, complianceCommand);
+  const auditCount = countLiteral(workflow, auditCommand);
+  const ciValidateCount = countLiteral(workflow, ciValidateCommand);
+  const semantic = inspectWorkflowPnpmInvocations(workflow);
+  const semanticValidateCount = semantic.runTargets.filter(
+    (target) => target === "validate",
+  ).length;
+
+  if (installCount !== 1) {
+    issues.push(issue("HOSTED_FROZEN_INSTALL_COUNT_INVALID", String(installCount)));
+  }
+  if (validateCount !== 1) {
+    issues.push(issue("HOSTED_VALIDATE_COUNT_INVALID", String(validateCount)));
+  }
+  if (
+    installCount === 1 &&
+    validateCount === 1 &&
+    workflow.indexOf(frozenInstall) >= workflow.indexOf(validateCommand)
+  ) {
+    issues.push(issue("HOSTED_COMMAND_ORDER_INVALID", "install must precede validate"));
+  }
+  if (complianceCount !== 0) {
+    issues.push(issue("HOSTED_DIRECT_COMPLIANCE_GATE_PRESENT", String(complianceCount)));
+  }
+  if (auditCount !== 0) {
+    issues.push(issue("HOSTED_DIRECT_DEPENDENCY_AUDIT_PRESENT", String(auditCount)));
+  }
+  if (ciValidateCount !== 0) {
+    issues.push(issue("HOSTED_CI_VALIDATE_PRESENT", String(ciValidateCount)));
+  }
+  if (semantic.install !== 1) {
+    issues.push(issue("HOSTED_SEMANTIC_INSTALL_COUNT_INVALID", String(semantic.install)));
+  }
+  if (semanticValidateCount !== 1) {
+    issues.push(issue("HOSTED_SEMANTIC_VALIDATE_COUNT_INVALID", String(semanticValidateCount)));
+  }
+
+  const workflowLower = workflow.toLowerCase();
+  for (const [reference, code] of [
+    ["compliance:check", "HOSTED_DIRECT_COMPLIANCE_GATE_PRESENT"],
+    ["dependency:audit", "HOSTED_DIRECT_DEPENDENCY_AUDIT_PRESENT"],
+    ["ci:validate", "HOSTED_CI_VALIDATE_PRESENT"],
+  ]) {
+    if (workflowLower.includes(reference)) issues.push(issue(code, reference));
+  }
+  const workflowPathNormalized = workflowLower.replace(/[\\/]+/gu, "/");
+  const complianceImplementation = "tooling/compliance/check.mjs";
+  if (workflowPathNormalized.includes(complianceImplementation)) {
+    issues.push(issue("HOSTED_DIRECT_COMPLIANCE_IMPLEMENTATION_PRESENT", complianceImplementation));
+  }
+  if (semantic.audit > 0) {
+    issues.push(issue("HOSTED_DIRECT_PNPM_AUDIT_PRESENT", String(semantic.audit)));
+  }
+
+  const validateBlocks = workflow
+    .split(/^\s*-\s*name:/gmu)
+    .slice(1)
+    .filter((block) => block.includes(validateCommand));
+  if (validateBlocks.some((block) => /^\s*continue-on-error\s*:/imu.test(block))) {
+    issues.push(issue("HOSTED_VALIDATE_CONTINUE_ON_ERROR", "key present"));
+  }
+
+  const validateScriptRaw = String(rootPackage.scripts?.validate ?? "");
+  const validateScript = validateScriptRaw.trim();
+  const terminalSuffix = `${complianceCommand} && ${auditCommand}`;
+  const validateComplianceCount = countLiteral(validateScript, complianceCommand);
+  const validateAuditCount = countLiteral(validateScript, auditCommand);
+
+  if (validateScriptRaw !== ACCEPTED_VALIDATE_SCRIPT) {
+    issues.push(issue("VALIDATE_SCRIPT_IDENTITY_DRIFT", validateScriptRaw));
+  }
+
+  if (validateComplianceCount === 0 || validateAuditCount === 0) {
+    issues.push(
+      issue(
+        "VALIDATE_TERMINAL_GATE_MISSING",
+        `compliance=${validateComplianceCount},audit=${validateAuditCount}`,
+      ),
+    );
+  }
+  if (validateComplianceCount > 1 || validateAuditCount > 1) {
+    issues.push(
+      issue(
+        "VALIDATE_TERMINAL_GATE_DUPLICATED",
+        `compliance=${validateComplianceCount},audit=${validateAuditCount}`,
+      ),
+    );
+  }
+  if (
+    validateComplianceCount === 1 &&
+    validateAuditCount === 1 &&
+    validateScript.indexOf(complianceCommand) >= validateScript.indexOf(auditCommand)
+  ) {
+    issues.push(issue("VALIDATE_TERMINAL_GATE_ORDER_INVALID", "compliance must precede audit"));
+  }
+  if (!validateScript.endsWith(terminalSuffix)) {
+    issues.push(issue("VALIDATE_FAIL_STOP_CHAIN_INVALID", terminalSuffix));
+  }
+  if (validateScript.includes("||") || validateScript.includes(";")) {
+    issues.push(issue("VALIDATE_FAIL_STOP_CHAIN_INVALID", "non-fail-stop operator"));
+  }
+  for (const directCommand of [
+    "node tooling/compliance/check.mjs",
+    "pnpm audit --audit-level low",
+  ]) {
+    if (validateScript.includes(directCommand)) {
+      issues.push(issue("VALIDATE_NAMED_GATE_BYPASS", directCommand));
+    }
+  }
+
+  for (const [name, command] of Object.entries({
+    "compliance:check": "node tooling/compliance/check.mjs",
+    "dependency:audit": "pnpm audit --audit-level low",
+  })) {
+    if (rootPackage.scripts?.[name] !== command) {
+      issues.push(issue("NAMED_GATE_SCRIPT_IDENTITY_DRIFT", `${name}: ${command}`));
+    }
+  }
+}
+
 export function parseTsv(text) {
   const lines = text
     .replace(/^\uFEFF/u, "")
@@ -392,6 +560,7 @@ function validateRepositoryAndDependencies(rootPath, repositoryPaths, issues) {
   if (!String(rootPackage.scripts?.validate ?? "").includes("pnpm run workflow:check")) {
     issues.push(issue("VALIDATE_CHAIN_MISSING_WORKFLOW_CHECK", "validate"));
   }
+  validateCanonicalHostedGateOwnership(rootPath, rootPackage, issues);
 
   const requiredScripts = {
     "electron:acquire": "node apps/editor-electron/node_modules/electron/install.js",

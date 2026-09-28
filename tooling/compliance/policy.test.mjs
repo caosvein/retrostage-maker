@@ -1229,30 +1229,121 @@ describe("validateWorkflowText", () => {
     expectIssueCode(mutated, "REQUIRED_FRAGMENT_MISSING");
   });
 
-  it("detects a missing compliance:check command", () => {
-    const mutated = mutateCanonical(
-      "run: pnpm run compliance:check",
-      "run: pnpm run workflow:check",
-    );
-    expectIssueCode(mutated, "REQUIRED_FRAGMENT_MISSING");
-  });
-
-  it("detects a missing dependency:audit command", () => {
-    const mutated = mutateCanonical(
-      "run: pnpm run dependency:audit",
-      "run: pnpm run workflow:check",
-    );
-    expectIssueCode(mutated, "REQUIRED_FRAGMENT_MISSING");
-  });
-
   it("detects COMMAND_ORDER_INVALID", () => {
     const mutated = canonicalCi
-      .replace("run: pnpm run validate", "run: __RSM_VALIDATE_PLACEHOLDER__")
-      .replace("run: pnpm run dependency:audit", "run: pnpm run validate")
-      .replace("run: __RSM_VALIDATE_PLACEHOLDER__", "run: pnpm run dependency:audit");
+      .replace("run: pnpm install --frozen-lockfile", "run: __RSM_INSTALL_PLACEHOLDER__")
+      .replace("run: pnpm run validate", "run: pnpm install --frozen-lockfile")
+      .replace("run: __RSM_INSTALL_PLACEHOLDER__", "run: pnpm run validate");
     expect(mutated).not.toBe(canonicalCi);
     expectIssueCode(mutated, "COMMAND_ORDER_INVALID");
   });
+
+  it.each([
+    [
+      "a duplicate frozen install",
+      "COMMAND_COUNT_INVALID",
+      "      - name: Duplicate install\n        shell: pwsh\n        run: pnpm install --frozen-lockfile\n\n",
+    ],
+    [
+      "a duplicate validate invocation",
+      "COMMAND_COUNT_INVALID",
+      "      - name: Duplicate validate\n        shell: pwsh\n        run: pnpm run validate\n\n",
+    ],
+    [
+      "direct compliance execution",
+      "DIRECT_WORKFLOW_COMPLIANCE_GATE_PRESENT",
+      "      - name: Duplicate compliance\n        shell: pwsh\n        run: pnpm run compliance:check\n\n",
+    ],
+    [
+      "direct dependency-audit execution",
+      "DIRECT_WORKFLOW_DEPENDENCY_AUDIT_PRESENT",
+      "      - name: Duplicate audit\n        shell: pwsh\n        run: pnpm run dependency:audit\n\n",
+    ],
+    [
+      "ci:validate execution",
+      "CI_VALIDATE_INVOCATION_PRESENT",
+      "      - name: Forbidden wrapper\n        shell: pwsh\n        run: pnpm run ci:validate\n\n",
+    ],
+  ])("rejects %s", (_name, expectedCode, step) => {
+    const mutated = mutateCanonical(
+      "      - name: Validate the empty foundation",
+      `${step}      - name: Validate the empty foundation`,
+    );
+    expectIssueCode(mutated, expectedCode);
+  });
+
+  it.each([
+    ["pnpm.cmd run compliance:check", "DIRECT_WORKFLOW_COMPLIANCE_GATE_PRESENT"],
+    ["pnpm run --silent compliance:check", "DIRECT_WORKFLOW_COMPLIANCE_GATE_PRESENT"],
+    ["pnpm.cmd run dependency:audit", "DIRECT_WORKFLOW_DEPENDENCY_AUDIT_PRESENT"],
+    ["pnpm run --silent dependency:audit", "DIRECT_WORKFLOW_DEPENDENCY_AUDIT_PRESENT"],
+    ["pnpm.cmd run ci:validate", "CI_VALIDATE_INVOCATION_PRESENT"],
+    ["pnpm run --silent ci:validate", "CI_VALIDATE_INVOCATION_PRESENT"],
+    ["pnpm.cmd run validate", "SEMANTIC_VALIDATE_COUNT_INVALID"],
+    ["pnpm run --silent validate", "SEMANTIC_VALIDATE_COUNT_INVALID"],
+    ["pnpm.cmd install --frozen-lockfile", "SEMANTIC_INSTALL_COUNT_INVALID"],
+    ["pnpm --silent install --frozen-lockfile", "SEMANTIC_INSTALL_COUNT_INVALID"],
+    ["pnpm.ps1 run validate", "SEMANTIC_VALIDATE_COUNT_INVALID"],
+    ["pnpm.exe run validate", "SEMANTIC_VALIDATE_COUNT_INVALID"],
+    ["PNPM.PS1 run validate", "SEMANTIC_VALIDATE_COUNT_INVALID"],
+    ["pnpm.ps1 --silent run validate", "SEMANTIC_VALIDATE_COUNT_INVALID"],
+    ["C:/tools/pnpm.ps1 run validate", "SEMANTIC_VALIDATE_COUNT_INVALID"],
+    ["C:/tools/pnpm.cmd run validate", "SEMANTIC_VALIDATE_COUNT_INVALID"],
+    ["C:/tools/pnpm.exe run validate", "SEMANTIC_VALIDATE_COUNT_INVALID"],
+    ["$env:PNPM_HOME/pnpm.ps1 run validate", "SEMANTIC_VALIDATE_COUNT_INVALID"],
+    ["pnpm.ps1 install --frozen-lockfile", "SEMANTIC_INSTALL_COUNT_INVALID"],
+    ["pnpm.exe install --frozen-lockfile", "SEMANTIC_INSTALL_COUNT_INVALID"],
+    ["C:/tools/pnpm.ps1 install --frozen-lockfile", "SEMANTIC_INSTALL_COUNT_INVALID"],
+    ["node tooling/compliance/check.mjs", "DIRECT_WORKFLOW_COMPLIANCE_IMPLEMENTATION_PRESENT"],
+    ["node ./tooling/compliance/check.mjs", "DIRECT_WORKFLOW_COMPLIANCE_IMPLEMENTATION_PRESENT"],
+    ["node tooling\\compliance\\check.mjs", "DIRECT_WORKFLOW_COMPLIANCE_IMPLEMENTATION_PRESENT"],
+    ["node .\\tooling\\compliance\\check.mjs", "DIRECT_WORKFLOW_COMPLIANCE_IMPLEMENTATION_PRESENT"],
+    [
+      "node C:\\repo\\tooling\\compliance\\check.mjs",
+      "DIRECT_WORKFLOW_COMPLIANCE_IMPLEMENTATION_PRESENT",
+    ],
+    [
+      "node C:/repo/tooling/compliance/check.mjs",
+      "DIRECT_WORKFLOW_COMPLIANCE_IMPLEMENTATION_PRESENT",
+    ],
+    [
+      "node C:/repo\\tooling/compliance\\check.mjs",
+      "DIRECT_WORKFLOW_COMPLIANCE_IMPLEMENTATION_PRESENT",
+    ],
+    [
+      "pnpm exec node .\\tooling\\compliance\\check.mjs",
+      "DIRECT_WORKFLOW_COMPLIANCE_IMPLEMENTATION_PRESENT",
+    ],
+    ["pnpm audit --audit-level low", "DIRECT_WORKFLOW_PNPM_AUDIT_PRESENT"],
+    ["pnpm audit --audit-level=low", "DIRECT_WORKFLOW_PNPM_AUDIT_PRESENT"],
+    ["pnpm --silent audit --audit-level low", "DIRECT_WORKFLOW_PNPM_AUDIT_PRESENT"],
+  ])("rejects semantic hosted alias %s", (command, expectedCode) => {
+    const step = `      - name: Semantic alias\n        shell: pwsh\n        run: ${command}\n\n`;
+    const mutated = mutateCanonical(
+      "      - name: Validate the empty foundation",
+      `${step}      - name: Validate the empty foundation`,
+    );
+    expectIssueCode(mutated, expectedCode);
+  });
+
+  it("rejects continue-on-error on the validate step", () => {
+    const mutated = mutateCanonical(
+      "        run: pnpm run validate",
+      "        continue-on-error: true\n        run: pnpm run validate",
+    );
+    expectIssueCode(mutated, "VALIDATE_CONTINUE_ON_ERROR");
+  });
+
+  it.each(["${{ true }}", "${{ matrix.allowed_failure }}"])(
+    "rejects validate continue-on-error value %s",
+    (value) => {
+      const mutated = mutateCanonical(
+        "        run: pnpm run validate",
+        `        continue-on-error: ${value}\n        run: pnpm run validate`,
+      );
+      expectIssueCode(mutated, "VALIDATE_CONTINUE_ON_ERROR");
+    },
+  );
 
   it("detects an UNEXPECTED_ACTION_REFERENCE", () => {
     const mutated = mutateCanonical(
@@ -1282,13 +1373,13 @@ describe("validateWorkflowText", () => {
 
   it("detects PUBLISH_RELEASE_PUSH_STEP_PRESENT", () => {
     const mutated = mutateCanonical(
-      "      - name: Enforce the high-severity vulnerability gate",
+      "      - name: Validate the empty foundation",
       [
         "      - name: Forbidden push",
         "        shell: pwsh",
         "        run: git push",
         "",
-        "      - name: Enforce the high-severity vulnerability gate",
+        "      - name: Validate the empty foundation",
       ].join("\n"),
     );
     expectIssueCode(mutated, "PUBLISH_RELEASE_PUSH_STEP_PRESENT");

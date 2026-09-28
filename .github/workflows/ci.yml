@@ -112,11 +112,3 @@ jobs:
         env:
           NODE_OPTIONS: --max-old-space-size=2560
         run: pnpm run validate
-
-      - name: Verify deterministic compliance artifacts
-        shell: pwsh
-        run: pnpm run compliance:check
-
-      - name: Enforce the high-severity vulnerability gate
-        shell: pwsh
-        run: pnpm run dependency:audit

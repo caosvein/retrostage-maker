@@ -80,7 +80,10 @@ function createFixture(activeTaskCount = 0) {
           "electron:package": "pnpm --dir apps/editor-electron run package",
           "electron:smoke": "pnpm --dir apps/editor-electron run smoke",
           "workflow:check": "node tooling/workflow-policy.mjs",
-          validate: "pnpm run workflow:check",
+          "compliance:check": "node tooling/compliance/check.mjs",
+          "dependency:audit": "pnpm audit --audit-level low",
+          validate:
+            "pnpm run format:check && pnpm run lint && pnpm run typecheck && pnpm run test && pnpm run arch:check && pnpm run deadcode:check && pnpm run electron:acquire && pnpm run build && pnpm run workflow:check && pnpm run electron:package && pnpm run electron:smoke && pnpm run compliance:check && pnpm run dependency:audit",
         },
         devDependencies: EXPECTED_DIRECT_DEV_DEPENDENCIES,
       },
@@ -120,7 +123,23 @@ function createFixture(activeTaskCount = 0) {
   ]) {
     write(root, `${packagePath}/package.json`, `${JSON.stringify({ name }, null, 2)}\n`);
   }
-  write(root, ".github/workflows/ci.yml", "name: Fixture CI\n");
+  write(
+    root,
+    ".github/workflows/ci.yml",
+    [
+      "name: Fixture CI",
+      "jobs:",
+      "  validation:",
+      "    steps:",
+      "      - name: Install",
+      "        shell: pwsh",
+      "        run: pnpm install --frozen-lockfile",
+      "      - name: Validate",
+      "        shell: pwsh",
+      "        run: pnpm run validate",
+      "",
+    ].join("\n"),
+  );
   return { root };
 }
 
@@ -141,6 +160,19 @@ function updateSourceManifestRow(root, sourceId, update) {
 
 function issueCodes(issues) {
   return issues.map(({ code }) => code);
+}
+
+function mutateFixtureWorkflow(fixture, mutate) {
+  const workflowPath = path.join(fixture.root, ".github/workflows/ci.yml");
+  const current = readFileSync(workflowPath, "utf8");
+  write(fixture.root, ".github/workflows/ci.yml", mutate(current));
+}
+
+function mutateFixturePackage(fixture, mutate) {
+  const packagePath = path.join(fixture.root, "package.json");
+  const current = JSON.parse(readFileSync(packagePath, "utf8"));
+  mutate(current);
+  write(fixture.root, "package.json", `${JSON.stringify(current, null, 2)}\n`);
 }
 
 const APPROVED_NODE_GYP_COMMIT = "06b29aafb7708acef8b3669835c8a7857ebc92d2";
@@ -175,6 +207,263 @@ describe("RSM-4 workflow policy", () => {
 
   it("passes with one ACTIVE milestone task", () => {
     expect(validateFixture(createFixture(1))).toEqual([]);
+  });
+
+  it.each([
+    [
+      "direct compliance execution",
+      "HOSTED_DIRECT_COMPLIANCE_GATE_PRESENT",
+      (workflow) =>
+        `${workflow}      - name: Duplicate compliance\n        run: pnpm run compliance:check\n`,
+    ],
+    [
+      "direct dependency-audit execution",
+      "HOSTED_DIRECT_DEPENDENCY_AUDIT_PRESENT",
+      (workflow) =>
+        `${workflow}      - name: Duplicate audit\n        run: pnpm run dependency:audit\n`,
+    ],
+    [
+      "ci:validate execution",
+      "HOSTED_CI_VALIDATE_PRESENT",
+      (workflow) =>
+        `${workflow}      - name: Forbidden wrapper\n        run: pnpm run ci:validate\n`,
+    ],
+    [
+      "a missing frozen install",
+      "HOSTED_FROZEN_INSTALL_COUNT_INVALID",
+      (workflow) => workflow.replace("pnpm install --frozen-lockfile", "pnpm install"),
+    ],
+    [
+      "a duplicate frozen install",
+      "HOSTED_FROZEN_INSTALL_COUNT_INVALID",
+      (workflow) =>
+        `${workflow}      - name: Duplicate install\n        run: pnpm install --frozen-lockfile\n`,
+    ],
+    [
+      "a missing validate invocation",
+      "HOSTED_VALIDATE_COUNT_INVALID",
+      (workflow) => workflow.replace("pnpm run validate", "pnpm run typecheck"),
+    ],
+    [
+      "a duplicate validate invocation",
+      "HOSTED_VALIDATE_COUNT_INVALID",
+      (workflow) => `${workflow}      - name: Duplicate validate\n        run: pnpm run validate\n`,
+    ],
+    [
+      "validate before install",
+      "HOSTED_COMMAND_ORDER_INVALID",
+      (workflow) =>
+        workflow
+          .replace("pnpm install --frozen-lockfile", "__VALIDATE__")
+          .replace("pnpm run validate", "pnpm install --frozen-lockfile")
+          .replace("__VALIDATE__", "pnpm run validate"),
+    ],
+    [
+      "continue-on-error on validate",
+      "HOSTED_VALIDATE_CONTINUE_ON_ERROR",
+      (workflow) =>
+        workflow.replace(
+          "        run: pnpm run validate",
+          "        continue-on-error: true\n        run: pnpm run validate",
+        ),
+    ],
+  ])("fails closed on hosted workflow %s", (_name, expectedCode, mutate) => {
+    const fixture = createFixture();
+    mutateFixtureWorkflow(fixture, mutate);
+    expect(issueCodes(validateFixture(fixture))).toContain(expectedCode);
+  });
+
+  it.each([
+    ["pnpm.cmd run compliance:check", "HOSTED_DIRECT_COMPLIANCE_GATE_PRESENT"],
+    ["pnpm run --silent compliance:check", "HOSTED_DIRECT_COMPLIANCE_GATE_PRESENT"],
+    ["pnpm.cmd run dependency:audit", "HOSTED_DIRECT_DEPENDENCY_AUDIT_PRESENT"],
+    ["pnpm run --silent dependency:audit", "HOSTED_DIRECT_DEPENDENCY_AUDIT_PRESENT"],
+    ["pnpm.cmd run ci:validate", "HOSTED_CI_VALIDATE_PRESENT"],
+    ["pnpm run --silent ci:validate", "HOSTED_CI_VALIDATE_PRESENT"],
+    ["pnpm.cmd run validate", "HOSTED_SEMANTIC_VALIDATE_COUNT_INVALID"],
+    ["pnpm run --silent validate", "HOSTED_SEMANTIC_VALIDATE_COUNT_INVALID"],
+    ["pnpm.cmd install --frozen-lockfile", "HOSTED_SEMANTIC_INSTALL_COUNT_INVALID"],
+    ["pnpm --silent install --frozen-lockfile", "HOSTED_SEMANTIC_INSTALL_COUNT_INVALID"],
+    ["pnpm.ps1 run validate", "HOSTED_SEMANTIC_VALIDATE_COUNT_INVALID"],
+    ["pnpm.exe run validate", "HOSTED_SEMANTIC_VALIDATE_COUNT_INVALID"],
+    ["PNPM.PS1 run validate", "HOSTED_SEMANTIC_VALIDATE_COUNT_INVALID"],
+    ["pnpm.ps1 --silent run validate", "HOSTED_SEMANTIC_VALIDATE_COUNT_INVALID"],
+    ["C:/tools/pnpm.ps1 run validate", "HOSTED_SEMANTIC_VALIDATE_COUNT_INVALID"],
+    ["C:/tools/pnpm.cmd run validate", "HOSTED_SEMANTIC_VALIDATE_COUNT_INVALID"],
+    ["C:/tools/pnpm.exe run validate", "HOSTED_SEMANTIC_VALIDATE_COUNT_INVALID"],
+    ["$env:PNPM_HOME/pnpm.ps1 run validate", "HOSTED_SEMANTIC_VALIDATE_COUNT_INVALID"],
+    ["pnpm.ps1 install --frozen-lockfile", "HOSTED_SEMANTIC_INSTALL_COUNT_INVALID"],
+    ["pnpm.exe install --frozen-lockfile", "HOSTED_SEMANTIC_INSTALL_COUNT_INVALID"],
+    ["C:/tools/pnpm.ps1 install --frozen-lockfile", "HOSTED_SEMANTIC_INSTALL_COUNT_INVALID"],
+    ["node tooling/compliance/check.mjs", "HOSTED_DIRECT_COMPLIANCE_IMPLEMENTATION_PRESENT"],
+    ["node ./tooling/compliance/check.mjs", "HOSTED_DIRECT_COMPLIANCE_IMPLEMENTATION_PRESENT"],
+    ["node tooling\\compliance\\check.mjs", "HOSTED_DIRECT_COMPLIANCE_IMPLEMENTATION_PRESENT"],
+    ["node .\\tooling\\compliance\\check.mjs", "HOSTED_DIRECT_COMPLIANCE_IMPLEMENTATION_PRESENT"],
+    [
+      "node C:\\repo\\tooling\\compliance\\check.mjs",
+      "HOSTED_DIRECT_COMPLIANCE_IMPLEMENTATION_PRESENT",
+    ],
+    [
+      "node C:/repo/tooling/compliance/check.mjs",
+      "HOSTED_DIRECT_COMPLIANCE_IMPLEMENTATION_PRESENT",
+    ],
+    [
+      "node C:/repo\\tooling/compliance\\check.mjs",
+      "HOSTED_DIRECT_COMPLIANCE_IMPLEMENTATION_PRESENT",
+    ],
+    [
+      "pnpm exec node .\\tooling\\compliance\\check.mjs",
+      "HOSTED_DIRECT_COMPLIANCE_IMPLEMENTATION_PRESENT",
+    ],
+    ["pnpm audit --audit-level low", "HOSTED_DIRECT_PNPM_AUDIT_PRESENT"],
+    ["pnpm audit --audit-level=low", "HOSTED_DIRECT_PNPM_AUDIT_PRESENT"],
+    ["pnpm --silent audit --audit-level low", "HOSTED_DIRECT_PNPM_AUDIT_PRESENT"],
+  ])("fails closed on semantic hosted alias %s", (command, expectedCode) => {
+    const fixture = createFixture();
+    mutateFixtureWorkflow(
+      fixture,
+      (workflow) => `${workflow}      - name: Semantic alias\n        run: ${command}\n`,
+    );
+    expect(issueCodes(validateFixture(fixture))).toContain(expectedCode);
+  });
+
+  it.each(["${{ true }}", "${{ matrix.allowed_failure }}"])(
+    "fails closed on validate continue-on-error value %s",
+    (value) => {
+      const fixture = createFixture();
+      mutateFixtureWorkflow(fixture, (workflow) =>
+        workflow.replace(
+          "        run: pnpm run validate",
+          `        continue-on-error: ${value}\n        run: pnpm run validate`,
+        ),
+      );
+      expect(issueCodes(validateFixture(fixture))).toContain("HOSTED_VALIDATE_CONTINUE_ON_ERROR");
+    },
+  );
+
+  it.each([
+    [
+      "missing compliance",
+      "VALIDATE_TERMINAL_GATE_MISSING",
+      (scripts) => {
+        scripts.validate = "pnpm run workflow:check && pnpm run dependency:audit";
+      },
+    ],
+    [
+      "missing audit",
+      "VALIDATE_TERMINAL_GATE_MISSING",
+      (scripts) => {
+        scripts.validate = "pnpm run workflow:check && pnpm run compliance:check";
+      },
+    ],
+    [
+      "reversed terminal gates",
+      "VALIDATE_TERMINAL_GATE_ORDER_INVALID",
+      (scripts) => {
+        scripts.validate =
+          "pnpm run workflow:check && pnpm run dependency:audit && pnpm run compliance:check";
+      },
+    ],
+    [
+      "duplicated compliance",
+      "VALIDATE_TERMINAL_GATE_DUPLICATED",
+      (scripts) => {
+        scripts.validate =
+          "pnpm run compliance:check && pnpm run workflow:check && pnpm run compliance:check && pnpm run dependency:audit";
+      },
+    ],
+    [
+      "duplicated audit",
+      "VALIDATE_TERMINAL_GATE_DUPLICATED",
+      (scripts) => {
+        scripts.validate =
+          "pnpm run dependency:audit && pnpm run workflow:check && pnpm run compliance:check && pnpm run dependency:audit";
+      },
+    ],
+    [
+      "a command after dependency audit",
+      "VALIDATE_FAIL_STOP_CHAIN_INVALID",
+      (scripts) => {
+        scripts.validate =
+          "pnpm run workflow:check && pnpm run compliance:check && pnpm run dependency:audit && pnpm run typecheck";
+      },
+    ],
+    [
+      "a non-fail-stop terminal separator",
+      "VALIDATE_FAIL_STOP_CHAIN_INVALID",
+      (scripts) => {
+        scripts.validate =
+          "pnpm run workflow:check && pnpm run compliance:check ; pnpm run dependency:audit";
+      },
+    ],
+    [
+      "a swallowed failure before the terminal gates",
+      "VALIDATE_FAIL_STOP_CHAIN_INVALID",
+      (scripts) => {
+        scripts.validate =
+          "pnpm run workflow:check || true && pnpm run compliance:check && pnpm run dependency:audit";
+      },
+    ],
+    [
+      "a direct compliance implementation bypass",
+      "VALIDATE_NAMED_GATE_BYPASS",
+      (scripts) => {
+        scripts.validate =
+          "node tooling/compliance/check.mjs && pnpm run compliance:check && pnpm run dependency:audit";
+      },
+    ],
+    [
+      "a direct dependency-audit implementation bypass",
+      "VALIDATE_NAMED_GATE_BYPASS",
+      (scripts) => {
+        scripts.validate =
+          "pnpm audit --audit-level low && pnpm run compliance:check && pnpm run dependency:audit";
+      },
+    ],
+  ])("fails closed on package validate %s", (_name, expectedCode, mutate) => {
+    const fixture = createFixture();
+    mutateFixturePackage(fixture, ({ scripts }) => mutate(scripts));
+    expect(issueCodes(validateFixture(fixture))).toContain(expectedCode);
+  });
+
+  it.each([
+    "node ./tooling/compliance/check.mjs && ",
+    "pnpm audit --audit-level=low && ",
+    "pnpm --silent audit --audit-level low && ",
+    "echo harmless && ",
+  ])("fails closed on complete package validate identity drift: %s", (prefix) => {
+    const fixture = createFixture();
+    mutateFixturePackage(fixture, ({ scripts }) => {
+      scripts.validate = `${prefix}${scripts.validate}`;
+    });
+    expect(issueCodes(validateFixture(fixture))).toContain("VALIDATE_SCRIPT_IDENTITY_DRIFT");
+  });
+
+  it("fails closed on a harmless-looking package validate suffix", () => {
+    const fixture = createFixture();
+    mutateFixturePackage(fixture, ({ scripts }) => {
+      scripts.validate = `${scripts.validate} && echo done`;
+    });
+    expect(issueCodes(validateFixture(fixture))).toContain("VALIDATE_SCRIPT_IDENTITY_DRIFT");
+  });
+
+  it("fails closed on package validate whitespace drift", () => {
+    const fixture = createFixture();
+    mutateFixturePackage(fixture, ({ scripts }) => {
+      scripts.validate = ` ${scripts.validate}`;
+    });
+    expect(issueCodes(validateFixture(fixture))).toContain("VALIDATE_SCRIPT_IDENTITY_DRIFT");
+  });
+
+  it.each([
+    ["compliance:check", "node tooling/compliance/generate.mjs"],
+    ["dependency:audit", "pnpm audit --audit-level moderate"],
+  ])("fails closed when the %s named gate identity drifts", (name, command) => {
+    const fixture = createFixture();
+    mutateFixturePackage(fixture, ({ scripts }) => {
+      scripts[name] = command;
+    });
+    expect(issueCodes(validateFixture(fixture))).toContain("NAMED_GATE_SCRIPT_IDENTITY_DRIFT");
   });
 
   it("accepts the exact codeload node-gyp repository and commit identity", () => {

@@ -523,16 +523,35 @@ const WINDOWS_PRIMARY_CI_CONTRACT = Object.freeze({
     '$pnpmVersion -ne "11.17.0"',
     "pnpm install --frozen-lockfile",
     "pnpm run validate",
-    "pnpm run compliance:check",
-    "pnpm run dependency:audit",
   ],
-  commands: [
-    "pnpm install --frozen-lockfile",
-    "pnpm run validate",
-    "pnpm run compliance:check",
-    "pnpm run dependency:audit",
-  ],
+  commands: ["pnpm install --frozen-lockfile", "pnpm run validate"],
 });
+
+function inspectWorkflowPnpmInvocations(workflow) {
+  const facts = { audit: 0, install: 0, runTargets: [] };
+  for (const line of workflow.split(/\r\n|\n|\r/u)) {
+    const tokens = line.match(/[A-Za-z0-9_./:@=-]+/gu) ?? [];
+    const pnpmIndexes = tokens.flatMap((token, index) => {
+      const basename = token.replace(/\\/gu, "/").split("/").at(-1) ?? "";
+      return /^pnpm(?:\.(?:cmd|ps1|exe))?$/iu.test(basename) ? [index] : [];
+    });
+    for (const [position, pnpmIndex] of pnpmIndexes.entries()) {
+      const nextPnpmIndex = pnpmIndexes[position + 1] ?? tokens.length;
+      const commandTokens = tokens
+        .slice(pnpmIndex + 1, nextPnpmIndex)
+        .map((token) => token.toLowerCase());
+      if (commandTokens.includes("install")) facts.install += 1;
+      if (commandTokens.includes("audit")) facts.audit += 1;
+      const runIndex = commandTokens.indexOf("run");
+      if (runIndex < 0) continue;
+      const runTokens = commandTokens.slice(runIndex + 1);
+      for (const target of ["validate", "compliance:check", "dependency:audit", "ci:validate"]) {
+        if (runTokens.includes(target)) facts.runTargets.push(target);
+      }
+    }
+  }
+  return facts;
+}
 
 export function validateWorkflowText(workflow) {
   const issues = [];
@@ -584,12 +603,49 @@ export function validateWorkflowText(workflow) {
     issues.push("COMMAND_ORDER_INVALID");
   }
 
+  for (const command of WINDOWS_PRIMARY_CI_CONTRACT.commands) {
+    const count = workflow.split(command).length - 1;
+    if (count !== 1) issues.push(`COMMAND_COUNT_INVALID:${command}:${count}`);
+  }
+  for (const [command, code] of [
+    ["pnpm run compliance:check", "DIRECT_WORKFLOW_COMPLIANCE_GATE_PRESENT"],
+    ["pnpm run dependency:audit", "DIRECT_WORKFLOW_DEPENDENCY_AUDIT_PRESENT"],
+    ["pnpm run ci:validate", "CI_VALIDATE_INVOCATION_PRESENT"],
+  ]) {
+    if (workflow.includes(command)) issues.push(code);
+  }
+
+  const semantic = inspectWorkflowPnpmInvocations(workflow);
+  const semanticValidateCount = semantic.runTargets.filter(
+    (target) => target === "validate",
+  ).length;
+  if (semantic.install !== 1) issues.push(`SEMANTIC_INSTALL_COUNT_INVALID:${semantic.install}`);
+  if (semanticValidateCount !== 1)
+    issues.push(`SEMANTIC_VALIDATE_COUNT_INVALID:${semanticValidateCount}`);
+
+  const workflowLower = workflow.toLowerCase();
+  for (const [reference, code] of [
+    ["compliance:check", "DIRECT_WORKFLOW_COMPLIANCE_GATE_PRESENT"],
+    ["dependency:audit", "DIRECT_WORKFLOW_DEPENDENCY_AUDIT_PRESENT"],
+    ["ci:validate", "CI_VALIDATE_INVOCATION_PRESENT"],
+  ]) {
+    if (workflowLower.includes(reference)) issues.push(code);
+  }
+  const workflowPathNormalized = workflowLower.replace(/[\\/]+/gu, "/");
+  if (workflowPathNormalized.includes("tooling/compliance/check.mjs")) {
+    issues.push("DIRECT_WORKFLOW_COMPLIANCE_IMPLEMENTATION_PRESENT");
+  }
+  if (semantic.audit > 0) issues.push("DIRECT_WORKFLOW_PNPM_AUDIT_PRESENT");
+
   const stepBlocks = workflow.split(/^\s*-\s*name:/mu).slice(1);
   for (const block of stepBlocks) {
     if (/^\s*run:/mu.test(block)) {
       if (!/^\s*shell:\s*pwsh/mu.test(block)) {
         issues.push("REQUIRED_FRAGMENT_MISSING:shell: pwsh");
       }
+    }
+    if (block.includes("pnpm run validate") && /^\s*continue-on-error\s*:/imu.test(block)) {
+      issues.push("VALIDATE_CONTINUE_ON_ERROR");
     }
   }
 
