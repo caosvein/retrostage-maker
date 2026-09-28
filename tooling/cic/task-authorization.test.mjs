@@ -282,7 +282,7 @@ describe.sequential("CIC-I4 task authorization, checkpoint, and lease lifecycle"
     );
     expect(admissionFact).toMatchObject({
       sourceGenerationFingerprint:
-        "F3CA72E7F199DAC701270E7E9611AE10921685579F9AF38D5060F1920BDCCBAB",
+        "CD88CD5E8634474EBF2EA5FE5195E2092592DD54084A79D1B9F8A9D55024B190",
       repositoryIdentity: REPOSITORY_IDENTITY,
       repositoryHeadCommit: fixture.physicalHeadCommit,
       repositoryHeadTree: fixture.physicalHeadTree,

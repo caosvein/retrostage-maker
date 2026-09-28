@@ -3,15 +3,15 @@
 **Document ID:** `07_RSM_REBOOT_REPOSITORY_COMMANDS_AND_VALIDATION`  
 **Role:** Authoritative operating command and validation source derived from physical RSM-3-I4 execution  
 **Project:** RetroStage Maker  
-**Observation date:** 2026-09-07  
+**Observation date:** 2026-09-28  
 **Timezone:** Europe/Istanbul  
-**State:** `AUTHORITATIVE REPOSITORY COMMAND SOURCE / RSM-3 CLOSED / CIC COMMAND ENTRY POINTS PHYSICALLY ALIGNED THROUGH I8`
+**State:** `AUTHORITATIVE REPOSITORY COMMAND SOURCE / RSM-3 CLOSED / CURRENT CIC COMMAND ENTRY POINTS PHYSICALLY REAUTHENTICATED`
 
 ---
 
 ## 1. Scope
 
-This source records commands and operations physically executed during the accepted-candidate FIX2 commit and the RSM-3-I4 RETRY2 physical proof. It covers repository identity, ordinary push, GitHub-hosted CI, fresh Windows clone, LF checkout verification, frozen install, validation, local and external backup, manifest verification, and isolated restore. It also records the CIC command entry points physically present at the accepted I8 HEAD; only top-level executable scripts are commands.
+This source records commands and operations physically executed during the accepted-candidate FIX2 commit and the RSM-3-I4 RETRY2 physical proof. It covers repository identity, ordinary push, GitHub-hosted CI, fresh Windows clone, LF checkout verification, frozen install, validation, local and external backup, manifest verification, and isolated restore. It also records the current CIC command entry points physically reauthenticated at HEAD `4414bcb7df4b3efe8aa0ad392405339f42dc70b8`, tree `754a410dfc2eb9a50918e9e0d76b603b3c221a2f`; only top-level executable scripts are commands.
 
 It does not close RSM-3-I4, authorize RSM-3-V1, start RSM-4, or authorize product implementation.
 
@@ -419,13 +419,13 @@ Never:
 
 ---
 
-`SOURCE 07 = AUTHORITATIVE REPOSITORY COMMAND SOURCE / RSM-3 CLOSED / CIC COMMAND ENTRY POINTS PHYSICALLY ALIGNED THROUGH I8`
+`SOURCE 07 = AUTHORITATIVE REPOSITORY COMMAND SOURCE / RSM-3 CLOSED / CURRENT CIC COMMAND ENTRY POINTS PHYSICALLY REAUTHENTICATED`
 
 ---
 
-## 13. Physical CIC Command Entry Points Through I8
+## 13. Current Physical CIC Command Entry Points
 
-The following command entry points exist physically at accepted HEAD `ab195046c575b7724239c3b4c156cd17804bc434`. Their accepted semantics do not grant Source mutation, Stage, Commit, Push, hosted-CI dispatch, or publication authority. Files under `tooling/cic/lib/**`, `.test.mjs` files, `PROMOTE`, and hypothetical I9–I12 entry points are not standalone commands.
+The following command entry points exist physically at current accepted HEAD `4414bcb7df4b3efe8aa0ad392405339f42dc70b8`, tree `754a410dfc2eb9a50918e9e0d76b603b3c221a2f`. Their accepted semantics do not grant Source mutation, Stage, Commit, Push, hosted-CI dispatch, or publication authority. Files under `tooling/cic/lib/**`, `.test.mjs` files, helpers, orchestration shorthand, evidence artifacts, and non-command files are not standalone commands.
 
 ### Read-only compilation and verification
 

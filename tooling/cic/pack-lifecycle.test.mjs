@@ -350,7 +350,7 @@ describe.sequential("CIC-I4 pack lifecycle", () => {
     );
     expect(artifacts.CONTEXT_COMPILATION.currentTruthIdentity).toMatch(/^[0-9A-F]{64}$/u);
     expect(artifacts.SOURCE_GENERATION_PROOF.fingerprint).toBe(
-      "F3CA72E7F199DAC701270E7E9611AE10921685579F9AF38D5060F1920BDCCBAB",
+      "CD88CD5E8634474EBF2EA5FE5195E2092592DD54084A79D1B9F8A9D55024B190",
     );
     expect(artifacts.REPOSITORY_IDENTITY_PROOF.repository.repositoryIdentity).toBe(
       REPOSITORY_IDENTITY,

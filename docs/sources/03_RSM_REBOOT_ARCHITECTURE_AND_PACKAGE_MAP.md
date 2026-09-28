@@ -3445,7 +3445,7 @@ The durable CTX-26/27/28 progression root must have one exact physical root and 
 
 Evidence uses stable ID, content hash, classification, governed locator and availability. Required missing/corrupt bytes fail closed; relocation of identical bytes does not change semantic identity. Clean-clone/restore and bounded deterministic scale fixtures must prove the architecture before CIC closure.
 
-No new production or development dependency is admitted by this boundary. Source07 remains unchanged until physical CIC scripts exist, and Source02/08 remain the lifecycle authority; this architecture text does not activate CIC or RSM-7.
+No new production or development dependency is admitted by this boundary. Physical top-level CIC command entry points exist and Source07 is reauthenticated to the current repository baseline; Source02/08 remain the current-control and lifecycle authority. This architecture text does not activate a later control or RSM-7.
 
 ---
 
@@ -3461,6 +3461,14 @@ implementation baseline = dbd3f2be31d89ca36a17ccb4914e21623df424a2
 closure/publication baseline = 34b1148e1c7be12e30f1e962148d40b5027a7b07
 closure natural CI = 32526483832 / 96909482744 / attempt 1 / success
 Gate B = ACTIVE / CURRENT
+Final CIC Closure = CLOSED / PASS / PUBLISHED / HOSTED-VALIDATED
+Post-I12 Slice1-5 = CLOSED / PASS / PUBLISHED / HOSTED-VALIDATED
+Slice6 canonical technical state = CONDITIONAL / DISABLED / NOT STARTED
+Slice6 owner progression disposition = DEFERRED / RESEARCH-ONLY / NOT REQUIRED FOR CURRENT PROGRESSION
+current CIC/repository baseline = 4414bcb7df4b3efe8aa0ad392405339f42dc70b8 / tree 754a410dfc2eb9a50918e9e0d76b603b3c221a2f / CI run 71 attempt 1 success
+RSM → CICtrl H0 = CLOSED / PASS / DONOR CAPTURE ACCEPTED / RSM MUTATION NONE
+current control = FIRST POST-I12 CIC REBASE / CURRENT-SOURCE ALIGNMENT
+V30-FREEZE11 / R16 / second CIC rebase / RIH = LOCKED
 RSM-7 = next roadmap milestone / not implemented / not started / not authorized
 ```
 

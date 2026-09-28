@@ -17,7 +17,7 @@ import { formatJsonResult, run } from "./verify-source-generation.mjs";
 const CIC_DIRECTORY = path.dirname(fileURLToPath(import.meta.url));
 const REPOSITORY_ROOT = path.resolve(CIC_DIRECTORY, "..", "..");
 const SOURCE_ROOT = path.join(REPOSITORY_ROOT, "docs", "sources");
-const EXPECTED_FINGERPRINT = "F3CA72E7F199DAC701270E7E9611AE10921685579F9AF38D5060F1920BDCCBAB";
+const EXPECTED_FINGERPRINT = "CD88CD5E8634474EBF2EA5FE5195E2092592DD54084A79D1B9F8A9D55024B190";
 const temporaryRoots = [];
 
 async function createFixture(order = [...EXPECTED_SOURCE_IDS]) {
