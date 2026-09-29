@@ -5753,12 +5753,12 @@
       "classification": "AUTOMATICALLY_ADMISSIBLE",
       "distributionScope": "RSM-5-I1 DEVELOPMENT / SECURE ELECTRON SHELL CANDIDATE / NOT FINAL RELEASE",
       "evidenceSource": "Installed package.json plus physical top-level license/notice files",
-      "identity": "fast-uri@3.1.6",
+      "identity": "fast-uri@3.1.7",
       "license": "BSD-3-Clause",
       "licenseFiles": [
         {
           "name": "LICENSE",
-          "path": "node_modules/.pnpm/fast-uri@3.1.6/node_modules/fast-uri/LICENSE",
+          "path": "node_modules/.pnpm/fast-uri@3.1.7/node_modules/fast-uri/LICENSE",
           "sha256": "B010B0DFDFDB23D7396E03B82CD4621FC9BB8F95D6B0AEA70B9C24E12074C786"
         }
       ],
@@ -5771,7 +5771,7 @@
       "packagedArtifactDisposition": null,
       "prohibited": false,
       "safeNoticeSourceUrl": "https://github.com/fastify/fast-uri.git",
-      "version": "3.1.6"
+      "version": "3.1.7"
     },
     {
       "author": "Matteo Collina <hello@matteocollina.com>",
@@ -7254,12 +7254,12 @@
       "classification": "AUTOMATICALLY_ADMISSIBLE",
       "distributionScope": "RSM-5-I1 DEVELOPMENT / SECURE ELECTRON SHELL CANDIDATE / NOT FINAL RELEASE",
       "evidenceSource": "Installed package.json plus physical top-level license/notice files",
-      "identity": "ip-address@10.5.0",
+      "identity": "ip-address@10.5.1",
       "license": "MIT",
       "licenseFiles": [
         {
           "name": "LICENSE",
-          "path": "node_modules/.pnpm/ip-address@10.5.0/node_modules/ip-address/LICENSE",
+          "path": "node_modules/.pnpm/ip-address@10.5.1/node_modules/ip-address/LICENSE",
           "sha256": "F8D791359A50CBCAC82C29CB7B0B1B889B28BE76FDD35B8EE33F0F7C8704702A"
         }
       ],
@@ -7272,7 +7272,7 @@
       "packagedArtifactDisposition": null,
       "prohibited": false,
       "safeNoticeSourceUrl": "https://github.com/beaugunderson/ip-address.git",
-      "version": "10.5.0"
+      "version": "10.5.1"
     },
     {
       "author": "Qix (http://github.com/qix-)",
@@ -12959,12 +12959,12 @@
       "classification": "AUTOMATICALLY_ADMISSIBLE",
       "distributionScope": "RSM-5-I1 DEVELOPMENT / SECURE ELECTRON SHELL CANDIDATE / NOT FINAL RELEASE",
       "evidenceSource": "Installed package.json plus physical top-level license/notice files",
-      "identity": "undici@7.29.0",
+      "identity": "undici@7.29.1",
       "license": "MIT",
       "licenseFiles": [
         {
           "name": "LICENSE",
-          "path": "node_modules/.pnpm/undici@7.29.0/node_modules/undici/LICENSE",
+          "path": "node_modules/.pnpm/undici@7.29.1/node_modules/undici/LICENSE",
           "sha256": "A6DB8096B2707BC0102D256917D4D33F298BA36D8C3F25DE067A2B5BB379DB27"
         }
       ],
@@ -12977,7 +12977,7 @@
       "packagedArtifactDisposition": null,
       "prohibited": false,
       "safeNoticeSourceUrl": "https://github.com/nodejs/undici.git",
-      "version": "7.29.0"
+      "version": "7.29.1"
     },
     {
       "author": "GitHub Inc.",
