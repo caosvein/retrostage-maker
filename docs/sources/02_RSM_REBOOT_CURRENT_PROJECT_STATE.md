@@ -4,12 +4,12 @@
 **Role:** Authoritative current-state snapshot for the RetroStage Maker reboot  
 **Project:** RetroStage Maker  
 **Source generation:** Reboot / clean-start  
-**Snapshot date:** 2026-09-28  
+**Snapshot date:** 2026-09-30
 **Snapshot timezone:** Europe/Istanbul  
-**Document state:** `LIVE SNAPSHOT / FINAL CIC CLOSURE CLOSED-PASS-PUBLISHED-HOSTED-VALIDATED / POST-I12 SLICES1-5 CLOSED-PASS-PUBLISHED-HOSTED-VALIDATED / SLICE6 CONDITIONAL-DISABLED-NOT STARTED AND DEFERRED-RESEARCH-ONLY / FIRST POST-I12 CIC REBASE ACTIVE / GATE B ACTIVE-CURRENT`  
+**Document state:** `LIVE SNAPSHOT / FINAL CIC CLOSURE AND POST-I12 SLICES1-5 CLOSED-PASS-PUBLISHED-HOSTED-VALIDATED / REBASE1 CLOSED-PASS-PUBLISHED-HOSTED-VALIDATED-MIRROR-CONVERGED / DEPSEC1 AND DEPSEC2 CLOSED-PASS-PUBLISHED-HOSTED-VALIDATED-REMOTE-CURRENT / V30-FREEZE11 FINALIZE1 CIC-FAST ACTIVE-NOT CLOSED / GATE B ACTIVE-CURRENT`
 **Current product gate:** `Gate B — ACTIVE / CURRENT`  
 **Current milestone/control:** `RSM-6 — MILESTONE CLOSED / PASS; RSM-7 — NEXT / NOT STARTED / NOT AUTHORIZED`  
-**Current task:** `FIRST POST-I12 CIC REBASE / CURRENT-SOURCE ALIGNMENT — REBASE1-IMPLEMENT1 / BOUNDED CANDIDATE EXECUTION; RSM-7 remains NOT STARTED / NOT AUTHORIZED`  
+**Current task:** `DEPSEC1 and DEPSEC2 CLOSED / PASS / PUBLISHED / HOSTED-VALIDATED / REMOTE-CURRENT; V30-FREEZE11 FINALIZE1 / CIC-FAST ACTIVE / NOT CLOSED; V30 publication NOT AUTHORIZED; R16 / second CIC rebase / RIH LOCKED; RSM-7 NOT STARTED / NOT AUTHORIZED`
 **Repository:** `PRESENT — C:\RetroStage\retrostage-maker`  
 **Remote origin:** `https://github.com/caosvein/retrostage-maker.git`  
 **Primary branch:** `main`  
@@ -52,14 +52,16 @@
 **Post-I12 Slice1-5:** `CLOSED / PASS / PUBLISHED / HOSTED-VALIDATED`  
 **Post-I12 Slice6 canonical technical state:** `CONDITIONAL / DISABLED / NOT STARTED`  
 **Post-I12 Slice6 owner progression disposition:** `DEFERRED / RESEARCH-ONLY / NOT REQUIRED FOR CURRENT PROGRESSION`  
-**Current CIC/repository publication baseline:** `4414bcb7df4b3efe8aa0ad392405339f42dc70b8`  
-**Current CIC/repository tree:** `754a410dfc2eb9a50918e9e0d76b603b3c221a2f`  
-**Current natural hosted CI:** `36397454934 / run 71 / job 108847116227 / attempt 1 / push / main / success`  
+**Current CIC/repository publication baseline:** `53ba37fdb035fef24bd3dcae33b981f25ccc7eb8`
+**Current CIC/repository tree:** `e81e8868cbeeb0a7a68320a3eb3bed9de8886f39`
+**Current natural hosted CI:** `36702542499 / validation job 109845100527 / success`
+**DEPSEC1:** `CLOSED / PASS / PUBLISHED / HOSTED-VALIDATED / REMOTE-CURRENT`
+**DEPSEC2:** `CLOSED / PASS / PUBLISHED / HOSTED-VALIDATED / REMOTE-CURRENT`
 **RSM → CICtrl H0:** `CLOSED / PASS / DONOR CAPTURE ACCEPTED / RSM MUTATION NONE`  
 **CICtrl boundary:** `INDEPENDENT / NOT AN RSM BLOCKER / ARCHITECTURE AND IMPLEMENTATION OUT OF RSM REBASE1 SCOPE`  
 **RSM-3 decision:** `CLOSED`  
 **Independently accepted/closed reboot product capabilities:** `RSM-5 secure Electron shell; RSM-6 I1-I8 renderer foundation and V1 validation`  
-**Immediate next control step:** `Construct and locally validate the exact REBASE1-IMPLEMENT1 candidate, then stop for independent ChatGPT exact-candidate final review; Stage, Commit, Push, hosted CI, mirror synchronization, and RSM-7 remain unauthorized`
+**Immediate next control step:** `Finish the V30-FREEZE11 FINALIZE1 / CIC-FAST Source-only candidate and stop for independent ChatGPT exact-candidate review; the local validation commit is authorized but push, mirror, V30 promotion, and RSM-7 remain unauthorized`
 
 ---
 
@@ -73,7 +75,7 @@ The POST-RSM-6 / PRE-RSM-7 `COMPLETENESS-FIX2` source alignment remains historic
 
 The `PRE-RSM-7 SOURCE ALIGNMENT WAVE2 CREATOR-APPEAL / SICE V4` control is `CLOSED / PASS`. Its exact Source generation was published at commit `4e5c337445f712a5feeab2f2c2167783086766d9`; natural CI run `32830026684`, job `97746392474`, attempt 1 completed successfully for the push to `main`. Google Drive Sources and ChatGPT Project Sources each converge `11/11 exact / PASS`, and the final completeness audit is `PASS`.
 
-CIC I5 is complete. CIC I6, I7, I8, and I9 are each `CLOSED / PASS / PUBLISHED / HOSTED-VALIDATED`. I9 closed at HEAD `8bda5b00dfc5fa310c1f7a3b74b874e60258c8dc`, tree `d05b92a98e50f72e8b7eec1ac04f8e67b8982ae3`, with correction candidate `BBBD4D67194826EE317C6F5215CD21F9A442163E12301101890825B25AE841E1` and natural CI `35544038260 / run 63 / job 106166682348 / attempt 1 / push / main / success`. The earlier staged-state validation failure and natural hosted run `35537782250` failure remain historical evidence. The later Source-alignment run `35582138348 / run 64 / job 106277214792 / attempt 1 / failure` exposed stale fixed Source-generation oracles and also remains historical evidence. The corrected CIC code baseline was HEAD `b077a73a72f796b74dbd255f5e23c63e704e82b7`, tree `cd78fbd1ad96c893a49feddf9e1cc8789012454e`, accepted by natural CI `35645178542 / run 65 / job 106483781727 / attempt 1 / push / main / success`. CIC I10, I11-Lite, and I12 are accepted; Final CIC Closure is `CLOSED / PASS / PUBLISHED / HOSTED-VALIDATED`; and Post-I12 Slice1-5 are `CLOSED / PASS / PUBLISHED / HOSTED-VALIDATED`. Slice6 retains two distinct accepted axes: canonical technical state `CONDITIONAL / DISABLED / NOT STARTED`, and owner progression disposition `DEFERRED / RESEARCH-ONLY / NOT REQUIRED FOR CURRENT PROGRESSION`. The current publication baseline is HEAD `4414bcb7df4b3efe8aa0ad392405339f42dc70b8`, tree `754a410dfc2eb9a50918e9e0d76b603b3c221a2f`, accepted by natural CI `36397454934 / run 71 / job 108847116227 / attempt 1 / push / main / success`. RSM → CICtrl H0 is `CLOSED / PASS / DONOR CAPTURE ACCEPTED` and made no RSM mutation; CICtrl remains independent, is not an RSM blocker, and its architecture and implementation stay outside RSM REBASE1 scope. The current control is `FIRST POST-I12 CIC REBASE / CURRENT-SOURCE ALIGNMENT`. V30-FREEZE11, R16, the second CIC rebase, and RIH remain locked. RSM-7 remains `NOT STARTED / NOT AUTHORIZED`.
+CIC I5-I12, Final CIC Closure, and Post-I12 Slice1-5 remain accepted historical closures. The prior publication baseline `4414bcb7df4b3efe8aa0ad392405339f42dc70b8` / tree `754a410dfc2eb9a50918e9e0d76b603b3c221a2f` / CI `36397454934` is historical, superseded as the current baseline by published DEPSEC2. REBASE1 remains closed and mirror-converged at its historical HEAD/tree. DEPSEC1 and DEPSEC2 are `CLOSED / PASS / PUBLISHED / HOSTED-VALIDATED / REMOTE-CURRENT` without granting new Source authority. V30-FREEZE11 `FINALIZE1 / CIC-FAST` is active, not closed or published. R16, the second CIC rebase, and RIH remain locked; RSM-7 remains `NOT STARTED / NOT AUTHORIZED`.
 
 ---
 
@@ -129,10 +131,11 @@ CIC I5 is complete. CIC I6, I7, I8, and I9 are each `CLOSED / PASS / PUBLISHED /
 | FINAL CIC CLOSURE | `CLOSED / PASS / PUBLISHED / HOSTED-VALIDATED` | Final closure publication and natural hosted validation are accepted |
 | POST-I12 SLICE1-5 | `CLOSED / PASS / PUBLISHED / HOSTED-VALIDATED` | Accepted post-I12 implementation sequence is complete through Slice5 |
 | POST-I12 SLICE6 | `CONDITIONAL / DISABLED / NOT STARTED` | Canonical technical state; owner progression is separately `DEFERRED / RESEARCH-ONLY / NOT REQUIRED FOR CURRENT PROGRESSION` |
-| CURRENT CIC/REPOSITORY PUBLICATION | `ACCEPTED / PUBLISHED / HOSTED-VALIDATED` | HEAD `4414bcb7df4b3efe8aa0ad392405339f42dc70b8`; tree `754a410dfc2eb9a50918e9e0d76b603b3c221a2f`; CI `36397454934 / run 71 / job 108847116227 / attempt 1 / success` |
+| CURRENT CIC/REPOSITORY PUBLICATION | `ACCEPTED / PUBLISHED / HOSTED-VALIDATED` | HEAD `53ba37fdb035fef24bd3dcae33b981f25ccc7eb8`; tree `e81e8868cbeeb0a7a68320a3eb3bed9de8886f39`; natural CI `36702542499`; validation job `109845100527`; DEPSEC1/2 remote-current |
 | RSM → CICtrl H0 | `CLOSED / PASS / DONOR CAPTURE ACCEPTED` | H0 made no RSM mutation; CICtrl remains independent and is not an RSM blocker |
-| FIRST POST-I12 CIC REBASE / CURRENT-SOURCE ALIGNMENT | `CURRENT / REBASE1-IMPLEMENT1` | Bounded candidate construction and local validation only; independent exact-candidate review remains separate |
-| LATER CONTROLS | `LOCKED / NOT EXECUTED` | V30-FREEZE11, R16, second CIC rebase, and RIH remain locked |
+| FIRST POST-I12 CIC REBASE / CURRENT-SOURCE ALIGNMENT | `REBASE1 CLOSED / PASS / PUBLISHED / HOSTED-VALIDATED / MIRROR-CONVERGED` | V30-FREEZE11 FINALIZE1 / CIC-FAST active/not closed; V30 publication unauthorized |
+| V30-FREEZE11 SOURCE ALIGNMENT | `FINALIZE1 / CIC-FAST ACTIVE / NOT CLOSED` | Semantic Source alignment only; no implementation completion or publication claim |
+| LATER CONTROLS | `LOCKED / NOT EXECUTED` | R16, second CIC rebase, and RIH remain locked |
 | RSM-7 | `NOT STARTED / NOT AUTHORIZED` | Canonical project/scene document implementation has not begun |
 
 ---
@@ -313,7 +316,7 @@ Tracked worktree drift: 0
 
 ## 7. Source 07 Position
 
-`07_RSM_REBOOT_REPOSITORY_COMMANDS_AND_VALIDATION.md` preserves the historical commands physically observed in I4 and documents the current physical top-level CIC command entry points reauthenticated at HEAD `4414bcb7df4b3efe8aa0ad392405339f42dc70b8`, tree `754a410dfc2eb9a50918e9e0d76b603b3c221a2f`.
+`07_RSM_REBOOT_REPOSITORY_COMMANDS_AND_VALIDATION.md` preserves historical I4 commands and top-level CIC entry points previously reauthenticated at HEAD `4414bcb7df4b3efe8aa0ad392405339f42dc70b8`, tree `754a410dfc2eb9a50918e9e0d76b603b3c221a2f`; that earlier reauthentication is not a claim about the current DEPSEC2 publication baseline.
 
 Its state is:
 
@@ -374,7 +377,7 @@ The exact admitted renderer dependency graph is `@babylonjs/core@9.21.2` and `@b
 ## 10. Current Handoff
 
 ```text
-snapshot date = 2026-09-28
+snapshot date = 2026-09-30
 Gate A = PASS / CLOSED
 Gate B = ACTIVE / CURRENT
 RSM-4 = CLOSED
@@ -426,15 +429,21 @@ FINAL CIC CLOSURE = CLOSED / PASS / PUBLISHED / HOSTED-VALIDATED
 POST-I12 Slice1-5 = CLOSED / PASS / PUBLISHED / HOSTED-VALIDATED
 Slice6 canonical technical state = CONDITIONAL / DISABLED / NOT STARTED
 Slice6 owner progression disposition = DEFERRED / RESEARCH-ONLY / NOT REQUIRED FOR CURRENT PROGRESSION
-current CIC/repository publication baseline = 4414bcb7df4b3efe8aa0ad392405339f42dc70b8
-current CIC/repository tree = 754a410dfc2eb9a50918e9e0d76b603b3c221a2f
-current natural hosted CI = 36397454934 / run 71 / job 108847116227 / attempt 1 / push / main / success
+current CIC/repository publication baseline = 53ba37fdb035fef24bd3dcae33b981f25ccc7eb8
+current CIC/repository tree = e81e8868cbeeb0a7a68320a3eb3bed9de8886f39
+current natural hosted CI = 36702542499 / validation job 109845100527 / success
+DEPSEC1 = CLOSED / PASS / PUBLISHED / HOSTED-VALIDATED / REMOTE-CURRENT
+DEPSEC2 = CLOSED / PASS / PUBLISHED / HOSTED-VALIDATED / REMOTE-CURRENT
 RSM → CICtrl H0 = CLOSED / PASS / DONOR CAPTURE ACCEPTED / RSM MUTATION NONE
 CICtrl = INDEPENDENT / NOT AN RSM BLOCKER / ARCHITECTURE AND IMPLEMENTATION OUT OF RSM REBASE1 SCOPE
-current control = FIRST POST-I12 CIC REBASE / CURRENT-SOURCE ALIGNMENT / REBASE1-IMPLEMENT1
-V30-FREEZE11 = LOCKED
+current control = V30-FREEZE11 FINALIZE1 / CIC-FAST ACTIVE / NOT CLOSED / V30 PUBLICATION NOT AUTHORIZED
+V30-FREEZE11 SOURCE ALIGNMENT = ACTIVE / NOT CLOSED
 R16 = LOCKED
 second CIC rebase = LOCKED
 RIH = LOCKED
 RSM-7 = NOT STARTED / NOT AUTHORIZED
 ```
+
+## V30-FREEZE11 Current Bounded Control
+
+REBASE1 is historically `CLOSED / PASS / PUBLISHED / HOSTED-VALIDATED / MIRROR-CONVERGED` at HEAD `a770d5621a7e9d6cd2a253a4f49e8c111e29a49b`, tree `847466cd66d49985cda3e720dbbe9ce1457e02cb`. Published DEPSEC2 is the current repository baseline `53ba37fdb035fef24bd3dcae33b981f25ccc7eb8`, tree `e81e8868cbeeb0a7a68320a3eb3bed9de8886f39`, natural CI `36702542499`, validation job `109845100527`; DEPSEC1 and DEPSEC2 are `CLOSED / PASS / PUBLISHED / HOSTED-VALIDATED / REMOTE-CURRENT`. V30-FREEZE11 `FINALIZE1 / CIC-FAST` is active and not closed; this Source-only candidate is not V30 publication or implementation completion. R16, the second CIC rebase, and RIH remain locked. RSM-7 is `NOT STARTED / NOT AUTHORIZED`.

@@ -58,7 +58,7 @@ import {
 
 const REPOSITORY_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
 const REPOSITORY_IDENTITY = "D1847AD57E4D92862E32419FFDF36061BD30AA2B37ECA74E28E3036B9CC1A40A";
-const SOURCE_GENERATION = "CD88CD5E8634474EBF2EA5FE5195E2092592DD54084A79D1B9F8A9D55024B190";
+const SOURCE_GENERATION = "0B9FA379A6EB320B728A9C39F793EF45F80D1B8A6EB7BF004538744160778BFC";
 const GIT_EXECUTABLE = path.join(process.env.ProgramFiles, "Git", "cmd", "git.exe");
 const runFile = promisify(execFile);
 const hash = (value) => sha256Hex(`cic-i9-restore-test:${value}`);

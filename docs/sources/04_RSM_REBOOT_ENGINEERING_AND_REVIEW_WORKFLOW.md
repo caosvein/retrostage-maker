@@ -2450,3 +2450,69 @@ This workflow adopts the following binding execution model:
 - closure requires truthful handoff to the next approved task.
 
 This source becomes authoritative for RetroStage Maker reboot engineering and review workflow once approved alongside the reboot charter, technology contract, canonical roadmap, product decision registry, and architecture/package map.
+
+---
+
+## 67. V30-FREEZE11 Validation and Review Contracts
+
+This review register carries only durable V30-FREEZE11 proof, validation, failure-containment, and parity rules into Source 04 authority.
+Evidence/examples remain in the accepted external oracle; these rules record intent and do not claim implementation, milestone completion, dependency admission, publication, or RSM-7 authority.
+
+### V30 Source-only CIC-FAST validation profile
+
+CIC-FAST is available only for Source/document/currentness/manifest/oracle alignment with an authenticated exact baseline and path universe and enumerable semantic exit criteria. It is unavailable if runtime/product implementation, persisted schema, dependency/lockfile/security boundary, Electron/editor-player graph, or release artifacts change. Its required proof is exact baseline and scope authentication, exact Source/manifest/generation identities, explicit semantic-gap dispositions, focused CIC Source tests, deterministic oracle-only updates where Source identities change, and independent exact-candidate review.
+
+During CIC-FAST iterations, do not run Electron acquire/package/smoke, compliance generation, live dependency audit, or full product `pnpm run validate`. This Source-only profile does not replace release-grade validation: one full validation is required at the final V30 publication/closure boundary before promotion is accepted, followed by natural hosted CI. Targeted pruning remains off; the general high-risk, mutation, and publication gates are unchanged.
+
+### Authority placement: §27 Validation Strategy and §49 Architecture Review Gate; add the named proof obligation without moving product authority
+
+#### VRW-10 — Visual Rawness Validation / Evidence / Regression Slice Contract
+
+- Required validation classes: Source04 should eventually prove visual rawness through explicit fixtures/evidence for.
+- readability under rawness UI non-interference card depth/sorting parity export/runtime parity capability fallback parity fog/lighting/readability coexistence CRT routing correctness accessibility/rawness precedence performance budget compliance.
+- Closure truth: Visual rawness is accepted only if it proves.
+- beautiful look + stable authority + runtime/export survivability + readability preservation + controlled degradation.
+- and not merely because a preview screenshot looks good.
+
+#### DIO-09 — Acceptance / Regression / Export Parity Contract
+
+- Required proof should include.
+- 60/120/144 Hz motion equivalence Section deactivate/reactivate without transform accumulation camera cut/parallax recomposition PIE restart / stale callback rejection physics-root isolation Sequence property arbitration presentation RNG isolation from gameplay RNG cloud wrap gap/pop behavior foreground readability alpha-overdraw/performance tiers save/load without ambient-motion payload dependence Preview -> PIE -> Cooked -> Packaged Player parity preset materialization / preset revision rebase safety.
+- Closure: Diorama motion is successful only when it feels alive while remaining.
+- simple for creators bounded frame-rate independent presentation-only exportable readable cheap enough to degrade gracefully.
+
+#### L10N-VAL-00 — Cross-Product Localization Validation / Regression / Release Evidence
+
+- Localization closure should prove both product domains independently.
+- Exported game matrix: At minimum.
+- source locale one same-script translated locale one long-expansion fixture CJK fixture RTL/Bidi fixture pseudo-locale missing translation fallback missing glyph localized voice absent/present localized image/media variant runtime locale switch save created in locale A -> loaded in locale B PIE -> Cooked -> Packaged Player parity offline locale-pack startup.
+- Maker matrix: At minimum.
+- Maker locale A -> B hot switch where supported restart-required native boundary where applicable Maker locale independent from Project SourceLocale Game Preview locale independent from Maker locale CommandId/DiagnosticId stable across languages Golden Layout survives text expansion Core Startup survives missing locale pack CJK/RTL/IME/font coverage offline packaged startup plugin missing-translation fallback Safe Mode/recovery localized/fallback path.
+- Translation/content regressions: Tests detect.
+- StringId removed/renamed unexpectedly source changed but translation still marked reviewed argument mismatch fallback cycle duplicate normalized locale missing locale pack dependency translation unsafe markup font missing glyph overflow/truncation voice/text locale mismatch store locale claim lacking physical artifact evidence.
+- No false completeness: A localization dashboard percentage is evidence only.
+- It does not override.
+- critical missing string broken font invalid message missing voice declared required unusable RTL layout missing physical locale pack.
+- Release language claim: A language becomes a claimed shipped capability only after the selected project/Maker release gate defines and passes its required interface/subtitle/audio/editor coverage.
+
+#### TRF-04 — Transform Round-Trip / Cross-Context Parity Proof Matrix
+
+- Before RSM-13 closes, and again at RSM-21 maturity, permanent fixtures prove the chosen convention.
+- Minimum representative fixtures.
+- unit-scale cube/reference primitive human-scale reference character camera forward/up/right nested parent-child transforms rotated parent + non-uniform scale negative-scale candidate where supported zero/singular scale rejection KEEP_LOCAL reparent KEEP_WORLD reparent non-representable KEEP_WORLD case glTF/source import conversion physics capsule / gravity / contact placement navigation agent dimensions / path coordinates animation/root-motion displacement save -> close -> reopen Preview PIE standalone/cooked player.
+- Evidence requirements.
+- Save/reopen and cook/export preserve approved meaning.
+- A fixture that cannot be supported produces deterministic structured failure rather than silent approximation.
+- Regression tests remain permanent architecture-contract evidence.
+- RSM-21 may increase coverage/precision but may not change the convention without an explicit migration decision.
+
+#### VIS-09 — Visual Regression Oracle
+
+- Visual regression must be deterministic enough to detect material visual drift without requiring unrealistic bit-identical output across all GPU/backend combinations.
+- Fixture identity: A visual regression fixture should bind at least.
+- scene / fixture identity camera identity PresentationProfile quality tier deterministic seed where applicable semantic runtime state output resolution / aspect relevant backend/capability classification.
+- Comparison policy: A regression oracle may combine.
+- bounded perceptual comparison region-of-interest comparison semantic screenshot metadata known-ignore regions for intentionally nondeterministic content.
+- Exact algorithm/thresholds must be validated empirically rather than guessed prematurely.
+- Required distinction: material visual regression is not harmless backend-specific pixel noise.
+- The oracle must not be so strict that legitimate backend variance creates constant false failures, nor so permissive that lighting/material/post regressions pass.

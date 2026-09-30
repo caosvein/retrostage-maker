@@ -205,6 +205,381 @@ Every dependency-introducing milestone must include a dependency admission sub-g
 
 ---
 
+### 6.1 V30-FREEZE11 First Semantic Seam vs Full Maturity
+
+A later milestone may own full production maturity while an earlier consumer requires a minimal stable semantic seam. The seam must exist before the first consumer; the later owner may expand tooling, diagnostics, adapters, migration, performance, and authoring UX but must not incompatibly redefine identity or meaning already consumed.
+
+#### Sequencing-risk reconciliation
+
+| Risk | First consumer | Required before | Stable seam | Full maturity owner |
+| --- | --- | --- | --- | --- |
+| SEQ-01 | RSM-16 PIE | PRE-RSM-16 | Editor/PIE/modal input ownership | RSM-34 |
+| SEQ-02 | RSM-17 playable movement | PRE-RSM-17 | InputAction/InputBinding | RSM-67 |
+| SEQ-03 | RSM-47 dialogue/readables | PRE-RSM-47 | Stable TextId/StringId | RSM-48 |
+| SEQ-04 | RSM-47 narrative player UI | PRE-RSM-47 | Runtime UI semantic shell | RSM-87 |
+| SEQ-05 | pre-RSM106 Sequence references | first Sequence reference | SequenceDefinitionId/PlaySequence | RSM-106 |
+| SEQ-06 | RSM-18/44/45 early content | first external content | Managed source + AssetId ingest | RSM-73–79 |
+| SEQ-07 | RSM-14/15/18 project/open/cook | RSM-14 | Storage-class ports | RSM-29 |
+| SEQ-08 | RSM-13+ canonical edits | RSM-13 | History-ready command envelope | RSM-31 |
+| SEQ-09 | RSM-44 performance-sensitive content | material RSM-44 scale | Provisional hardware/performance envelope | RSM-90 |
+| SEQ-10 | RSM-6/18/43–45 runtime resources; material lifetime risk by RSM-63 streaming | shared runtime-resource ownership; mandatory before material RSM-63 | ResourceRequest/ResourceHandle owner-scoped lease | RSM-80–81 |
+| SEQ-11 | RSM-18 early cooking/build | RSM-18 | immutable-input async/cook operation envelope + stale-publication rejection | RSM-27 |
+
+#### Complete milestone correction map
+
+Each row records direction only; no row advances implementation or milestone status.
+
+| Map | Candidate | First consumer | Minimal stable seam | Full maturity owner |
+| --- | --- | --- | --- | --- |
+| MAP-SYS-06 | SYS-06 | At the first milestone that consumes this semantic family | Runtime Failure Classification / Fallback / Diagnostic Contract | RSM-97 |
+| MAP-GPC-12 | GPC-12 | At the first milestone that consumes this semantic family | Item / Inventory / Progression Transaction Semantics | RSM-46, RSM-50, RSM-65, RSM-69, RSM-70 |
+| MAP-INV-00 | INV-00 | At the first milestone that consumes this semantic family | Inventory Ecosystem Authority / Bounded Product Scope Contract | Source01 existing family milestone; exact implementation remains milestone-gated |
+| MAP-INV-07 | INV-07 | At the first milestone that consumes this semantic family | Bounded Currency Resource / Vendor & Fixed Exchange Accepted Optional/Profile-Gated Capability | RSM-111, RSM-50, RSM-54, RSM-69, RSM-70, RSM-72, RSM-87 |
+| MAP-RUI-00 | RUI-00 | At the first milestone that consumes this semantic family | Runtime UI Backend Admission & Export Boundary | RSM-87 |
+| MAP-DLG-04 | DLG-04 | At the first milestone that consumes this semantic family | Dialogue Interruption / Control / Camera / Audio Scoped Ownership | Source01 existing family milestone; exact implementation remains milestone-gated |
+| MAP-SAV-08 | SAV-08 | At the first milestone that consumes this semantic family | Corruption / Migration / Previous-Generation Fallback | Source01 existing family milestone; exact implementation remains milestone-gated |
+| MAP-SAV-10 | SAV-10 | At the first milestone that consumes this semantic family | Retention / Size / Disk / Performance Budget | Source01 existing family milestone; exact implementation remains milestone-gated |
+| MAP-MED-00 | MED-00 | At the first milestone that consumes this semantic family | Media Capability Admission / Supported Playback Profile | Source01 existing family milestone; exact implementation remains milestone-gated |
+| MAP-MED-04 | MED-04 | At the first milestone that consumes this semantic family | Video Presentation / Aspect / Color / Safe Area / Renderer-Loss Semantics | Source01 existing family milestone; exact implementation remains milestone-gated |
+| MAP-MED-06 | MED-06 | At the first milestone that consumes this semantic family | Input Lock / Skip / Terminal Outcome / Exactly-Once Continuation | Source01 existing family milestone; exact implementation remains milestone-gated |
+| MAP-EXP-08 | EXP-08 | At the first milestone that consumes this semantic family | Packaged Player Electron Security / Protocol / Fuse / ASAR-Integrity Posture | Source01 existing family milestone; exact implementation remains milestone-gated |
+| MAP-MUI-08 | MUI-08 | At the first milestone that consumes this semantic family | Specialized Editor / Workshop / Designer Shared Authoring Contract | Source01 existing family milestone; exact implementation remains milestone-gated |
+| MAP-CUX-10 | CUX-10 | At the first milestone that consumes this semantic family | Progressive Disclosure Milestone Ownership / Closure Contract | PRE-RSM-7, RSM-10, RSM-11, RSM-12, RSM-120, RSM-13–18, RSM-18, RSM-19, RSM-7–8, RSM-9 |
+| MAP-WBX-02 | WBX-02 | At the first milestone that consumes this semantic family | Workspace Mode / Creator Stage / Disclosure Tier / Layout Orthogonality | Source01 existing family milestone; exact implementation remains milestone-gated |
+| MAP-AST-02 | AST-02 | At the first milestone that consumes this semantic family | Untrusted Asset Import / Parser / URI / Decode-Budget Contract | RSM-27, RSM-73/77 |
+| MAP-JOB-01 | JOB-01 | At the first milestone that consumes this semantic family | Async Job Executor / Worker Budget / Priority / Cancellation / Publication | RSM-27 |
+| MAP-PERF-00 | PERF-00 | At the first milestone that consumes this semantic family | Shared Performance Budget / Hardware Profile / Degradation / Hysteresis Contract | RSM-103, RSM-71, RSM-82 |
+| MAP-LOC-01 | LOC-01 | At the first milestone that consumes this semantic family | Game Localization Profile / Supported Locale / Default / Shipping Contract | RSM-119, RSM-48, RSM-87, RSM-93 |
+| MAP-LOC-10 | LOC-10 | At the first milestone that consumes this semantic family | Translation Interchange / Import / Untrusted File / Merge Contract | Source01 existing family milestone; exact implementation remains milestone-gated |
+| MAP-IMP-01 | IMP-01 | At the first milestone that consumes this semantic family | Project Content Namespace / Managed Source Ownership / Portability Contract | Source01 existing family milestone; exact implementation remains milestone-gated |
+| MAP-IMP-12 | IMP-12 | At the first milestone that consumes this semantic family | Import → Cook → Runtime Manifest → Export Provenance Closure Contract | Source01 existing family milestone; exact implementation remains milestone-gated |
+| MAP-PRG-00 | PRG-00 | At the first milestone that consumes this semantic family | Objective / Progression Authority & Non-Quest-Engine Boundary | Source01 existing family milestone; exact implementation remains milestone-gated |
+| MAP-MAP-00 | MAP-00 | At the first milestone that consumes this semantic family | Bounded Static Map / Floorplan Product Admission & Non-Navigation Boundary | Source01 existing family milestone; exact implementation remains milestone-gated |
+| MAP-TRF-00 | TRF-00 | At the first milestone that consumes this semantic family | Early Canonical Transform Sequencing Barrier | PRE-RSM-13, RSM-13, RSM-17, RSM-21 |
+| MAP-TRF-02 | TRF-02 | At the first milestone that consumes this semantic family | Local / World TRS / Matrix / Scale / Representability Contract | Source01 existing family milestone; exact implementation remains milestone-gated |
+| MAP-TRF-03 | TRF-03 | At the first milestone that consumes this semantic family | Spatial Adapter / Import / Physics / Navigation / Animation Conversion Boundary | Source01 existing family milestone; exact implementation remains milestone-gated |
+| MAP-TRF-04 | TRF-04 | At the first milestone that consumes this semantic family | Transform Round-Trip / Cross-Context Parity Proof Matrix | RSM-13, RSM-21 |
+| MAP-HRY-01 | HRY-01 | At the first milestone that consumes this semantic family | Reparent KEEP_WORLD / KEEP_LOCAL / Exact Representability Contract | Source01 existing family milestone; exact implementation remains milestone-gated |
+| MAP-VAR-01 | VAR-01 | At the first milestone that consumes this semantic family | Variable Definition / Type / Scope / Lifetime / Default Identity | Source01 existing family milestone; exact implementation remains milestone-gated |
+| MAP-PHY-00 | PHY-00 | At the first milestone that consumes this semantic family | Early Collision Semantic Profile / Channel / Query Boundary | RSM-17, RSM-28 |
+| MAP-PHY-01 | PHY-01 | At the first milestone that consumes this semantic family | RSM-17 Early Seam → RSM-28 Production Expansion Contract | RSM-17, RSM-28 |
+| MAP-INP-00 | INP-00 | RSM-17 playable movement | PRE-RSM-17 InputAction/InputBinding seam | RSM-67 full input/rebinding maturity |
+| MAP-INP-14 | INP-14 | At the first milestone that consumes this semantic family | Preview / PIE / Standalone / Export / Platform-Adapter Input Parity | Source01 existing family milestone; exact implementation remains milestone-gated |
+| MAP-PST-00 | PST-00 | At the first milestone that consumes this semantic family | Exported Player Settings Durable Authority / Non-Aliasing Contract | Source01 existing family milestone; exact implementation remains milestone-gated |
+| MAP-PST-01 | PST-01 | At the first milestone that consumes this semantic family | Player Settings Schema / Migration / Atomic Write / Corruption / Multi-Instance Contract | Source01 existing family milestone; exact implementation remains milestone-gated |
+| MAP-PST-02 | PST-02 | At the first milestone that consumes this semantic family | Player Override Resolution / Compatibility / Reset / Recovery Contract | Source01 existing family milestone; exact implementation remains milestone-gated |
+| MAP-SEQG-00 | SEQG-00 | At the first milestone that consumes this semantic family | First-Definition vs Production-Maturity Milestone Rule | Source01 existing family milestone; exact implementation remains milestone-gated |
+| MAP-INP-15 | INP-15 | RSM-16 PIE | PRE-RSM-16 editor/PIE/modal input ownership | RSM-34 context-stack maturity |
+| MAP-TXT-03 | TXT-03 | RSM-47 dialogue/readables | PRE-RSM-47 stable TextId/StringId | RSM-48 localization identity maturity |
+| MAP-RUI-13 | RUI-13 | RSM-47 narrative player UI | PRE-RSM-47 semantic UI shell | RSM-47→66→67→87 staged UI maturity |
+| MAP-SEQ-05 | SEQ-05 | first pre-RSM-106 sequence reference | SequenceDefinitionId/PlaySequence before first consumer | RSM-106 Sequencer maturity |
+| MAP-IMP-14 | IMP-14 | RSM-18/44/45 external content | managed source + AssetId at first external content | RSM-73–79 import/content maturity |
+| MAP-STO-00 | STO-00 | RSM-14/15/18 project/open/cook | storage-class ports from RSM-14 | RSM-29 physical layout maturity |
+| MAP-CMD-00 | CMD-00 | RSM-13 canonical edits | history-ready command envelope at RSM-13 | RSM-31 undo/redo maturity |
+| MAP-HWT-00 | HWT-00 | RSM-44/71 performance-sensitive content | provisional hardware/performance envelope | RSM-90 evidence-based final lock |
+| MAP-RES-00 | RES-00 | RSM-6/18/43–45 consumers; RSM-63 streaming | shared handle/owner-scoped lease before material RSM-63 | RSM-80/81 Resource Manager maturity |
+| MAP-JOB-02 | JOB-02 | RSM-18 early cook/build | immutable-input operation envelope at RSM-18 | RSM-27 shared Job System maturity |
+| MAP-RIG-00 | RIG-00 | At the first milestone that consumes this semantic family | Early Rig / Import / Retarget-Readiness Handoff Contract | RSM-21, RSM-75, RSM-77, RSM-78, RSM-84, RSM-85 |
+| MAP-RIG-02 | RIG-02 | At the first milestone that consumes this semantic family | Coordinate / Reference-Pose / Orientation Contract | RSM-21 |
+| MAP-ANI-00 | ANI-00 | At the first milestone that consumes this semantic family | Early Animation Continuity / Semantic Projection Seam Contract | RSM-17, RSM-37, RSM-46, RSM-46–52, RSM-47, RSM-59, RSM-59–62, RSM-60, RSM-62, RSM-72, RSM-84, RSM-84/85, RSM-85 |
+| MAP-ANI-20 | ANI-20 | At the first milestone that consumes this semantic family | Pre-Early-Access Character Animation Baseline / Truthful Capability Gate | RSM-78, RSM-84/85 |
+| MAP-ANI-21 | ANI-21 | At the first milestone that consumes this semantic family | Creator Locomotion Authoring / Quick Setup / Preview & Progressive Disclosure Contract | RSM-12, RSM-17, RSM-37, RSM-59–62, RSM-72, RSM-75–78, RSM-78, RSM-84, RSM-85 |
+
+#### Roadmap-owned candidate contracts
+
+##### TRF-00 — Early Canonical Transform Sequencing Barrier
+
+- Required contract.
+- PRE-RSM-13 -> accept one exact Canonical Spatial Convention decision + proof evidence.
+- RSM-13 -> consume that accepted convention.
+- RSM-17 -> consume the same convention in movement/physics.
+- RSM-21 -> mature / normalize / verify / document -> MUST NOT silently redefine it.
+- 1. RSM-13 is blocked from material transform implementation until the exact product convention is accepted. 2. A renderer/backend default is not sufficient evidence for the product convention. 3. The accepted convention is product/platform architecture, not a per-project Creator preference. 4. If evidence later proves a convention defect, migration requires an explicit schema/asset/project migration.
+- reinterpretation of persisted numbers is forbidden. 5. Preview, PIE, cooked player and import/export adapters consume the same accepted semantics. 6. The decision artifact records exact values, rationale, tested adapters and fixture hashes.
+- Freeze8 disposition: exact handedness/basis values remain proof-gated, not guessed by this alignment.
+- A temporary convention implemented in RSM-13 could leak into serialized transforms, gizmos, camera, physics, import, animation/root motion, navigation and early standalone fixtures, forcing migration later.
+- 1.
+- RSM-13 is blocked from material transform implementation until the exact product convention is accepted.
+- 2.
+- 3.
+- 4.
+- If evidence later proves a convention defect, migration requires an explicit schema/asset/project migration.
+- Preview, PIE, cooked player and import/export adapters consume the same accepted semantics.
+
+##### PHY-01 — RSM-17 Early Seam → RSM-28 Production Expansion Contract
+
+- Roadmap sequencing is corrected semantically.
+- PRE/RSM-17 -> define minimal stable RetroStage collision/query seam.
+- RSM-17 -> prove movement/grounding/blocker/trigger through that seam.
+- RSM-28 -> expand channel taxonomy, authoring, query shapes, diagnostics and backend contract -> MUST NOT replace an incompatible raw-backend early API.
+- 1. Any RSM-17 temporary physics implementation conforms to the semantic seam or is test-only and non-authoritative. 2. RSM-28 may add roles/profiles/query capabilities while preserving stable meaning or performing an explicit migration. 3. No second physics authority is introduced to bridge an incompatible early slice. 4. Gameplay, Interaction, AI, audio/perception and navigation request typed queries.
+- only the adapter knows Havok. 5. Cooked/player runtime uses the same semantic profile identities as PIE.
+
+##### INP-00 — Early Input Sequencing / Semantic Action Non-Bypass Contract
+
+- RetroStage must not therefore use.
+- RSM-17 movement -> hard-coded W/A/S/D or raw browser key -> later RSM-67 attempts to wrap it.
+- or.
+- camera -> raw mouse/gamepad axis.
+- as an architectural bridge.
+- Before material RSM-17 playable-input implementation, RetroStage establishes a minimal typed semantic input seam.
+- physical device sample -> RetroStage device adapter -> InputBinding resolution -> semantic InputAction -> runtime input context -> Player Action Arbiter / Camera / Runtime UI / owning system.
+- Gameplay systems consume semantic actions and normalized values, never DOM events, raw browser key names, Gamepad button indices or Babylon input callbacks.
+- Sequencing: PRE-RSM-17 -> stable input-action identity + built-in baseline mapping seam.
+- RSM-17 -> playable movement consumes semantic actions.
+- RSM-41/42 -> camera consumes semantic LOOK / camera-control actions.
+- RSM-67 -> creator authoring, rebinding, conflict handling, player overrides, prompts, device lifecycle and accessibility mature the same contract.
+- RSM-87 / RSM-119 -> player-facing settings/UI/export parity mature it further.
+- RSM-67 may extend the system, but may not incompatibly redefine the semantic action identity already consumed by gameplay.
+
+##### SEQG-00 — First-Definition vs Production-Maturity Milestone Rule
+
+- A later roadmap milestone may own full production maturity while an earlier milestone already consumes that subsystem's semantic meaning.
+- The invariant is.
+- minimal stable semantic seam BEFORE first consumer.
+- full tooling / production maturity MAY remain at the later owning milestone.
+- The later milestone may expand, productionize, optimize, add authoring UX, diagnostics, adapters and migration support, but may not incompatibly redefine identity/meaning already consumed earlier.
+- For every milestone review.
+- What stable semantic concept does this milestone consume? Where was that concept first defined? Is that definition earlier than this consumer?
+- If not: -> establish a bounded early seam or -> reorder the consumer.
+- This is roadmap governance, not a new runtime subsystem.
+
+##### INP-15 — PRE-RSM-16 Input Ownership Seam / RSM-34 Context-Stack Maturity Reconciliation
+
+- Freeze9 establishes semantic InputAction before RSM-17, but RSM-16 already introduces PIE while RSM-34 later owns the full Input Context Stack / Editor Mode State Machine.
+- Before material RSM-16 PIE input, a minimal ownership seam distinguishes.
+- EDITOR PIE MODAL / CAPTURE.
+- and prevents.
+- editor shortcut -> gameplay action PIE action -> editor mutation modal/rebind capture -> gameplay leakage.
+- RSM-34 remains the full maturity owner for context-stack inspection, mode-state transitions, priority/capture rules, debug visibility and restoration semantics.
+- INP-02 remains the semantic runtime context contract.
+- this section repairs roadmap sequencing only.
+
+##### TXT-03 — Pre-RSM-47 Stable Text Identity Barrier / RSM-48 Localization Maturity
+
+- RSM-47 introduces persisted dialogue/readable/narrative text before RSM-48 owns full Text Identity / String Table / localization readiness.
+- Before material RSM-47 persisted narrative content, RetroStage already has a stable text-reference seam equivalent to.
+- StringId / TextId -> default/source text entry.
+- Display text is not persistent reference identity.
+- RSM-47 stores semantic text references from day one.
+- RSM-48 remains the production-maturity owner for StringTable authoring, locale/fallback, formatting, Unicode/grapheme/Bidi policy, font fallback, pseudo-localization, diagnostics and localization import/export.
+
+##### RUI-13 — Early Runtime UI Semantic Shell / RSM-47→66→67→87 Handoff
+
+- Dialogue, Objectives, Inventory, Save Slots and Input navigation need runtime UI semantics before RSM-87 owns the full Player UI / HUD / Menu system.
+- Before material RSM-47 player-facing narrative presentation, establish only the stable shell needed by earlier consumers.
+- stable screen identity screen-instance identity UI layer / modal policy focus/back intent typed semantic binding show/hide/open/close request input-context participation.
+- Handoff.
+- RSM-47 -> dialogue/readable projection RSM-49/50 -> objective/inventory projection RSM-66 -> Save Slot UI RSM-67 -> controller navigation/rebind UI RSM-87 -> full runtime UI/HUD/Menu authoring, layout, styling, accessibility and diagnostics.
+- RSM-87 matures the same shell rather than replacing private mini-UI runtimes.
+
+##### SEQ-05 — Early Stable Sequence Reference / No Private Timeline Before RSM-106
+
+- Earlier systems may reference/request a cinematic consequence before the native Sequencer is mature at RSM-106.
+- A stable seam may exist earlier.
+- SequenceDefinitionId PlaySequence request capability/readiness validation.
+- This does not create a full timeline runtime early.
+- Before RSM-106, Scene Director, Dialogue, Objective/Puzzle, transitions and Player UI must not invent private mini-timeline/cutscene document formats.
+- If execution is not yet implemented, the stable reference remains valid intent with a CAPABILITY_NOT_YET_AVAILABLE-equivalent readiness result.
+- RSM-106 later introduces/matures the native Sequence document/runtime/editor while preserving the same semantic reference and Event/Action integration.
+
+##### IMP-14 — Early Managed Asset Ingest Seam / RSM-18/44/45 → RSM-73–79 Handoff
+
+- Full Asset Registry / Content Browser / production import/reimport belongs to RSM-73–79, but earlier milestones already consume project content.
+- Early consumers reuse Freeze5 semantics at minimal scale.
+- external source -> validated managed source snapshot / admitted source ownership -> stable AssetId -> bounded derivative/import result -> consumer.
+- They must not persist raw absolute external paths or backend loader identity as content authority.
+- Reconcile at least.
+- RSM-18 early cook/player assets RSM-43/44 presentation assets RSM-45 audio assets RSM-47 readable/dialogue presentation assets where applicable.
+- RSM-73–79 productionizes registry/search/browser/import/reimport without replacing incompatible path-based early references.
+
+##### STO-00 — Early Storage-Class Semantics / RSM-14/15/18 → RSM-29 Physical Layout Maturity
+
+- RSM-14/15/18 persist/open/cook project content before RSM-29 finalizes physical storage layout.
+- Early implementation consumes storage classes/ports, not hard-coded folder strings.
+- Distinct authorities remain.
+- canonical project documents managed source assets rebuildable/generated derivatives editor-local caches/preferences runtime/player writable data.
+- RSM-29 owns physical-layout maturity, portability, relocation, migration and cleanup/rebuild rules, but may not incompatibly redefine ownership already consumed earlier.
+- No gameplay/editor consumer may treat projectRoot + hard-coded folder as stable identity.
+
+##### CMD-00 — History-Ready Canonical Command Envelope / RSM-13 → RSM-31
+
+- Canonical authoring mutations begin before full Undo/Redo history at RSM-31.
+- Every canonical mutation introduced before RSM-31 already flows through shared command authority and carries enough stable transaction metadata for later history integration.
+- This does not require full Undo/Redo UI early.
+- Representative envelope.
+- command identity target/precondition identity atomic candidate mutation result gesture/transaction identity where continuous history/inverse metadata or reviewed non-invertible classification.
+- RSM-31 matures stack/grouping/coalescing/history UX without redesigning early mutation authority.
+
+##### HWT-00 — Provisional Hardware / Performance Envelope / RSM-44/71 → RSM-90 Final Lock
+
+- Exact minimum hardware may remain an evidence-gated product decision at RSM-90, but presentation/runtime systems cannot scale against no envelope.
+- Before material performance-sensitive content expansion, maintain a provisional engineering envelope covering as applicable.
+- CPU class GPU/API capability class RAM/VRAM class target output-resolution class frame-time/fps class content/runtime budget direction.
+- The provisional envelope is engineering guidance, not final marketing minimum specification.
+- RSM-71 uses it for budget/admission discipline.
+- RSM-90 later accepts the evidence-based final target through an explicit product decision rather than discovering that earlier content assumed unbounded hardware.
+
+##### RES-00 — Early Runtime Resource Handle / Lease Seam → RSM-80/81 Resource Manager Maturity
+
+- Representative early consumers include.
+- The full Runtime Asset Loading / Resource Manager maturity remains later at RSM-80/81.
+- Without an early semantic seam, each early consumer can accidentally invent its own.
+- load cache retain dispose reload device-loss reconstruction.
+- Before material shared-runtime resource lifetime begins, RetroStage uses the existing SYS-13 resource semantics as the one conceptual boundary.
+- stable semantic resource identity / AssetId / derivative identity -> ResourceRequestId or accepted equivalent -> owner-scoped ResourceHandle / lease -> backend resource object.
+- but those objects are never the durable semantic resource identity.
+- Early invariants: An owner cannot release a resource lease it never acquired.
+- A resource remains usable while at least one valid owner lease requires it.
+- Editor Preview, PIE and standalone-player ownership are separate lifetimes.
+- Section unload releases only that Section's lease contribution.
+- Reimport/new generation cannot mutate an already-running old-generation resource in place unless the owning contract explicitly supports that transition.
+- Async resource completion validates request generation before publication.
+- RSM-80/81 maturity: RSM-80/81 remains the full production owner for.
+- The later Resource Manager must mature the early lease identity and may not replace incompatible private ownership systems created by earlier milestones.
+- Sequencing requirement: At minimum, the semantic lease seam must be proven before RSM-63 Scene/Section streaming becomes material.
+- Earlier RSM-18/43/44/45 consumers should already use the same direction so no private resource manager becomes architectural precedent.
+- RSM-6 -> Babylon renderer/backend resources RSM-18 -> minimal standalone player / early cooked runtime content RSM-43/44 -> presentation assets RSM-45 -> audio playback assets RSM-63 -> Scene/Section streaming and unload/reload lifetime.
+- ownership model.
+- Minimal early path.
+- global reuse/coalescing cache policy reference/lease diagnostics priority/loading policy memory pressure eviction large-project behavior preload/prefetch where admitted resource inspector/tooling deterministic teardown proof.
+
+##### JOB-02 — Pre-RSM-18 Async/Cook Operation Envelope → RSM-27 Shared Job System Maturity
+
+- A private early cook worker framework would create a second async architecture that later must be replaced.
+- RSM-18 may remain synchronous or use bounded asynchronous implementation, but every early cook/build operation uses a minimal operation envelope compatible with later Job semantics.
+- Representative identity/evidence.
+- OperationId / EarlyCookOperationId / ExportBuildId captured immutable input revision/snapshot owner/project/session generation cancellation or abandonment authority progress/result state where surfaced single final publication stale-publication rejection.
+- Exact type names remain implementation-owned.
+- Worker boundary: Early workers, if any.
+- compute candidate output -> return result/evidence -> owner validates generation/preconditions -> single publication/commit.
+- A worker does not directly mutate canonical project truth.
+- Cancellation: Cancellation means.
+- request stop / abandon -> late completion may still arrive -> late completion must fail publication if no longer current.
+- Cancellation is not proof that arbitrary backend work stopped instantaneously.
+- RSM-27 maturity: RSM-27 remains the production owner for.
+- shared JobId model queueing priority/fairness worker pool CPU/RAM/I/O resource budgeting task locks progress aggregation/UI global cancellation orchestration job diagnostics.
+- RSM-27 must adopt/mature early operation identity and stale-publication rules rather than wrapping or replacing a private RSM-18 executor architecture.
+- Scope guardrail: Freeze11 does not require a general-purpose worker pool before RSM-27.
+- provided it honors immutable input capture, cancellation/abandon semantics and validated single publication.
+
+##### RIG-00 — Early Rig / Import / Retarget-Readiness Handoff Contract
+
+- If RSM-75 imports skeletons as anonymous Babylon bone/name structures and RSM-78 reimports without a durable mapping/reference-pose model, RSM-85 would have to redesign the asset pipeline after gameplay, NPC, combat and storytelling systems already depend on character animation.
+- The semantic rig contract is declared early, while full retarget execution remains milestone-gated.
+- RSM-21 -> coordinate / unit / handedness / transform convention exists.
+- RSM-75 -> deterministic skeleton + animation import facts.
+- RSM-77 -> derivative/cache invalidation truth.
+- RSM-78 -> reimport-stable creator-approved mapping continuity.
+- RSM-84 -> production animation asset authoring.
+- RSM-85 -> production retargeting/state-machine workflow.
+- RSM-75 should preserve or derive enough stable source evidence for later RIG-01..RIG-05 work, including where applicable.
+- source skeleton/subasset stable identity stable imported bone/subasset identity parent/hierarchy identity source bind/rest-pose transforms source animation clip identity source animation target identity source root candidate unit/axis normalization provenance importer version/settings provenance.
+- The exact stored schema remains owned by the post-CIC Source03/asset-pipeline implementation.
+- this candidate freezes the information requirement, not a permanent JSON shape.
+- Reimport continuity: RSM-78 must distinguish.
+- display-name change is not identity change.
+- Name similarity remains an import hint only.
+- Non-goal: RIG-00 does not require full generic retargeting before RSM-85.
+- It prevents earlier import/reimport work from destroying the facts RSM-85 requires.
+
+##### ANI-00 — Early Animation Continuity / Semantic Projection Seam Contract
+
+- RSM-17 protagonist movement RSM-46+ interaction RSM-47 dialogue presentation RSM-59 navigation/patrol RSM-60 NPC/enemy runtime RSM-62 combat/reaction/death RSM-72 integrated genre-capable gameplay proof.
+- NPC state -> play raw "walk.glb" clip.
+- Early milestone obligations: #### RSM-17.
+- It may be intentionally small, but the protagonist identity should be able to reference an AnimationSet or equivalent stable semantic profile and express the supported movement/presentation intent without gameplay owning raw engine animation objects.
+- LOCOMOTION.IDLE LOCOMOTION.MOVE.
+- The exact vocabulary remains profile-owned.
+- #### RSM-37.
+- The Event/Action vocabulary must be compatible with.
+- stable semantic animation request identity typed animation marker/event identity causal occurrence / repeat policy.
+- Gameplay-critical timing never depends on a raw frame number as permanent meaning.
+- #### RSM-46–52.
+- ACTION.INTERACT ACTION.USE_ITEM DIALOGUE.TALK DIALOGUE.GESTURE.
+- but they do not own playback state.
+- the gameplay owner revalidates before committing consequential meaning.
+- Gate E does not require the mature RSM-84/85 animation authoring stack.
+- It does require the representative gameplay fixture to prove.
+- Player/NPC/Enemy semantic animation requests do not use raw engine identity as gameplay truth baseline character presentation survives Preview / PIE / player gameplay-critical animation markers use typed identity where applicable combat/dialogue/interaction owners remain authoritative direct Babylon clip/frame/callback gameplay authority = absent.
+- RSM-72 must report mature RSM-84/85 features as not-yet-implemented where that is the truth.
+- This distinction is binding for post-CIC roadmap rebase.
+
+##### ANI-20 — Pre-Early-Access Character Animation Baseline / Truthful Capability Gate
+
+- That is acceptable only if the Early Access build advertises animation capability truthfully and does not ship character-heavy gameplay whose animation foundation is an undocumented temporary backend coupling.
+- If the Early Access product advertises a supported character gameplay profile, the advertised slice must prove an EA Animation Baseline before release.
+- Applicable baseline evidence includes.
+- stable semantic AnimationSet/profile reference supported skeletal clip import/playback basic in-place locomotion projection required by the advertised profile supported one-shot interaction/action/reaction playback typed marker path where gameplay timing relies on animation markers stable skeleton/animation import identity reimport without silent semantic-reference drift Preview / PIE / Cooked / Standalone Player parity creator-readable missing/incompatible animation diagnostics no raw Babylon object/frame/callback gameplay authority.
+- The exact locomotion set is profile-dependent.
+- IDLE/WALK/RUN is representative, not a mandatory universal state list.
+- Explicit non-requirements before mature RSM-84/85: Unless separately advertised and proven, the EA baseline does not require.
+- full visual animation-state-machine editor generic humanoid retargeting workflow advanced blend spaces advanced animation layers root-motion authoring facial animation / lip sync unrestricted creature retargeting.
+- EA store/product claims must distinguish.
+- SUPPORTED NOW LIMITED / PROFILE-BOUND COMING LATER UNSUPPORTED.
+- RSM-84/85 remain the mature production owners.
+
+##### ANI-21 — Creator Locomotion Authoring / Quick Setup / Preview & Progressive Disclosure Contract
+
+- The mature RSM-85 locomotion editor may expose deeper control, but the default path must remain usable for common supported profiles.
+- Shared Player / NPC / Enemy authoring model: Player, NPC and Enemy gameplay owners remain distinct, but locomotion presentation authoring should reuse one product vocabulary where capability-compatible.
+- ATTACK HIT_REACTION STUN DEATH TALK / GESTURE SPECIAL PROFILE ACTION.
+- fix only material blockers.
+- stable imported clip identity source clip name import metadata loop/timing characteristics rig compatibility known profile conventions creator-approved prior mappings.
+- A filename such as Walk, Run or mixamo.com is never durable locomotion identity.
+- Reimport must preserve creator-approved semantic assignments where stable imported identity and compatibility permit it.
+- Advanced controls remain validated semantic configuration.
+- Preview must not grant Inventory, Combat, Objective, AI, Dialogue, Scene or Save consequences.
+- Retarget preview / compatibility: Where a selected AnimationSet requires retargeting, the Creator surface should expose semantic readiness rather than raw AnimatorAvatar options.
+- A preset must not.
+- Creator customization after preset application becomes ordinary canonical authoring state.
+- AI / Navigation integration: Enemy/NPC locomotion authoring must not require a Creator to hand-code.
+- They never require the Creator to bind raw Babylon objects.
+- Consequential gameplay remains with its real owner and typed markers/events remain subject to ANI-07 / SYS-05 non-bypass rules.
+- Root-motion authoring boundary: Default locomotion configuration must state whether motion is.
+- The locomotion editor cannot directly make the Babylon root transform authoritative.
+- Who owns movement right now?
+- This profile requires in-place movement.
+- Locomotion Profile: A bounded locomotion profile may define supported behavior such as.
+- IN_PLACE_STANDARD IN_PLACE_DIRECTIONAL PROFILE_BOUNDED_ROOT_MOTION SPRITE_DIRECTIONAL.
+- Exact profile names are owner-defined.
+- the required invariant is that capability and root-motion policy are explicit.
+- Default humanoid Player/NPC/Enemy locomotion should prefer in-place movement unless an owning profile explicitly admits bounded root motion.
+- Creator / Default — Quick Setup: For a supported common profile, the default locomotion surface should expose the smallest truthful set needed to become usable.
+- 1.
+- Rig Humanoid READY.
+- Readiness READY TO PREVIEW.
+- Why?
+- Is Preview / PIE / Cooked / Player resolution equivalent?
+- Semantic state RUN Speed 3.84 m/s Movement owner Navigation Resolved slot LOCOMOTION.RUN Resolved clip Humanoid_Run_01 Rig Guard_01 / HUMANOID Retarget READY / cached generation 12 Blend Walk 0.12 / Run 0.88 Root motion IN_PLACE.
+- Exact labels/layout are non-normative.
+- if AI == CHASE -> play RunForward if AI == PATROL -> play Walk.
+- Correct direction.
+- AI / Navigation -> locomotion intent + accepted movement truth -> locomotion semantic parameters -> ANI-04 / ANI-10 resolution -> animation projection.
+- The authoring surface configures how semantic locomotion is presented.
+- it does not redefine AI.
+- Preview / Test Locomotion: The locomotion authoring surface should provide a bounded preview that can drive representative semantic parameters without mutating live gameplay truth.
+- Player / NPC / Enemy presets: RetroStage may provide capability-bounded presets that reduce repetitive setup.
+- Examples.
+- Player Humanoid Basic NPC Humanoid Basic Enemy Humanoid Chase/Combat Basic Directional Sprite NPC.
+- Product objective: A Creator should be able to configure a supported Player, NPC or Enemy locomotion presentation without understanding Babylon animation objects, writing a Flow Graph, hand-wiring AI states to clip names or building a general-purpose animation state machine from scratch.
+- The ordinary workflow is semantic.
+- Character / Enemy -> Rig readiness -> Animation Set -> Locomotion Profile -> Preview / Test -> Creator-readable readiness.
+- Representative workflow.
+- choose / verify CharacterRigProfile 2.
+- choose AnimationSet 3.
+- resolve required semantic slots 4.
+- It refines existing owners.
+- RSM-12 -> descriptor/progressive-disclosure foundation where applicable.
+- RSM-17 / RSM-37 -> minimal semantic animation request/slot seam.
+- RSM-59–62 / RSM-72 -> Player/NPC/Enemy gameplay proves locomotion intent without raw-clip coupling.
+- RSM-75–78 -> rig / clip / reference-pose / reimport readiness and creator mapping continuity.
+- POST-RSM-78 EA -> if character animation is advertised, provide a truthful profile-bounded Quick Setup / Preview path.
+- RSM-84 -> mature AnimationSet / clip / marker asset authoring.
+- RSM-85 -> mature Creator locomotion authoring: Quick Setup + bounded graph/profile + Advanced + Diagnostics + retarget workflow.
+
+---
+
 ## 7. Definition of Done
 
 Unless a milestone explicitly narrows the requirement, closure requires:

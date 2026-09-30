@@ -4089,3 +4089,670 @@ This decision registry adopts the following reboot direction:
 - no historical milestone status is treated as live reboot implementation truth.
 
 This source becomes authoritative for durable product decisions and deferred scope once approved alongside the charter, technology contract, and canonical roadmap.
+
+---
+
+## 105. V30-FREEZE11 Product Decisions and Deferred-Scope Contracts
+
+This product register carries only durable V30-FREEZE11 product decisions, profile gates, exclusions, and deferred-scope rules into Source 05 authority.
+Evidence/examples remain in the accepted external oracle; these rules record intent and do not claim implementation, milestone completion, dependency admission, publication, or RSM-7 authority.
+
+### Authority placement: §100 Open Questions plus D-013/D-015 identity-and-migration boundary; record that exact basis values remain RSM-21 proof-gated
+
+#### TRF-01 — Unit / Axis / Handedness / Rotation / Numeric Semantics Contract
+
+- The accepted Canonical Spatial Convention MUST define, in one owner-controlled contract.
+- world-unit meaning / meters-per-unit handedness canonical UP / FORWARD / RIGHT basis angle/internal-unit policy canonical rotation representation quaternion component order if quaternion-backed quaternion normalization / sign-equivalence policy Euler presentation/conversion policy position / rotation / scale serialization precision finite-number requirement normalization / epsilon / comparison rules zero-scale policy negative-scale policy non-uniform-scale policy.
+- NaN, Infinity, malformed quaternion and non-finite transform values are rejected before canonical commit. - UI Euler fields, gizmo display angles or backend quaternion layouts do not define canonical rotation meaning. - Quaternion q and -q, if semantically equivalent under the accepted representation, normalize deterministically for hashing/diff/save behavior. - Any rounding/quantization boundary that can affect gameplay, hierarchy or export is explicit and tested. - World-unit meaning is shared by movement, camera distances, physics, navigation, audio spatial distance, fog/ranges, root motion and authored map projection where applicable. - Per-domain convenience units may exist only as explicit conversions beneath canonical meaning.
+- A product decision may strongly prefer a conventional value, but no exact value is canonical until the TRF-04 proof matrix and owner acceptance are complete.
+- NaN, Infinity, malformed quaternion and non-finite transform values are rejected before canonical commit.
+- Per-domain convenience units may exist only as explicit conversions beneath canonical meaning.
+
+### Authority placement: §6 Complex Economy / Vendor / Commerce Gameplay exclusion; INV-07 owner disposition = `ACCEPT_BOUNDED_EXCEPTION` / optional-profile-gated
+
+#### INV-07 — Bounded Currency Resource / Vendor & Fixed Exchange Accepted Bounded Exception
+
+- RetroStage accepts a bounded fixed-authored in-game exchange capability, not a general economy.
+- Currency balances remain distinct from inventory stacks and story flags.
+- A `CurrencyDefinitionId` identifies a `CurrencyBalance` held by the currency authority; neither an inventory stack nor a story flag is the balance authority. A physical coin or token is an ordinary Item only when explicitly authored as one, with no implicit item-quantity/`CurrencyBalance` synchronization.
+- Vendor profiles, catalog entries, sessions, stock, NPC identity, and currency identity do not alias.
+- Catalog buy prices are fixed authored amounts; a fixed authored sell price is optional. Dynamic pricing is not admitted.
+- Authored stock is `FINITE` or `UNLIMITED`. A finite purchase decrements stock atomically with payment and item grant and persists the finite count when applicable; unlimited stock has no mutable finite count to save. A bounded reset policy is `NONE` or `STORY_EVENT`, not timed or procedural market restocking.
+- Authored story conditions may gate vendor or catalog availability, queried through the owning story authority without a duplicated availability state.
+- Buy, optional sell, and explicit item exchange commit atomically across payment, inventory transfer, and finite stock.
+- Failure cannot lose currency without granting the item, remove an item without granting payment, or decrement finite stock twice.
+- Dynamic pricing, markets, inflation, reputation pricing, procedural merchant inventories, exchange-rate systems, auctions, generalized barter valuation, real-money commerce, payment SDKs, DLC stores, and marketplaces remain excluded.
+- Existing RSM-50, RSM-54, RSM-69, RSM-70, RSM-72, RSM-87, and RSM-111 owners absorb the bounded capability; no new milestone is created.
+- The capability is OPTIONAL and PROFILE-GATED; projects are not required to expose it.
+
+### Authority placement: D-081 controlled imperfection and D-082 semantic export closure; add the named bounded presentation direction
+
+#### VRW-00 — Visual Rawness Stack / Authority / Scope Contract
+
+- Authority normalization: Visual rawness is a presentation-language layer, not a replacement for core gameplay, save, Sequence, asset or authoring authority.
+- Representative ownership.
+- canonical authored visual intent -> GameDefinition / PresentationProfile / Scene/Section presentation fields.
+- visual rawness presets/profiles -> creator-authored canonical presentation choices.
+- preview-only look experiments -> SICE/MUI preview surfaces until applied.
+- runtime projection -> renderer/material/postprocess implementation.
+- quality fallback -> capability/profile/runtime policy.
+- Studio decoration -> never canonical game visual authority.
+- Layered stack: A scene’s final look is conceptually composed in this order.
+- base authored art -> depth/space staging -> lighting/fog/atmosphere -> material response -> VFX contributions -> post/display simulation -> UI composition.
+- Exact implementation order can vary, but product semantics must preserve that these are coordinated layers rather than unrelated per-feature hacks.
+- Scope: Visual rawness may shape.
+- mood texture display character retro identity camera-space depth perception liminal atmosphere stylized wear/imperfectity.
+- It may not silently alter.
+- collision navigation hit registration objective truth interaction range save logic authored geometry identity.
+- Profile principle: A creator can opt into rawness at several scopes.
+- project/global default scene/section override camera/sequence context override where approved temporary preview variant quality/capability fallback variant.
+- Overrides remain explicit and compositional.
+
+#### VRW-01 — Layered Analog Surface Language / Depth Card / Diorama Contract
+
+- Goal: RetroStage can gain strong identity from “miniature set” / “transparent stage” / “printed diorama” composition rather than only shader effects.
+- Diorama staging: Supported visual staging can include.
+- background sky/void layer far environment cards midground structure cards hero prop cards foreground atmosphere cards occlusion masks light cards shadow catcher planes.
+- where product scope approves them.
+- Transparent cards: Transparent PNG/decal/card assets are presentation assets with explicit rules for.
+- intended depth band parallax behavior sorting/occlusion class shadow participation lighting response collision participation = none unless separately authored geometry exists.
+- A foreground diorama card does not become gameplay collision merely because it visually covers space.
+- Depth authority: A visual card’s parallax/depth effect is derived from an authored depth-band/staging contract rather than arbitrary hand tuning in each scene.
+- Representative categories.
+- FAR_BACKDROP MID_BACKDROP PLAYSPACE_BACK PLAYSPACE_MID PLAYSPACE_FRONT ATMOS_FOREGROUND UI_ADJACENT_DECOR.
+- Occlusion: Transparent card sorting must not rely on accidental engine draw order.
+- If a card should occlude the player or another layer, that is explicit through the staging class or mask system.
+- Movement language: Diorama layers may use subtle motion.
+- parallax drift fan rotation sign flicker cloth sway film gate wobble dust layer motion.
+- but only through bounded presentation animation. They are not physics/gameplay authorities.
+- Export parity: Depth-card staging must remain visible and semantically consistent in cooked/exported player builds, not only inside editor preview.
+
+#### VRW-02 — CRT / Scanline / Display Simulation Presentation Contract
+
+- Principle: CRT/display simulation is treated as an optional coordinated display-language profile, not a single postprocess toggle.
+- Components: A CRT profile may include bounded/independently controllable.
+- scanlines phosphor mask / subpixel suggestion barrel/pincushion distortion corner falloff / vignette bloom / halation chroma softness / bleed low-level noise mild jitter / convergence drift black-level shaping.
+- Non-destructive application: CRT applies in the presentation/post layer. It does not rewrite source textures or baked UI assets.
+- Readability guardrails: CRT must not break.
+- text readability UI hit clarity interaction prompts aim/readiness feedback subtitles inventory readability critical puzzle clues.
+- Therefore the profile supports graded intensity and UI-aware composition boundaries.
+- Capability tiers: CRT has defined tiers such as.
+- FULL REDUCED MINIMAL OFF.
+- or equivalent, driven by capability and creator/player policy where applicable.
+- Selective routing: The system may support different routing policies, for example.
+- world only world + some diegetic overlays whole frame.
+- but the chosen route is explicit. UI is not distorted by accident.
+
+#### VRW-03 — Palette / Contrast / Silhouette / Readability Preservation Contract
+
+- Visual-language risk: Rawness and mood can easily reduce legibility if palette, fog, VFX and CRT all pull in the same direction.
+- Rule: Every rawness treatment preserves gameplay readability primitives.
+- player silhouette enemy silhouette interactable readability door/route legibility threat telegraph visibility hit feedback visibility pickup/readable item recognition objective / clue recognition.
+- Palette discipline: A project/scene can define a palette identity.
+- base tonal family highlight family danger/accent family ambient shadow family UI complement relationship.
+- This is presentation guidance, not a fixed tiny color table unless the creator chooses one.
+- Contrast floor: Post/rawness profiles keep a minimum meaningful contrast floor for critical classes. Rawness cannot collapse all midtones until gameplay objects disappear into the set.
+- Silhouette preservation: Fog, bloom, grime, noise or backdrop pattern cannot destroy the contour readability of active gameplay actors.
+- Semantic accents: Color/emissive accents for.
+- danger interaction safe point objective relevance sequence target.
+- remain distinct under rawness profiles.
+
+#### VRW-04 — Lighting / Atmosphere / Fog / Halation / Shadow Shape Contract
+
+- Goal: The strongest “raw” look is usually not only about filters. It is about light behavior and depth.
+- Supported language: RetroStage visual rawness can intentionally use.
+- biased key/fill ratios colored fog volumes thick shadow pockets soft halation around emissives window-light shafts atmospheric depth falloff dust/smoke beam visibility.
+- within budget.
+- Lighting contract: Lighting rawness is authored as presentation intent, not hand-inserted arbitrary scene hacks.
+- It should support.
+- scene default look section/local override time/state-based lighting variation Sequence-driven temporary override.
+- under existing presentation ownership.
+- Shadow shape: The visual style may favor.
+- chunkier shadow masses stylized penumbra hard/soft hybrid edges miniature-stage spotlighting.
+- as a project identity.
+- Atmosphere vs gameplay: Fog/atmosphere can obscure moodfully, but cannot invalidate critical gameplay navigation/readability beyond creator-approved limits.
+- Halation: Emissive bloom/halation supports retro-display and analog mood, but must remain bounded so bright elements do not erase nearby interactables or text.
+
+#### VRW-05 — Surface Imperfection / Grime / Print / Noise / Temporal Variation Contract
+
+- Goal: RetroStage can benefit from “physical artifact” feeling: printed paper sets, worn signage, tape noise, imperfect transparencies, aged backdrops.
+- Surface-language classes: Supported classes may include.
+- paper grain screenprint offset feel paint wear dust/scratch layer lens dirt / bloom dirt subtle dither/noise film gate wobble poster fade edge wear sticker/tape overlays.
+- Controlled ownership: These imperfections belong to one of three explicit classes.
+- asset-authored source detail material/runtime surface response frame/post/display overlay.
+- A creator should not need to destructively bake everything into source art.
+- Temporal variation: Temporal variation such as.
+- very subtle flicker scan drift projector jitter neon shimmer noise pulse.
+- must be bounded and presentation-only.
+- It cannot create seizure-prone or input-hostile instability, and it must respect accessibility preferences.
+- Density discipline: Grime/noise layering must remain intentionally budgeted. Multiple independent noise layers cannot accumulate into unreadable mush.
+
+#### VRW-06 — VFX / Material / Post Chain Harmony Contract
+
+- Risk: A good rawness profile can be destroyed when materials, VFX and postprocessing are tuned separately.
+- Rule: VFX and material response remain compatible with the chosen visual language.
+- Examples.
+- dust motes match atmosphere density blood/sparks/popups do not ignore CRT/post contrast logic emissive materials respect halation policy rain/fog/noise do not all occupy the same frequency band.
+- Chain harmony: The post chain has explicit conceptual harmony between.
+- exposure/tonemap intent bloom/halation color grading vignette/falloff CRT/display simulation optional grain/noise.
+- The product does not rely on accidental order-dependent beauty.
+- Frequency separation: Foreground particles, dithering, fog, grime and CRT scanline content should occupy separable frequency/detail bands where possible so the frame remains readable.
+
+#### VRW-07 — UI ↔ World Visual Harmony / Legibility / Non-Interference Contract
+
+- Goal: RetroStage’s UI should feel like it belongs to the world without being damaged by the world’s look.
+- Harmony: The UI may visually echo the world through.
+- palette relationship frame motifs panel translucency light bleed tone scanline-aware styling shadow language.
+- Non-interference: But world rawness cannot interfere with.
+- menu usability inventory readability settings navigation subtitle legibility save/load clarity prompt timing text input / editor controls.
+- UI routing: If display simulation is applied to UI, it must be through an explicit UI-aware profile. Otherwise UI remains outside the effect or receives a gentler variant.
+- Accessibility: Accessibility and readability precedence outrank visual rawness intensity.
+
+#### VRW-08 — Preview / Export / Capability Tier / Fallback Parity Contract
+
+- Rule: A rawness-heavy preview that cannot survive runtime/export is not canonical visual truth.
+- Canonical parity: For any admitted visual rawness feature, the project must define.
+- preview behavior runtime behavior cooked/exported behavior capability-tier fallback.
+- Graceful degradation: If a full profile is too expensive.
+- card count may reduce fog step may simplify CRT may downgrade overlay density may reduce halation may compress.
+- but the visual language should remain recognizably the same.
+- Unsupported feature: If a particular experimental preview effect has no export/runtime path, it remains preview-only and cannot silently become part of accepted final game look.
+- Validation: Capability fallbacks are explicit validation targets, not “best effort.”.
+
+#### VRW-09 — Visual Rawness Authoring Surfaces / Ownership / Preset Safety Contract
+
+- Authoring surfaces: Visual rawness should be authorable through creator-safe surfaces such as.
+- global visual-language profile scene/section visual overrides display/CRT profile editor diorama/depth card staging controls lighting-atmosphere rawness controls imperfection/noise overlay controls.
+- Preset safety: Presets are declarative. Applying a preset does not write hidden unrelated values outside the intended visual domain.
+- Composition: A creator can combine.
+- base style preset display simulation preset scene override sequence override quality fallback.
+- without losing authority clarity.
+- Preview safety: Look experiments stay preview-bound until applied through canonical authoring transactions.
+- Dependency: No rawness preset requires plugin code execution or Studio-only state to function.
+
+#### VLP-00 — Visual Language Preset Definition / Authoring-Recipe Authority
+
+- A Visual Language Preset is a declarative creator recipe, not runtime authority.
+- Representative identity.
+- VisualLanguagePresetId VisualLanguagePresetRevision PresetFamilyId PresetProvenance supported visual-domain contribution set recommended capability tier.
+- Preset contribution domains: A preset may contribute bounded recommendations/defaults for.
+- palette / tonal relationship lighting / atmosphere display / CRT simulation surface imperfection diorama staging diorama motion VFX harmony UI ↔ world relationship quality-tier fallback accessibility ceilings.
+- Apply semantics: Baseline Apply is snapshot/materialization-oriented.
+- preset -> preview resolved contribution -> creator chooses all or selected domains -> normal canonical authoring transaction -> owned PresentationProfile / Scene / visual-profile fields updated -> preset provenance retained for explain/reapply/rebase.
+- The runtime/exported player does not require the preset package merely because a preset was used.
+- No hidden authority: VisualLanguagePreset is not shader program authority is not GameDefinition resolver replacement is not runtime plugin is not Studio-only state.
+- A preset cannot write unrelated gameplay, save, collision, navigation, input or plugin configuration.
+- Partial Apply: The creator may apply only specific domains, for example.
+- Display / CRT only Palette + Atmosphere Diorama Staging + Motion Imperfection only UI relationship only.
+- This prevents a useful style recipe from forcing unrelated visual choices.
+
+#### VLP-01 — Built-In Starter Preset Families
+
+- This alignment proposes an initial built-in starter pack.
+- Names are product-facing candidates and may be renamed without changing the architectural contract.
+- 1.
+- RAW_CRT_NIGHT: Intent.
+- dark authored scene strong silhouette discipline moderate/high CRT display character controlled scanline/chroma softness bounded bloom/halation subtle fog minimal low-frequency analog jitter UI routed through gentler or separate display treatment.
+- Recommended motion.
+- slow fog bank very subtle distant light flicker occasional foreground dust low-amplitude sign/neon variation.
+- 2.
+- PRINTED_DIORAMA_LIMINAL: Intent.
+- transparent/printed depth-card staging paper grain / screenprint imperfection soft parallax flat-to-soft miniature-stage lighting mild haze minimal/off CRT by default strong depth silhouettes.
+- cloud flow bands slow fog drift paper/curtain sway light-card drift subtle projector/print wobble.
+- 3.
+- DUSTY_VHS_INDUSTRIAL: Intent.
+- desaturated industrial surfaces fluorescent/sodium-like light relationships moderate chroma softness/bleed tracking/noise suggestion dust/haze strong machine silhouettes.
+- fan rotation vent haze drift light flicker rain-sheet/condensation UV scroll slow cable/sign sway.
+- 4.
+- SOFT_HALATION_MEMORY: Intent.
+- slow curtain/foliage sway floating dust light-shaft drift soft cloud motion very low-amplitude opacity breathing.
+- 5.
+- HARSH_NEON_DECAY: Intent.
+- 6.
+- WEATHERED_BROADCAST_HORROR: Intent.
+- aged broadcast/display feeling medium CRT vignette/falloff paper/poster wear subtle analog interference staged stillness punctuated by low-frequency motion.
+- The creator can replace palette relationships while retaining the lighting, diorama, CRT or imperfection language.
+
+#### VLP-02 — Preset Domain Composition / Partial Apply / Override Semantics
+
+- Modular preset composition: A preset is resolved as modular contribution domains, conceptually.
+- PaletteContribution LightingAtmosphereContribution DisplaySimulationContribution ImperfectionContribution DioramaStagingContribution DioramaMotionContribution UIRelationshipContribution FallbackContribution.
+- Authority: Each contribution ultimately writes only through its owning canonical presentation profile/document.
+- A preset does not create a parallel PresetRuntimeState.
+- Override order: Representative authoring resolution.
+- project visual-language defaults -> applied preset materialization -> creator-authored profile values -> Scene/Section override -> Sequence/camera scoped temporary contribution -> capability/accessibility effective fallback.
+- Exact field resolution remains owning-profile specific.
+- Custom state: If the creator manually edits values after applying a preset, the surface may show.
+- CUSTOMIZED FROM <preset>.
+- rather than pretending the original preset still exactly describes the effective look.
+- No arbitrary full-preset blending: Baseline avoids continuous blending of two unrelated full presets because that can create unclear ownership and unreadable combinations.
+- Creators compose modules/overrides explicitly.
+- A future bounded blend system would require its own readability/performance contract.
+
+#### VLP-03 — Preset Version / Provenance / Project Materialization / Rebase Safety
+
+- Critical upgrade rule: Updating RetroStage or a built-in content pack must not silently change the appearance of existing projects.
+- Materialized project truth: After Apply, accepted project presentation values are canonical truth.
+- The project may retain provenance such as.
+- source VisualLanguagePresetId source VisualLanguagePresetRevision applied domains apply transaction identity creator override state.
+- but runtime/export does not resolve visual meaning from a floating latest preset.
+- Built-in preset update: If preset revision N+1 is improved.
+- existing project using materialized N -> unchanged.
+- The creator may explicitly choose.
+- Preview Changes Reapply Selected Domains Rebase to New Preset Revision Keep Current.
+- Rebase: Preset rebase is a normal MUI edit-session / canonical transaction.
+- old materialized values current creator overrides new preset candidate -> field/domain diff -> creator selection -> validation -> atomic Apply.
+- It cannot overwrite creator modifications silently.
+- External content packs: A declarative content pack may contribute Visual Language Presets under PLG-00 content-pack rules.
+- Applying one materializes project-owned presentation meaning.
+- Removing the pack later does not invalidate a game merely because the recipe source disappeared.
+
+#### VLP-04 — Preset Accessibility / Readability / Capability Tier Contract
+
+- Every built-in preset declares.
+- readability assumptions UI routing recommendation high-motion/flicker ceilings CRT intensity ceiling contrast/silhouette guardrails FULL / REDUCED / MINIMAL / OFF fallback behavior.
+- Accessibility: Preset application respects.
+- reduced motion flicker sensitivity text/UI readability subtitles critical prompt clarity.
+- A preset may suggest stronger visual treatment, but accessibility/safety precedence remains higher.
+- Capability tier: A preset must remain recognizably itself when reduced.
+- For example.
+- PRINTED_DIORAMA_LIMINAL FULL -> 6 animated depth layers + haze + grain.
+- REDUCED -> fewer animated layers + simplified haze.
+- MINIMAL -> static depth cards + palette/lighting identity.
+- OFF rawness -> core authored art still remains valid.
+
+#### VLP-05 — Preset Authoring UX / Look Lab / Apply / Custom Variant Contract
+
+- Creator workflow: A suitable Maker flow is.
+- Visual Language -> Choose Preset -> Preview -> Compare A/B -> inspect contributed domains -> adjust intensity / selected modules -> Apply.
+- Preset macro controls: A preset may expose a few creator-safe macro controls such as.
+- Rawness Atmosphere Display Character Diorama Depth Motion Imperfection.
+- but macro controls are projections over explicit bounded visual parameters.
+- They are not an opaque runtime algorithm.
+- Custom variant: The creator may save a project-local custom Visual Language variant/profile assembled from accepted canonical settings.
+- This is not executable plugin code and must remain exportable without Studio.
+- Problems/diagnostics: The authoring UI can report.
+- too much alpha overdraw UI route strongly distorted critical silhouette contrast below threshold motion/flicker above accessibility recommendation unsupported rawness feature for target tier preset provenance stale compared with newer recipe revision.
+
+#### DIO-00 — Diorama Motion Profile / Presentation-Only Authority
+
+- Goal: Give static cards and environment presentation subtle life without requiring animation code.
+- Canonical identity: Representative reusable data.
+- DioramaMotionProfileId DioramaMotionProfileRevision DioramaMotionInstanceId target presentation node/card identity motion primitive(s) phase policy presentation clock domain capability tier.
+- Presentation-only invariant: Diorama motion may affect presentation properties such as.
+- visual translation offset visual rotation offset visual scale offset opacity emissive intensity UV offset sprite/frame index.
+- It cannot directly mutate.
+- physics body transform collision shape navigation obstacle gameplay entity transform authority interaction position AI target position save/story truth.
+- Physical props: If a gameplay/physics object should appear to have ambient motion.
+- physical root -> remains gameplay/physics-owned.
+- presentation child -> may receive DioramaMotion.
+- Example.
+- fan body / blocker = static gameplay root.
+- fan blade visual child = ROTATE_LOOP.
+
+#### DIO-01 — Bounded Motion Primitive Catalog / Analytic Phase Contract
+
+- Bounded primitive catalog: Baseline motion primitives may include.
+- TRANSLATE_WRAP TRANSLATE_OSCILLATE ROTATE_LOOP ROTATE_OSCILLATE SCALE_BREATHE OPACITY_PULSE EMISSIVE_PULSE UV_SCROLL FRAME_CYCLE SWAY_ARC FLOW_BAND.
+- Exact names may change.
+- No general scripting language: Diorama Motion does not provide.
+- arbitrary JavaScript general animation graph general procedural expression language physics simulation cloth simulation wind solver.
+- Complex authored cinematic movement continues to use Sequencer/Animation.
+- Analytic evaluation: Where practical, ambient pose is evaluated from semantic phase.
+- phase = f(presentation clock, period, stable phase offset) pose = g(profile parameters, phase).
+- rather than accumulating.
+- position += velocity * delta forever.
+- This avoids drift, improves frame-rate independence and makes reactivation/fallback easier.
+- Curves: Bounded built-in curves may include.
+- LINEAR SINE SMOOTH_SINE TRIANGLE EASE_IN_OUT STEP_PATTERN where explicitly authored.
+- A future custom curve asset may be admitted without introducing arbitrary executable expressions.
+
+#### DIO-02 — Cloud / Fog / Rain / Light / Sign / Prop Environment Motion Recipes
+
+- This alignment proposes reusable environment-motion recipes built from DIO primitives.
+- CLOUD_FLOW: Use case.
+- transparent cloud card / cloud card group.
+- Representative behavior.
+- FLOW_BAND / TRANSLATE_WRAP direction speed wrap span stable phase offset optional low-amplitude vertical drift optional subtle opacity variation depth-band parallax factor.
+- A cloud that leaves one edge wraps/re-enters through normalized phase.
+- it does not accumulate world position indefinitely.
+- Multiple cloud cards may use stable presentation-only phase offsets/speed variation.
+- FOG_BANK_DRIFT: TRANSLATE_WRAP + very low OPACITY_PULSE + optional UV_SCROLL.
+- Designed for far/mid/foreground atmosphere bands.
+- RAIN_SHEET: UV_SCROLL or FRAME_CYCLE.
+- for presentation rain sheets/window streak overlays.
+- Gameplay wetness/collision is separate.
+- FAN_SPIN: ROTATE_LOOP.
+- for a presentation child of a fan/vent/machine prop.
+- HANGING_SIGN_SWAY: SWAY_ARC.
+- for sign, cable, hanging decoration or lightweight prop presentation.
+- CURTAIN / FOLIAGE_BREATHE: SWAY_ARC + optional SCALE_BREATHE at very low amplitude.
+- This is stylized ambient motion, not cloth simulation.
+- NEON_FLICKER: EMISSIVE_PULSE or bounded STEP_PATTERN.
+- with accessibility/flicker ceilings.
+- LIGHT_SHAFT_DRIFT: TRANSLATE_OSCILLATE + low-amplitude OPACITY_PULSE.
+- for a presentation light-card/beam texture.
+- It does not move gameplay light/collision unless an explicit lighting owner also changes.
+- POSTER / PAPER_FLUTTER: ROTATE_OSCILLATE + very small TRANSLATE_OSCILLATE.
+- for diorama paper/poster layers.
+- DUST_LAYER: Small dust can remain VFX-owned.
+- A diorama recipe may reference an existing bounded VFX profile rather than inventing a second particle system.
+
+#### DIO-03 — Parallax / Depth-Band / Camera-Response Composition
+
+- Existing VRW depth bands: VRW-01 depth/staging classes remain authoritative.
+- Diorama motion composes with depth response instead of replacing it.
+- Presentation transform composition: Representative conceptual composition.
+- Base Authored Presentation Transform + Depth-Band / Camera Parallax Offset + Diorama Ambient Motion Offset + approved Sequence/Camera scoped contribution = Final Presentation Transform.
+- Exact transform math/order remains renderer-owned but must be deterministic and documented.
+- Parallax factor: Each depth band/profile uses bounded parallax behavior.
+- A far background may move less than a foreground atmosphere card.
+- Parallax is camera/presentation semantics and does not change gameplay-space position.
+- Camera cuts: On fixed-camera/Sequence camera cuts.
+- parallax projection -> recomputed from the new camera context.
+- Ambient motion phase may continue according to DIO-04.
+- the card does not teleport gameplay objects.
+- Foreground safety: Strong foreground parallax/motion must not repeatedly cover.
+- player enemy threat interaction prompt subtitle/UI critical route.
+- beyond the readability contract.
+
+#### DIO-04 — Section / Visibility / Pause / Sequence / Save / Reactivation Lifecycle
+
+- Clock: Diorama ambient motion uses SYS-09 presentation timing.
+- No card creates its own requestAnimationFrame, setInterval or gameplay timer authority.
+- Section lifecycle: If the owning Section is.
+- RESIDENT but SEMANTICALLY INACTIVE / HIDDEN.
+- its motion does not need to run as authoritative per-object work.
+- When the presentation becomes active/visible, phase is reconstructed according to the profile.
+- Phase policies: Representative policies.
+- RESET_ON_ACTIVATE STABLE_PHASE_FROM_ID CONTINUE_WITH_SESSION_PRESENTATION_PHASE SEQUENCE_DRIVEN.
+- Exact names may differ.
+- Runtime Save: Ambient diorama motion is not Runtime Save truth by default.
+- cloud x-position fan blade angle fog opacity pulse.
+- do not create save payloads.
+- If exact cinematic phase matters, Sequence owns the time/marker.
+- If persistent semantic environment state matters, another owning gameplay/story system owns it.
+- Pause: Each profile declares whether ambient presentation.
+- PAUSES_WITH_GAMEPLAY CONTINUES_ON_PRESENTATION_CLOCK FOLLOWS_SEQUENCE.
+- within product policy.
+- Reactivation: Stream-out/reactivation cannot duplicate layers or accumulate transform offsets.
+- Analytic phase/reconstruction produces one valid presentation state.
+
+#### DIO-05 — Presentation RNG / Phase / Variation / Synchronization Contract
+
+- RNG domain: Ambient variation uses SYS-14 presentation-only RNG/domain semantics.
+- It never consumes gameplay/encounter/liminal RNG streams.
+- Stable variation: Variation may derive from.
+- DioramaMotionInstanceId MotionProfileId Scene/Section presentation identity presentation RNG domain authored phase seed.
+- rather than wall clock.
+- Uses: Stable variation can drive bounded.
+- phase offset speed multiplier sway amplitude flicker pattern selection opacity offset.
+- within profile ranges.
+- Synchronization groups: Creators may optionally group several layers.
+- SyncGroupId.
+- for intentional relationships such as.
+- cloud bands sharing wind direction several lamps sharing a slow power pulse multiple posters moving with one staged breeze.
+- Synchronization remains presentation-only.
+- No accidental lockstep: Unrelated cards do not all begin at phase zero unless the creator requests it.
+
+#### DIO-06 — Property Ownership / Physics-Root Separation / Sequence Arbitration
+
+- Property channels: Diorama motion targets explicit presentation channels.
+- VISUAL_TRANSLATION_OFFSET VISUAL_ROTATION_OFFSET VISUAL_SCALE_OFFSET OPACITY EMISSIVE UV FRAME.
+- Single semantic composition path: No two systems blindly overwrite the same transform/property.
+- If Sequence temporarily owns a card/property.
+- Sequence scoped contribution + Diorama baseline contribution.
+- are composed or Diorama is suspended according to an explicit channel policy.
+- Gameplay transform protection: For entities with GPC-13/GPC-19 transform authority.
+- Diorama Motion -> presentation child/channel only.
+- unless a separate gameplay command changes the physical root.
+- Lighting protection: A light-card's opacity/emissive motion does not automatically change a gameplay/real light's intensity.
+- If real-light flicker is desired, the lighting/presentation owner uses its own approved visual light channel/profile.
+- No hidden consequences: A flickering sign cannot trigger.
+- AI perception damage objective event.
+- merely through visual phase.
+- Those require normal semantic Event/Action/gameplay systems.
+
+#### DIO-07 — Diorama Motion Authoring / Preview / Diagnostics / Preset Integration
+
+- Maker workflow: A creator-friendly path can be.
+- select card / presentation node -> Add Ambient Motion -> choose recipe/profile -> adjust bounded controls -> Preview -> Apply.
+- Simple controls: Common controls may include.
+- Speed Direction Amplitude Period Phase Parallax Opacity Range Wrap Span Variation Pause Policy.
+- Only controls relevant to the selected primitive/profile appear.
+- Cloud UX example: For a cloud card.
+- Motion: Cloud Flow Direction: ← / -> Speed: Slow / Medium / Custom Depth: Far / Mid / Front Vertical Drift: Off / Low Opacity Breath: Off / Low Variation: Stable Wrap: Auto from card bounds / explicit.
+- The creator should not need to write animation code.
+- Multi-layer tools: Diorama editor may allow.
+- Apply motion profile to selected layers stagger phases normalize wind direction preview parallax solo depth band freeze motion.
+- through normal MUI batch/preview contracts.
+- Preset integration: VLP presets may suggest/instantiate default DioramaMotionProfiles, but creator edits remain canonical project-owned values.
+- Preset removal does not remove already-applied motion profiles.
+- Diagnostics: Creator-readable findings may include.
+- foreground motion obscures critical readability area wrap span creates visible gap/pop too many animated alpha layers motion target is a physics-owned root unsupported motion channel on selected material/card flicker exceeds accessibility recommendation profile has no REDUCED/MINIMAL fallback.
+
+#### DIO-08 — Performance / Batching / Overdraw / Capability Fallback
+
+- Update architecture: Baseline implementation should avoid one arbitrary JavaScript callback/closure per animated card.
+- Diorama motion is evaluated through a centralized presentation-motion evaluator or equivalent bounded batching path.
+- Analytic batching: Cards sharing compatible.
+- MotionProfile primitive type material family depth band.
+- may batch/evaluate efficiently where the renderer allows.
+- Exact Babylon implementation is deferred.
+- Visibility: Motion work can be skipped/reduced for.
+- hidden layers inactive Sections offscreen/noncontributing layers MINIMAL/OFF tier.
+- without changing gameplay state.
+- Alpha overdraw: Diorama budgets include.
+- animated transparent layer count large-screen alpha coverage simultaneous fog/noise sheets texture memory motion evaluator count material/post variants.
+- Fallback: Representative fallback.
+- FULL -> all authored motion.
+- REDUCED -> fewer moving bands / simplified opacity variation.
+- MINIMAL -> key hero/background motion only.
+- OFF -> static authored cards.
+- The scene remains compositionally valid at every tier.
+- No fallback mutation: Capability fallback changes effective presentation only.
+- It does not write the project or remove the creator’s authored profiles.
+
+### Authority placement: D-086 anti-scope completeness annex §37 Dynamic Open-World Map / Navigation UI; strengthen the bounded static authored floorplan alternative
+
+#### MAP-00 — Bounded Static Map / Floorplan Product Admission & Non-Navigation Boundary
+
+- Current Source05 truth: Source05 currently excludes Dynamic Open-World Map / Navigation UI and offers an optional static authored floorplan/map UI if later admitted.
+- Freeze6 therefore records a bounded product-decision candidate.
+- it does not silently overwrite Source05.
+- Post-CIC Source05 owner review must explicitly choose.
+- ACCEPT_BOUNDED_STATIC_MAP or REJECT_FOR_CURRENT_PRODUCT_SCOPE.
+- If accepted: The first-product feature is.
+- static authored floorplan/map document + authored floors/regions + semantic marker projection + optional authored reveal state + profile-bounded player-location projection + player Map screen.
+- Still excluded: GPS/minimap pathfinding automatic route planning navigation arrows as engine authority world-scale waypoint framework open-world map streaming fast travel automatic fog-of-war / dynamic exploration discovery navmesh-derived map gameplay procedural cartography.
+- No new roadmap milestone or dependency is created by Freeze6.
+
+### Authority placement: D-086 feature-level creator capability and anti-scope intent; add bounded progressive-disclosure invariants
+
+#### CUX-01 — Creator Complexity Boundary / Semantic Default Surface
+
+- Ordinary authoring must be organized around RetroStage-owned semantic game concepts, not around the raw implementation vocabulary of Electron, React, Babylon.js, browser APIs, filesystem internals, CIC development governance or package-private engine objects.
+- Representative default creator concepts include.
+- Scene Section Entity Character Interaction Item Equipment Objective Dialogue Condition Action Sequence UI Screen Audio Cue VFX Cue Rig Socket Visual Preset Export Profile.
+- Representative implementation concepts that must not be required for ordinary authoring include.
+- Babylon TransformNode / Mesh / Skeleton object identity raw bone index React component instance DOM node IPC channel filesystem inode repository/source fingerprint runtime authority generation mutation lease checkpoint identity adapter/private package object raw save JSON raw manifest/hash field.
+- A creator can complete the common supported workflow through semantic product concepts.
+- Internal object identity never becomes the only creator-visible way to select or reference content.
+- Stable semantic IDs may exist and may be shown in diagnostics, but ordinary workflows use meaningful names, labels and relationships.
+- Product-owned semantic adapters remain the boundary between creator intent and engine/backend details.
+- Third-party editor surfaces do not become the RetroStage authoring model merely because the backend exposes them.
+- A backend may be replaced without forcing ordinary creator terminology to change.
+- Default surfaces may summarize complex state, but may not lie about validation, risk or capability availability.
+- The rule is semantic simplicity with preserved truth, not cosmetic minimalism.
+- Anti-simplification rule: The complexity boundary does not mean.
+
+#### CUX-02 — Progressive Disclosure Tier Contract
+
+- Every creator-facing setting, command, diagnostic or configuration surface that can become materially complex must belong to an explicit disclosure tier.
+- The baseline tiers are.
+- CREATOR / DEFAULT ADVANCED DIAGNOSTICS / EXPERT.
+- CREATOR / DEFAULT: The default surface contains.
+- the most common supported path.
+- safe and meaningful defaults.
+- semantic creator labels and descriptions.
+- the minimum controls required to complete the workflow.
+- visible validation blockers that the creator must act on.
+- contextual repair actions where a safe repair path exists.
+- A common workflow must not require switching to Diagnostics merely to discover a required ordinary setting.
+- ADVANCED: Advanced surfaces may expose.
+- bounded tuning.
+- optional policy choices.
+- less common configuration.
+- performance/quality tradeoffs.
+- explicit lifecycle/fallback behavior where the creator benefits from controlling it.
+- Advanced controls remain fully validated and supported.
+- Advanced does not mean "unsafe bypass.".
+- DIAGNOSTICS / EXPERT: Diagnostics may expose.
+- stable semantic identities.
+- resolution/provenance chains.
+- owning subsystem.
+- effective value source.
+- generation/version information.
+- adapter/backend identity.
+- dependency/validation traces.
+- structured error identity.
+- Diagnostics are primarily explanatory and investigative.
+- A diagnostics panel must not become a backdoor around normal mutation authority.
+- Tier invariants: Changing disclosure tier changes presentation, not canonical authority.
+- Hidden controls retain their effective values and validation.
+- A critical blocker is never hidden merely because it is Advanced/Diagnostic.
+- No canonical project becomes non-portable because one machine stored a different disclosure preference.
+- Diagnostics are primarily explanatory and investigative. A diagnostics panel must not become a backdoor around normal mutation authority.
+
+#### CUX-03 — Creator Terminology / Engine-Internal Non-Exposure Contract
+
+- RetroStage must maintain a creator-oriented terminology layer.
+- Examples.
+- engine/internal creator-facing default ──────────────────────────────── ────────────────────────── TransformNode / Mesh Entity / Transform AnimationGroup Animation Clip / Character Animation Skeleton bone index Semantic Joint / Rig Socket raw renderer material object Material / Surface Profile runtime generation lease "operation no longer belongs to this session" checkpoint mismatch "the project state changed.
+- refresh/retry" capability predicate failure "this project profile does not support this tool" pack/cook manifest mismatch "export inputs changed.
+- rebuild required".
+- Exact wording is product-owned and may evolve.
+- the separation is binding.
+- Required behavior: Raw third-party class/type names are not required knowledge for common creator workflows. - Internal failure codes remain available for diagnostics but receive creator-safe explanation. - Internal identity strings are copyable from advanced diagnostics when useful, not used as the ordinary primary label. - Creator terminology remains coherent across Inspector, Hierarchy, Flow Graph, Sequencer, Problems, PIE and Export surfaces. - A backend rename or package refactor does not silently rename creator concepts. - Documentation and tooltips describe the supported RetroStage concept first and backend detail only where deliberately useful.
+- Internal failure codes remain available for diagnostics but receive creator-safe explanation.
+- Creator terminology remains coherent across Inspector, Hierarchy, Flow Graph, Sequencer, Problems, PIE and Export surfaces.
+- Documentation and tooltips describe the supported RetroStage concept first and backend detail only where deliberately useful.
+
+#### CUX-04 — Contextual Problem Explanation / Repair Action Contract
+
+- Creator-facing failure handling must answer.
+- WHAT is wrong? WHERE is it? WHY does it matter? WHAT can the creator safely do next?
+- A default Problems/error surface should prefer a creator explanation such as.
+- Weapon cannot be attached. Right Hand mapping is missing. [Open Rig Mapper].
+- over an unprocessed internal message such as.
+- CharacterRigProfile capability HAND_R resolution failure.
+- The internal diagnostic identity remains available underneath the creator explanation.
+- Contextual repair actions: A repair action may be offered only when it is.
+- typed.
+- validated.
+- scoped to the affected object/workflow.
+- auditable through normal command authority.
+- non-destructive or explicitly confirmed where destructive.
+- revalidated at execution time.
+- A repair button must not mutate documents directly through React/DOM/Inspector state.
+- Failure-detail tiers: DEFAULT -> creator problem + affected object + safe next action.
+- ADVANCED -> semantic owner / capability / expected-vs-observed explanation.
+- DIAGNOSTICS -> exact diagnostic identity / provenance / generation / backend evidence.
+- Safety: Raw stack traces, private filesystem paths, secrets or security-sensitive values are not the default creator-facing error payload. - "Auto-fix" is not shown when correctness depends on guessing creator intent. - If no safe repair exists, the UI states that clearly rather than inventing a fix. - A degraded presentation path may be described as degraded without implying gameplay truth changed.
+
+#### CUX-05 — Creator-Facing Capability Completion Gate
+
+- RetroStage distinguishes.
+- ENGINE / BACKEND CAPABILITY COMPLETE is not CREATOR CAPABILITY COMPLETE.
+- A capability is not creator-complete merely because the backend code works.
+- Before a creator-facing milestone treats a capability as complete, the applicable slice must prove.
+- 1. an ordinary semantic default path exists.
+- 2. advanced configuration is optional for the ordinary case.
+- 3. diagnostics exist without polluting the normal workflow.
+- 4. raw engine/internal identifiers are not required knowledge.
+- 5. validation errors explain the creator problem.
+- 6. contextual repair/navigation exists where a safe deterministic next step is known.
+- 7. defaults are explicit and reversible where the creator can change them.
+- 8. save/reopen/PIE/export behavior does not depend on hidden editor-only state.
+- 9. keyboard/accessibility behavior remains viable for the exposed workflow.
+- 10. the supported/unsupported boundary is explainable.
+- Completion truth: A milestone may truthfully report.
+- BACKEND COMPLETE CREATOR SURFACE INCOMPLETE.
+- without pretending the feature is creator-ready.
+- This is preferable to shipping an engine-capable feature that requires creators to understand raw backend implementation.
+
+#### CUX-06 — Registry-Driven Inspector / Disclosure Metadata Contract
+
+- Where the authoritative Component Registry / Inspector descriptor system applies, disclosure behavior must be data-driven rather than duplicated as hardcoded React type lists.
+- A descriptor may carry the applicable subset of.
+- creatorLabel creatorDescription disclosureTier visibilityCondition capabilityPredicate advancedDescription diagnosticOwner riskLevel unit / semantic value format defaultValue resetBehavior validationHints contextualActions searchKeywords documentationTopic.
+- Authority: Descriptor metadata controls presentation and validated editing affordance.
+- It does not grant direct mutation authority.
+- Inspector descriptor -> candidate edit / typed command -> validation -> canonical mutation.
+- remains the required direction.
+- Multi-selection / unknown data: MIXED values remain presentation state, never a persisted value. - Unknown components remain preserved under the existing unknown-component contract. - An unknown or plugin-owned field is not silently forced into a Basic tier merely because the UI does not understand its semantics. - Plugin/editor extension disclosure metadata must pass the owning plugin/capability/trust rules.
+- Scalability: New component types should be able to inherit the same disclosure model without every panel inventing a separate "simple mode.".
+
+#### CUX-07 — Cross-Surface Semantic Consistency Contract
+
+- Progressive disclosure may change how much detail is visible, but it may not create different semantic behavior between authoring surfaces.
+- Where the same consequential intent is available from multiple surfaces.
+- Inspector Hierarchy Flow Graph Sequencer Dialogue Runtime-UI authoring Problems repair action Command Palette.
+- the surfaces must route to the same owning semantic command/action or to explicitly documented different operations.
+- Examples.
+- Give Item Open Door Set Objective State Attach Equipment Change Scene/Section.
+- must not have one code path that follows normal validation while an "advanced" surface directly mutates private state.
+- Simple mode and Advanced mode never imply different gameplay authority. - Sequencer/Flow/Inspector shortcuts cannot bypass the owning Action/command contract. - A contextual repair action cannot perform a privileged mutation unavailable to the owning system. - Preview/scrub surfaces remain preview semantics even when advanced details are visible. - Export/PIE diagnostics describe the same canonical configuration the editor actually owns.
+- This contract is a usability rule and an anti-bypass rule at the same time.
+
+#### CUX-08 — Bounded Expert Escape Hatch / Supported Power Contract
+
+- RetroStage should not make advanced creators less capable merely to keep defaults simple.
+- Advanced/Expert surfaces may expose deeper supported control when the underlying product contract owns it.
+- However an expert escape hatch must remain bounded.
+- Allowed direction: Creator semantic advanced control -> RetroStage validated configuration -> adapter/backend.
+- Not allowed as ordinary product behavior: "Advanced mode" -> arbitrary mutable Babylon object -> arbitrary DOM/component mutation -> arbitrary project JSON mutation -> arbitrary filesystem path -> direct save/export authority.
+- If a later plugin/SDK or scripting surface intentionally exposes deeper power, it remains governed by its own trust, capability, lifecycle, validation and export contracts.
+- Unsupported/experimental distinction: If a control is experimental or unsupported for a profile.
+- label it truthfully.
+- do not disguise it as a stable Advanced control.
+- explain export/runtime limitations.
+- keep unsupported state from silently becoming canonical runtime authority.
+- Advanced configuration that is advertised as supported must be serializable, migration-safe, validation-safe and export-compatible under its owning milestone.
+
+#### CUX-09 — Disclosure Preference / Discoverability / Accessibility Contract
+
+- Progressive disclosure must not turn into hidden functionality that creators cannot discover.
+- Discoverability: Supported approaches may include.
+- "Advanced" section expansion search Command Palette Problems links contextual "More settings" documentation/help links capability explanations.
+- The exact UX is milestone-owned.
+- Preference scope: Disclosure preferences are editor-local unless explicitly promoted by a later reviewed requirement.
+- Examples.
+- expanded Advanced section Diagnostics panel visibility preferred Inspector detail level.
+- do not dirty canonical project content and do not affect exported-game semantics.
+- Accessibility: Disclosure controls are keyboard reachable. - Expanded/collapsed state has accessible semantics. - Critical errors remain perceivable regardless of tier. - Color alone does not communicate disclosure/risk state. - Search/help must not require pointer-only interaction for essential paths. - Reduced-motion or accessibility preferences may alter presentation but not hide required truth.
+- Reset: A creator can return the workspace/detail preferences to supported defaults without altering project content, undo history, runtime state or export output.
+
+#### CUX-10 — Progressive Disclosure Milestone Ownership / Closure Contract
+
+- Progressive disclosure is not deferred to a late polish phase.
+- Its ownership is staged across the roadmap.
+- SOURCE ALIGNMENT / PRE-RSM-7 -> freeze Creator Complexity Boundary + CUX contracts.
+- RSM-7–8 -> semantic documents / stable identities make engine-independent creator concepts possible.
+- RSM-9 -> FIRST VISIBLE IMPLEMENTATION -> Editor Shell / Hierarchy / Inspector / Problems -> design tokens / creator terminology / focus semantics -> default creator-facing surface.
+- RSM-10 -> canonical edits remain behind typed command authority regardless of disclosure tier.
+- RSM-11 -> structured diagnostics support creator / advanced / diagnostic explanation layers.
+- RSM-12 -> SCALABLE FOUNDATION -> Component Registry / Inspector descriptors carry disclosure metadata.
+- RSM-13–18 -> prove the model in transform / hierarchy / project lifecycle / save / PIE / export spine.
+- POST-RSM-18 CREATOR EXPERIENCE PASS -> normalize discoverability, terminology, contextual actions, empty/error states and detail levels.
+- RSM-19+ -> every new creator-facing capability inherits the same completion/disclosure rules.
+- RSM-120 -> public-alpha maturity proves a focused creator can complete representative workflows without mandatory raw-engine/internal knowledge.
+- Milestone acceptance rule: Whenever a milestone adds a creator-facing surface, review must ask.
+- What is Advanced?
+- What is diagnostic-only?
+- Does the disclosure preference remain non-canonical?
+- It must, however, avoid establishing a creator-hostile default architecture that later milestones would need to undo.
+- Dependency rule: CUX-01..10 admit no new production or development dependency by themselves.
+- Use existing approved UI/platform capabilities unless a later milestone independently proves and admits a dependency through Source06.
+- What is the default semantic path? What is Advanced? What is diagnostic-only? What internal vocabulary leaks? What errors are creator-readable? What safe contextual repair exists? Can the common workflow be completed without raw backend identity? Does the disclosure preference remain non-canonical?
+- A milestone does not need every future advanced option. It must, however, avoid establishing a creator-hostile default architecture that later milestones would need to undo.
