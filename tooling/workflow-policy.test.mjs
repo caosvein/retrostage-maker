@@ -108,12 +108,12 @@ function createFixture(activeTaskCount = 0) {
   write(
     root,
     "pnpm-workspace.yaml",
-    `packages:\n  - "packages/*"\n  - "apps/*"\n\nautoInstallPeers: false\nblockExoticSubdeps: false\nstrictPeerDependencies: true\nignoreScripts: true\nsavePrefix: ""\nminimumReleaseAgeExclude:\n  - electron@43.4.0\noverrides:\n  js-yaml: 4.3.2\n  tar: 7.5.22\n  "eslint@9.21.0>@eslint/plugin-kit": 0.3.4\n`,
+    `packages:\n  - "packages/*"\n  - "apps/*"\n\nautoInstallPeers: false\nblockExoticSubdeps: false\nstrictPeerDependencies: true\nignoreScripts: true\nsavePrefix: ""\nminimumReleaseAgeExclude:\n  - electron@43.5.0\noverrides:\n  js-yaml: 4.3.2\n  tar: 7.5.22\n  "eslint@9.21.0>@eslint/plugin-kit": 0.3.4\n`,
   );
   write(
     root,
     "pnpm-lock.yaml",
-    `lockfileVersion: '9.0'\noverrides:\n  js-yaml: 4.3.2\n  eslint@9.21.0>@eslint/plugin-kit: 0.3.4\n  tar: 7.5.22\npackages:\n  '@eslint/plugin-kit@0.3.4': {}\n  '@electron/node-gyp@https://codeload.github.com/electron/node-gyp/tar.gz/06b29aafb7708acef8b3669835c8a7857ebc92d2': {}\n  electron@43.4.0: {}\n  js-yaml@4.3.2: {}\n  tar@7.5.22: {}\n`,
+    `lockfileVersion: '9.0'\noverrides:\n  js-yaml: 4.3.2\n  eslint@9.21.0>@eslint/plugin-kit: 0.3.4\n  tar: 7.5.22\npackages:\n  '@eslint/plugin-kit@0.3.4': {}\n  '@electron/node-gyp@https://codeload.github.com/electron/node-gyp/tar.gz/06b29aafb7708acef8b3669835c8a7857ebc92d2': {}\n  electron@43.5.0: {}\n  js-yaml@4.3.2: {}\n  tar@7.5.22: {}\n`,
   );
   for (const [packagePath, name] of [
     ["packages/core", "@retrostage/core"],

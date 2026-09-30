@@ -8,13 +8,17 @@ strictPeerDependencies: true
 ignoreScripts: true
 savePrefix: ""
 minimumReleaseAgeExclude:
-  - electron@43.4.0
+  - electron@43.5.0
 overrides:
   js-yaml: 4.3.2
   tar: 7.5.22
   "eslint@9.21.0>@eslint/plugin-kit": 0.3.4
   "@electron/packager@18.4.4>extract-zip": "npm:@electron-internal/extract-zip@1.0.5"
   "@electron/get@5.1.0>undici": 7.29.1
-  "ajv@8.20.0>fast-uri": 3.1.7
+  "ajv@8.20.0>fast-uri": 3.1.8
   "plist@3.1.1>@xmldom/xmldom": 0.9.12
-  "socks@2.8.9>ip-address": 10.5.1
+  "socks@2.8.9>ip-address": 10.7.1
+  "minimatch@3.1.5>brace-expansion": 1.1.21
+  "minimatch@5.1.9>brace-expansion": 2.1.7
+  "minimatch@9.0.9>brace-expansion": 2.1.7
+  "minimatch@10.2.6>brace-expansion": 5.0.12

@@ -46,7 +46,7 @@ const EXPECTED_ROOT_DIRECT_DEPENDENCIES = Object.freeze({
 });
 const EXPECTED_APPLICATION_DIRECT_DEPENDENCIES = Object.freeze({
   "@electron-forge/core": "7.11.2",
-  electron: "43.4.0",
+  electron: "43.5.0",
   vite: "8.2.1",
 });
 const DEPENDENCY_SECURITY_ADMISSION = Object.freeze({
@@ -199,7 +199,7 @@ function assertDependencyBaseline() {
     "strictPeerDependencies: true",
     "ignoreScripts: true",
     'savePrefix: ""',
-    "  - electron@43.4.0",
+    "  - electron@43.5.0",
     "overrides:\n  js-yaml: 4.3.2",
     "  tar: 7.5.22",
     '  "eslint@9.21.0>@eslint/plugin-kit": 0.3.4',
@@ -214,7 +214,7 @@ function assertDependencyBaseline() {
     "eslint@9.21.0>@eslint/plugin-kit: 0.3.4",
     "'@eslint/plugin-kit@0.3.4':",
     "tar@7.5.22:",
-    "electron@43.4.0:",
+    "electron@43.5.0:",
   ]) {
     if (!lock.includes(fragment)) throw new Error(`Lock graph identity missing: ${fragment}`);
   }

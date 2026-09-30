@@ -44,7 +44,7 @@ function boundaryIssues({
   }
   const exactDependencies = {
     "@electron-forge/core": "7.11.2",
-    electron: "43.4.0",
+    electron: "43.5.0",
     vite: "8.2.1",
   };
   if (JSON.stringify(packageJson.devDependencies) !== JSON.stringify(exactDependencies)) {

@@ -294,19 +294,19 @@
       "distributionScope": "RSM-5-I1 DEVELOPMENT / SECURE ELECTRON SHELL CANDIDATE / NOT FINAL RELEASE",
       "license": "MIT",
       "licenseNoticeLocations": [
-        "node_modules/.pnpm/electron@43.4.0_supports-color@8.1.1/node_modules/electron/LICENSE"
+        "node_modules/.pnpm/electron@43.5.0_supports-color@8.1.1/node_modules/electron/LICENSE"
       ],
       "owningPackage": "electron",
       "packagedRole": "RSM-5-I1 ELECTRON SECURE SHELL RUNTIME / NOT FINAL RELEASE PACKAGE",
-      "packageReleaseUrl": "https://www.npmjs.com/package/electron/v/43.4.0",
+      "packageReleaseUrl": "https://www.npmjs.com/package/electron/v/43.5.0",
       "platform": "UNSPECIFIED",
-      "provenanceSourceIdentity": "electron@43.4.0",
-      "relativeArtifactPath": "node_modules/.pnpm/electron@43.4.0_supports-color@8.1.1/node_modules/electron/dist/d3dcompiler_47.dll",
-      "replacementRemovalProcedure": "Remove or update owning tool dependency electron@43.4.0 or its transitive parent; review pnpm-lock.yaml changes; regenerate compliance artifacts; run full validation. Do not delete the artifact directly from node_modules.",
+      "provenanceSourceIdentity": "electron@43.5.0",
+      "relativeArtifactPath": "node_modules/.pnpm/electron@43.5.0_supports-color@8.1.1/node_modules/electron/dist/d3dcompiler_47.dll",
+      "replacementRemovalProcedure": "Remove or update owning tool dependency electron@43.5.0 or its transitive parent; review pnpm-lock.yaml changes; regenerate compliance artifacts; run full validation. Do not delete the artifact directly from node_modules.",
       "sha256": "A05F99734F7C4822FEFC12B367AF21FD0976ED6608752FB1E1E80B6ECE7ECBBB",
       "sourceCodeAvailability": "UPSTREAM_REPOSITORY_DECLARED",
       "sourceRepository": "https://github.com/electron/electron",
-      "version": "43.4.0"
+      "version": "43.5.0"
     },
     {
       "abiRuntimeRequirements": "PLATFORM_NATIVE_LIBRARY / EXACT ABI LEVEL NOT ESTABLISHED BY INSTALLED PACKAGE METADATA",
@@ -316,19 +316,19 @@
       "distributionScope": "RSM-5-I1 DEVELOPMENT / SECURE ELECTRON SHELL CANDIDATE / NOT FINAL RELEASE",
       "license": "MIT",
       "licenseNoticeLocations": [
-        "node_modules/.pnpm/electron@43.4.0_supports-color@8.1.1/node_modules/electron/LICENSE"
+        "node_modules/.pnpm/electron@43.5.0_supports-color@8.1.1/node_modules/electron/LICENSE"
       ],
       "owningPackage": "electron",
       "packagedRole": "RSM-5-I1 ELECTRON SECURE SHELL RUNTIME / NOT FINAL RELEASE PACKAGE",
-      "packageReleaseUrl": "https://www.npmjs.com/package/electron/v/43.4.0",
+      "packageReleaseUrl": "https://www.npmjs.com/package/electron/v/43.5.0",
       "platform": "UNSPECIFIED",
-      "provenanceSourceIdentity": "electron@43.4.0",
-      "relativeArtifactPath": "node_modules/.pnpm/electron@43.4.0_supports-color@8.1.1/node_modules/electron/dist/dxcompiler.dll",
-      "replacementRemovalProcedure": "Remove or update owning tool dependency electron@43.4.0 or its transitive parent; review pnpm-lock.yaml changes; regenerate compliance artifacts; run full validation. Do not delete the artifact directly from node_modules.",
-      "sha256": "36C6F0AF0CD7FF8585CEA0A6090F1C2CE5DB044D16B366074B2E9F85EF2E2629",
+      "provenanceSourceIdentity": "electron@43.5.0",
+      "relativeArtifactPath": "node_modules/.pnpm/electron@43.5.0_supports-color@8.1.1/node_modules/electron/dist/dxcompiler.dll",
+      "replacementRemovalProcedure": "Remove or update owning tool dependency electron@43.5.0 or its transitive parent; review pnpm-lock.yaml changes; regenerate compliance artifacts; run full validation. Do not delete the artifact directly from node_modules.",
+      "sha256": "3EDE8535B555E15885EFB480CD273EC0803EA0DC8D768D4F1BE01E9574CF9C98",
       "sourceCodeAvailability": "UPSTREAM_REPOSITORY_DECLARED",
       "sourceRepository": "https://github.com/electron/electron",
-      "version": "43.4.0"
+      "version": "43.5.0"
     },
     {
       "abiRuntimeRequirements": "PLATFORM_NATIVE_LIBRARY / EXACT ABI LEVEL NOT ESTABLISHED BY INSTALLED PACKAGE METADATA",
@@ -338,19 +338,19 @@
       "distributionScope": "RSM-5-I1 DEVELOPMENT / SECURE ELECTRON SHELL CANDIDATE / NOT FINAL RELEASE",
       "license": "MIT",
       "licenseNoticeLocations": [
-        "node_modules/.pnpm/electron@43.4.0_supports-color@8.1.1/node_modules/electron/LICENSE"
+        "node_modules/.pnpm/electron@43.5.0_supports-color@8.1.1/node_modules/electron/LICENSE"
       ],
       "owningPackage": "electron",
       "packagedRole": "RSM-5-I1 ELECTRON SECURE SHELL RUNTIME / NOT FINAL RELEASE PACKAGE",
-      "packageReleaseUrl": "https://www.npmjs.com/package/electron/v/43.4.0",
+      "packageReleaseUrl": "https://www.npmjs.com/package/electron/v/43.5.0",
       "platform": "UNSPECIFIED",
-      "provenanceSourceIdentity": "electron@43.4.0",
-      "relativeArtifactPath": "node_modules/.pnpm/electron@43.4.0_supports-color@8.1.1/node_modules/electron/dist/dxil.dll",
-      "replacementRemovalProcedure": "Remove or update owning tool dependency electron@43.4.0 or its transitive parent; review pnpm-lock.yaml changes; regenerate compliance artifacts; run full validation. Do not delete the artifact directly from node_modules.",
+      "provenanceSourceIdentity": "electron@43.5.0",
+      "relativeArtifactPath": "node_modules/.pnpm/electron@43.5.0_supports-color@8.1.1/node_modules/electron/dist/dxil.dll",
+      "replacementRemovalProcedure": "Remove or update owning tool dependency electron@43.5.0 or its transitive parent; review pnpm-lock.yaml changes; regenerate compliance artifacts; run full validation. Do not delete the artifact directly from node_modules.",
       "sha256": "77E039C905030A641E53658A008B74E90635A5EA9B6B79EABD0F2003BDFCA59A",
       "sourceCodeAvailability": "UPSTREAM_REPOSITORY_DECLARED",
       "sourceRepository": "https://github.com/electron/electron",
-      "version": "43.4.0"
+      "version": "43.5.0"
     },
     {
       "abiRuntimeRequirements": "STANDALONE_PLATFORM_EXECUTABLE / NODE ABI NOT APPLICABLE",
@@ -360,19 +360,19 @@
       "distributionScope": "RSM-5-I1 DEVELOPMENT / SECURE ELECTRON SHELL CANDIDATE / NOT FINAL RELEASE",
       "license": "MIT",
       "licenseNoticeLocations": [
-        "node_modules/.pnpm/electron@43.4.0_supports-color@8.1.1/node_modules/electron/LICENSE"
+        "node_modules/.pnpm/electron@43.5.0_supports-color@8.1.1/node_modules/electron/LICENSE"
       ],
       "owningPackage": "electron",
       "packagedRole": "RSM-5-I1 ELECTRON SECURE SHELL RUNTIME / NOT FINAL RELEASE PACKAGE",
-      "packageReleaseUrl": "https://www.npmjs.com/package/electron/v/43.4.0",
+      "packageReleaseUrl": "https://www.npmjs.com/package/electron/v/43.5.0",
       "platform": "UNSPECIFIED",
-      "provenanceSourceIdentity": "electron@43.4.0",
-      "relativeArtifactPath": "node_modules/.pnpm/electron@43.4.0_supports-color@8.1.1/node_modules/electron/dist/electron.exe",
-      "replacementRemovalProcedure": "Remove or update owning tool dependency electron@43.4.0 or its transitive parent; review pnpm-lock.yaml changes; regenerate compliance artifacts; run full validation. Do not delete the artifact directly from node_modules.",
-      "sha256": "BAB31519EE1BC5B490CAF7844E2B1DBCD4F7BB49A13039103952AB381C02ADE4",
+      "provenanceSourceIdentity": "electron@43.5.0",
+      "relativeArtifactPath": "node_modules/.pnpm/electron@43.5.0_supports-color@8.1.1/node_modules/electron/dist/electron.exe",
+      "replacementRemovalProcedure": "Remove or update owning tool dependency electron@43.5.0 or its transitive parent; review pnpm-lock.yaml changes; regenerate compliance artifacts; run full validation. Do not delete the artifact directly from node_modules.",
+      "sha256": "5456B3C5615EFB53C6059E82CC775197AA8F9E2C825F1D646B37388E74BED2AD",
       "sourceCodeAvailability": "UPSTREAM_REPOSITORY_DECLARED",
       "sourceRepository": "https://github.com/electron/electron",
-      "version": "43.4.0"
+      "version": "43.5.0"
     },
     {
       "abiRuntimeRequirements": "PLATFORM_NATIVE_LIBRARY / EXACT ABI LEVEL NOT ESTABLISHED BY INSTALLED PACKAGE METADATA",
@@ -382,19 +382,19 @@
       "distributionScope": "RSM-5-I1 DEVELOPMENT / SECURE ELECTRON SHELL CANDIDATE / NOT FINAL RELEASE",
       "license": "MIT",
       "licenseNoticeLocations": [
-        "node_modules/.pnpm/electron@43.4.0_supports-color@8.1.1/node_modules/electron/LICENSE"
+        "node_modules/.pnpm/electron@43.5.0_supports-color@8.1.1/node_modules/electron/LICENSE"
       ],
       "owningPackage": "electron",
       "packagedRole": "RSM-5-I1 ELECTRON SECURE SHELL RUNTIME / NOT FINAL RELEASE PACKAGE",
-      "packageReleaseUrl": "https://www.npmjs.com/package/electron/v/43.4.0",
+      "packageReleaseUrl": "https://www.npmjs.com/package/electron/v/43.5.0",
       "platform": "UNSPECIFIED",
-      "provenanceSourceIdentity": "electron@43.4.0",
-      "relativeArtifactPath": "node_modules/.pnpm/electron@43.4.0_supports-color@8.1.1/node_modules/electron/dist/ffmpeg.dll",
-      "replacementRemovalProcedure": "Remove or update owning tool dependency electron@43.4.0 or its transitive parent; review pnpm-lock.yaml changes; regenerate compliance artifacts; run full validation. Do not delete the artifact directly from node_modules.",
-      "sha256": "E3B958EC29F381D9872F1F19E5C29661693F6AEAF382F969F97D5C6A9DA53CCA",
+      "provenanceSourceIdentity": "electron@43.5.0",
+      "relativeArtifactPath": "node_modules/.pnpm/electron@43.5.0_supports-color@8.1.1/node_modules/electron/dist/ffmpeg.dll",
+      "replacementRemovalProcedure": "Remove or update owning tool dependency electron@43.5.0 or its transitive parent; review pnpm-lock.yaml changes; regenerate compliance artifacts; run full validation. Do not delete the artifact directly from node_modules.",
+      "sha256": "1097EFA2CFBB707445CCD23EDD037E8E833B1A71747E373C32C4646B73088996",
       "sourceCodeAvailability": "UPSTREAM_REPOSITORY_DECLARED",
       "sourceRepository": "https://github.com/electron/electron",
-      "version": "43.4.0"
+      "version": "43.5.0"
     },
     {
       "abiRuntimeRequirements": "PLATFORM_NATIVE_LIBRARY / EXACT ABI LEVEL NOT ESTABLISHED BY INSTALLED PACKAGE METADATA",
@@ -404,19 +404,19 @@
       "distributionScope": "RSM-5-I1 DEVELOPMENT / SECURE ELECTRON SHELL CANDIDATE / NOT FINAL RELEASE",
       "license": "MIT",
       "licenseNoticeLocations": [
-        "node_modules/.pnpm/electron@43.4.0_supports-color@8.1.1/node_modules/electron/LICENSE"
+        "node_modules/.pnpm/electron@43.5.0_supports-color@8.1.1/node_modules/electron/LICENSE"
       ],
       "owningPackage": "electron",
       "packagedRole": "RSM-5-I1 ELECTRON SECURE SHELL RUNTIME / NOT FINAL RELEASE PACKAGE",
-      "packageReleaseUrl": "https://www.npmjs.com/package/electron/v/43.4.0",
+      "packageReleaseUrl": "https://www.npmjs.com/package/electron/v/43.5.0",
       "platform": "UNSPECIFIED",
-      "provenanceSourceIdentity": "electron@43.4.0",
-      "relativeArtifactPath": "node_modules/.pnpm/electron@43.4.0_supports-color@8.1.1/node_modules/electron/dist/libEGL.dll",
-      "replacementRemovalProcedure": "Remove or update owning tool dependency electron@43.4.0 or its transitive parent; review pnpm-lock.yaml changes; regenerate compliance artifacts; run full validation. Do not delete the artifact directly from node_modules.",
-      "sha256": "700BDE9F10D03C37BEC6FEF9471F5016650C2B8A3C7229060E996C232FA19BDC",
+      "provenanceSourceIdentity": "electron@43.5.0",
+      "relativeArtifactPath": "node_modules/.pnpm/electron@43.5.0_supports-color@8.1.1/node_modules/electron/dist/libEGL.dll",
+      "replacementRemovalProcedure": "Remove or update owning tool dependency electron@43.5.0 or its transitive parent; review pnpm-lock.yaml changes; regenerate compliance artifacts; run full validation. Do not delete the artifact directly from node_modules.",
+      "sha256": "BA1AB3B7AFA86607F158B74C6EAF7459FB6C3AAAF4A5C1BCBD4AFF4E4BAC87F2",
       "sourceCodeAvailability": "UPSTREAM_REPOSITORY_DECLARED",
       "sourceRepository": "https://github.com/electron/electron",
-      "version": "43.4.0"
+      "version": "43.5.0"
     },
     {
       "abiRuntimeRequirements": "PLATFORM_NATIVE_LIBRARY / EXACT ABI LEVEL NOT ESTABLISHED BY INSTALLED PACKAGE METADATA",
@@ -426,19 +426,19 @@
       "distributionScope": "RSM-5-I1 DEVELOPMENT / SECURE ELECTRON SHELL CANDIDATE / NOT FINAL RELEASE",
       "license": "MIT",
       "licenseNoticeLocations": [
-        "node_modules/.pnpm/electron@43.4.0_supports-color@8.1.1/node_modules/electron/LICENSE"
+        "node_modules/.pnpm/electron@43.5.0_supports-color@8.1.1/node_modules/electron/LICENSE"
       ],
       "owningPackage": "electron",
       "packagedRole": "RSM-5-I1 ELECTRON SECURE SHELL RUNTIME / NOT FINAL RELEASE PACKAGE",
-      "packageReleaseUrl": "https://www.npmjs.com/package/electron/v/43.4.0",
+      "packageReleaseUrl": "https://www.npmjs.com/package/electron/v/43.5.0",
       "platform": "UNSPECIFIED",
-      "provenanceSourceIdentity": "electron@43.4.0",
-      "relativeArtifactPath": "node_modules/.pnpm/electron@43.4.0_supports-color@8.1.1/node_modules/electron/dist/libGLESv2.dll",
-      "replacementRemovalProcedure": "Remove or update owning tool dependency electron@43.4.0 or its transitive parent; review pnpm-lock.yaml changes; regenerate compliance artifacts; run full validation. Do not delete the artifact directly from node_modules.",
-      "sha256": "1811383343E2C4EFD7F5275787188AE12AB9D059067032BC57D511FD25E03D70",
+      "provenanceSourceIdentity": "electron@43.5.0",
+      "relativeArtifactPath": "node_modules/.pnpm/electron@43.5.0_supports-color@8.1.1/node_modules/electron/dist/libGLESv2.dll",
+      "replacementRemovalProcedure": "Remove or update owning tool dependency electron@43.5.0 or its transitive parent; review pnpm-lock.yaml changes; regenerate compliance artifacts; run full validation. Do not delete the artifact directly from node_modules.",
+      "sha256": "BD9F9B85E4B375AA3282C7C6C99DCF4F2582DCBE4101682DFE1DB62F720D22E9",
       "sourceCodeAvailability": "UPSTREAM_REPOSITORY_DECLARED",
       "sourceRepository": "https://github.com/electron/electron",
-      "version": "43.4.0"
+      "version": "43.5.0"
     },
     {
       "abiRuntimeRequirements": "PLATFORM_NATIVE_LIBRARY / EXACT ABI LEVEL NOT ESTABLISHED BY INSTALLED PACKAGE METADATA",
@@ -448,19 +448,19 @@
       "distributionScope": "RSM-5-I1 DEVELOPMENT / SECURE ELECTRON SHELL CANDIDATE / NOT FINAL RELEASE",
       "license": "MIT",
       "licenseNoticeLocations": [
-        "node_modules/.pnpm/electron@43.4.0_supports-color@8.1.1/node_modules/electron/LICENSE"
+        "node_modules/.pnpm/electron@43.5.0_supports-color@8.1.1/node_modules/electron/LICENSE"
       ],
       "owningPackage": "electron",
       "packagedRole": "RSM-5-I1 ELECTRON SECURE SHELL RUNTIME / NOT FINAL RELEASE PACKAGE",
-      "packageReleaseUrl": "https://www.npmjs.com/package/electron/v/43.4.0",
+      "packageReleaseUrl": "https://www.npmjs.com/package/electron/v/43.5.0",
       "platform": "UNSPECIFIED",
-      "provenanceSourceIdentity": "electron@43.4.0",
-      "relativeArtifactPath": "node_modules/.pnpm/electron@43.4.0_supports-color@8.1.1/node_modules/electron/dist/vk_swiftshader.dll",
-      "replacementRemovalProcedure": "Remove or update owning tool dependency electron@43.4.0 or its transitive parent; review pnpm-lock.yaml changes; regenerate compliance artifacts; run full validation. Do not delete the artifact directly from node_modules.",
-      "sha256": "292EB353E8A0BF89806F951483BB6DF890A638D6F17DD692BAAE96CA80FE5719",
+      "provenanceSourceIdentity": "electron@43.5.0",
+      "relativeArtifactPath": "node_modules/.pnpm/electron@43.5.0_supports-color@8.1.1/node_modules/electron/dist/vk_swiftshader.dll",
+      "replacementRemovalProcedure": "Remove or update owning tool dependency electron@43.5.0 or its transitive parent; review pnpm-lock.yaml changes; regenerate compliance artifacts; run full validation. Do not delete the artifact directly from node_modules.",
+      "sha256": "8FB4C18FE5F01AB386915546FE3D7ED3064A9F75D4488646E0863B04A9E4A230",
       "sourceCodeAvailability": "UPSTREAM_REPOSITORY_DECLARED",
       "sourceRepository": "https://github.com/electron/electron",
-      "version": "43.4.0"
+      "version": "43.5.0"
     },
     {
       "abiRuntimeRequirements": "PLATFORM_NATIVE_LIBRARY / EXACT ABI LEVEL NOT ESTABLISHED BY INSTALLED PACKAGE METADATA",
@@ -470,19 +470,19 @@
       "distributionScope": "RSM-5-I1 DEVELOPMENT / SECURE ELECTRON SHELL CANDIDATE / NOT FINAL RELEASE",
       "license": "MIT",
       "licenseNoticeLocations": [
-        "node_modules/.pnpm/electron@43.4.0_supports-color@8.1.1/node_modules/electron/LICENSE"
+        "node_modules/.pnpm/electron@43.5.0_supports-color@8.1.1/node_modules/electron/LICENSE"
       ],
       "owningPackage": "electron",
       "packagedRole": "RSM-5-I1 ELECTRON SECURE SHELL RUNTIME / NOT FINAL RELEASE PACKAGE",
-      "packageReleaseUrl": "https://www.npmjs.com/package/electron/v/43.4.0",
+      "packageReleaseUrl": "https://www.npmjs.com/package/electron/v/43.5.0",
       "platform": "UNSPECIFIED",
-      "provenanceSourceIdentity": "electron@43.4.0",
-      "relativeArtifactPath": "node_modules/.pnpm/electron@43.4.0_supports-color@8.1.1/node_modules/electron/dist/vulkan-1.dll",
-      "replacementRemovalProcedure": "Remove or update owning tool dependency electron@43.4.0 or its transitive parent; review pnpm-lock.yaml changes; regenerate compliance artifacts; run full validation. Do not delete the artifact directly from node_modules.",
-      "sha256": "3F482A27A955EEF4921BFB796A043DD338363EEA285EFAE34D299AEF0FEE6AFE",
+      "provenanceSourceIdentity": "electron@43.5.0",
+      "relativeArtifactPath": "node_modules/.pnpm/electron@43.5.0_supports-color@8.1.1/node_modules/electron/dist/vulkan-1.dll",
+      "replacementRemovalProcedure": "Remove or update owning tool dependency electron@43.5.0 or its transitive parent; review pnpm-lock.yaml changes; regenerate compliance artifacts; run full validation. Do not delete the artifact directly from node_modules.",
+      "sha256": "46F0002B18DEAE101C18F95C4E2D3E6B0F8944D293FFD3BD2665978458BDE73C",
       "sourceCodeAvailability": "UPSTREAM_REPOSITORY_DECLARED",
       "sourceRepository": "https://github.com/electron/electron",
-      "version": "43.4.0"
+      "version": "43.5.0"
     },
     {
       "abiRuntimeRequirements": "NODE_NATIVE_ADDON / EXACT N-API OR NODE ABI LEVEL NOT ESTABLISHED BY INSTALLED PACKAGE METADATA",

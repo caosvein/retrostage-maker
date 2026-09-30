@@ -3,7 +3,7 @@ import os from "node:os";
 import path from "node:path";
 import process from "node:process";
 
-const releaseDirectoryUrl = "https://github.com/electron/electron/releases/download/v43.4.0";
+const releaseDirectoryUrl = "https://github.com/electron/electron/releases/download/v43.5.0";
 const cacheDirectory = createHash("sha256").update(releaseDirectoryUrl).digest("hex");
 const defaultCacheRoot =
   process.platform === "win32"

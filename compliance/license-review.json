@@ -3464,12 +3464,12 @@
       "classification": "AUTOMATICALLY_ADMISSIBLE",
       "distributionScope": "RSM-5-I1 DEVELOPMENT / SECURE ELECTRON SHELL CANDIDATE / NOT FINAL RELEASE",
       "evidenceSource": "Installed package.json plus physical top-level license/notice files",
-      "identity": "brace-expansion@1.1.18",
+      "identity": "brace-expansion@1.1.21",
       "license": "MIT",
       "licenseFiles": [
         {
           "name": "LICENSE",
-          "path": "node_modules/.pnpm/brace-expansion@1.1.18/node_modules/brace-expansion/LICENSE",
+          "path": "node_modules/.pnpm/brace-expansion@1.1.21/node_modules/brace-expansion/LICENSE",
           "sha256": "68F12F6E2C33688699249C01D8F9623C534DA20AA71989C57B061B7BC1676D14"
         }
       ],
@@ -3482,19 +3482,19 @@
       "packagedArtifactDisposition": null,
       "prohibited": false,
       "safeNoticeSourceUrl": "https://github.com/juliangruber/brace-expansion.git",
-      "version": "1.1.18"
+      "version": "1.1.21"
     },
     {
       "author": "Julian Gruber <mail@juliangruber.com> (http://juliangruber.com/)",
       "classification": "AUTOMATICALLY_ADMISSIBLE",
       "distributionScope": "RSM-5-I1 DEVELOPMENT / SECURE ELECTRON SHELL CANDIDATE / NOT FINAL RELEASE",
       "evidenceSource": "Installed package.json plus physical top-level license/notice files",
-      "identity": "brace-expansion@2.1.4",
+      "identity": "brace-expansion@2.1.7",
       "license": "MIT",
       "licenseFiles": [
         {
           "name": "LICENSE",
-          "path": "node_modules/.pnpm/brace-expansion@2.1.4/node_modules/brace-expansion/LICENSE",
+          "path": "node_modules/.pnpm/brace-expansion@2.1.7/node_modules/brace-expansion/LICENSE",
           "sha256": "68F12F6E2C33688699249C01D8F9623C534DA20AA71989C57B061B7BC1676D14"
         }
       ],
@@ -3507,19 +3507,19 @@
       "packagedArtifactDisposition": null,
       "prohibited": false,
       "safeNoticeSourceUrl": "https://github.com/juliangruber/brace-expansion.git",
-      "version": "2.1.4"
+      "version": "2.1.7"
     },
     {
       "author": "",
       "classification": "AUTOMATICALLY_ADMISSIBLE",
       "distributionScope": "RSM-5-I1 DEVELOPMENT / SECURE ELECTRON SHELL CANDIDATE / NOT FINAL RELEASE",
       "evidenceSource": "Installed package.json plus physical top-level license/notice files",
-      "identity": "brace-expansion@5.0.9",
+      "identity": "brace-expansion@5.0.12",
       "license": "MIT",
       "licenseFiles": [
         {
           "name": "LICENSE",
-          "path": "node_modules/.pnpm/brace-expansion@5.0.9/node_modules/brace-expansion/LICENSE",
+          "path": "node_modules/.pnpm/brace-expansion@5.0.12/node_modules/brace-expansion/LICENSE",
           "sha256": "9C63A23124D68CD30CD316A94A1A0BCA34F032786DF6DF69FC4B5F136BAC8D2E"
         }
       ],
@@ -3532,7 +3532,7 @@
       "packagedArtifactDisposition": null,
       "prohibited": false,
       "safeNoticeSourceUrl": "https://github.com/juliangruber/brace-expansion.git",
-      "version": "5.0.9"
+      "version": "5.0.12"
     },
     {
       "author": "Jon Schlinkert (https://github.com/jonschlinkert)",
@@ -4746,12 +4746,12 @@
       "classification": "AUTOMATICALLY_ADMISSIBLE",
       "distributionScope": "RSM-5-I1 DEVELOPMENT / SECURE ELECTRON SHELL CANDIDATE / NOT FINAL RELEASE",
       "evidenceSource": "Installed package.json plus physical top-level license/notice files",
-      "identity": "electron@43.4.0",
+      "identity": "electron@43.5.0",
       "license": "MIT",
       "licenseFiles": [
         {
           "name": "LICENSE",
-          "path": "node_modules/.pnpm/electron@43.4.0_supports-color@8.1.1/node_modules/electron/LICENSE",
+          "path": "node_modules/.pnpm/electron@43.5.0_supports-color@8.1.1/node_modules/electron/LICENSE",
           "sha256": "5154E165BD6C2CC0CFBCD8916498C7ABAB0497923BAFCD5CB07673FE8480087D"
         }
       ],
@@ -4764,7 +4764,7 @@
       "packagedArtifactDisposition": null,
       "prohibited": false,
       "safeNoticeSourceUrl": "https://github.com/electron/electron",
-      "version": "43.4.0"
+      "version": "43.5.0"
     },
     {
       "author": "Mathias Bynens (https://mathiasbynens.be/)",
@@ -5753,12 +5753,12 @@
       "classification": "AUTOMATICALLY_ADMISSIBLE",
       "distributionScope": "RSM-5-I1 DEVELOPMENT / SECURE ELECTRON SHELL CANDIDATE / NOT FINAL RELEASE",
       "evidenceSource": "Installed package.json plus physical top-level license/notice files",
-      "identity": "fast-uri@3.1.7",
+      "identity": "fast-uri@3.1.8",
       "license": "BSD-3-Clause",
       "licenseFiles": [
         {
           "name": "LICENSE",
-          "path": "node_modules/.pnpm/fast-uri@3.1.7/node_modules/fast-uri/LICENSE",
+          "path": "node_modules/.pnpm/fast-uri@3.1.8/node_modules/fast-uri/LICENSE",
           "sha256": "B010B0DFDFDB23D7396E03B82CD4621FC9BB8F95D6B0AEA70B9C24E12074C786"
         }
       ],
@@ -5771,7 +5771,7 @@
       "packagedArtifactDisposition": null,
       "prohibited": false,
       "safeNoticeSourceUrl": "https://github.com/fastify/fast-uri.git",
-      "version": "3.1.7"
+      "version": "3.1.8"
     },
     {
       "author": "Matteo Collina <hello@matteocollina.com>",
@@ -7254,12 +7254,12 @@
       "classification": "AUTOMATICALLY_ADMISSIBLE",
       "distributionScope": "RSM-5-I1 DEVELOPMENT / SECURE ELECTRON SHELL CANDIDATE / NOT FINAL RELEASE",
       "evidenceSource": "Installed package.json plus physical top-level license/notice files",
-      "identity": "ip-address@10.5.1",
+      "identity": "ip-address@10.7.1",
       "license": "MIT",
       "licenseFiles": [
         {
           "name": "LICENSE",
-          "path": "node_modules/.pnpm/ip-address@10.5.1/node_modules/ip-address/LICENSE",
+          "path": "node_modules/.pnpm/ip-address@10.7.1/node_modules/ip-address/LICENSE",
           "sha256": "F8D791359A50CBCAC82C29CB7B0B1B889B28BE76FDD35B8EE33F0F7C8704702A"
         }
       ],
@@ -7272,7 +7272,7 @@
       "packagedArtifactDisposition": null,
       "prohibited": false,
       "safeNoticeSourceUrl": "https://github.com/beaugunderson/ip-address.git",
-      "version": "10.5.1"
+      "version": "10.7.1"
     },
     {
       "author": "Qix (http://github.com/qix-)",

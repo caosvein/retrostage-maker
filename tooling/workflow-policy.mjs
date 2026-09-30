@@ -21,7 +21,7 @@ export const EXPECTED_DIRECT_DEV_DEPENDENCIES = Object.freeze({
 
 export const EXPECTED_APPLICATION_DEV_DEPENDENCIES = Object.freeze({
   "@electron-forge/core": "7.11.2",
-  electron: "43.4.0",
+  electron: "43.5.0",
   vite: "8.2.1",
 });
 
@@ -617,7 +617,7 @@ function validateRepositoryAndDependencies(rootPath, repositoryPaths, issues) {
     "strictPeerDependencies: true",
     "ignoreScripts: true",
     'savePrefix: ""',
-    "  - electron@43.4.0",
+    "  - electron@43.5.0",
     "overrides:\n  js-yaml: 4.3.2",
     "  tar: 7.5.22",
     '  "eslint@9.21.0>@eslint/plugin-kit": 0.3.4',
@@ -640,7 +640,7 @@ function validateRepositoryAndDependencies(rootPath, repositoryPaths, issues) {
     "eslint@9.21.0>@eslint/plugin-kit: 0.3.4",
     "'@eslint/plugin-kit@0.3.4':",
     "tar@7.5.22:",
-    "electron@43.4.0:",
+    "electron@43.5.0:",
   ]) {
     if (!lock.includes(fragment)) issues.push(issue("LOCK_IDENTITY_MISSING", fragment));
   }

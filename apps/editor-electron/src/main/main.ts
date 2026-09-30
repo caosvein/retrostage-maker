@@ -278,7 +278,7 @@ async function runSmoke(window: BrowserWindow): Promise<void> {
 
   const passes =
     result.appReady === true &&
-    result.electronVersion === "43.4.0" &&
+    result.electronVersion === "43.5.0" &&
     result.brand === "RetroStage Maker" &&
     result.nodeProcessType === "undefined" &&
     result.nodeRequireType === "undefined" &&
